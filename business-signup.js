@@ -36,35 +36,64 @@ document.getElementById('js-s1-next').addEventListener('click', () => {
 });
 
 // ── SCREEN 1b: Claim search ───────────────────────────────
+let claimSearchTimer;
+let claimSearchCache = []; // businesses fetched from Supabase
+
 document.getElementById('js-claim-search').addEventListener('input', function () {
   const q = this.value.toLowerCase().trim();
   const results = document.getElementById('js-claim-results');
   if (!q) { results.innerHTML = ''; return; }
 
-  const matches = (typeof BUSINESSES !== 'undefined' ? BUSINESSES : []).filter(b =>
-    b.name.toLowerCase().includes(q) || b.suburb?.toLowerCase().includes(q)
-  );
+  results.innerHTML = '<p style="color:var(--mid);font-size:.85rem;padding:.5rem 0">Searching…</p>';
 
-  results.innerHTML = matches.length
-    ? matches.map(b => `
-        <button class="bsign-result-item" data-id="${b.id}">
-          <span class="bsign-result-item__emoji">${b.emoji}</span>
-          <div>
-            <div class="bsign-result-item__name">${b.name}</div>
-            <div class="bsign-result-item__type">${b.type} · ${b.suburb}</div>
-          </div>
-        </button>
-      `).join('')
-    : '<p style="color:var(--mid);font-size:.85rem;padding:.5rem 0">No matches found. Try creating a new listing instead.</p>';
+  clearTimeout(claimSearchTimer);
+  claimSearchTimer = setTimeout(async () => {
+    // Search Supabase first (unclaimed businesses only)
+    let supabaseMatches = [];
+    try {
+      const { data } = await db.from('businesses')
+        .select('id, name, type, suburb, emoji, color, location, website, description, owner_id, is_claimed')
+        .or(`name.ilike.%${q}%,suburb.ilike.%${q}%`)
+        .is('owner_id', null)
+        .limit(10);
+      supabaseMatches = data || [];
+    } catch (_) {}
 
-  results.querySelectorAll('.bsign-result-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      results.querySelectorAll('.bsign-result-item').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      bsState.claimedBiz = BUSINESSES.find(b => b.id === btn.dataset.id);
-      document.getElementById('js-s1b-next').disabled = false;
+    // Also search local BUSINESSES array (unclaimed = no owner_id)
+    const localMatches = (typeof BUSINESSES !== 'undefined' ? BUSINESSES : []).filter(b =>
+      (b.name.toLowerCase().includes(q) || b.suburb?.toLowerCase().includes(q))
+    );
+
+    // Merge — Supabase takes priority, add local ones not already in results
+    const supabaseIds = new Set(supabaseMatches.map(b => b.id));
+    const merged = [
+      ...supabaseMatches,
+      ...localMatches.filter(b => !supabaseIds.has(b.id))
+    ];
+
+    claimSearchCache = merged;
+
+    results.innerHTML = merged.length
+      ? merged.map(b => `
+          <button class="bsign-result-item" data-id="${b.id}">
+            <span class="bsign-result-item__emoji">${b.emoji || '🏪'}</span>
+            <div>
+              <div class="bsign-result-item__name">${b.name}</div>
+              <div class="bsign-result-item__type">${b.type || 'Business'} · ${b.suburb || ''}</div>
+            </div>
+          </button>`).join('')
+      : '<p style="color:var(--mid);font-size:.85rem;padding:.5rem 0">No unclaimed listings found. Try creating a new listing instead.</p>';
+
+    results.querySelectorAll('.bsign-result-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        results.querySelectorAll('.bsign-result-item').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        bsState.claimedBiz = claimSearchCache.find(b => b.id === btn.dataset.id)
+          || (typeof BUSINESSES !== 'undefined' ? BUSINESSES : []).find(b => b.id === btn.dataset.id);
+        document.getElementById('js-s1b-next').disabled = false;
+      });
     });
-  });
+  }, 350);
 });
 
 document.getElementById('js-s1b-next').addEventListener('click', () => {
@@ -138,11 +167,30 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
   }
 
   const btn = document.getElementById('js-s4-next');
+  const errEl = document.getElementById('js-s4-error');
   btn.disabled = true;
   btn.textContent = 'Saving…';
+  if (errEl) errEl.style.display = 'none';
 
-  const { data: { session } } = await db.auth.getSession();
-  const userId = session?.user?.id || null;
+  // Get session with timeout to avoid hanging on stale tokens
+  let userId = null;
+  try {
+    const timeout = new Promise(r => setTimeout(() => r(null), 3000));
+    const session = await Promise.race([
+      db.auth.getSession().then(r => r.data?.session ?? null),
+      timeout,
+    ]);
+    userId = session?.user?.id || null;
+  } catch (_) {}
+
+  if (!userId) {
+    const msg = 'You need to be logged in to claim or create a business. Please log in first.';
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    else alert(msg);
+    btn.disabled = false;
+    btn.textContent = 'Submit';
+    return;
+  }
 
   let bizId, error;
 
@@ -150,40 +198,44 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
     // Claim an existing business — update owner_id
     bizId = bsState.claimedBiz.id;
     const { error: upErr } = await db.from('businesses').update({
-      owner_id: userId,
-      claimed: true,
-      plan: bsState.plan,
-      name: bsState.details.name,
-      suburb: bsState.details.suburb,
-      location: bsState.details.address,
-      website: bsState.details.website,
+      owner_id:   userId,
+      is_claimed: true,
+      plan:        bsState.plan,
+      name:        bsState.details.name,
+      suburb:      bsState.details.suburb,
+      location:    bsState.details.address,
+      website:     bsState.details.website,
       description: bsState.details.description,
-      type: bsState.type || bsState.claimedBiz.type,
+      type:        bsState.type || bsState.claimedBiz.type,
     }).eq('id', bizId);
     error = upErr;
   } else {
     // Create a new business
     bizId = 'biz-' + Date.now().toString(36);
     const { error: insErr } = await db.from('businesses').insert({
-      id: bizId,
-      owner_id: userId,
-      claimed: false,
-      plan: bsState.plan,
-      name: bsState.details.name,
-      type: bsState.type || 'Business',
-      suburb: bsState.details.suburb,
-      location: bsState.details.address,
-      website: bsState.details.website,
+      id:          bizId,
+      owner_id:    userId,
+      is_claimed:  true,
+      plan:        bsState.plan,
+      name:        bsState.details.name,
+      type:        bsState.type || 'Business',
+      suburb:      bsState.details.suburb,
+      location:    bsState.details.address,
+      website:     bsState.details.website,
       description: bsState.details.description,
-      emoji: '🏪',
-      color: '#4ac8d0',
-      section: 'eat',
+      emoji:       '🏪',
+      color:       '#4ac8d0',
+      section:     'eat',
     });
     error = insErr;
   }
 
   if (error) {
-    alert('Could not save your business: ' + error.message);
+    const msg = error.code === '42501'
+      ? 'Permission denied — the business may already be claimed by another user. Contact us if you believe this is an error.'
+      : 'Could not save: ' + error.message;
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    else alert(msg);
     btn.disabled = false;
     btn.textContent = 'Submit';
     return;
@@ -209,8 +261,16 @@ document.getElementById('js-bsign-back').addEventListener('click', () => {
 
 // ── INIT ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await db.auth.getSession();
-  if (!session) {
-    window.location.href = 'signup.html?next=business-signup.html';
+  try {
+    const timeout = new Promise(r => setTimeout(() => r(null), 3000));
+    const session = await Promise.race([
+      db.auth.getSession().then(r => r.data?.session ?? null),
+      timeout,
+    ]);
+    if (!session) {
+      window.location.href = 'login.html?next=business-signup.html';
+    }
+  } catch (_) {
+    window.location.href = 'login.html?next=business-signup.html';
   }
 });

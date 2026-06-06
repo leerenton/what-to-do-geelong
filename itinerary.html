@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Geelong Itinerary — WTDG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="itinerary.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="logo">
+        <div class="logo__bubble"><span>WHAT</span><span>TO DO</span></div>
+        <span class="logo__wordmark">Geelong!</span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html">← Back to guide</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HEADER -->
+  <div class="itin-header" id="js-itin-header">
+    <!-- Injected by JS -->
+  </div>
+
+  <!-- ACTIONS BAR -->
+  <div class="itin-actions" id="js-itin-actions" hidden>
+    <div class="container itin-actions__inner">
+      <button class="btn btn--teal" id="js-email-itin">📧 Email to me</button>
+      <button class="btn btn--outline" id="js-share-itin">🔗 Share itinerary</button>
+      <button class="itin-clear" id="js-clear-itin">Clear all</button>
+    </div>
+  </div>
+
+  <!-- ITEMS LIST -->
+  <main class="container itin-main">
+    <div id="js-itin-list"></div>
+  </main>
+
+  <!-- EMAIL MODAL -->
+  <div class="modal-backdrop" id="js-modal" hidden>
+    <div class="modal">
+      <button class="modal__close" id="js-modal-close">✕</button>
+      <div class="modal__emoji">📧</div>
+      <h2 class="modal__title">Email my Geelong plan</h2>
+      <p class="modal__sub">We'll send your starred events, eats, and stays straight to your inbox.</p>
+      <div class="modal__form">
+        <input type="text" id="modal-name" placeholder="Your name" class="ob-input" />
+        <input type="email" id="modal-email" placeholder="Your email address" class="ob-input" />
+        <button class="ob-next" id="js-modal-send">Send my itinerary ✨</button>
+      </div>
+      <p class="ob-legal">We'll never spam you. <a href="#">Privacy policy</a>.</p>
+    </div>
+  </div>
+
+  <!-- SHARE TOAST -->
+  <div class="share-toast" id="js-share-toast" hidden>🔗 Link copied to clipboard!</div>
+
+  <footer class="footer" style="margin-top:3rem">
+    <div class="container footer__inner">
+      <span class="footer__logo">WHAT TO DO GEELONG!</span>
+      <p class="footer__copy">Your local guide to events, experiences & places to stay.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="itinerary.js"></script>
+</body>
+</html>

@@ -526,7 +526,7 @@ function initPersonaliseCTAs() {
   document.querySelectorAll('#js-personalise, #js-personalise-2').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
-      alert('Personalisation coming soon!');
+      window.location.href = 'onboarding.html';
     });
   });
 }
@@ -627,6 +627,47 @@ function initListingPage() {
   });
 }
 
+// ── STARRING / ITINERARY ─────────────────────────────────
+function getSaved() {
+  try { return JSON.parse(localStorage.getItem('wtdg_saved') || '[]'); } catch { return []; }
+}
+
+function toggleSave(item) {
+  const saved = getSaved();
+  const idx = saved.findIndex(s => s.id === item.id);
+  if (idx >= 0) { saved.splice(idx, 1); } else { saved.push(item); }
+  localStorage.setItem('wtdg_saved', JSON.stringify(saved));
+  updateItinBadge();
+  return idx < 0; // true = now saved
+}
+
+function isSaved(id) { return getSaved().some(s => s.id === id); }
+
+function updateItinBadge() {
+  const count = getSaved().length;
+  const badge = document.getElementById('js-itin-badge');
+  const countEl = document.getElementById('js-itin-count');
+  if (!badge) return;
+  badge.hidden = count === 0;
+  if (countEl) countEl.textContent = count;
+}
+
+function addStarBtn(el, item) {
+  const btn = document.createElement('button');
+  btn.className = 'star-btn' + (isSaved(item.id) ? ' starred' : '');
+  btn.setAttribute('aria-label', 'Save to itinerary');
+  btn.textContent = isSaved(item.id) ? '⭐' : '☆';
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nowSaved = toggleSave(item);
+    btn.classList.toggle('starred', nowSaved);
+    btn.textContent = nowSaved ? '⭐' : '☆';
+  });
+  el.style.position = 'relative';
+  el.appendChild(btn);
+}
+
 // ── INIT ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('js-event-scroll')) {
@@ -639,6 +680,20 @@ document.addEventListener('DOMContentLoaded', () => {
     initChips();
     initDateBar();
     initPersonaliseCTAs();
+    updateItinBadge();
+
+    // Add star buttons to rendered cards
+    setTimeout(() => {
+      document.querySelectorAll('.event-card').forEach(card => {
+        const title = card.querySelector('.event-card__title')?.textContent;
+        const ev = EVENTS.find(e => e.title === title);
+        if (ev) addStarBtn(card, { ...ev, type: 'event' });
+      });
+      document.querySelectorAll('.stay-card').forEach((card, i) => {
+        const s = STAYS[i];
+        if (s) addStarBtn(card, { id: s.id, title: s.name, name: s.name, type: 'stay', emoji: s.emoji, color: s.color, price: s.price, location: s.location });
+      });
+    }, 0);
   }
   if (document.getElementById('js-listing-root')) {
     initListingPage();

@@ -955,6 +955,91 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .promo-card__desc { font-size: .83rem; color: var(--mid); line-height: 1.5; }
 .promo-card__expires { font-size: .75rem; color: var(--mid); font-weight: 600; }
 
+/* ── ITINERARY BADGE (nav) ──────────────────────────────── */
+.itin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  background: var(--teal);
+  color: var(--dark);
+  font-size: .78rem;
+  font-weight: 800;
+  border-radius: var(--radius-pill);
+  padding: .3rem .7rem;
+  text-decoration: none;
+  transition: background .15s;
+}
+.itin-badge:hover { background: var(--teal-d); }
+
+/* ── STAR BUTTON ────────────────────────────────────────── */
+.star-btn {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.9);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+  transition: background .15s, transform .1s;
+  z-index: 2;
+  backdrop-filter: blur(4px);
+}
+.star-btn:hover { transform: scale(1.15); background: var(--white); }
+.star-btn.starred { background: var(--teal); }
+
+.event-card { position: relative; }
+.featured-card { position: relative; }
+.stay-card { position: relative; }
+
+/* ── GIVEAWAY BANNER ────────────────────────────────────── */
+.giveaway-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--dark);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 1.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow .15s, transform .15s;
+}
+.giveaway-banner:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+
+.giveaway-banner__left { display: flex; flex-direction: column; gap: .25rem; }
+.giveaway-banner__badge {
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--teal);
+}
+.giveaway-banner__title {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1.2;
+}
+.giveaway-banner__sub { font-size: .75rem; color: rgba(255,255,255,.45); }
+.giveaway-banner__cta {
+  background: var(--teal);
+  color: var(--dark);
+  font-size: .82rem;
+  font-weight: 800;
+  border-radius: var(--radius-pill);
+  padding: .45rem 1rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ── RESPONSIVE ─────────────────────────────────────────── */
 @media (max-width: 640px) {
   .nav__links { display: none; }

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Win Tickets — Disney On Ice Geelong — WTDG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="giveaway.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="logo">
+        <div class="logo__bubble"><span>WHAT</span><span>TO DO</span></div>
+        <span class="logo__wordmark">Geelong!</span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html">← Back to guide</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="gw-hero">
+    <div class="gw-hero__badge">🎁 Giveaway</div>
+    <div class="gw-hero__emoji">⛸️</div>
+    <h1 class="gw-hero__title">Win a Family Pass to<br /><span class="gw-hero__accent">Disney On Ice!</span></h1>
+    <p class="gw-hero__sub">We're giving away a family pass (4 tickets) to Disney On Ice at the Geelong Arena. Enter for your chance to win!</p>
+    <div class="gw-hero__meta">
+      <span>📅 Show: Sat 19 Jul, 2pm</span>
+      <span>📍 Geelong Arena</span>
+      <span>🏆 1 family pass to win</span>
+    </div>
+    <div class="gw-hero__closes">Entries close Sun 13 Jul at midnight</div>
+  </div>
+
+  <!-- ENTRY PANEL -->
+  <div class="container gw-main">
+
+    <!-- State A: Known user (email in localStorage) -->
+    <div class="gw-panel" id="js-gw-known" hidden>
+      <div class="gw-panel__icon">⭐</div>
+      <h2 class="gw-panel__title">You're in with one click!</h2>
+      <p class="gw-panel__sub">We'll enter you as <strong id="js-known-email"></strong>. Good luck!</p>
+      <button class="ob-next" id="js-one-click-enter">Enter now — it's free! 🤞</button>
+      <p class="gw-panel__not-you">Not you? <button class="gw-link" id="js-not-me">Use a different email</button></p>
+    </div>
+
+    <!-- State B: New / unknown user -->
+    <div class="gw-panel" id="js-gw-new">
+      <div class="gw-panel__icon">🎟️</div>
+      <h2 class="gw-panel__title">Enter the giveaway</h2>
+      <p class="gw-panel__sub">Free to enter. Just pop in your details below.</p>
+      <div class="gw-form" id="js-gw-form">
+        <input type="text"  id="gw-name"  placeholder="Your first name"   class="ob-input" />
+        <input type="email" id="gw-email" placeholder="Your email address" class="ob-input" />
+        <div class="gw-bonus">
+          <input type="checkbox" id="gw-alerts" checked />
+          <label for="gw-alerts">Also send me event alerts and offers from WTDG</label>
+        </div>
+        <button class="ob-next" id="js-enter-btn">Enter the giveaway 🤞</button>
+        <p class="ob-legal">By entering you agree to our <a href="#">terms & conditions</a>. One entry per person.</p>
+      </div>
+    </div>
+
+    <!-- State C: Entered confirmation -->
+    <div class="gw-panel gw-panel--success" id="js-gw-entered" hidden>
+      <div class="gw-panel__icon">🎉</div>
+      <h2 class="gw-panel__title">You're entered!</h2>
+      <p class="gw-panel__sub">We'll contact the winner on <strong>Mon 14 Jul</strong>. Fingers crossed!</p>
+
+      <div class="gw-share-nudge">
+        <p class="gw-share-nudge__label">Share with a friend for a bonus entry 🤙</p>
+        <div class="gw-share-btns">
+          <button class="btn btn--teal" id="js-gw-share">🔗 Copy link</button>
+          <a href="https://wa.me/?text=Win%20a%20family%20pass%20to%20Disney%20On%20Ice%20in%20Geelong!%20Enter%20free%20here%3A%20" target="_blank" rel="noopener" class="btn btn--outline">💬 WhatsApp</a>
+        </div>
+      </div>
+
+      <div class="gw-also">
+        <p class="gw-also__label">While you wait — check these out:</p>
+        <a href="index.html#do" class="btn btn--teal btn--full">Explore what's on in Geelong →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- OTHER GIVEAWAYS -->
+  <section class="page-section container">
+    <div class="section-header">
+      <h2 class="section-title">More giveaways 🎁</h2>
+    </div>
+    <div class="gw-more-grid">
+      <div class="gw-more-card gw-more-card--closed">
+        <div class="gw-more-card__emoji">🎭</div>
+        <div class="gw-more-card__body">
+          <span class="gw-more-card__status gw-more-card__status--closed">Closed</span>
+          <span class="gw-more-card__title">GPAC Opening Night — 2 tickets</span>
+          <span class="gw-more-card__meta">Winner: @sarah_g 🎉</span>
+        </div>
+      </div>
+      <div class="gw-more-card">
+        <div class="gw-more-card__emoji">🍷</div>
+        <div class="gw-more-card__body">
+          <span class="gw-more-card__status gw-more-card__status--soon">Coming soon</span>
+          <span class="gw-more-card__title">Bellarine Peninsula Wine Tour for 2</span>
+          <span class="gw-more-card__meta">Opens Mon 21 Jul</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOAST -->
+  <div class="share-toast" id="js-gw-toast" hidden></div>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span class="footer__logo">WHAT TO DO GEELONG!</span>
+      <p class="footer__copy">Your local guide to events, experiences & places to stay.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="giveaway.js"></script>
+</body>
+</html>

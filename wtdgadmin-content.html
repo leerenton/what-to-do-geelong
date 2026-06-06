@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    .adm-tabs { display: flex; gap: .35rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--adm-border); padding-bottom: 0; }
+    .adm-tab {
+      padding: .6rem 1.1rem; font-size: .85rem; font-weight: 600;
+      color: var(--adm-mid); cursor: pointer; border: none; background: none;
+      font-family: inherit; border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: color .15s, border-color .15s;
+    }
+    .adm-tab:hover { color: var(--adm-text); }
+    .adm-tab.active { color: var(--adm-teal); border-bottom-color: var(--adm-teal); }
+    .adm-tab-panel { display: none; }
+    .adm-tab-panel.active { display: block; }
+    .adm-edit-form { background: var(--adm-card); border: 1px solid var(--adm-border); border-radius: var(--adm-radius); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .adm-edit-form h3 { font-size: .95rem; font-weight: 700; margin-bottom: 1rem; }
+    .adm-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+    @media (max-width: 600px) { .adm-form-grid { grid-template-columns: 1fr; } }
+    .adm-form-field { display: flex; flex-direction: column; gap: .3rem; }
+    .adm-form-field label { font-size: .78rem; font-weight: 600; color: var(--adm-mid); }
+    .adm-form-field input, .adm-form-field select, .adm-form-field textarea {
+      background: var(--adm-bg); border: 1px solid var(--adm-border); border-radius: .45rem;
+      padding: .55rem .75rem; color: var(--adm-text); font-size: .85rem; font-family: inherit; outline: none;
+    }
+    .adm-form-field input:focus, .adm-form-field select:focus, .adm-form-field textarea:focus { border-color: var(--adm-teal); }
+    .adm-form-field textarea { resize: vertical; min-height: 80px; }
+    .adm-form-full { grid-column: 1 / -1; }
+  </style>
+</head>
+<body class="adm-body">
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Content</span>
+      <div class="adm-topbar__right">
+        <button class="adm-btn adm-btn--sm" id="js-new-article-btn">+ New Article</button>
+      </div>
+    </div>
+    <div class="adm-content">
+
+      <div class="adm-tabs">
+        <button class="adm-tab active" data-tab="articles">Articles / News</button>
+        <button class="adm-tab" data-tab="submissions">Business Submissions</button>
+      </div>
+
+      <!-- Articles tab -->
+      <div class="adm-tab-panel active" id="js-tab-articles">
+
+        <!-- New / Edit form (hidden by default) -->
+        <div class="adm-edit-form" id="js-article-form" style="display:none">
+          <h3 id="js-form-title">New Article</h3>
+          <div class="adm-form-grid">
+            <div class="adm-form-field adm-form-full">
+              <label>Headline *</label>
+              <input type="text" id="af-title" placeholder="Article headline" />
+            </div>
+            <div class="adm-form-field">
+              <label>Type</label>
+              <select id="af-type">
+                <option value="guide">Guide</option>
+                <option value="news">News</option>
+                <option value="feature">Feature</option>
+                <option value="interview">Interview</option>
+                <option value="listicle">List</option>
+              </select>
+            </div>
+            <div class="adm-form-field">
+              <label>Associate to Business</label>
+              <select id="af-business">
+                <option value="">None</option>
+              </select>
+            </div>
+            <div class="adm-form-field">
+              <label>Hero Image URL</label>
+              <input type="url" id="af-img" placeholder="https://…" />
+            </div>
+            <div class="adm-form-field">
+              <label>Slug (URL)</label>
+              <input type="text" id="af-slug" placeholder="auto-generated from title" />
+            </div>
+            <div class="adm-form-field">
+              <label>Tags (comma separated)</label>
+              <input type="text" id="af-tags" placeholder="food, geelong, winter" />
+            </div>
+            <div class="adm-form-field adm-form-full">
+              <label>Excerpt / Summary</label>
+              <textarea id="af-excerpt" placeholder="Short description shown in cards…"></textarea>
+            </div>
+            <div class="adm-form-field adm-form-full">
+              <label>Content (HTML or plain text)</label>
+              <textarea id="af-content" style="min-height:160px" placeholder="Full article content…"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap">
+            <button class="adm-btn adm-btn--sm" id="js-save-article">Save Article</button>
+            <button class="adm-btn adm-btn--outline adm-btn--sm" onclick="cancelArticleForm()">Cancel</button>
+            <div id="js-article-save-status" style="font-size:.82rem;align-self:center"></div>
+          </div>
+        </div>
+
+        <div class="adm-toolbar">
+          <div class="adm-search">
+            <span class="adm-search__icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="search" id="js-art-search" placeholder="Search articles…" />
+          </div>
+          <select class="adm-select" id="js-art-type">
+            <option value="">All types</option>
+            <option value="guide">Guide</option>
+            <option value="news">News</option>
+            <option value="feature">Feature</option>
+            <option value="interview">Interview</option>
+            <option value="listicle">List</option>
+          </select>
+        </div>
+
+        <div class="adm-table-wrap" id="js-articles-table">
+          <div class="adm-table-empty">Loading articles…</div>
+        </div>
+      </div>
+
+      <!-- Business submissions tab -->
+      <div class="adm-tab-panel" id="js-tab-submissions">
+        <div class="adm-toolbar">
+          <div class="adm-search">
+            <span class="adm-search__icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="search" id="js-sub-search" placeholder="Search submissions…" />
+          </div>
+          <select class="adm-select" id="js-sub-status">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select class="adm-select" id="js-sub-type">
+            <option value="">All types</option>
+            <option value="event">Event</option>
+            <option value="business">Business</option>
+            <option value="promo">Promo/Offer</option>
+          </select>
+        </div>
+        <div class="adm-table-wrap" id="js-submissions-table">
+          <div class="adm-table-empty">Loading submissions…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script src="wtdgadmin-shell.js?v=1"></script>
+<script>
+let allArticles = [], allBizList = [], allSubmissions = [];
+let editingArticleId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
+  initAdminShell('Content');
+  setupTabs();
+
+  document.getElementById('js-new-article-btn').addEventListener('click', showArticleForm);
+  document.getElementById('js-save-article').addEventListener('click', saveArticle);
+  ['js-art-search','js-art-type'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderArticles);
+    document.getElementById(id)?.addEventListener('change', renderArticles);
+  });
+  ['js-sub-search','js-sub-status','js-sub-type'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderSubmissions);
+    document.getElementById(id)?.addEventListener('change', renderSubmissions);
+  });
+
+  await Promise.all([loadArticles(), loadBusinessList(), loadSubmissions()]);
+});
+
+function setupTabs() {
+  document.querySelectorAll('.adm-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.adm-tab-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`js-tab-${tab.dataset.tab}`).classList.add('active');
+    });
+  });
+}
+
+// ── ARTICLES ──────────────────────────────────────────────────
+async function loadArticles() {
+  const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
+  allArticles = data || [];
+  renderArticles();
+}
+
+async function loadBusinessList() {
+  const { data } = await db.from('businesses').select('id, name').order('name');
+  allBizList = data || [];
+  const sel = document.getElementById('af-business');
+  allBizList.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.id; opt.textContent = b.name;
+    sel.appendChild(opt);
+  });
+}
+
+function renderArticles() {
+  const q    = document.getElementById('js-art-search').value.toLowerCase();
+  const type = document.getElementById('js-art-type').value;
+  let list = allArticles.filter(a =>
+    (!q || (a.title||'').toLowerCase().includes(q)) &&
+    (!type || a.type === type)
+  );
+  if (!list.length) {
+    document.getElementById('js-articles-table').innerHTML = '<div class="adm-table-empty">No articles found.</div>';
+    return;
+  }
+  const rows = list.map(a => `
+    <tr>
+      <td>
+        <div style="font-weight:600">${a.title || '—'}</div>
+        <div style="font-size:.75rem;color:var(--adm-mid)">${a.slug || ''}</div>
+      </td>
+      <td><span class="adm-badge adm-badge--blue">${a.type || '—'}</span></td>
+      <td style="font-size:.78rem;color:var(--adm-mid)">${a.business_id ? (allBizList.find(b=>b.id===a.business_id)?.name || a.business_id) : '—'}</td>
+      <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(a.created_at)}</td>
+      <td style="display:flex;gap:.35rem;flex-wrap:wrap">
+        <button class="adm-btn adm-btn--outline adm-btn--sm" onclick="editArticle('${a.id}')">Edit</button>
+        <a href="article.html?s=${a.slug}" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm">View</a>
+        <button class="adm-btn adm-btn--sm" style="background:var(--adm-red)" onclick="deleteArticle('${a.id}')">Delete</button>
+      </td>
+    </tr>`).join('');
+  document.getElementById('js-articles-table').innerHTML = `
+    <table class="adm-table">
+      <thead><tr><th>Title</th><th>Type</th><th>Business</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function showArticleForm(articleData = null) {
+  editingArticleId = articleData?.id || null;
+  document.getElementById('js-form-title').textContent = articleData ? 'Edit Article' : 'New Article';
+  document.getElementById('af-title').value    = articleData?.title || '';
+  document.getElementById('af-type').value     = articleData?.type || 'guide';
+  document.getElementById('af-business').value = articleData?.business_id || '';
+  document.getElementById('af-img').value      = articleData?.hero_img || '';
+  document.getElementById('af-slug').value     = articleData?.slug || '';
+  document.getElementById('af-tags').value     = (articleData?.tags || []).join(', ');
+  document.getElementById('af-excerpt').value  = articleData?.excerpt || '';
+  document.getElementById('af-content').value  = articleData?.content || '';
+  document.getElementById('js-article-form').style.display = '';
+  document.getElementById('js-article-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelArticleForm() {
+  document.getElementById('js-article-form').style.display = 'none';
+  editingArticleId = null;
+}
+
+function editArticle(id) {
+  const a = allArticles.find(x => x.id === id);
+  if (a) showArticleForm(a);
+}
+
+async function deleteArticle(id) {
+  if (!confirm('Delete this article? This cannot be undone.')) return;
+  const { error } = await db.from('articles').delete().eq('id', id);
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  allArticles = allArticles.filter(a => a.id !== id);
+  renderArticles();
+}
+
+async function saveArticle() {
+  const title = document.getElementById('af-title').value.trim();
+  if (!title) { alert('Title is required.'); return; }
+
+  const slug = document.getElementById('af-slug').value.trim() ||
+    title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  const payload = {
+    title,
+    type:        document.getElementById('af-type').value,
+    business_id: document.getElementById('af-business').value || null,
+    hero_img:    document.getElementById('af-img').value.trim() || null,
+    slug,
+    tags:        document.getElementById('af-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    excerpt:     document.getElementById('af-excerpt').value.trim() || null,
+    content:     document.getElementById('af-content').value.trim() || null,
+    updated_at:  new Date().toISOString(),
+  };
+
+  const statusEl = document.getElementById('js-article-save-status');
+  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--adm-mid)';
+
+  let error;
+  if (editingArticleId) {
+    ({ error } = await db.from('articles').update(payload).eq('id', editingArticleId));
+  } else {
+    payload.created_at = new Date().toISOString();
+    ({ error } = await db.from('articles').insert(payload));
+  }
+
+  if (error) {
+    statusEl.textContent = '✗ ' + error.message; statusEl.style.color = 'var(--adm-red)';
+    return;
+  }
+  statusEl.textContent = '✓ Saved'; statusEl.style.color = 'var(--adm-green)';
+  cancelArticleForm();
+  await loadArticles();
+}
+
+// ── BUSINESS SUBMISSIONS ──────────────────────────────────────
+async function loadSubmissions() {
+  // Try a 'submissions' table — falls back gracefully if not yet created
+  const { data } = await db.from('submissions').select('*').order('created_at', { ascending: false });
+  allSubmissions = data || [];
+  renderSubmissions();
+}
+
+function renderSubmissions() {
+  const q      = document.getElementById('js-sub-search').value.toLowerCase();
+  const status = document.getElementById('js-sub-status').value;
+  const type   = document.getElementById('js-sub-type').value;
+
+  let list = allSubmissions.filter(s =>
+    (!q || (s.title||s.name||'').toLowerCase().includes(q) || (s.business_name||'').toLowerCase().includes(q)) &&
+    (!status || s.status === status) &&
+    (!type || s.type === type)
+  );
+
+  if (allSubmissions.length === 0) {
+    document.getElementById('js-submissions-table').innerHTML = `<div class="adm-table-empty">
+      No submissions yet — or run setup SQL:<br><br>
+      <pre style="background:var(--adm-card2);padding:1rem;border-radius:.5rem;font-size:.72rem;text-align:left;overflow:auto">
+CREATE TABLE IF NOT EXISTS submissions (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  type text, -- 'event' | 'business' | 'promo'
+  title text, name text, business_name text,
+  description text, contact_email text,
+  data jsonb, status text DEFAULT 'pending',
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "insert_anon" ON submissions FOR INSERT WITH CHECK (true);
+CREATE POLICY "admin_all"   ON submissions FOR ALL   USING (true);
+GRANT ALL ON submissions TO anon, authenticated;
+      </pre>
+    </div>`;
+    return;
+  }
+
+  if (!list.length) {
+    document.getElementById('js-submissions-table').innerHTML = '<div class="adm-table-empty">No submissions match filters.</div>';
+    return;
+  }
+
+  const statusBadge = s => ({
+    pending:  '<span class="adm-badge adm-badge--amber">Pending</span>',
+    approved: '<span class="adm-badge adm-badge--green">Approved</span>',
+    rejected: '<span class="adm-badge adm-badge--red">Rejected</span>',
+  }[s] || `<span class="adm-badge">${s}</span>`);
+
+  const rows = list.map(s => `
+    <tr>
+      <td><div style="font-weight:600">${s.title || s.name || '—'}</div><div style="font-size:.75rem;color:var(--adm-mid)">${s.business_name || s.contact_email || ''}</div></td>
+      <td><span class="adm-badge adm-badge--blue">${s.type || '—'}</span></td>
+      <td>${statusBadge(s.status)}</td>
+      <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(s.created_at)}</td>
+      <td style="display:flex;gap:.35rem;flex-wrap:wrap">
+        <button class="adm-btn adm-btn--sm" style="background:var(--adm-green)" onclick="approveSubmission('${s.id}')">✓ Approve</button>
+        <button class="adm-btn adm-btn--sm adm-btn--danger" onclick="rejectSubmission('${s.id}')">✕ Reject</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('js-submissions-table').innerHTML = `
+    <table class="adm-table">
+      <thead><tr><th>Submission</th><th>Type</th><th>Status</th><th>Received</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+async function approveSubmission(id) {
+  await db.from('submissions').update({ status: 'approved' }).eq('id', id);
+  const s = allSubmissions.find(x => x.id === id);
+  if (s) s.status = 'approved';
+  renderSubmissions();
+}
+async function rejectSubmission(id) {
+  await db.from('submissions').update({ status: 'rejected' }).eq('id', id);
+  const s = allSubmissions.find(x => x.id === id);
+  if (s) s.status = 'rejected';
+  renderSubmissions();
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+}
+window.cancelArticleForm = cancelArticleForm;
+</script>
+</body>
+</html>

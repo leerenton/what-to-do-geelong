@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Promotions — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+</head>
+<body class="adm-body">
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Promotions</span>
+      <div class="adm-topbar__right">
+        <span id="js-promo-count" style="font-size:.82rem;color:var(--adm-mid)"></span>
+      </div>
+    </div>
+    <div class="adm-content">
+
+      <div class="adm-stats" style="margin-bottom:1.5rem" id="js-promo-stats"></div>
+
+      <div class="adm-toolbar">
+        <div class="adm-search">
+          <span class="adm-search__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input type="search" id="js-promo-search" placeholder="Search by business or contact…" />
+        </div>
+        <select class="adm-select" id="js-promo-status">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="live">Live</option>
+          <option value="completed">Completed</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <select class="adm-select" id="js-promo-type">
+          <option value="">All types</option>
+          <option value="event">Event</option>
+          <option value="business">Business</option>
+          <option value="social">Social Only</option>
+        </select>
+      </div>
+
+      <div class="adm-table-wrap" id="js-promo-table">
+        <div class="adm-table-empty">Loading promotions…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="adm-modal-overlay" id="js-promo-modal" hidden>
+  <div class="adm-modal" style="max-width:580px">
+    <button class="adm-modal__close" onclick="closeModal()">✕</button>
+    <h2 class="adm-modal__title" id="js-modal-title">Promotion</h2>
+    <div id="js-modal-body"></div>
+    <div class="adm-modal__actions" id="js-modal-actions"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script src="wtdgadmin-shell.js?v=1"></script>
+<script>
+let allPromos = [];
+let activePromo = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
+  initAdminShell('Promotions');
+  await loadPromos();
+  ['js-promo-search','js-promo-status','js-promo-type'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderPromos);
+    document.getElementById(id)?.addEventListener('change', renderPromos);
+  });
+});
+
+async function loadPromos() {
+  const { data, error } = await db.from('ad_submissions').select('*').order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('js-promo-table').innerHTML = `<div class="adm-table-empty">Could not load. Run setup SQL:<br><br>
+      <pre style="background:var(--adm-card2);padding:1rem;border-radius:.5rem;font-size:.72rem;text-align:left;overflow:auto">
+CREATE TABLE IF NOT EXISTS ad_submissions (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  promote_type text, package_id text, package_name text,
+  package_price numeric, duration text,
+  contact_name text, contact_email text, contact_phone text,
+  biz_name text, event_name text, start_date date,
+  notes text, status text DEFAULT 'pending',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz
+);
+ALTER TABLE ad_submissions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "insert_anon" ON ad_submissions FOR INSERT WITH CHECK (true);
+CREATE POLICY "admin_all"   ON ad_submissions FOR ALL   USING (true);
+GRANT ALL ON ad_submissions TO anon, authenticated;
+      </pre></div>`;
+    return;
+  }
+  allPromos = data || [];
+
+  const pending   = allPromos.filter(p => p.status === 'pending').length;
+  const approved  = allPromos.filter(p => p.status === 'approved').length;
+  const live      = allPromos.filter(p => p.status === 'live').length;
+  const revenue   = allPromos.reduce((s, p) => s + (p.package_price || 0), 0);
+
+  document.getElementById('js-promo-count').textContent = `${allPromos.length} total`;
+  document.getElementById('js-promo-stats').innerHTML = `
+    ${sc('Total Submissions', allPromos.length)}
+    ${sc('Pending Review', pending, 'amber')}
+    ${sc('Approved / Live', approved + live, 'teal')}
+    ${sc('Total Value', '$'+revenue.toLocaleString(), 'green')}`;
+
+  renderPromos();
+}
+
+function sc(l,v,variant=''){return`<div class="adm-stat${variant?' adm-stat--'+variant:''}"><div class="adm-stat__label">${l}</div><div class="adm-stat__value">${v}</div></div>`;}
+
+function renderPromos() {
+  const q      = document.getElementById('js-promo-search').value.toLowerCase();
+  const status = document.getElementById('js-promo-status').value;
+  const type   = document.getElementById('js-promo-type').value;
+
+  let list = allPromos.filter(p =>
+    (!q || (p.biz_name||'').toLowerCase().includes(q) || (p.contact_name||'').toLowerCase().includes(q) || (p.contact_email||'').toLowerCase().includes(q)) &&
+    (!status || p.status === status) &&
+    (!type || p.promote_type === type)
+  );
+
+  if (!list.length) {
+    document.getElementById('js-promo-table').innerHTML = '<div class="adm-table-empty">No promotions match filters.</div>';
+    return;
+  }
+
+  const statusBadge = s => ({
+    pending:   '<span class="adm-badge adm-badge--amber">Pending</span>',
+    approved:  '<span class="adm-badge adm-badge--blue">Approved</span>',
+    live:      '<span class="adm-badge adm-badge--green">Live</span>',
+    completed: '<span class="adm-badge adm-badge--blue">Completed</span>',
+    rejected:  '<span class="adm-badge adm-badge--red">Rejected</span>',
+  }[s] || `<span class="adm-badge">${s}</span>`);
+
+  const typeIcon = t => ({ event: '🎟', business: '🏪', social: '📱' }[t] || '📋');
+
+  const rows = list.map(p => `
+    <tr>
+      <td>
+        <div style="font-weight:600">${typeIcon(p.promote_type)} ${p.biz_name || '—'}</div>
+        <div style="font-size:.75rem;color:var(--adm-mid)">${p.contact_name} · ${p.contact_email}</div>
+      </td>
+      <td><span class="adm-badge adm-badge--blue">${p.package_name || '—'}</span><div style="font-size:.72rem;color:var(--adm-mid);margin-top:.2rem">${p.duration || ''}</div></td>
+      <td style="font-weight:700;color:var(--adm-teal)">$${(p.package_price||0).toLocaleString()}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(p.created_at)}</td>
+      <td><button class="adm-btn adm-btn--outline adm-btn--sm" onclick="openModal('${p.id}')">Review</button></td>
+    </tr>`).join('');
+
+  document.getElementById('js-promo-table').innerHTML = `
+    <table class="adm-table">
+      <thead><tr><th>Business / Event</th><th>Package</th><th>Value</th><th>Status</th><th>Submitted</th><th>Action</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function openModal(id) {
+  activePromo = allPromos.find(p => p.id === id);
+  if (!activePromo) return;
+  const p = activePromo;
+
+  document.getElementById('js-modal-title').textContent = p.biz_name || 'Promotion';
+  document.getElementById('js-modal-body').innerHTML = `
+    <div class="adm-modal__row"><span class="adm-modal__key">Type</span><span>${p.promote_type}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Package</span><span>${p.package_name} · ${p.duration}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Price</span><span style="font-weight:700;color:var(--adm-teal)">$${p.package_price} inc. GST</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Contact</span><span>${p.contact_name}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Email</span><span><a href="mailto:${p.contact_email}" style="color:var(--adm-teal)">${p.contact_email}</a></span></div>
+    ${p.contact_phone ? `<div class="adm-modal__row"><span class="adm-modal__key">Phone</span><span>${p.contact_phone}</span></div>` : ''}
+    ${p.event_name ? `<div class="adm-modal__row"><span class="adm-modal__key">Event</span><span>${p.event_name}</span></div>` : ''}
+    ${p.start_date ? `<div class="adm-modal__row"><span class="adm-modal__key">Start date</span><span>${p.start_date}</span></div>` : ''}
+    ${p.notes ? `<div class="adm-modal__row" style="flex-direction:column;align-items:flex-start;gap:.35rem"><span class="adm-modal__key">Notes</span><span style="font-size:.82rem;line-height:1.5">${p.notes}</span></div>` : ''}
+    <div class="adm-modal__row"><span class="adm-modal__key">Submitted</span><span>${fmtDate(p.created_at)}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Status</span><span id="js-modal-status-val">${p.status}</span></div>`;
+
+  document.getElementById('js-modal-actions').innerHTML = `
+    <button class="adm-btn adm-btn--sm" onclick="updateStatus('approved')" style="background:var(--adm-teal)">✓ Approve</button>
+    <button class="adm-btn adm-btn--sm" onclick="updateStatus('live')" style="background:var(--adm-green)">🟢 Mark Live</button>
+    <button class="adm-btn adm-btn--sm" onclick="updateStatus('completed')" style="background:var(--adm-border);color:var(--adm-text)">✔ Complete</button>
+    <button class="adm-btn adm-btn--sm adm-btn--danger" onclick="updateStatus('rejected')">✕ Reject</button>
+    <a href="mailto:${p.contact_email}?subject=Your WTDG Promotion — ${p.package_name}&body=Hi ${p.contact_name}," class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">📧 Email</a>`;
+
+  document.getElementById('js-promo-modal').hidden = false;
+}
+
+async function updateStatus(status) {
+  if (!activePromo) return;
+  const { error } = await db.from('ad_submissions')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', activePromo.id);
+  if (error) { alert('Update failed: ' + error.message); return; }
+  activePromo.status = status;
+  const idx = allPromos.findIndex(p => p.id === activePromo.id);
+  if (idx > -1) allPromos[idx].status = status;
+  document.getElementById('js-modal-status-val').textContent = status;
+  renderPromos();
+}
+
+function closeModal() { document.getElementById('js-promo-modal').hidden = true; }
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+}
+</script>
+</body>
+</html>

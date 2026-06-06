@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advertise — What To Do Geelong</title>
+  <meta name="description" content="Promote your business or event to thousands of Geelong locals. Choose from featured listings, homepage placements and social media promotions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
+  <!-- End Google Tag Manager -->
+  <style>
+    /* ── ADVERTISE PAGE ─────────────────────────────────────── */
+    .adv-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0a2f2b 100%);
+      padding: 5rem var(--gutter) 4rem;
+      text-align: center;
+      color: #fff;
+    }
+    .adv-hero__badge {
+      display: inline-block;
+      background: rgba(42,180,160,.2);
+      border: 1px solid rgba(42,180,160,.4);
+      color: #2ab4a0;
+      font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: .35rem .9rem; border-radius: 999px; margin-bottom: 1.25rem;
+    }
+    .adv-hero__title {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900; line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .adv-hero__title span { color: #2ab4a0; }
+    .adv-hero__sub {
+      color: #94a3b8; font-size: 1.05rem; max-width: 520px;
+      margin: 0 auto 2rem; line-height: 1.65;
+    }
+    .adv-hero__stats {
+      display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    .adv-stat { text-align: center; }
+    .adv-stat__num { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 900; color: #2ab4a0; }
+    .adv-stat__label { font-size: .78rem; color: #64748b; margin-top: .15rem; }
+
+    /* ── STEPS ──────────────────────────────────────────────── */
+    .adv-main { max-width: 860px; margin: 0 auto; padding: 3rem var(--gutter) 5rem; }
+    .adv-step { display: none; }
+    .adv-step.active { display: block; }
+    .adv-step-header { margin-bottom: 2rem; }
+    .adv-step-num {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--teal); margin-bottom: .5rem;
+    }
+    .adv-step-num::before {
+      content: attr(data-n);
+      background: var(--teal); color: #fff;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem;
+    }
+    .adv-step-title { font-family: 'Nunito', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: .35rem; }
+    .adv-step-sub { color: #6b7280; font-size: .9rem; }
+
+    /* ── OPTION CARDS ───────────────────────────────────────── */
+    .adv-option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .adv-option {
+      border: 2px solid #e5e7eb; border-radius: 1rem; padding: 1.5rem;
+      cursor: pointer; transition: border-color .2s, box-shadow .2s;
+      background: #fff; text-align: center; position: relative;
+    }
+    .adv-option:hover { border-color: var(--teal); box-shadow: 0 4px 16px rgba(42,180,160,.12); }
+    .adv-option.selected { border-color: var(--teal); background: rgba(42,180,160,.04); box-shadow: 0 4px 16px rgba(42,180,160,.15); }
+    .adv-option__check {
+      position: absolute; top: .75rem; right: .75rem;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--teal); display: none; align-items: center; justify-content: center;
+    }
+    .adv-option.selected .adv-option__check { display: flex; }
+    .adv-option__check::after { content: '✓'; color: #fff; font-size: .7rem; font-weight: 800; }
+    .adv-option__icon { font-size: 2.5rem; margin-bottom: .75rem; display: block; }
+    .adv-option__title { font-weight: 700; font-size: 1rem; margin-bottom: .35rem; }
+    .adv-option__desc { font-size: .8rem; color: #6b7280; line-height: 1.5; }
+
+    /* ── PACKAGES ───────────────────────────────────────────── */
+    .adv-packages { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .adv-pkg {
+      border: 2px solid #e5e7eb; border-radius: 1rem; padding: 1.5rem;
+      cursor: pointer; transition: all .2s; background: #fff; position: relative;
+    }
+    .adv-pkg:hover { border-color: var(--teal); }
+    .adv-pkg.selected { border-color: var(--teal); background: rgba(42,180,160,.04); }
+    .adv-pkg--popular { border-color: var(--teal); }
+    .adv-pkg__popular {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--teal); color: #fff;
+      font-size: .65rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+      padding: .2rem .65rem; border-radius: 999px; white-space: nowrap;
+    }
+    .adv-pkg__check {
+      position: absolute; top: .75rem; right: .75rem;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--teal); display: none; align-items: center; justify-content: center;
+    }
+    .adv-pkg.selected .adv-pkg__check { display: flex; }
+    .adv-pkg__check::after { content: '✓'; color: #fff; font-size: .7rem; font-weight: 800; }
+    .adv-pkg__name { font-weight: 800; font-size: 1.05rem; margin-bottom: .2rem; }
+    .adv-pkg__duration { font-size: .78rem; color: var(--teal); font-weight: 600; margin-bottom: .75rem; }
+    .adv-pkg__price { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 900; color: #1a1a2e; line-height: 1; margin-bottom: .15rem; }
+    .adv-pkg__price-note { font-size: .72rem; color: #9ca3af; margin-bottom: 1rem; }
+    .adv-pkg__features { list-style: none; padding: 0; margin: 0; }
+    .adv-pkg__features li {
+      font-size: .8rem; color: #374151; padding: .3rem 0;
+      border-bottom: 1px solid #f3f4f6; display: flex; align-items: flex-start; gap: .5rem;
+    }
+    .adv-pkg__features li:last-child { border-bottom: none; }
+    .adv-pkg__features li::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; margin-top: .05rem; }
+    .adv-pkg__features li.muted { color: #9ca3af; }
+    .adv-pkg__features li.muted::before { content: '—'; color: #d1d5db; }
+
+    /* ── FORM ───────────────────────────────────────────────── */
+    .adv-form { display: flex; flex-direction: column; gap: 1rem; }
+    .adv-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .adv-form-row { grid-template-columns: 1fr; } }
+    .adv-field { display: flex; flex-direction: column; gap: .35rem; }
+    .adv-label { font-size: .82rem; font-weight: 600; color: #374151; }
+    .adv-input, .adv-select, .adv-textarea {
+      border: 1.5px solid #e5e7eb; border-radius: .6rem; padding: .65rem .85rem;
+      font-size: .9rem; font-family: inherit; outline: none; transition: border-color .15s;
+      background: #fff;
+    }
+    .adv-input:focus, .adv-select:focus, .adv-textarea:focus { border-color: var(--teal); }
+    .adv-textarea { resize: vertical; min-height: 100px; }
+
+    /* ── SUMMARY BOX ────────────────────────────────────────── */
+    .adv-summary {
+      background: #f8f9fa; border: 1.5px solid #e5e7eb; border-radius: 1rem;
+      padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+    }
+    .adv-summary__title { font-weight: 700; font-size: .9rem; margin-bottom: .75rem; color: #1a1a2e; }
+    .adv-summary__row { display: flex; justify-content: space-between; align-items: center; padding: .35rem 0; font-size: .85rem; }
+    .adv-summary__row:not(:last-child) { border-bottom: 1px solid #e5e7eb; }
+    .adv-summary__label { color: #6b7280; }
+    .adv-summary__val { font-weight: 600; color: #1a1a2e; }
+    .adv-summary__total { font-size: 1rem; font-weight: 800; color: var(--teal); }
+
+    /* ── NAV BUTTONS ────────────────────────────────────────── */
+    .adv-nav { display: flex; gap: .75rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap; }
+    .adv-btn-next {
+      background: var(--teal); color: #fff; border: none; border-radius: .65rem;
+      padding: .75rem 2rem; font-size: .95rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: opacity .15s;
+    }
+    .adv-btn-next:hover { opacity: .9; }
+    .adv-btn-next:disabled { opacity: .5; cursor: default; }
+    .adv-btn-back {
+      background: none; border: 1.5px solid #e5e7eb; border-radius: .65rem;
+      padding: .7rem 1.5rem; font-size: .9rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; color: #6b7280; transition: border-color .15s;
+    }
+    .adv-btn-back:hover { border-color: #9ca3af; }
+
+    /* ── PROGRESS BAR ───────────────────────────────────────── */
+    .adv-progress { display: flex; gap: .5rem; margin-bottom: 2.5rem; }
+    .adv-progress__step {
+      flex: 1; height: 4px; background: #e5e7eb; border-radius: 999px;
+      transition: background .3s;
+    }
+    .adv-progress__step.done { background: var(--teal); }
+
+    /* ── SUCCESS ────────────────────────────────────────────── */
+    .adv-success { text-align: center; padding: 3rem 0; }
+    .adv-success__icon { font-size: 4rem; margin-bottom: 1.25rem; display: block; }
+    .adv-success__title { font-family: 'Nunito', sans-serif; font-size: 1.75rem; font-weight: 900; margin-bottom: .75rem; }
+    .adv-success__sub { color: #6b7280; max-width: 420px; margin: 0 auto 2rem; line-height: 1.6; }
+
+    /* ── SOCIAL CALLOUT ─────────────────────────────────────── */
+    .adv-social-note {
+      background: linear-gradient(135deg, rgba(42,180,160,.08), rgba(42,180,160,.03));
+      border: 1.5px solid rgba(42,180,160,.25);
+      border-radius: .85rem; padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: .85rem; margin-top: .75rem;
+      font-size: .83rem; color: #374151; line-height: 1.5;
+    }
+    .adv-social-note__icon { font-size: 1.5rem; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager -->
+
+<header class="nav">
+  <div class="nav__inner container">
+    <a href="index.html" class="nav__logo-link">
+      <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+    </a>
+    <nav class="nav__links">
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="index.html#eat">Eat</a>
+      <a href="index.html#stay">Stay</a>
+      <a href="advertise.html" style="color:var(--teal);font-weight:700">Advertise</a>
+      <a href="business-signup.html" class="btn btn--teal btn--sm">List Your Business</a>
+    </nav>
+    <button class="nav__hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="adv-hero">
+  <div class="adv-hero__badge">✦ Advertising Opportunities</div>
+  <h1 class="adv-hero__title">Reach <span>Geelong locals</span><br>who are ready to go out</h1>
+  <p class="adv-hero__sub">What To Do Geelong connects your business or event with thousands of locals actively looking for things to do. Get featured on site, in feeds, and across our socials.</p>
+  <div class="adv-hero__stats">
+    <div class="adv-stat"><div class="adv-stat__num">12k+</div><div class="adv-stat__label">Monthly visitors</div></div>
+    <div class="adv-stat"><div class="adv-stat__num">8.5k</div><div class="adv-stat__label">Social followers</div></div>
+    <div class="adv-stat"><div class="adv-stat__num">4.2k</div><div class="adv-stat__label">Newsletter subscribers</div></div>
+    <div class="adv-stat"><div class="adv-stat__num">94%</div><div class="adv-stat__label">Local Geelong audience</div></div>
+  </div>
+</div>
+
+<!-- Main wizard -->
+<div class="adv-main">
+
+  <!-- Progress -->
+  <div class="adv-progress">
+    <div class="adv-progress__step done" id="js-prog-1"></div>
+    <div class="adv-progress__step" id="js-prog-2"></div>
+    <div class="adv-progress__step" id="js-prog-3"></div>
+    <div class="adv-progress__step" id="js-prog-4"></div>
+  </div>
+
+  <!-- Step 1: What to promote -->
+  <div class="adv-step active" id="js-step-1">
+    <div class="adv-step-header">
+      <div class="adv-step-num" data-n="1">What would you like to promote?</div>
+      <h2 class="adv-step-title">Choose your promotion type</h2>
+      <p class="adv-step-sub">Select whether you're promoting an event you've submitted or your business listing.</p>
+    </div>
+
+    <div class="adv-option-grid">
+      <div class="adv-option" data-type="event" onclick="selectOption(this,'promoteType')">
+        <span class="adv-option__check"></span>
+        <span class="adv-option__icon">🎟</span>
+        <div class="adv-option__title">Promote an Event</div>
+        <div class="adv-option__desc">Drive attendance to a specific event you've listed on WTDG. Great for markets, concerts, festivals & workshops.</div>
+      </div>
+      <div class="adv-option" data-type="business" onclick="selectOption(this,'promoteType')">
+        <span class="adv-option__check"></span>
+        <span class="adv-option__icon">🏪</span>
+        <div class="adv-option__title">Promote My Business</div>
+        <div class="adv-option__desc">Feature your business listing to locals browsing for places to eat, stay, or explore. Perfect for ongoing visibility.</div>
+      </div>
+      <div class="adv-option" data-type="social" onclick="selectOption(this,'promoteType')">
+        <span class="adv-option__check"></span>
+        <span class="adv-option__icon">📱</span>
+        <div class="adv-option__title">Social Media Only</div>
+        <div class="adv-option__desc">Just want the social push? We'll create and post dedicated content about your business or event across our IG & FB.</div>
+      </div>
+    </div>
+
+    <div class="adv-nav">
+      <button class="adv-btn-next" onclick="goStep(2)" id="js-next-1" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Choose package -->
+  <div class="adv-step" id="js-step-2">
+    <div class="adv-step-header">
+      <div class="adv-step-num" data-n="2">Choose your package</div>
+      <h2 class="adv-step-title">Pick a promotion package</h2>
+      <p class="adv-step-sub">All packages are time-based — your promotion runs for the selected period across chosen placements.</p>
+    </div>
+
+    <div class="adv-packages" id="js-packages">
+      <!-- Rendered by JS based on type selection -->
+    </div>
+
+    <div class="adv-social-note" id="js-social-note" style="display:none">
+      <span class="adv-social-note__icon">📣</span>
+      <div>Posts are created by our team and shared across <strong>Instagram & Facebook</strong>. Spotlight and Premier packages include Stories. We'll contact you for any assets needed (images, logo, key message).</div>
+    </div>
+
+    <div class="adv-nav">
+      <button class="adv-btn-back" onclick="goStep(1)">← Back</button>
+      <button class="adv-btn-next" onclick="goStep(3)" id="js-next-2" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Your details -->
+  <div class="adv-step" id="js-step-3">
+    <div class="adv-step-header">
+      <div class="adv-step-num" data-n="3">Your details</div>
+      <h2 class="adv-step-title">Tell us about yourself</h2>
+      <p class="adv-step-sub">We'll review your submission and reach out within 1 business day to confirm and arrange payment.</p>
+    </div>
+
+    <div class="adv-form">
+      <div class="adv-form-row">
+        <div class="adv-field">
+          <label class="adv-label">Your name *</label>
+          <input type="text" class="adv-input" id="adv-name" placeholder="Jane Smith" />
+        </div>
+        <div class="adv-field">
+          <label class="adv-label">Email address *</label>
+          <input type="email" class="adv-input" id="adv-email" placeholder="jane@yourbusiness.com.au" />
+        </div>
+      </div>
+      <div class="adv-form-row">
+        <div class="adv-field">
+          <label class="adv-label">Business / Event name *</label>
+          <input type="text" class="adv-input" id="adv-biz" placeholder="e.g. Geelong Farmers Market" />
+        </div>
+        <div class="adv-field">
+          <label class="adv-label">Phone (optional)</label>
+          <input type="tel" class="adv-input" id="adv-phone" placeholder="04xx xxx xxx" />
+        </div>
+      </div>
+      <div class="adv-field" id="js-event-name-field" style="display:none">
+        <label class="adv-label">Event name / date (if promoting an event)</label>
+        <input type="text" class="adv-input" id="adv-event-name" placeholder="e.g. Summer Night Markets — 15 Feb" />
+      </div>
+      <div class="adv-field">
+        <label class="adv-label">Preferred start date</label>
+        <input type="date" class="adv-input" id="adv-start-date" />
+      </div>
+      <div class="adv-field">
+        <label class="adv-label">Anything else we should know?</label>
+        <textarea class="adv-textarea" id="adv-notes" placeholder="Key message, special requirements, links to assets…"></textarea>
+      </div>
+    </div>
+
+    <div class="adv-nav">
+      <button class="adv-btn-back" onclick="goStep(2)">← Back</button>
+      <button class="adv-btn-next" onclick="goStep(4)" id="js-next-3">Review & Submit</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Review & submit -->
+  <div class="adv-step" id="js-step-4">
+    <div class="adv-step-header">
+      <div class="adv-step-num" data-n="4">Review & submit</div>
+      <h2 class="adv-step-title">Confirm your promotion</h2>
+      <p class="adv-step-sub">Check everything looks right. We'll confirm within 1 business day and send a payment link.</p>
+    </div>
+
+    <div class="adv-summary" id="js-summary"></div>
+
+    <p style="font-size:.82rem;color:#6b7280;margin-bottom:1.5rem;line-height:1.6">
+      By submitting you agree to our advertising terms. Payment is required before your promotion goes live.
+      We'll send you a confirmation email and invoice within 1 business day.
+    </p>
+
+    <div class="adv-nav">
+      <button class="adv-btn-back" onclick="goStep(3)">← Back</button>
+      <button class="adv-btn-next" onclick="submitPromotion()" id="js-submit-btn">Submit Promotion Request</button>
+    </div>
+    <div id="js-submit-error" style="color:#ef4444;font-size:.85rem;margin-top:.75rem;display:none"></div>
+  </div>
+
+  <!-- Success -->
+  <div class="adv-step" id="js-step-success">
+    <div class="adv-success">
+      <span class="adv-success__icon">🎉</span>
+      <h2 class="adv-success__title">You're all set!</h2>
+      <p class="adv-success__sub">Thanks for submitting your promotion request. Our team will review it and reach out within 1 business day with a confirmation and payment details.</p>
+      <a href="index.html" class="btn btn--teal" style="display:inline-block;margin-top:1rem">Back to WTDG →</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__logo">WHAT TO DO GEELONG!</div>
+    <p class="footer__copy">Your local guide to events, experiences & places to stay in Geelong, Victoria.</p>
+    <nav class="footer__nav">
+      <a href="advertise.html">Advertise</a>
+      <a href="business-signup.html">List Your Business</a>
+      <a href="#">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="analytics.js?v=1"></script>
+<script>
+// ── STATE ────────────────────────────────────────────────────
+const state = {
+  promoteType: null,   // 'event' | 'business' | 'social'
+  package: null,       // package object
+  details: {},
+};
+
+// ── PACKAGES ─────────────────────────────────────────────────
+const PACKAGES = {
+  event: [
+    {
+      id: 'boost', name: 'Boost', duration: '7 days', price: 49,
+      popular: false,
+      features: [
+        'Featured in Events category page',
+        'Event card highlighted with "Featured" badge',
+        'Priority placement in event listings',
+        { text: 'Homepage feature placement', muted: true },
+        { text: 'Social media posts', muted: true },
+        { text: 'Newsletter mention', muted: true },
+      ]
+    },
+    {
+      id: 'spotlight', name: 'Spotlight', duration: '14 days', price: 99,
+      popular: true,
+      features: [
+        'Homepage featured events strip',
+        'Events category page feature',
+        'Featured badge on all listings',
+        '1 dedicated Instagram & Facebook post',
+        { text: 'Newsletter mention', muted: true },
+        { text: 'Instagram & Facebook Stories', muted: true },
+      ]
+    },
+    {
+      id: 'premier', name: 'Premier', duration: '30 days', price: 199,
+      popular: false,
+      features: [
+        'Homepage hero featured placement',
+        'Events + relevant category pages',
+        'Featured badge across all listings',
+        '3 social posts (IG, FB + Stories)',
+        'Newsletter feature mention',
+        'Monthly performance report',
+      ]
+    },
+  ],
+  business: [
+    {
+      id: 'boost', name: 'Boost', duration: '7 days', price: 49,
+      popular: false,
+      features: [
+        'Featured in relevant category page',
+        '"Featured" badge on your listing',
+        'Priority placement in search',
+        { text: 'Homepage feature', muted: true },
+        { text: 'Social media posts', muted: true },
+        { text: 'Newsletter mention', muted: true },
+      ]
+    },
+    {
+      id: 'spotlight', name: 'Spotlight', duration: '14 days', price: 99,
+      popular: true,
+      features: [
+        'Homepage featured businesses strip',
+        'Category page top placement',
+        'Featured badge on listing',
+        '1 dedicated Instagram & Facebook post',
+        { text: 'Newsletter mention', muted: true },
+        { text: 'Instagram & Facebook Stories', muted: true },
+      ]
+    },
+    {
+      id: 'premier', name: 'Premier', duration: '30 days', price: 199,
+      popular: false,
+      features: [
+        'Homepage hero feature placement',
+        'All relevant category pages',
+        'Featured badge on listing',
+        '3 social posts (IG, FB + Stories)',
+        'Newsletter business spotlight',
+        'Monthly performance report',
+      ]
+    },
+  ],
+  social: [
+    {
+      id: 'social-single', name: 'Single Post', duration: 'One-off', price: 39,
+      popular: false,
+      features: [
+        '1 custom Instagram post',
+        '1 Facebook post',
+        'Professional caption & hashtags',
+        { text: 'Instagram Stories', muted: true },
+        { text: 'Multiple posts', muted: true },
+        { text: 'Newsletter mention', muted: true },
+      ]
+    },
+    {
+      id: 'social-boost', name: 'Social Boost', duration: '2 weeks', price: 79,
+      popular: true,
+      features: [
+        '3 Instagram posts',
+        '3 Facebook posts',
+        'Instagram & Facebook Stories',
+        'Professional captions & hashtags',
+        { text: 'Newsletter mention', muted: true },
+        { text: 'Monthly report', muted: true },
+      ]
+    },
+    {
+      id: 'social-campaign', name: 'Campaign', duration: '1 month', price: 149,
+      popular: false,
+      features: [
+        '6 Instagram & Facebook posts',
+        'Stories throughout campaign',
+        'Professional captions & hashtags',
+        'Newsletter mention',
+        'Campaign performance report',
+        'Dedicated account manager',
+      ]
+    },
+  ],
+};
+
+// ── STEP NAVIGATION ───────────────────────────────────────────
+function goStep(n) {
+  // Validate before progressing
+  if (n === 2 && !state.promoteType) return;
+  if (n === 4) {
+    const name  = document.getElementById('adv-name').value.trim();
+    const email = document.getElementById('adv-email').value.trim();
+    const biz   = document.getElementById('adv-biz').value.trim();
+    if (!name || !email || !biz) {
+      alert('Please fill in your name, email and business/event name.');
+      return;
+    }
+    state.details = {
+      name, email, biz,
+      phone:      document.getElementById('adv-phone').value.trim(),
+      eventName:  document.getElementById('adv-event-name').value.trim(),
+      startDate:  document.getElementById('adv-start-date').value,
+      notes:      document.getElementById('adv-notes').value.trim(),
+    };
+    renderSummary();
+  }
+
+  document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
+  document.getElementById(`js-step-${n === 'success' ? 'success' : n}`).classList.add('active');
+
+  // Update progress
+  [1,2,3,4].forEach(i => {
+    document.getElementById(`js-prog-${i}`)?.classList.toggle('done', i <= (n === 'success' ? 4 : n));
+  });
+
+  // Render packages when entering step 2
+  if (n === 2) renderPackages();
+  // Show event name field on step 3 if promoting event
+  if (n === 3) {
+    document.getElementById('js-event-name-field').style.display = state.promoteType === 'event' ? '' : 'none';
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Track step
+  if (typeof wtdgTrack === 'function') wtdgTrack('advertise_step', { step: n, promote_type: state.promoteType });
+}
+
+// ── OPTION SELECTION ──────────────────────────────────────────
+function selectOption(el, key) {
+  el.closest('.adv-option-grid').querySelectorAll('.adv-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  state[key] = el.dataset.type;
+  document.getElementById('js-next-1').disabled = false;
+}
+
+// ── RENDER PACKAGES ───────────────────────────────────────────
+function renderPackages() {
+  const pkgs = PACKAGES[state.promoteType] || [];
+  state.package = null;
+  document.getElementById('js-next-2').disabled = true;
+
+  document.getElementById('js-packages').innerHTML = pkgs.map(p => `
+    <div class="adv-pkg ${p.popular ? 'adv-pkg--popular' : ''}" data-pkg-id="${p.id}" onclick="selectPackage(this)">
+      ${p.popular ? '<div class="adv-pkg__popular">Most Popular</div>' : ''}
+      <span class="adv-pkg__check"></span>
+      <div class="adv-pkg__name">${p.name}</div>
+      <div class="adv-pkg__duration">${p.duration}</div>
+      <div class="adv-pkg__price">$${p.price}</div>
+      <div class="adv-pkg__price-note">inc. GST · one-time</div>
+      <ul class="adv-pkg__features">
+        ${p.features.map(f => typeof f === 'string'
+          ? `<li>${f}</li>`
+          : `<li class="muted">${f.text}</li>`
+        ).join('')}
+      </ul>
+    </div>`).join('');
+
+  // Show social note for packages with social posts
+  document.getElementById('js-social-note').style.display =
+    state.promoteType === 'social' || state.promoteType === 'business' || state.promoteType === 'event' ? 'flex' : 'none';
+}
+
+function selectPackage(el) {
+  document.querySelectorAll('.adv-pkg').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  const pkgId = el.dataset.pkgId;
+  state.package = (PACKAGES[state.promoteType] || []).find(p => p.id === pkgId);
+  document.getElementById('js-next-2').disabled = false;
+
+  if (typeof wtdgTrack === 'function') wtdgTrack('advertise_package_selected', {
+    package_name: state.package?.name,
+    package_price: state.package?.price,
+    promote_type: state.promoteType,
+  });
+}
+
+// ── RENDER SUMMARY ────────────────────────────────────────────
+function renderSummary() {
+  const typeLabel = { event: 'Event promotion', business: 'Business promotion', social: 'Social media only' };
+  document.getElementById('js-summary').innerHTML = `
+    <div class="adv-summary__title">Order Summary</div>
+    <div class="adv-summary__row"><span class="adv-summary__label">Promotion type</span><span class="adv-summary__val">${typeLabel[state.promoteType]}</span></div>
+    <div class="adv-summary__row"><span class="adv-summary__label">Package</span><span class="adv-summary__val">${state.package?.name} · ${state.package?.duration}</span></div>
+    <div class="adv-summary__row"><span class="adv-summary__label">Business / Event</span><span class="adv-summary__val">${state.details.biz}</span></div>
+    <div class="adv-summary__row"><span class="adv-summary__label">Contact</span><span class="adv-summary__val">${state.details.name} · ${state.details.email}</span></div>
+    ${state.details.startDate ? `<div class="adv-summary__row"><span class="adv-summary__label">Preferred start</span><span class="adv-summary__val">${state.details.startDate}</span></div>` : ''}
+    <div class="adv-summary__row" style="margin-top:.5rem;padding-top:.75rem;border-top:2px solid #e5e7eb">
+      <span class="adv-summary__label" style="font-weight:700">Total</span>
+      <span class="adv-summary__val adv-summary__total">$${state.package?.price} inc. GST</span>
+    </div>`;
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────
+async function submitPromotion() {
+  const btn = document.getElementById('js-submit-btn');
+  const err = document.getElementById('js-submit-error');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  err.style.display = 'none';
+
+  const payload = {
+    promote_type:  state.promoteType,
+    package_id:    state.package?.id,
+    package_name:  state.package?.name,
+    package_price: state.package?.price,
+    duration:      state.package?.duration,
+    contact_name:  state.details.name,
+    contact_email: state.details.email,
+    biz_name:      state.details.biz,
+    contact_phone: state.details.phone || null,
+    event_name:    state.details.eventName || null,
+    start_date:    state.details.startDate || null,
+    notes:         state.details.notes || null,
+    status:        'pending',
+    created_at:    new Date().toISOString(),
+  };
+
+  try {
+    const { error } = await db.from('ad_submissions').insert(payload);
+    if (error) throw error;
+
+    if (typeof wtdgTrack === 'function') wtdgTrack('advertise_submitted', {
+      promote_type:  state.promoteType,
+      package_name:  state.package?.name,
+      package_price: state.package?.price,
+    });
+
+    goStep('success');
+  } catch (e) {
+    err.textContent = 'Something went wrong — please email us directly at hello@whattodogeelong.com.au';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Submit Promotion Request';
+  }
+}
+</script>
+</body>
+</html>

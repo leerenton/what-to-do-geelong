@@ -97,6 +97,11 @@ async function initAccountNav() {
           <div class="nav__acct-divider"></div>
           <a href="account.html" class="nav__acct-item"><span class="material-symbols-rounded">person</span> My Account</a>
           <a href="guides.html" class="nav__acct-item"><span class="material-symbols-rounded">star</span> My WTDGuides</a>
+          ${['lee.renton81@gmail.com'].includes(acct.email) ? `
+            <div class="nav__acct-divider"></div>
+            <a href="wtdgadmin-dash.html" class="nav__acct-item" style="color:var(--teal);font-weight:600">
+              <span class="material-symbols-rounded">admin_panel_settings</span> Admin Panel
+            </a>` : ''}
           ${profiles.length ? `
             <div class="nav__acct-divider"></div>
             <div class="nav__acct-section-label">My Businesses</div>

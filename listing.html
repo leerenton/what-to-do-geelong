@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Listing — WTDG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo">WTDG</a>
+      <nav class="nav__links">
+        <a href="index.html#events">Events</a>
+        <a href="index.html#categories">Explore</a>
+        <a href="index.html#businesses">Businesses</a>
+      </nav>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Listing content injected by app.js -->
+  <div id="js-listing-root"></div>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span class="footer__logo">WTDG</span>
+      <p class="footer__copy">© 2025 What To Do Geelong. Built with love for Geelong locals.</p>
+      <nav class="footer__nav">
+        <a href="#">About</a>
+        <a href="#">Submit an event</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

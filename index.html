@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What To Do Geelong!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="logo">
+        <div class="logo__bubble">
+          <span>WHAT</span>
+          <span>TO DO</span>
+        </div>
+        <span class="logo__wordmark">Geelong!</span>
+      </a>
+      <nav class="nav__links">
+        <a href="#eat">Eat</a>
+        <a href="#stay">Stay</a>
+        <a href="#offers">Offers</a>
+        <a href="#" class="btn btn--teal btn--sm" id="js-personalise">✨ Personalise</a>
+      </nav>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- DATE / LOCATION BAR -->
+  <div class="datebar">
+    <div class="container datebar__inner">
+      <span class="datebar__loc">📍 Geelong, VIC</span>
+      <button class="datebar__btn" id="js-datebar-toggle">
+        🗓 Planning a visit?
+      </button>
+    </div>
+    <!-- Expandable date picker -->
+    <div class="date-drawer" id="js-date-drawer" hidden>
+      <div class="container date-drawer__inner">
+        <p class="date-drawer__label">When are you heading to Geelong?</p>
+        <div class="date-drawer__fields">
+          <div class="date-field">
+            <label for="dp-from">Arriving</label>
+            <input type="date" id="dp-from" />
+          </div>
+          <div class="date-field">
+            <label for="dp-to">Leaving</label>
+            <input type="date" id="dp-to" />
+          </div>
+          <button class="btn btn--teal" id="js-dp-apply">Show me what's on ✨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THIS WEEKEND -->
+  <section class="page-section" id="do">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">This Weekend 🎉</h2>
+        <span class="date-pill" id="js-weekend-label">7–8 Jun</span>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="chip-row" id="js-chip-row">
+        <button class="chip chip--active">All</button>
+        <button class="chip">Music</button>
+        <button class="chip">Food & Drink</button>
+        <button class="chip">Arts</button>
+        <button class="chip">Family</button>
+        <button class="chip">Outdoors</button>
+        <button class="chip">Markets</button>
+        <button class="chip">Free</button>
+      </div>
+
+      <!-- Featured event -->
+      <div id="js-featured-event"></div>
+
+      <!-- Horizontal scroll event strip -->
+      <div class="event-scroll" id="js-event-scroll"></div>
+    </div>
+  </section>
+
+  <!-- VISIT PLANNER CARD -->
+  <div class="container">
+    <div class="planner-card">
+      <h3 class="planner-card__title">Planning a trip to Geelong? 🗺️</h3>
+      <p class="planner-card__sub">Tell us when you're coming and we'll line up events, eats, and a place to stay.</p>
+      <div class="planner-card__fields">
+        <input type="date" id="dp-from-2" class="planner-input" />
+        <input type="date" id="dp-to-2" class="planner-input" />
+      </div>
+      <button class="btn btn--teal btn--full">Show My Geelong Weekend ✨</button>
+    </div>
+  </div>
+
+  <!-- COMING UP -->
+  <section class="page-section" id="upcoming">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Coming Up 📅</h2>
+        <a href="#" class="see-all">See all</a>
+      </div>
+      <div class="upcoming-list" id="js-upcoming-list"></div>
+    </div>
+  </section>
+
+  <!-- WHERE TO EAT -->
+  <section class="page-section page-section--alt" id="eat">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Where to Eat 🍽️</h2>
+        <a href="#" class="see-all">See all</a>
+      </div>
+      <div class="biz-scroll" id="js-eat-strip"></div>
+    </div>
+  </section>
+
+  <!-- WHERE TO STAY -->
+  <section class="page-section" id="stay">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Where to Stay 🛏️</h2>
+        <a href="#" class="see-all">See all</a>
+      </div>
+      <div class="stay-scroll" id="js-stay-grid"></div>
+    </div>
+  </section>
+
+  <!-- DEALS & OFFERS -->
+  <section class="page-section page-section--alt" id="offers">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Deals & Offers 🎁</h2>
+        <span class="section-sub">From local businesses</span>
+      </div>
+      <div class="offers-scroll" id="js-offers-strip"></div>
+    </div>
+  </section>
+
+  <!-- PERSONALISE BANNER -->
+  <section class="promo-banner">
+    <div class="container promo-banner__inner">
+      <div>
+        <h2 class="promo-banner__title">Make it yours ✨</h2>
+        <p class="promo-banner__sub">Tell us your vibe and we'll show you the good stuff.</p>
+      </div>
+      <button class="btn btn--teal btn--lg" id="js-personalise-2">Get started →</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__logo">WHAT TO DO GEELONG!</div>
+      <p class="footer__copy">Your local guide to events, experiences & places to stay in Geelong, Victoria.</p>
+      <nav class="footer__nav">
+        <a href="#">About</a>
+        <a href="#">Submit an Event</a>
+        <a href="#">Advertise</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -17,6 +17,7 @@ let BUSINESSES = [
     location: '116 Pakington St, Geelong West VIC 3218',
     suburb: 'Geelong West',
     website: 'pistolpetes.com.au',
+    lat: -38.1452, lng: 144.3438,
     img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -31,6 +32,7 @@ let BUSINESSES = [
     location: '77 Little Malop St, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'drmorse.com.au',
+    lat: -38.1464, lng: 144.3588,
     img: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -45,6 +47,7 @@ let BUSINESSES = [
     location: '83 Little Ryrie St, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'babaganoush.com.au',
+    lat: -38.1472, lng: 144.3608,
     img: 'https://images.unsplash.com/photo-1484980859-ea25e15becea?auto=format&fit=crop&w=800&q=80',
   },
   // ── RESTAURANTS ────────────────────────────────────────
@@ -60,6 +63,7 @@ let BUSINESSES = [
     location: '53 Little Ryrie St, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'restaurantigni.com',
+    lat: -38.1471, lng: 144.3607,
     img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -74,6 +78,7 @@ let BUSINESSES = [
     location: 'Cunningham Pier, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'wharfshed.com.au',
+    lat: -38.1452, lng: 144.3560,
     img: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -88,6 +93,7 @@ let BUSINESSES = [
     location: '98 Pakington St, Geelong West VIC 3218',
     suburb: 'Geelong West',
     website: 'humblerays.com.au',
+    lat: -38.1451, lng: 144.3440,
     img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -102,6 +108,7 @@ let BUSINESSES = [
     location: 'Eastern Beach Reserve, Geelong VIC 3220',
     suburb: 'Geelong',
     website: '',
+    lat: -38.1511, lng: 144.3791,
     img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
   },
   // ── BARS & PUBS ────────────────────────────────────────
@@ -117,6 +124,7 @@ let BUSINESSES = [
     location: '1 Yarra St, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'littlecreatures.com.au',
+    lat: -38.1446, lng: 144.3553,
     img: 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -131,6 +139,7 @@ let BUSINESSES = [
     location: '110 Pakington St, Newtown VIC 3220',
     suburb: 'Newtown',
     website: 'barwonclub.com.au',
+    lat: -38.1553, lng: 144.3447,
     img: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800&q=80',
   },
   // ── MARKETS ────────────────────────────────────────────
@@ -146,6 +155,7 @@ let BUSINESSES = [
     location: 'Johnstone Park, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'geelongfarmersmarket.com.au',
+    lat: -38.1455, lng: 144.3578,
     img: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=800&q=80',
   },
   // ── ARTS & CULTURE ─────────────────────────────────────
@@ -161,6 +171,7 @@ let BUSINESSES = [
     location: '50 Little Malop St, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'gpac.org.au',
+    lat: -38.1463, lng: 144.3591,
     img: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -175,6 +186,7 @@ let BUSINESSES = [
     location: '55 Little Malop St, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'geelongartgallery.org.au',
+    lat: -38.1464, lng: 144.3592,
     img: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -189,6 +201,7 @@ let BUSINESSES = [
     location: '240 Pakington St, Newtown VIC 3220',
     suburb: 'Newtown',
     website: 'boomgallery.com.au',
+    lat: -38.1600, lng: 144.3450,
     img: 'https://images.unsplash.com/photo-1580138955393-e26e89b56a3c?auto=format&fit=crop&w=800&q=80',
   },
   {
@@ -203,6 +216,7 @@ let BUSINESSES = [
     location: '26 Moorabool St, Geelong VIC 3220',
     suburb: 'Geelong CBD',
     website: 'nwm.vic.gov.au',
+    lat: -38.1480, lng: 144.3596,
     img: 'https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?auto=format&fit=crop&w=800&q=80',
   },
 ];
@@ -222,6 +236,7 @@ let EVENTS = [
     price: 'Free',
     emoji: '🥦',
     color: '#52b788',
+    lat: -38.1455, lng: 144.3578,
     featured: true,
   },
   {
@@ -237,6 +252,7 @@ let EVENTS = [
     price: 'Free',
     emoji: '🍺',
     color: '#f59e0b',
+    lat: -38.1446, lng: 144.3553,
   },
   {
     id: 3,
@@ -251,6 +267,7 @@ let EVENTS = [
     price: '$45',
     emoji: '🎭',
     color: '#e76f51',
+    lat: -38.1463, lng: 144.3591,
   },
   {
     id: 4,
@@ -265,6 +282,7 @@ let EVENTS = [
     price: 'Free',
     emoji: '🏺',
     color: '#9b5de5',
+    lat: -38.1600, lng: 144.3450,
   },
   {
     id: 5,
@@ -279,6 +297,7 @@ let EVENTS = [
     price: '$40',
     emoji: '☕',
     color: '#f4a261',
+    lat: -38.1452, lng: 144.3438,
   },
   {
     id: 6,
@@ -293,6 +312,7 @@ let EVENTS = [
     price: '$35',
     emoji: '🏃',
     color: '#3a86ff',
+    lat: -38.4065, lng: 144.1891,
   },
   {
     id: 7,
@@ -307,6 +327,7 @@ let EVENTS = [
     price: 'Free',
     emoji: '🖼️',
     color: '#9c27b0',
+    lat: -38.1464, lng: 144.3592,
   },
   {
     id: 8,
@@ -321,6 +342,7 @@ let EVENTS = [
     price: '$8',
     emoji: '🐑',
     color: '#78909c',
+    lat: -38.1480, lng: 144.3596,
   },
   {
     id: 9,
@@ -335,6 +357,7 @@ let EVENTS = [
     price: '$10',
     emoji: '🎸',
     color: '#5c6bc0',
+    lat: -38.1553, lng: 144.3447,
   },
 ];
 
@@ -345,6 +368,7 @@ let STAYS = [
     name: 'Novotel Geelong',
     type: 'Hotel',
     location: 'Cnr Gheringhap & Myers St, Geelong VIC 3220',
+    lat: -38.1463, lng: 144.3622, suburb: 'Geelong CBD',
     price: '$199',
     stars: '★★★★',
     emoji: '🏨',
@@ -356,6 +380,7 @@ let STAYS = [
     name: 'Quest Geelong Central',
     type: 'Apartment Hotel',
     location: '15 Myers St, Geelong VIC 3220',
+    lat: -38.1465, lng: 144.3620, suburb: 'Geelong CBD',
     price: '$159',
     stars: '★★★★',
     emoji: '🏢',
@@ -367,6 +392,7 @@ let STAYS = [
     name: 'Mercure Geelong',
     type: 'Hotel',
     location: '91 Myers St, Geelong VIC 3220',
+    lat: -38.1468, lng: 144.3618, suburb: 'Geelong CBD',
     price: '$135',
     stars: '★★★',
     emoji: '🏩',
@@ -378,6 +404,7 @@ let STAYS = [
     name: 'Surf Coast Retreat',
     type: 'Holiday House',
     location: 'Great Ocean Rd, Torquay VIC 3228',
+    lat: -38.3308, lng: 144.3248, suburb: 'Torquay',
     price: '$285',
     stars: '★★★★★',
     emoji: '🏡',
@@ -389,6 +416,7 @@ let STAYS = [
     name: 'The Bellarine Farmhouse',
     type: 'Holiday House',
     location: 'Drysdale VIC 3222',
+    lat: -38.1757, lng: 144.5661, suburb: 'Bellarine',
     price: '$320',
     stars: '★★★★★',
     emoji: '🌿',
@@ -400,6 +428,7 @@ let STAYS = [
     name: 'Mantra Southbank Geelong',
     type: 'Apartment Hotel',
     location: '11 Eastern Beach Rd, Geelong VIC 3220',
+    lat: -38.1473, lng: 144.3720, suburb: 'Geelong CBD',
     price: '$175',
     stars: '★★★★',
     emoji: '🌊',
@@ -1540,12 +1569,13 @@ async function initEventPage() {
 
 // ── EVENTS SEE-ALL PAGE ───────────────────────────────────
 // ── COLLECTION CARD BUILDER ───────────────────────────────
-function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, ctaLabel) {
+function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, ctaLabel, lat, lng) {
   const thumb = img
     ? `<img src="${img}" alt="${name}" class="coll-card__img" loading="lazy" />`
     : `<div class="coll-card__img-placeholder" style="background:${bg}22">${emoji}</div>`;
+  const latAttr = (lat && lng) ? ` data-lat="${lat}" data-lng="${lng}"` : '';
   return `
-    <a href="${href}" class="coll-card">
+    <a href="${href}" class="coll-card"${latAttr}>
       ${thumb}
       <div class="coll-card__body">
         <div class="coll-card__type">${type}</div>
@@ -1614,9 +1644,11 @@ function initEventsPage() {
         `📍 ${ev.location} · 🕐 ${ev.time}`,
         ev.location,
         ev.price !== 'Free' ? ev.price : null,
-        biz ? biz.name : null
+        biz ? biz.name : null,
+        ev.lat, ev.lng
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your search.</p></div>`;
+    if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
   }
 
   collFilter(
@@ -1626,6 +1658,7 @@ function initEventsPage() {
     document.getElementById('js-events-count'),
     renderEvents
   );
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-events-filters');
 }
 
 // ── EAT COLLECTION PAGE ───────────────────────────────────
@@ -1645,9 +1678,11 @@ function initEatPage() {
         biz.description,
         biz.suburb || biz.location,
         businessHasUpcoming(biz.id) ? 'Event' : null,
-        businessHasPromo(biz.id) ? 'Offer' : null
+        businessHasPromo(biz.id) ? 'Offer' : null,
+        biz.lat, biz.lng
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
+    if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
   }
 
   collFilter(
@@ -1657,6 +1692,7 @@ function initEatPage() {
     document.getElementById('js-eat-count'),
     renderEat
   );
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-eat-filters');
 }
 
 // ── STAY COLLECTION PAGE ──────────────────────────────────
@@ -1673,9 +1709,11 @@ function initStayPage() {
         s.name,
         s.description || `${s.stars || ''} · ${s.price || ''}`.trim().replace(/^· |· $/, ''),
         s.suburb || s.location,
-        null, null
+        null, null,
+        s.lat, s.lng
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
+    if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
   }
 
   collFilter(
@@ -1685,6 +1723,7 @@ function initStayPage() {
     document.getElementById('js-stay-count'),
     renderStay
   );
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-stay-filters');
 }
 
 // ── STAY SEE-ALL PAGE (legacy stub) ──────────────────────

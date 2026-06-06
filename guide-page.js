@@ -177,4 +177,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   render();
+
+  // Init day planner after guide renders
+  if (items.length && window.initGuidePlanner) {
+    window.initGuidePlanner(guide, items, isOwner);
+  }
 });

@@ -2313,3 +2313,32 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   color: var(--mid); display: flex; flex-direction: column; align-items: center; gap: .75rem;
 }
 .nav__active { color: var(--teal) !important; font-weight: 700; }
+
+/* ── LOCATION BUTTON ─────────────────────────────────────── */
+.loc-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .35rem .85rem; border-radius: 999px;
+  border: 1.5px solid var(--border); background: #fff;
+  font-size: .8rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  color: #374151; transition: all .15s; white-space: nowrap; flex-shrink: 0;
+}
+.loc-btn .material-symbols-rounded { font-size: 1rem; }
+.loc-btn:hover { border-color: var(--teal); color: var(--teal); }
+.loc-btn--set { background: var(--teal); color: #fff; border-color: var(--teal); }
+.loc-btn--set:hover { background: #229988; border-color: #229988; }
+.loc-btn__clear {
+  font-size: .75rem; opacity: .7; margin-left: .2rem;
+  padding: 0 .1rem;
+}
+.loc-btn__clear:hover { opacity: 1; }
+
+/* ── DISTANCE BADGE ──────────────────────────────────────── */
+.dist-badge {
+  display: none;
+  position: absolute; top: .5rem; right: .5rem;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+  color: #fff; font-size: .7rem; font-weight: 700;
+  border-radius: 999px; padding: .2rem .55rem;
+  pointer-events: none;
+}
+.coll-card { position: relative; }

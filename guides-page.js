@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const guides = await loadGuides();
 
   function guideUrl(g) {
-    return IS_LOCAL ? `guide.html?id=${g.id}` : `/guide/${g.id}`;
+    return window.IS_LOCAL ? `guide.html?id=${g.id}` : `/guide/${g.id}`;
   }
 
   function render() {
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dateStr = g.date_from
       ? `${formatGuideDate(g.date_from)}${g.date_to ? ' – ' + formatGuideDate(g.date_to) : ''}`
       : 'No dates set';
-    const shareUrl = IS_LOCAL ? `guide.html?id=${g.id}` : `/guide/${g.id}`;
+    const shareUrl = window.IS_LOCAL ? `guide.html?id=${g.id}` : `/guide/${g.id}`;
     return `
       <div class="guide-card" data-id="${g.id}">
         <a href="${guideUrl(g)}" class="guide-card__body">
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
         </a>
         <div class="guide-card__actions">
-          <button class="guide-card__btn js-copy-link" data-url="${window.location.origin}/${IS_LOCAL ? 'guide.html?id=' : 'guide/'}${g.id}" title="Copy shareable link">
+          <button class="guide-card__btn js-copy-link" data-url="${window.location.origin}/${window.IS_LOCAL ? 'guide.html?id=' : 'guide/'}${g.id}" title="Copy shareable link">
             <span class="material-symbols-rounded">link</span>
           </button>
           <button class="guide-card__btn js-delete-guide" data-id="${g.id}" title="Delete guide">

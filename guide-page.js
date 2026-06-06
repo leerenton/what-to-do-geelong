@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isOwner = (session?.user?.id && guide.user_id === session.user.id) || guide.session_id === sid;
 
   const items = guide.guide_items || [];
-  const shareUrl = IS_LOCAL
+  const shareUrl = window.IS_LOCAL
     ? `${window.location.origin}/guide.html?id=${guide.id}`
     : `${window.location.origin}/guide/${guide.id}`;
 

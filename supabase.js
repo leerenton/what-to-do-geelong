@@ -51,6 +51,10 @@ async function loadAllData() {
 }
 window.loadAllData = loadAllData;
 
+// ── ENVIRONMENT ──────────────────────────────────────────
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+window.IS_LOCAL = IS_LOCAL;
+
 // ── SLUG UTILITY ─────────────────────────────────────────
 function slugify(str) {
   return String(str)

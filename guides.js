@@ -17,9 +17,13 @@ function genGuideId() {
 
 async function guideOwnerFilter() {
   try {
-    const { data: { session } } = await db.auth.getSession();
-    if (session?.user?.id) return { col: 'user_id', val: session.user.id };
-  } catch (_) { /* stale token — fall through to session_id */ }
+    const timeout = new Promise(res => setTimeout(() => res(null), 2000));
+    const sessionResult = await Promise.race([
+      db.auth.getSession().then(r => r.data?.session ?? null),
+      timeout,
+    ]);
+    if (sessionResult?.user?.id) return { col: 'user_id', val: sessionResult.user.id };
+  } catch (_) {}
   return { col: 'session_id', val: getSessionId() };
 }
 

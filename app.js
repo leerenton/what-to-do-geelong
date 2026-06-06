@@ -628,8 +628,6 @@ function getArticleBySlug(slug) {
 }
 
 // ── LINK BUILDERS (slug-based URLs) ───────────────────────
-const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
 function bizLink(biz) {
   const s = biz.slug || slugify(biz.name + '-' + (biz.suburb || ''));
   return IS_LOCAL ? `listing.html?s=${s}` : `/${s}`;

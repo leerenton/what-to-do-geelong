@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geelong Cats — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── CATS PAGE TAKEOVER ──────────────────────────────── */
+    :root {
+      --cats-navy: #002855;
+      --cats-blue: #003f8a;
+      --cats-white: #ffffff;
+      --cats-gold: #e8c842;
+    }
+
+    body { background: var(--cats-navy); color: var(--cats-white); }
+
+    /* Nav override */
+    .nav { background: var(--cats-navy); border-bottom: 1px solid rgba(255,255,255,.1); }
+    .nav__links a { color: rgba(255,255,255,.75); }
+    .nav__links a:hover { color: var(--cats-white); }
+    .nav__drop-toggle { color: rgba(255,255,255,.75); }
+    .nav__drop-menu { background: var(--cats-blue); border-color: rgba(255,255,255,.15); }
+    .nav__drop-menu a { color: rgba(255,255,255,.8); }
+    .nav__drop-menu a:hover { background: rgba(255,255,255,.1); color: var(--cats-white); }
+    .nav__drop-divider { border-color: rgba(255,255,255,.15); }
+    .nav__cats-link { color: var(--cats-gold) !important; font-weight: 700; }
+    .nav__cats-dot { background: var(--cats-gold) !important; }
+
+    /* Hero */
+    .cats-hero {
+      position: relative;
+      background: var(--cats-navy);
+      padding: 3rem var(--gutter) 2.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .cats-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,63,138,.7) 0%, transparent 70%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,.03)' stroke-width='1'/%3E%3C/svg%3E") repeat;
+      pointer-events: none;
+    }
+    .cats-hero__content { position: relative; z-index: 1; }
+    .cats-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--cats-gold);
+      color: var(--cats-navy);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      border-radius: var(--radius-pill);
+      padding: .25rem .8rem;
+      margin-bottom: 1rem;
+    }
+    .cats-hero__title {
+      font-family: var(--font-head);
+      font-size: clamp(2.4rem, 8vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--cats-white);
+      margin-bottom: .4rem;
+    }
+    .cats-hero__title span { color: var(--cats-gold); }
+    .cats-hero__sub {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.65);
+      margin-bottom: 1.5rem;
+    }
+    .cats-hero__season {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--radius-pill);
+      padding: .4rem 1rem;
+      font-size: .85rem;
+      color: rgba(255,255,255,.75);
+    }
+
+    /* Sections */
+    .cats-section { padding: 2rem 0; }
+    .cats-section-title {
+      font-family: var(--font-head);
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--cats-white);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
+    }
+    .cats-section-title .material-symbols-rounded { color: var(--cats-gold); }
+
+    /* Fixture cards */
+    .fixtures-list { display: flex; flex-direction: column; gap: .75rem; }
+
+    .fixture-card {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1.25rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: .75rem 1rem;
+      text-decoration: none;
+      transition: background .15s, border-color .15s;
+    }
+    .fixture-card:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+    .fixture-card--home { border-left: 3px solid var(--cats-gold); }
+    .fixture-card--away { border-left: 3px solid rgba(255,255,255,.25); }
+    .fixture-card--result { opacity: .6; }
+
+    .fixture-round {
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.45);
+      min-width: 2.5rem;
+      text-align: center;
+    }
+
+    .fixture-main { display: flex; flex-direction: column; gap: .2rem; }
+    .fixture-teams {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--cats-white);
+      line-height: 1.2;
+    }
+    .fixture-teams__vs { color: rgba(255,255,255,.4); font-size: .8rem; font-weight: 600; margin: 0 .35rem; }
+    .fixture-meta {
+      font-size: .78rem;
+      color: rgba(255,255,255,.5);
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+    .fixture-meta .material-symbols-rounded { font-size: .9rem; }
+
+    .fixture-right { display: flex; flex-direction: column; align-items: flex-end; gap: .25rem; }
+    .fixture-badge {
+      font-size: .65rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-radius: var(--radius-pill);
+      padding: .2rem .55rem;
+    }
+    .fixture-badge--home { background: var(--cats-gold); color: var(--cats-navy); }
+    .fixture-badge--away { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
+    .fixture-score {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--cats-white);
+    }
+    .fixture-score--win { color: var(--cats-gold); }
+    .fixture-score--loss { color: rgba(255,80,80,.85); }
+
+    /* Stats strip */
+    .cats-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+      margin-bottom: 2rem;
+    }
+    .cats-stat {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem;
+      text-align: center;
+    }
+    .cats-stat__num {
+      font-family: var(--font-head);
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-weight: 900;
+      color: var(--cats-gold);
+      line-height: 1;
+    }
+    .cats-stat__label { font-size: .75rem; color: rgba(255,255,255,.55); margin-top: .25rem; }
+
+    /* Venue card */
+    .cats-venue {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .cats-venue__img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      opacity: .75;
+    }
+    .cats-venue__body { padding: 1.25rem; }
+    .cats-venue__title {
+      font-family: var(--font-head);
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--cats-white);
+      margin-bottom: .35rem;
+    }
+    .cats-venue__meta { font-size: .85rem; color: rgba(255,255,255,.55); line-height: 1.6; }
+
+    /* Footer override */
+    .footer { background: rgba(0,0,0,.4); border-top: 1px solid rgba(255,255,255,.1); }
+    .footer__logo { color: var(--cats-white); }
+    .footer__copy { color: rgba(255,255,255,.45); }
+    .footer__nav a { color: rgba(255,255,255,.5); }
+    .footer__nav a:hover { color: var(--cats-white); }
+  </style>
+  <!-- Google AdSense verification -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo-link">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+      </a>
+      <nav class="nav__links">
+        <a href="index.html#eat">Eat</a>
+        <a href="index.html#stay">Stay</a>
+        <a href="index.html#offers">Offers</a>
+        <div class="nav__drop">
+          <button class="nav__drop-toggle">Major Events <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu">
+            <a href="festival-of-sails.html"><span class="material-symbols-rounded">sailing</span> Festival of Sails</a>
+            <a href="cadel-evans.html"><span class="material-symbols-rounded">directions_bike</span> Cadel Evans Road Race</a>
+            <div class="nav__drop-divider"></div>
+            <a href="#"><span class="material-symbols-rounded">celebration</span> Pako Festa</a>
+            <a href="#"><span class="material-symbols-rounded">star</span> Geelong Show</a>
+          </div>
+        </div>
+        <a href="cats.html" class="nav__cats-link"><span class="nav__cats-dot"></span> Cats</a>
+        <a href="editorial.html">Read</a>
+        <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
+      </nav>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="cats-hero">
+    <div class="cats-hero__content">
+      <div class="cats-hero__badge"><span class="material-symbols-rounded">sports</span> AFL · 2025 Season</div>
+      <h1 class="cats-hero__title">Geelong<br /><span>Cats</span></h1>
+      <p class="cats-hero__sub">Upcoming fixtures for your Geelong Cats</p>
+      <div class="cats-hero__season">
+        <span class="material-symbols-rounded">calendar_month</span>
+        2025 Toyota AFL Premiership Season
+      </div>
+    </div>
+  </div>
+
+  <!-- SEASON STATS -->
+  <section class="cats-section">
+    <div class="container">
+      <div class="cats-stats">
+        <div class="cats-stat">
+          <div class="cats-stat__num">11</div>
+          <div class="cats-stat__label">Wins</div>
+        </div>
+        <div class="cats-stat">
+          <div class="cats-stat__num">5</div>
+          <div class="cats-stat__label">Losses</div>
+        </div>
+        <div class="cats-stat">
+          <div class="cats-stat__num">3rd</div>
+          <div class="cats-stat__label">Ladder</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPCOMING FIXTURES -->
+  <section class="cats-section">
+    <div class="container">
+      <h2 class="cats-section-title"><span class="material-symbols-rounded">event</span> Upcoming Fixtures</h2>
+      <div class="fixtures-list">
+
+        <div class="fixture-card fixture-card--home">
+          <div class="fixture-round">R16</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> Collingwood</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sat 14 Jun · 7:30pm
+              <span class="material-symbols-rounded">location_on</span> GMHBA Stadium
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--home">Home</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--away">
+          <div class="fixture-round">R17</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> Brisbane Lions</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sat 21 Jun · 4:35pm
+              <span class="material-symbols-rounded">location_on</span> The Gabba, Brisbane
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--away">Away</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--home">
+          <div class="fixture-round">R18</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> West Coast Eagles</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sun 29 Jun · 1:10pm
+              <span class="material-symbols-rounded">location_on</span> GMHBA Stadium
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--home">Home</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--away">
+          <div class="fixture-round">R19</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> GWS Giants</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sat 5 Jul · 1:45pm
+              <span class="material-symbols-rounded">location_on</span> ENGIE Stadium, Sydney
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--away">Away</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--home">
+          <div class="fixture-round">R20</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> Carlton</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sat 12 Jul · 7:30pm
+              <span class="material-symbols-rounded">location_on</span> GMHBA Stadium
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--home">Home</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--away">
+          <div class="fixture-round">R21</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> Hawthorn</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sat 19 Jul · 2:10pm
+              <span class="material-symbols-rounded">location_on</span> MCG, Melbourne
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--away">Away</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--home">
+          <div class="fixture-round">R22</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> Melbourne</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Fri 25 Jul · 7:50pm
+              <span class="material-symbols-rounded">location_on</span> GMHBA Stadium
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--home">Home</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--away">
+          <div class="fixture-round">R23</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> Sydney Swans</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sat 2 Aug · 4:35pm
+              <span class="material-symbols-rounded">location_on</span> SCG, Sydney
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--away">Away</span>
+          </div>
+        </div>
+
+        <div class="fixture-card fixture-card--home">
+          <div class="fixture-round">R24</div>
+          <div class="fixture-main">
+            <div class="fixture-teams">Geelong <span class="fixture-teams__vs">vs</span> Essendon</div>
+            <div class="fixture-meta">
+              <span class="material-symbols-rounded">calendar_month</span> Sat 9 Aug · 7:30pm
+              <span class="material-symbols-rounded">location_on</span> GMHBA Stadium
+            </div>
+          </div>
+          <div class="fixture-right">
+            <span class="fixture-badge fixture-badge--home">Home</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- GMHBA STADIUM -->
+  <section class="cats-section">
+    <div class="container">
+      <h2 class="cats-section-title"><span class="material-symbols-rounded">stadium</span> GMHBA Stadium</h2>
+      <div class="cats-venue">
+        <img
+          src="https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&q=80"
+          alt="GMHBA Stadium Geelong"
+          class="cats-venue__img"
+        />
+        <div class="cats-venue__body">
+          <div class="cats-venue__title">GMHBA Stadium, Kardinia Park</div>
+          <div class="cats-venue__meta">
+            Stead Park, Geelong · Capacity 36,000 · One of the best atmospheres in the AFL.<br />
+            <br />
+            <strong style="color:rgba(255,255,255,.7)">Getting there:</strong> Train to South Geelong Station (2 min walk on game day) or tram to Kardinia Park on match days.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISCLAIMER -->
+  <div class="container" style="padding-bottom:2rem">
+    <p style="font-size:.75rem;color:rgba(255,255,255,.3);line-height:1.6">
+      Fixture times and opponents shown are illustrative and may not reflect the current official AFL schedule. Always check the official <a href="https://afl.com.au" style="color:rgba(255,255,255,.5)" target="_blank" rel="noopener">AFL website</a> or the <a href="https://geelongcats.com.au" style="color:rgba(255,255,255,.5)" target="_blank" rel="noopener">Geelong Cats</a> site for up-to-date fixtures.
+    </p>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__logo">WHAT TO DO GEELONG!</div>
+      <p class="footer__copy">Your local guide to events, experiences & places to stay in Geelong, Victoria.</p>
+      <nav class="footer__nav">
+        <a href="#">About</a>
+        <a href="#">Submit an Event</a>
+        <a href="#">Advertise</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

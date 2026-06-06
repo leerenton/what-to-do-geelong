@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="business-dashboard.css" />
+  <!-- Google AdSense verification -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+</head>
+<body class="dash-body">
+
+  <!-- TOP BAR -->
+  <div class="dash-topbar">
+    <a href="index.html" class="dash-topbar__logo"><img src="assets/logo.jpg" alt="WTDG" /></a>
+    <span class="dash-topbar__sep">/</span>
+
+    <!-- Business switcher -->
+    <div style="position:relative">
+      <button class="dash-biz-switcher" id="js-dash-switcher">
+        <span class="dash-biz-switcher__emoji" id="js-dash-emoji">🏪</span>
+        <span class="dash-biz-switcher__name" id="js-dash-bizname">My Business</span>
+        <span class="material-symbols-rounded dash-biz-switcher__chevron">expand_more</span>
+      </button>
+      <div class="dash-switcher-menu" id="js-switcher-menu"></div>
+    </div>
+
+    <span class="dash-topbar__plan" id="js-dash-plan-badge">Free</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="dash-tabs" id="js-dash-tabs">
+    <button class="dash-tab active" data-tab="overview"><span class="material-symbols-rounded">dashboard</span> Overview</button>
+    <button class="dash-tab" data-tab="events"><span class="material-symbols-rounded">event</span> Events</button>
+    <button class="dash-tab" data-tab="offers"><span class="material-symbols-rounded">local_offer</span> Offers</button>
+    <button class="dash-tab" data-tab="gallery"><span class="material-symbols-rounded">photo_library</span> Gallery</button>
+    <button class="dash-tab" data-tab="inquiries"><span class="material-symbols-rounded">mail</span> Inquiries <span id="js-inq-badge" style="display:none;background:var(--teal);color:var(--dark);border-radius:var(--radius-pill);font-size:.65rem;font-weight:800;padding:.1rem .45rem;margin-left:.2rem"></span></button>
+    <button class="dash-tab" data-tab="settings"><span class="material-symbols-rounded">settings</span> Settings</button>
+  </div>
+
+  <!-- PANELS -->
+  <div id="js-dash-root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="business-dashboard.js"></script>
+</body>
+</html>

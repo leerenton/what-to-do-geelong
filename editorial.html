@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Edit — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google AdSense verification -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo-link">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+      </a>
+      <nav class="nav__links">
+        <a href="index.html#eat">Eat</a>
+        <a href="index.html#stay">Stay</a>
+        <a href="index.html#offers">Offers</a>
+        <div class="nav__drop">
+          <button class="nav__drop-toggle">Major Events <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu">
+            <a href="festival-of-sails.html"><span class="material-symbols-rounded">sailing</span> Festival of Sails</a>
+            <a href="cadel-evans.html"><span class="material-symbols-rounded">directions_bike</span> Cadel Evans Road Race</a>
+            <div class="nav__drop-divider"></div>
+            <a href="#"><span class="material-symbols-rounded">celebration</span> Pako Festa</a>
+            <a href="#"><span class="material-symbols-rounded">star</span> Geelong Show</a>
+          </div>
+        </div>
+        <a href="cats.html" class="nav__cats-link"><span class="nav__cats-dot"></span> Cats</a>
+        <a href="editorial.html" class="nav__drop-active">Read</a>
+        <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
+      </nav>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- EDITORIAL HERO -->
+  <div class="ed-hub-hero">
+    <div class="container ed-hub-hero__inner">
+      <span class="ed-hub-hero__eyebrow"><span class="material-symbols-rounded">auto_stories</span> The Edit</span>
+      <h1 class="ed-hub-hero__title">Guides, News &amp; Geelong Stories</h1>
+      <p class="ed-hub-hero__sub">Curated guides, local business news, and the history of a city worth knowing.</p>
+      <a href="what-was-geelong.html" class="btn btn--teal btn--lg">
+        <span class="material-symbols-rounded">history_edu</span> What Was Geelong →
+      </a>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="page-section" style="padding-bottom:0">
+    <div class="container">
+      <div class="chip-row">
+        <button class="chip chip--active" data-filter="all">All</button>
+        <button class="chip" data-filter="guide"><span class="material-symbols-rounded">menu_book</span> Guides</button>
+        <button class="chip" data-filter="news"><span class="material-symbols-rounded">newspaper</span> Business News</button>
+        <button class="chip" data-filter="history"><span class="material-symbols-rounded">history_edu</span> What Was Geelong</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARTICLE GRID -->
+  <section class="page-section">
+    <div class="container">
+      <div class="ed-grid" id="js-editorial-root"></div>
+    </div>
+  </section>
+
+  <!-- WHAT WAS GEELONG BANNER -->
+  <section class="promo-banner" style="background:#2d1b69">
+    <div class="container promo-banner__inner">
+      <div>
+        <h2 class="promo-banner__title">What Was Geelong?</h2>
+        <p class="promo-banner__sub">Before the waterfront promenade, before the coffee shops — discover Geelong's past through photos, stories, and before-and-after history.</p>
+      </div>
+      <a href="what-was-geelong.html" class="btn btn--teal btn--lg">Explore →</a>
+    </div>
+  </section>
+
+  <!-- ARE YOU A BUSINESS? -->
+  <section class="page-section page-section--alt">
+    <div class="container">
+      <div class="ed-biz-cta">
+        <div class="ed-biz-cta__icon"><span class="material-symbols-rounded">newspaper</span></div>
+        <div>
+          <h3 class="ed-biz-cta__title">Got news? Share it here.</h3>
+          <p class="ed-biz-cta__sub">Featured business members can post news and announcements directly to The Edit. New product launches, events, milestones — your story, to our audience.</p>
+        </div>
+        <a href="business-signup.html" class="btn btn--teal btn--lg">Get Featured →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__logo">WHAT TO DO GEELONG!</div>
+      <p class="footer__copy">Your local guide to events, experiences & places to stay in Geelong, Victoria.</p>
+      <nav class="footer__nav">
+        <a href="#">About</a>
+        <a href="#">Submit an Event</a>
+        <a href="#">Advertise</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

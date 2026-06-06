@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seed Database — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #f7f4ef; color: #1a1a1a; padding: 2rem 1rem; min-height: 100vh; }
+    .card { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 18px; padding: 2rem; box-shadow: 0 3px 12px rgba(0,0,0,.10); }
+    h1 { font-family: 'Nunito', sans-serif; font-size: 1.6rem; font-weight: 900; margin-bottom: .4rem; }
+    p { font-size: .9rem; color: #777; margin-bottom: 1.5rem; line-height: 1.6; }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; background: #4ac8d0; color: #1a1a1a; font-weight: 800; font-size: .95rem; padding: .75rem 1.5rem; border-radius: 999px; border: none; cursor: pointer; }
+    .btn:hover { background: #33aeb6; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .log { margin-top: 1.5rem; background: #1a1a1a; color: #4ac8d0; border-radius: 12px; padding: 1rem 1.25rem; font-family: monospace; font-size: .8rem; line-height: 1.8; max-height: 400px; overflow-y: auto; display: none; }
+    .log.visible { display: block; }
+    .log .ok  { color: #52b788; }
+    .log .err { color: #f72585; }
+    .log .info { color: #aaa; }
+    .section-label { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #777; margin-bottom: .5rem; display: block; }
+    .warn { background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: .75rem 1rem; font-size: .82rem; margin-bottom: 1.25rem; color: #795548; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>🌱 Seed Database</h1>
+  <p>This page inserts the current static site data into your Supabase database. Run it once after creating tables with <code>schema.sql</code>. It uses <strong>upsert</strong> so it's safe to re-run.</p>
+  <div class="warn">⚠️ Make sure you've run <strong>schema.sql</strong> in the Supabase SQL Editor first.</div>
+  <span class="section-label">Tables to seed</span>
+  <p style="margin-bottom:1rem">Businesses (6) · Events (8) · Stays (4) · Promos (5) · Articles (9)</p>
+  <button class="btn" id="js-seed-btn">🚀 Seed all data</button>
+  <div class="log" id="js-log"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="app.js"></script>
+<script src="seed.js"></script>
+</body>
+</html>

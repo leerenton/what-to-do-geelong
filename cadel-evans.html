@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadel Evans Great Ocean Road Race — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── CADEL EVANS PAGE ────────────────────────────────── */
+    :root {
+      --cadel-red: #c0392b;
+      --cadel-dark: #1a1a2e;
+    }
+    .ce-hero {
+      position: relative;
+      min-height: 80vh;
+      display: flex;
+      align-items: flex-end;
+      background: var(--cadel-dark);
+      overflow: hidden;
+    }
+    .ce-hero__img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .5;
+    }
+    .ce-hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,26,46,.97) 0%, rgba(26,26,46,.35) 55%, transparent 100%);
+    }
+    .ce-hero__content {
+      position: relative;
+      z-index: 1;
+      padding: 2.5rem var(--gutter) 3rem;
+      color: var(--white);
+      max-width: 720px;
+    }
+    .ce-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--cadel-red);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      border-radius: var(--radius-pill);
+      padding: .25rem .8rem;
+      margin-bottom: .9rem;
+    }
+    .ce-hero__title {
+      font-family: var(--font-head);
+      font-size: clamp(1.9rem, 6.5vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.08;
+      margin-bottom: .5rem;
+    }
+    .ce-hero__subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: rgba(255,255,255,.78);
+      margin-bottom: 1.1rem;
+    }
+    .ce-hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 1.2rem;
+      font-size: .85rem;
+      color: rgba(255,255,255,.6);
+      margin-bottom: 1.75rem;
+    }
+    .ce-hero__meta span { display: flex; align-items: center; gap: .3rem; }
+    .ce-hero__ctas { display: flex; gap: .75rem; flex-wrap: wrap; }
+
+    .ce-section { padding: 2.5rem 0; }
+    .ce-section--red { background: #fff5f5; }
+    .ce-section--dark { background: var(--cadel-dark); color: var(--white); }
+    .ce-section--dark .section-title { color: var(--white); }
+
+    .ce-intro {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--dark);
+      max-width: 700px;
+      margin-top: .75rem;
+    }
+
+    .ce-highlights {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .ce-highlight-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+    .ce-highlight-card__icon { font-size: 1.6rem; color: var(--cadel-red); }
+    .ce-highlight-card__title { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--dark); }
+    .ce-highlight-card__desc { font-size: .85rem; color: var(--mid); line-height: 1.5; }
+
+    .ce-gallery {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 220px 220px;
+      gap: .75rem;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-top: 1.5rem;
+    }
+    .ce-gallery img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .ce-gallery img:first-child { grid-column: 1 / 3; height: 280px; }
+
+    .ce-route {
+      margin-top: 1.5rem;
+      background: rgba(255,255,255,.08);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+    }
+    .ce-route__title { font-family: var(--font-head); font-size: 1rem; font-weight: 800; margin-bottom: .75rem; color: var(--white); }
+    .ce-route__stages { display: flex; flex-direction: column; gap: .5rem; }
+    .ce-route__stage {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-size: .88rem;
+      color: rgba(255,255,255,.75);
+    }
+    .ce-route__stage .material-symbols-rounded { font-size: 1.1rem; color: var(--cadel-red); flex-shrink: 0; }
+
+    .ce-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .ce-info-item { display: flex; flex-direction: column; gap: .2rem; }
+    .ce-info-item__label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--mid);
+    }
+    .ce-info-item__val { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--dark); }
+  </style>
+  <!-- Google AdSense verification -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo-link">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+      </a>
+      <nav class="nav__links">
+        <a href="index.html#eat">Eat</a>
+        <a href="index.html#stay">Stay</a>
+        <a href="index.html#offers">Offers</a>
+        <div class="nav__drop">
+          <button class="nav__drop-toggle">Major Events <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu">
+            <a href="festival-of-sails.html"><span class="material-symbols-rounded">sailing</span> Festival of Sails</a>
+            <a href="cadel-evans.html" class="nav__drop-active"><span class="material-symbols-rounded">directions_bike</span> Cadel Evans Road Race</a>
+            <div class="nav__drop-divider"></div>
+            <a href="#"><span class="material-symbols-rounded">celebration</span> Pako Festa</a>
+            <a href="#"><span class="material-symbols-rounded">star</span> Geelong Show</a>
+          </div>
+        </div>
+        <a href="cats.html" class="nav__cats-link"><span class="nav__cats-dot"></span> Cats</a>
+        <a href="editorial.html">Read</a>
+        <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
+      </nav>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="ce-hero">
+    <img
+      class="ce-hero__img"
+      src="https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=1400&q=80"
+      alt="Cyclists racing in the Cadel Evans Road Race"
+    />
+    <div class="ce-hero__overlay"></div>
+    <div class="ce-hero__content">
+      <span class="ce-hero__badge"><span class="material-symbols-rounded">directions_bike</span> Major Event</span>
+      <h1 class="ce-hero__title">Cadel Evans Great Ocean Road Race</h1>
+      <p class="ce-hero__subtitle">World Tour cycling at its finest — through Geelong and along one of the world's most iconic coastlines.</p>
+      <div class="ce-hero__meta">
+        <span><span class="material-symbols-rounded">calendar_month</span> Late January / Early February</span>
+        <span><span class="material-symbols-rounded">location_on</span> Geelong to Geelong (via Great Ocean Road)</span>
+        <span><span class="material-symbols-rounded">emoji_events</span> UCI WorldTour</span>
+      </div>
+      <div class="ce-hero__ctas">
+        <a href="https://cadelevansrace.com.au" target="_blank" rel="noopener" class="btn btn--teal btn--lg">Official site →</a>
+        <a href="index.html#stay" class="btn btn--outline btn--lg" style="color:#fff;border-color:rgba(255,255,255,.4)">Find accommodation</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="ce-section">
+    <div class="container">
+      <h2 class="section-title"><span class="material-symbols-rounded">info</span> About the Race</h2>
+      <p class="ce-intro">
+        Named in honour of Geelong's own Tour de France champion Cadel Evans, this UCI WorldTour race brings the world's elite cyclists to regional Victoria for a breathtaking one-day classic. Starting and finishing in Geelong, the route winds through the Surf Coast, climbs Challambra, and follows the spectacular Great Ocean Road — making it one of the most scenic and challenging races on the global calendar.
+      </p>
+      <div class="ce-highlights">
+        <div class="ce-highlight-card">
+          <span class="material-symbols-rounded ce-highlight-card__icon">directions_bike</span>
+          <div class="ce-highlight-card__title">Elite Road Race</div>
+          <div class="ce-highlight-card__desc">UCI WorldTour status — the same circuit as the Tour de France, Paris-Roubaix, and Liège–Bastogne–Liège.</div>
+        </div>
+        <div class="ce-highlight-card">
+          <span class="material-symbols-rounded ce-highlight-card__icon">landscape</span>
+          <div class="ce-highlight-card__title">Iconic Scenery</div>
+          <div class="ce-highlight-card__desc">Riders and spectators alike are treated to Great Ocean Road coastal views and Surf Coast hinterland climbs.</div>
+        </div>
+        <div class="ce-highlight-card">
+          <span class="material-symbols-rounded ce-highlight-card__icon">people</span>
+          <div class="ce-highlight-card__title">Free to Watch</div>
+          <div class="ce-highlight-card__desc">Find a spot along the route or cheer at the finish line on Moorabool St — completely free for spectators.</div>
+        </div>
+        <div class="ce-highlight-card">
+          <span class="material-symbols-rounded ce-highlight-card__icon">restaurant</span>
+          <div class="ce-highlight-card__title">Festival Atmosphere</div>
+          <div class="ce-highlight-card__desc">The finish-line precinct comes alive with food stalls, live entertainment, and cycling exhibits.</div>
+        </div>
+        <div class="ce-highlight-card">
+          <span class="material-symbols-rounded ce-highlight-card__icon">child_care</span>
+          <div class="ce-highlight-card__title">Kids' Race</div>
+          <div class="ce-highlight-card__desc">The Little Cadel ride gives young cyclists their moment to race the Geelong streets like the pros.</div>
+        </div>
+        <div class="ce-highlight-card">
+          <span class="material-symbols-rounded ce-highlight-card__icon">star</span>
+          <div class="ce-highlight-card__title">Star Riders</div>
+          <div class="ce-highlight-card__desc">Past winners include Egan Bernal, Richie Porte, and Simon Gerrans — world-class competition every year.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="ce-section ce-section--red">
+    <div class="container">
+      <h2 class="section-title"><span class="material-symbols-rounded">photo_library</span> Race Day Highlights</h2>
+      <div class="ce-gallery">
+        <img src="https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=80" alt="Cycling peloton" />
+        <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=600&q=80" alt="Coastal cycling" />
+        <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80" alt="Race finish line crowd" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUTE -->
+  <section class="ce-section ce-section--dark">
+    <div class="container">
+      <h2 class="section-title"><span class="material-symbols-rounded">route</span> Race Route</h2>
+      <div class="ce-route">
+        <div class="ce-route__title">Key Stages &amp; Spectator Spots</div>
+        <div class="ce-route__stages">
+          <div class="ce-route__stage"><span class="material-symbols-rounded">flag</span> Start: Geelong Waterfront / Moorabool Street</div>
+          <div class="ce-route__stage"><span class="material-symbols-rounded">south</span> Surf Coast through Torquay &amp; Jan Juc</div>
+          <div class="ce-route__stage"><span class="material-symbols-rounded">landscape</span> Challambra circuit — key climb of the race</div>
+          <div class="ce-route__stage"><span class="material-symbols-rounded">waves</span> Great Ocean Road coastal section (spectacular for spectators)</div>
+          <div class="ce-route__stage"><span class="material-symbols-rounded">north</span> Return through Lorne, Anglesea, and Torquay</div>
+          <div class="ce-route__stage"><span class="material-symbols-rounded">sports_score</span> Finish: Geelong CBD — Moorabool Street</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INFO -->
+  <section class="ce-section">
+    <div class="container">
+      <h2 class="section-title"><span class="material-symbols-rounded">info</span> Need to Know</h2>
+      <div class="ce-info-grid">
+        <div class="ce-info-item">
+          <span class="ce-info-item__label">When</span>
+          <span class="ce-info-item__val">Late January / Early February</span>
+        </div>
+        <div class="ce-info-item">
+          <span class="ce-info-item__label">Start &amp; Finish</span>
+          <span class="ce-info-item__val">Geelong CBD, Moorabool Street</span>
+        </div>
+        <div class="ce-info-item">
+          <span class="ce-info-item__label">Admission</span>
+          <span class="ce-info-item__val">Free (all spectator areas)</span>
+        </div>
+        <div class="ce-info-item">
+          <span class="ce-info-item__label">Getting there</span>
+          <span class="ce-info-item__val">Train to Geelong Station — 10 min walk to finish</span>
+        </div>
+        <div class="ce-info-item">
+          <span class="ce-info-item__label">Race distance</span>
+          <span class="ce-info-item__val">~174 km (varies by year)</span>
+        </div>
+        <div class="ce-info-item">
+          <span class="ce-info-item__label">Instagram</span>
+          <span class="ce-info-item__val">#CadelEvansRace</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAY CTA -->
+  <section class="promo-banner" style="background:var(--cadel-dark)">
+    <div class="container promo-banner__inner">
+      <div>
+        <h2 class="promo-banner__title">Race weekend plans?</h2>
+        <p class="promo-banner__sub">Stay in Geelong and soak up the full race experience.</p>
+      </div>
+      <a href="index.html#stay" class="btn btn--teal btn--lg">Find accommodation →</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__logo">WHAT TO DO GEELONG!</div>
+      <p class="footer__copy">Your local guide to events, experiences & places to stay in Geelong, Victoria.</p>
+      <nav class="footer__nav">
+        <a href="#">About</a>
+        <a href="#">Submit an Event</a>
+        <a href="#">Advertise</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

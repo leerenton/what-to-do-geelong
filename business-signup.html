@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>List Your Business — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="business-signup.css" />
+  <!-- Google AdSense verification -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+</head>
+<body class="bsign-body">
+
+  <div class="bsign-wrap">
+
+    <div class="bsign-topbar">
+      <a href="index.html" class="bsign-logo"><img src="assets/logo.jpg" alt="What To Do Geelong" /></a>
+      <button class="bsign-back" id="js-bsign-back" style="display:none">← Back</button>
+    </div>
+
+    <div class="bsign-progress"><div class="bsign-progress__fill" id="js-bsign-progress" style="width:20%"></div></div>
+
+    <!-- SCREEN 1: Claim or Create -->
+    <div class="bsign-screen active" id="bs-s1">
+      <div class="bsign-step-label">Step 1 of 5</div>
+      <h1 class="bsign-title">Is your business already on WTDG?</h1>
+      <p class="bsign-sub">You can claim an existing listing or create a brand new one.</p>
+      <div class="bsign-choice-grid">
+        <button class="bsign-choice" id="js-choice-claim" data-value="claim">
+          <span class="bsign-choice__icon">🔍</span>
+          <span class="bsign-choice__label">Claim listing</span>
+          <span class="bsign-choice__sub">Already listed on WTDG</span>
+        </button>
+        <button class="bsign-choice" id="js-choice-create" data-value="create">
+          <span class="bsign-choice__icon">✨</span>
+          <span class="bsign-choice__label">Create new</span>
+          <span class="bsign-choice__sub">Not on WTDG yet</span>
+        </button>
+      </div>
+      <button class="bsign-next" id="js-s1-next" disabled>Continue →</button>
+    </div>
+
+    <!-- SCREEN 1b: Claim search -->
+    <div class="bsign-screen" id="bs-s1b">
+      <div class="bsign-step-label">Step 1 of 5</div>
+      <h1 class="bsign-title">Search for your business</h1>
+      <p class="bsign-sub">Find your listing and claim it as the owner.</p>
+      <div class="bsign-search-wrap">
+        <span class="material-symbols-rounded bsign-search-icon">search</span>
+        <input class="bsign-search-input" type="text" id="js-claim-search" placeholder="Type your business name…" />
+      </div>
+      <div class="bsign-results" id="js-claim-results"></div>
+      <button class="bsign-next" id="js-s1b-next" disabled>Claim this listing →</button>
+      <button class="bsign-skip" onclick="bsignGoto('bs-s1')">← Back to options</button>
+    </div>
+
+    <!-- SCREEN 2: Business details -->
+    <div class="bsign-screen" id="bs-s2">
+      <div class="bsign-step-label">Step 2 of 5</div>
+      <h1 class="bsign-title">Tell us about your business</h1>
+      <p class="bsign-sub">This information will appear on your WTDG listing.</p>
+
+      <div class="bsign-step-label" style="margin-bottom:.65rem">Business type</div>
+      <div class="bsign-type-grid" id="js-btype-grid">
+        <button class="bsign-type-chip" data-value="Restaurant / Café">🍽️ Restaurant / Café</button>
+        <button class="bsign-type-chip" data-value="Bar / Venue">🍺 Bar / Venue</button>
+        <button class="bsign-type-chip" data-value="Accommodation">🛏️ Accommodation</button>
+        <button class="bsign-type-chip" data-value="Arts & Culture">🎭 Arts & Culture</button>
+        <button class="bsign-type-chip" data-value="Retail / Shop">🛍️ Retail / Shop</button>
+        <button class="bsign-type-chip" data-value="Event Organiser">🎪 Event Organiser</button>
+        <button class="bsign-type-chip" data-value="Health & Fitness">🏋️ Health & Fitness</button>
+        <button class="bsign-type-chip" data-value="Other">📌 Other</button>
+      </div>
+
+      <div class="bsign-form" id="js-bdetails-form">
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-name">Business name *</label>
+          <input class="bsign-input" type="text" id="bd-name" placeholder="e.g. The Wharf Shed Café" />
+        </div>
+        <div class="bsign-row">
+          <div class="bsign-field">
+            <label class="bsign-label" for="bd-suburb">Suburb *</label>
+            <input class="bsign-input" type="text" id="bd-suburb" placeholder="e.g. Geelong CBD" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="bd-phone">Phone</label>
+            <input class="bsign-input" type="tel" id="bd-phone" placeholder="03 XXXX XXXX" />
+          </div>
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-address">Street address</label>
+          <input class="bsign-input" type="text" id="bd-address" placeholder="123 Main St, Geelong VIC 3220" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-website">Website</label>
+          <input class="bsign-input" type="url" id="bd-website" placeholder="yourbusiness.com.au" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-desc">Short description *</label>
+          <textarea class="bsign-input bsign-textarea" id="bd-desc" placeholder="Tell visitors what makes your place special (2–3 sentences)…"></textarea>
+        </div>
+      </div>
+      <button class="bsign-next" id="js-s2-next">Continue →</button>
+    </div>
+
+    <!-- SCREEN 3: Plan selection -->
+    <div class="bsign-screen" id="bs-s3">
+      <div class="bsign-step-label">Step 3 of 5</div>
+      <h1 class="bsign-title">Choose your plan</h1>
+      <p class="bsign-sub">Start free and upgrade anytime. No lock-in contracts.</p>
+
+      <div class="bsign-plan-grid">
+        <div class="bsign-plan" id="js-plan-free" data-plan="free">
+          <div class="bsign-plan__header">
+            <span class="bsign-plan__name">Free</span>
+            <span class="bsign-plan__price">$0 <span>/ month</span></span>
+            <div class="bsign-plan__radio"></div>
+          </div>
+          <div class="bsign-plan__features">
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Basic listing on WTDG</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> 1 active event at a time</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> 1 active offer at a time</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Inquiry form on listing</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Photo gallery</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Featured placement</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Analytics dashboard</div>
+          </div>
+        </div>
+
+        <div class="bsign-plan bsign-plan--featured selected" id="js-plan-featured" data-plan="featured">
+          <div class="bsign-plan__badge">⭐ Recommended</div>
+          <div class="bsign-plan__header">
+            <span class="bsign-plan__name">Featured</span>
+            <span class="bsign-plan__price">$49 <span>/ month</span></span>
+            <div class="bsign-plan__radio"></div>
+          </div>
+          <div class="bsign-plan__features">
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Priority placement on WTDG</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Unlimited events + offers</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Photo gallery (up to 20 photos)</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Inquiry form with full details</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Analytics dashboard</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Featured badge on listing</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Push to "What's On" highlights</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="bsign-next" id="js-s3-next">Continue →</button>
+    </div>
+
+    <!-- SCREEN 4: Contact person -->
+    <div class="bsign-screen" id="bs-s4">
+      <div class="bsign-step-label">Step 4 of 5</div>
+      <h1 class="bsign-title">Your contact details</h1>
+      <p class="bsign-sub">We'll use these to confirm your listing and send account updates.</p>
+      <div class="bsign-form">
+        <div class="bsign-field">
+          <label class="bsign-label" for="bc-name">Your name *</label>
+          <input class="bsign-input" type="text" id="bc-name" placeholder="First and last name" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bc-email">Email address *</label>
+          <input class="bsign-input" type="email" id="bc-email" placeholder="you@yourbusiness.com.au" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bc-role">Your role</label>
+          <select class="bsign-input" id="bc-role">
+            <option value="">Select your role…</option>
+            <option value="Owner">Owner</option>
+            <option value="Manager">Manager</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <button class="bsign-next" id="js-s4-next">Submit listing →</button>
+    </div>
+
+    <!-- SCREEN 5: Done -->
+    <div class="bsign-screen" id="bs-s5">
+      <div class="bsign-done">
+        <div class="bsign-done__icon">🎉</div>
+        <h1 class="bsign-done__title">You're listed!</h1>
+        <p class="bsign-done__sub" id="js-bsign-done-sub">Your business is now live on What To Do Geelong. Head to your dashboard to add events, offers, and photos.</p>
+        <a href="business-dashboard.html" class="btn btn--teal btn--lg" style="margin-top:.5rem">Go to my dashboard →</a>
+        <a href="index.html" class="btn btn--outline" style="margin-top:.5rem">Back to WTDG</a>
+      </div>
+    </div>
+
+  </div><!-- /bsign-wrap -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+  <script src="business-signup.js"></script>
+</body>
+</html>

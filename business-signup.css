@@ -1,0 +1,221 @@
+/* ── BUSINESS SIGN-UP FLOW ───────────────────────────────── */
+.bsign-body { background: var(--cream); min-height: 100vh; }
+
+.bsign-wrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 var(--gutter) 3rem;
+}
+
+.bsign-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0 1.5rem;
+}
+
+.bsign-logo img { height: 30px; width: auto; }
+
+.bsign-progress {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+.bsign-progress__fill {
+  height: 100%;
+  background: var(--teal);
+  border-radius: 2px;
+  transition: width .3s ease;
+}
+
+.bsign-screen { display: none; }
+.bsign-screen.active { display: block; }
+
+.bsign-step-label {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: .5rem;
+}
+.bsign-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
+  font-weight: 900;
+  color: var(--dark);
+  line-height: 1.2;
+  margin-bottom: .4rem;
+}
+.bsign-sub { font-size: .9rem; color: var(--mid); line-height: 1.6; margin-bottom: 1.5rem; }
+
+/* Claim / create choice cards */
+.bsign-choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.25rem; }
+.bsign-choice {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s, box-shadow .15s;
+  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+}
+.bsign-choice:hover { border-color: var(--teal); }
+.bsign-choice.selected { border-color: var(--teal); background: var(--teal-lt); box-shadow: 0 0 0 3px rgba(74,200,208,.2); }
+.bsign-choice__icon { font-size: 2rem; }
+.bsign-choice__label { font-family: var(--font-head); font-size: .95rem; font-weight: 800; color: var(--dark); }
+.bsign-choice__sub { font-size: .78rem; color: var(--mid); }
+
+/* Search existing listings */
+.bsign-search-wrap { position: relative; margin-bottom: 1rem; }
+.bsign-search-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .75rem 1rem .75rem 2.75rem;
+  font-size: .95rem;
+  font-family: var(--font-body);
+  color: var(--dark);
+  background: var(--white);
+}
+.bsign-search-input:focus { outline: none; border-color: var(--teal); }
+.bsign-search-icon {
+  position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+  color: var(--mid); pointer-events: none;
+}
+.bsign-results { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+.bsign-result-item {
+  display: flex; align-items: center; gap: .75rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .8rem 1rem;
+  cursor: pointer;
+  transition: border-color .15s;
+  text-align: left; width: 100%;
+  font-family: var(--font-body);
+}
+.bsign-result-item:hover { border-color: var(--teal); }
+.bsign-result-item.selected { border-color: var(--teal); background: var(--teal-lt); }
+.bsign-result-item__emoji { font-size: 1.4rem; flex-shrink: 0; }
+.bsign-result-item__name { font-weight: 700; color: var(--dark); font-size: .9rem; }
+.bsign-result-item__type { font-size: .78rem; color: var(--mid); }
+
+/* Form fields */
+.bsign-form { display: flex; flex-direction: column; gap: .85rem; margin-bottom: 1.25rem; }
+.bsign-field { display: flex; flex-direction: column; gap: .3rem; }
+.bsign-label { font-size: .82rem; font-weight: 600; color: var(--dark); }
+.bsign-input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .7rem .9rem;
+  font-size: .95rem;
+  font-family: var(--font-body);
+  color: var(--dark);
+  background: var(--white);
+  width: 100%;
+  transition: border-color .15s;
+}
+.bsign-input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(74,200,208,.15); }
+.bsign-textarea { resize: vertical; min-height: 90px; }
+.bsign-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+/* Type chips */
+.bsign-type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; margin-bottom: 1.25rem; }
+.bsign-type-chip {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .6rem .75rem;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--dark);
+  text-align: center;
+  transition: border-color .15s;
+  font-family: var(--font-body);
+}
+.bsign-type-chip:hover { border-color: var(--teal); }
+.bsign-type-chip.selected { border-color: var(--teal); background: var(--teal-lt); color: var(--teal-d); }
+
+/* Plan cards */
+.bsign-plan-grid { display: flex; flex-direction: column; gap: .85rem; margin-bottom: 1.25rem; }
+.bsign-plan {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: border-color .15s;
+  position: relative;
+}
+.bsign-plan:hover { border-color: var(--teal); }
+.bsign-plan.selected { border-color: var(--teal); }
+.bsign-plan--featured { border-color: var(--teal); }
+.bsign-plan__badge {
+  position: absolute;
+  top: -1px; right: 1rem;
+  background: var(--teal);
+  color: var(--dark);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  padding: .2rem .6rem;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.bsign-plan__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .6rem; }
+.bsign-plan__name { font-family: var(--font-head); font-size: 1.05rem; font-weight: 900; color: var(--dark); }
+.bsign-plan__price { font-family: var(--font-head); font-size: 1.1rem; font-weight: 900; color: var(--dark); }
+.bsign-plan__price span { font-size: .78rem; font-weight: 600; color: var(--mid); }
+.bsign-plan__features { display: flex; flex-direction: column; gap: .3rem; }
+.bsign-plan__feat {
+  display: flex; align-items: flex-start; gap: .4rem;
+  font-size: .83rem; color: var(--mid); line-height: 1.4;
+}
+.bsign-plan__feat .material-symbols-rounded { font-size: .95rem; color: var(--teal); flex-shrink: 0; margin-top: 1px; }
+.bsign-plan__feat--muted .material-symbols-rounded { color: var(--border); }
+.bsign-plan__radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; margin-left: auto; }
+.bsign-plan.selected .bsign-plan__radio { border-color: var(--teal); background: var(--teal); }
+
+/* Buttons */
+.bsign-next {
+  background: var(--teal);
+  color: var(--dark);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: .85rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-head);
+  cursor: pointer;
+  width: 100%;
+  transition: background .15s;
+}
+.bsign-next:hover { background: var(--teal-d); }
+.bsign-next:disabled { opacity: .45; cursor: not-allowed; }
+.bsign-back {
+  background: none; border: none; cursor: pointer;
+  color: var(--mid); font-size: .88rem; font-family: var(--font-body);
+  padding: 0; display: flex; align-items: center; gap: .25rem;
+}
+.bsign-back:hover { color: var(--dark); }
+.bsign-skip {
+  display: block; text-align: center;
+  font-size: .85rem; color: var(--mid);
+  margin-top: .75rem; cursor: pointer;
+  background: none; border: none; font-family: var(--font-body); width: 100%;
+}
+
+/* Done screen */
+.bsign-done {
+  text-align: center;
+  padding: 2rem 0;
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
+}
+.bsign-done__icon { font-size: 4rem; }
+.bsign-done__title { font-family: var(--font-head); font-size: 1.6rem; font-weight: 900; color: var(--dark); }
+.bsign-done__sub { font-size: .9rem; color: var(--mid); line-height: 1.6; max-width: 360px; }

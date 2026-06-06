@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inquiries — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css" />
+  <style>
+    .inq-toolbar {
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .inq-search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+    .inq-search-wrap .material-symbols-rounded {
+      position: absolute; left: .65rem; top: 50%; transform: translateY(-50%);
+      color: #94a3b8; font-size: 1.1rem; pointer-events: none;
+    }
+    .inq-search {
+      width: 100%; border: 1.5px solid #e2e8f0; border-radius: .5rem;
+      padding: .5rem .75rem .5rem 2.25rem; font-size: .85rem; font-family: inherit; outline: none;
+      background: #f8fafc;
+    }
+    .inq-search:focus { border-color: #2ab4a0; background: #fff; }
+    .inq-filter-pills { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .inq-pill {
+      padding: .3rem .8rem; border-radius: 999px; border: 1.5px solid #e2e8f0;
+      font-size: .78rem; font-weight: 600; cursor: pointer; background: #f8fafc;
+      color: #374151; font-family: inherit; transition: all .15s;
+    }
+    .inq-pill:hover { border-color: #2ab4a0; color: #2ab4a0; }
+    .inq-pill.active { background: #2ab4a0; color: #fff; border-color: #2ab4a0; }
+    .inq-count { font-size: .8rem; color: #64748b; margin-left: auto; white-space: nowrap; }
+
+    /* Table */
+    .inq-table-wrap { background: #fff; border: 1.5px solid #e2e8f0; border-radius: .75rem; overflow: hidden; }
+    .inq-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .inq-table th {
+      background: #f8fafc; border-bottom: 1.5px solid #e2e8f0;
+      padding: .65rem 1rem; text-align: left; font-size: .72rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #64748b;
+    }
+    .inq-table td { padding: .75rem 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+    .inq-table tr:last-child td { border-bottom: none; }
+    .inq-table tr.unread td { background: #f0fdf4; }
+    .inq-table tr:hover td { background: #f8fafc; }
+    .inq-table tr.unread:hover td { background: #dcfce7; }
+    .inq-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: #22c55e; margin-right: .4rem; flex-shrink: 0;
+    }
+    .inq-name { font-weight: 600; color: #1a1a2e; }
+    .inq-email { font-size: .78rem; color: #64748b; }
+    .inq-biz { font-size: .78rem; color: #2ab4a0; font-weight: 600; }
+    .inq-msg { color: #374151; line-height: 1.5; max-width: 380px; }
+    .inq-msg-preview { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .inq-date { font-size: .75rem; color: #94a3b8; white-space: nowrap; }
+    .inq-actions { display: flex; gap: .4rem; align-items: center; }
+    .inq-btn {
+      display: inline-flex; align-items: center; gap: .25rem;
+      padding: .3rem .65rem; border-radius: .4rem; font-size: .75rem;
+      font-weight: 600; border: none; cursor: pointer; font-family: inherit;
+      transition: background .15s; text-decoration: none;
+    }
+    .inq-btn--reply { background: #eff6ff; color: #2563eb; }
+    .inq-btn--reply:hover { background: #dbeafe; }
+    .inq-btn--read { background: #f0fdf4; color: #16a34a; }
+    .inq-btn--read:hover { background: #dcfce7; }
+    .inq-btn--delete { background: #fef2f2; color: #dc2626; }
+    .inq-btn--delete:hover { background: #fee2e2; }
+
+    /* Detail slide-out */
+    .inq-detail-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      z-index: 200; display: none; align-items: flex-start; justify-content: flex-end;
+    }
+    .inq-detail-overlay.open { display: flex; }
+    .inq-detail-panel {
+      background: #fff; width: min(480px, 100vw); height: 100vh;
+      overflow-y: auto; padding: 1.75rem; display: flex; flex-direction: column; gap: 1.25rem;
+      box-shadow: -4px 0 32px rgba(0,0,0,.15);
+    }
+    .inq-detail-close {
+      background: none; border: none; cursor: pointer; color: #64748b;
+      display: flex; align-items: center; gap: .3rem; font-size: .85rem; font-family: inherit;
+      align-self: flex-start; padding: 0;
+    }
+    .inq-detail-close:hover { color: #1a1a2e; }
+    .inq-detail-title { font-family: 'Nunito', sans-serif; font-size: 1.3rem; font-weight: 800; }
+    .inq-detail-meta { display: flex; flex-direction: column; gap: .3rem; }
+    .inq-detail-meta-row { display: flex; gap: .5rem; align-items: center; font-size: .85rem; }
+    .inq-detail-meta-label { font-weight: 600; color: #64748b; min-width: 70px; }
+    .inq-detail-msg {
+      background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: .5rem;
+      padding: 1rem; font-size: .88rem; line-height: 1.7; color: #374151;
+      white-space: pre-wrap;
+    }
+    .inq-detail-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .inq-empty { text-align: center; padding: 4rem 2rem; color: #94a3b8; }
+    .inq-empty .material-symbols-rounded { font-size: 2.5rem; display: block; margin-bottom: .75rem; }
+
+    @media (max-width: 768px) {
+      .inq-table thead { display: none; }
+      .inq-table td { display: block; padding: .4rem 1rem; }
+      .inq-table td::before { content: attr(data-label); font-weight: 700; color: #64748b; font-size: .72rem; display: block; margin-bottom: .1rem; }
+      .inq-table tr { display: block; border-bottom: 1.5px solid #e2e8f0; padding: .5rem 0; }
+      .inq-table tr:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body class="adm-body">
+  <div class="adm-layout">
+    <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+    <div class="adm-main">
+      <header class="adm-topbar">
+        <h1 class="adm-topbar__title" id="js-adm-page-title">Inquiries</h1>
+        <div class="adm-topbar__right">
+          <span id="js-unread-badge" class="adm-badge adm-badge--green" style="display:none"></span>
+        </div>
+      </header>
+
+      <div class="adm-content">
+        <div class="inq-toolbar">
+          <div class="inq-search-wrap">
+            <span class="material-symbols-rounded">search</span>
+            <input class="inq-search" id="js-inq-search" type="text" placeholder="Search name, email, message…" />
+          </div>
+          <div class="inq-filter-pills" id="js-inq-filters">
+            <button class="inq-pill active" data-filter="all">All</button>
+            <button class="inq-pill" data-filter="unread">Unread</button>
+            <button class="inq-pill" data-filter="read">Read</button>
+          </div>
+          <span class="inq-count" id="js-inq-count"></span>
+        </div>
+
+        <div class="inq-table-wrap">
+          <table class="inq-table" id="js-inq-table">
+            <thead>
+              <tr>
+                <th>From</th>
+                <th>Business</th>
+                <th>Message</th>
+                <th>Received</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="js-inq-body">
+              <tr><td colspan="5" style="text-align:center;padding:3rem;color:#94a3b8">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail slide-out panel -->
+  <div class="inq-detail-overlay" id="js-inq-overlay">
+    <div class="inq-detail-panel" id="js-inq-panel">
+      <button class="inq-detail-close" id="js-inq-close">
+        <span class="material-symbols-rounded">arrow_back</span> Close
+      </button>
+      <div class="inq-detail-title" id="js-inq-det-title"></div>
+      <div class="inq-detail-meta" id="js-inq-det-meta"></div>
+      <div class="inq-detail-msg" id="js-inq-det-msg"></div>
+      <div class="inq-detail-actions" id="js-inq-det-actions"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="wtdgadmin.js"></script>
+  <script src="wtdgadmin-shell.js"></script>
+  <script>
+  'use strict';
+  requireAdminAuth().then(async () => {
+    initAdminShell('Inquiries');
+
+    let allInquiries = [];
+    let activeFilter = 'all';
+    let searchQ = '';
+    let openId = null;
+
+    // ── LOAD ─────────────────────────────────────────────
+    async function loadInquiries() {
+      const { data, error } = await db.from('inquiries')
+        .select('*, businesses(name)')
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      if (error) {
+        document.getElementById('js-inq-body').innerHTML =
+          `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#ef4444">Error: ${error.message}</td></tr>`;
+        return;
+      }
+      allInquiries = data || [];
+      render();
+    }
+
+    // ── RENDER ────────────────────────────────────────────
+    function filtered() {
+      return allInquiries.filter(inq => {
+        if (activeFilter === 'unread' && !inq.unread) return false;
+        if (activeFilter === 'read'   &&  inq.unread) return false;
+        if (searchQ) {
+          const hay = [inq.name, inq.email, inq.message, inq.businesses?.name].join(' ').toLowerCase();
+          if (!hay.includes(searchQ)) return false;
+        }
+        return true;
+      });
+    }
+
+    function render() {
+      const items = filtered();
+      const unreadCount = allInquiries.filter(i => i.unread).length;
+
+      // Update unread badge in topbar
+      const badge = document.getElementById('js-unread-badge');
+      if (unreadCount > 0) {
+        badge.textContent = `${unreadCount} unread`;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+
+      document.getElementById('js-inq-count').textContent =
+        `${items.length} inquiry${items.length !== 1 ? 'ies' : 'y'}`;
+
+      const tbody = document.getElementById('js-inq-body');
+      if (!items.length) {
+        tbody.innerHTML = `<tr><td colspan="5">
+          <div class="inq-empty">
+            <span class="material-symbols-rounded">inbox</span>
+            No inquiries found.
+          </div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(inq => {
+        const bizName = inq.businesses?.name || inq.business_id || '—';
+        const date = inq.created_at
+          ? new Date(inq.created_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+          : '—';
+        return `
+          <tr class="${inq.unread ? 'unread' : ''}" data-id="${inq.id}" style="cursor:pointer">
+            <td data-label="From">
+              ${inq.unread ? '<span class="inq-dot"></span>' : ''}
+              <div class="inq-name">${esc(inq.name || '—')}</div>
+              <div class="inq-email">${esc(inq.email || '')}</div>
+            </td>
+            <td data-label="Business"><span class="inq-biz">${esc(bizName)}</span></td>
+            <td data-label="Message">
+              <div class="inq-msg inq-msg-preview">${esc(inq.message || '')}</div>
+            </td>
+            <td data-label="Received"><span class="inq-date">${date}</span></td>
+            <td data-label="Actions" onclick="event.stopPropagation()">
+              <div class="inq-actions">
+                <a href="mailto:${esc(inq.email || '')}?subject=Re: Your enquiry to ${esc(bizName)}"
+                   class="inq-btn inq-btn--reply" title="Reply by email">
+                  <span class="material-symbols-rounded" style="font-size:.9rem">reply</span> Reply
+                </a>
+                ${inq.unread
+                  ? `<button class="inq-btn inq-btn--read js-mark-read" data-id="${inq.id}" title="Mark as read">
+                       <span class="material-symbols-rounded" style="font-size:.9rem">mark_email_read</span>
+                     </button>`
+                  : ''}
+                <button class="inq-btn inq-btn--delete js-delete-inq" data-id="${inq.id}" title="Delete">
+                  <span class="material-symbols-rounded" style="font-size:.9rem">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+
+      // Row click → detail panel
+      tbody.querySelectorAll('tr[data-id]').forEach(row => {
+        row.addEventListener('click', () => openDetail(row.dataset.id));
+      });
+
+      // Mark read
+      tbody.querySelectorAll('.js-mark-read').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          e.stopPropagation();
+          await markRead(btn.dataset.id);
+        });
+      });
+
+      // Delete
+      tbody.querySelectorAll('.js-delete-inq').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          e.stopPropagation();
+          if (!confirm('Delete this inquiry?')) return;
+          await db.from('inquiries').delete().eq('id', btn.dataset.id);
+          allInquiries = allInquiries.filter(i => i.id !== btn.dataset.id);
+          render();
+          if (openId === btn.dataset.id) closeDetail();
+        });
+      });
+    }
+
+    // ── MARK READ ─────────────────────────────────────────
+    async function markRead(id) {
+      await db.from('inquiries').update({ unread: false }).eq('id', id);
+      const inq = allInquiries.find(i => i.id === id);
+      if (inq) inq.unread = false;
+      render();
+    }
+
+    // ── DETAIL PANEL ─────────────────────────────────────
+    function openDetail(id) {
+      const inq = allInquiries.find(i => i.id === id);
+      if (!inq) return;
+      openId = id;
+
+      const bizName = inq.businesses?.name || inq.business_id || '—';
+      const date = inq.created_at
+        ? new Date(inq.created_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+        : '—';
+
+      document.getElementById('js-inq-det-title').textContent = `Message from ${inq.name || 'Unknown'}`;
+      document.getElementById('js-inq-det-meta').innerHTML = `
+        <div class="inq-detail-meta-row">
+          <span class="inq-detail-meta-label">From</span>
+          <span>${esc(inq.name || '—')} &lt;<a href="mailto:${esc(inq.email || '')}">${esc(inq.email || '')}</a>&gt;</span>
+        </div>
+        <div class="inq-detail-meta-row">
+          <span class="inq-detail-meta-label">Business</span>
+          <span class="inq-biz">${esc(bizName)}</span>
+        </div>
+        <div class="inq-detail-meta-row">
+          <span class="inq-detail-meta-label">Received</span>
+          <span>${date}</span>
+        </div>
+        <div class="inq-detail-meta-row">
+          <span class="inq-detail-meta-label">Status</span>
+          <span>${inq.unread ? '<span style="color:#22c55e;font-weight:700">● Unread</span>' : '<span style="color:#94a3b8">Read</span>'}</span>
+        </div>`;
+      document.getElementById('js-inq-det-msg').textContent = inq.message || '(no message)';
+      document.getElementById('js-inq-det-actions').innerHTML = `
+        <a href="mailto:${esc(inq.email || '')}?subject=Re: Your enquiry to ${esc(bizName)}"
+           class="adm-btn adm-btn--primary">
+          <span class="material-symbols-rounded">reply</span> Reply by email
+        </a>
+        ${inq.unread ? `<button class="adm-btn adm-btn--outline" id="js-det-markread">Mark as read</button>` : ''}
+        <button class="adm-btn adm-btn--danger" id="js-det-delete">Delete</button>`;
+
+      document.getElementById('js-inq-overlay').classList.add('open');
+
+      document.getElementById('js-det-markread')?.addEventListener('click', async () => {
+        await markRead(id);
+        openDetail(id); // refresh panel
+      });
+      document.getElementById('js-det-delete')?.addEventListener('click', async () => {
+        if (!confirm('Delete this inquiry?')) return;
+        await db.from('inquiries').delete().eq('id', id);
+        allInquiries = allInquiries.filter(i => i.id !== id);
+        render();
+        closeDetail();
+      });
+
+      // Auto mark as read after 2s
+      if (inq.unread) setTimeout(() => markRead(id), 2000);
+    }
+
+    function closeDetail() {
+      openId = null;
+      document.getElementById('js-inq-overlay').classList.remove('open');
+    }
+
+    // ── FILTERS + SEARCH ─────────────────────────────────
+    document.getElementById('js-inq-filters').querySelectorAll('.inq-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.inq-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeFilter = pill.dataset.filter;
+        render();
+      });
+    });
+
+    document.getElementById('js-inq-search').addEventListener('input', e => {
+      searchQ = e.target.value.toLowerCase().trim();
+      render();
+    });
+
+    document.getElementById('js-inq-close').addEventListener('click', closeDetail);
+    document.getElementById('js-inq-overlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeDetail();
+    });
+
+    function esc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    loadInquiries();
+  });
+  </script>
+</body>
+</html>

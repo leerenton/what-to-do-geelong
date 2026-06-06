@@ -8,6 +8,7 @@
     { "source": "/wtdgadmin/offers",       "destination": "/wtdgadmin-offers.html" },
     { "source": "/wtdgadmin/revenue",      "destination": "/wtdgadmin-revenue.html" },
     { "source": "/wtdgadmin/settings",     "destination": "/wtdgadmin-settings.html" },
+    { "source": "/wtdgadmin/inquiries",    "destination": "/wtdgadmin-inquiries.html" },
     { "source": "/wtdgadmin/content",      "destination": "/wtdgadmin-content.html" },
     { "source": "/wtdgadmin/promotions",   "destination": "/wtdgadmin-promotions.html" },
     { "source": "/advertise",              "destination": "/advertise.html" },

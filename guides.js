@@ -16,8 +16,10 @@ function genGuideId() {
 }
 
 async function guideOwnerFilter() {
-  const { data: { session } } = await db.auth.getSession();
-  if (session?.user?.id) return { col: 'user_id', val: session.user.id };
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user?.id) return { col: 'user_id', val: session.user.id };
+  } catch (_) { /* stale token — fall through to session_id */ }
   return { col: 'session_id', val: getSessionId() };
 }
 
@@ -34,11 +36,12 @@ window.loadGuides = loadGuides;
 
 async function createGuide({ name, dateFrom, dateTo } = {}) {
   const id = genGuideId();
-  const { data: { session } } = await db.auth.getSession();
+  let userId = null;
+  try { const { data: { session } } = await db.auth.getSession(); userId = session?.user?.id || null; } catch (_) {}
   const { data, error } = await db.from('guides').insert({
     id,
     name:       name || 'My Geelong Guide',
-    user_id:    session?.user?.id || null,
+    user_id:    userId,
     session_id: getSessionId(),
     date_from:  dateFrom || null,
     date_to:    dateTo   || null,

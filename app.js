@@ -629,19 +629,19 @@ function getArticleBySlug(slug) {
 
 // ── LINK BUILDERS (slug-based URLs) ───────────────────────
 function bizLink(biz) {
-  return `listing.html?s=${biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))}`;
+  return `/${biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))}`;
 }
 function evLink(ev) {
   const eSlug = ev.slug || slugify(ev.title);
   if (ev.businessId) {
     const biz = getBusinessById(ev.businessId);
     const bSlug = biz ? (biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))) : '';
-    if (bSlug) return `event.html?b=${bSlug}&s=${eSlug}`;
+    if (bSlug) return `/${bSlug}/${eSlug}`;
   }
-  return `event.html?s=${eSlug}`;
+  return `/events/${eSlug}`;
 }
 function artLink(art) {
-  return `article.html?s=${art.slug || art.id}`;
+  return `/news/${art.slug || art.id}`;
 }
 
 function getEventsForBusiness(businessId) {

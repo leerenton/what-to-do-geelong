@@ -628,20 +628,24 @@ function getArticleBySlug(slug) {
 }
 
 // ── LINK BUILDERS (slug-based URLs) ───────────────────────
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
 function bizLink(biz) {
-  return `/${biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))}`;
+  const s = biz.slug || slugify(biz.name + '-' + (biz.suburb || ''));
+  return IS_LOCAL ? `listing.html?s=${s}` : `/${s}`;
 }
 function evLink(ev) {
   const eSlug = ev.slug || slugify(ev.title);
   if (ev.businessId) {
     const biz = getBusinessById(ev.businessId);
     const bSlug = biz ? (biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))) : '';
-    if (bSlug) return `/${bSlug}/${eSlug}`;
+    if (bSlug) return IS_LOCAL ? `event.html?b=${bSlug}&s=${eSlug}` : `/${bSlug}/${eSlug}`;
   }
-  return `/events/${eSlug}`;
+  return IS_LOCAL ? `event.html?s=${eSlug}` : `/events/${eSlug}`;
 }
 function artLink(art) {
-  return `/news/${art.slug || art.id}`;
+  const s = art.slug || art.id;
+  return IS_LOCAL ? `article.html?s=${s}` : `/news/${s}`;
 }
 
 function getEventsForBusiness(businessId) {

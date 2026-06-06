@@ -1053,21 +1053,58 @@ async function initListingPage() {
   const events = getEventsForBusiness(biz.id);
   const promos = getPromosForBusiness(biz.id);
 
+  // Build gallery images — use biz.img + biz.gallery if available, else fallback emoji slides
+  const galleryImgs = [
+    biz.img,
+    ...(biz.gallery || []),
+  ].filter(Boolean).slice(0, 5);
+
+  const heroSlides = galleryImgs.length
+    ? galleryImgs.map((src, i) => `<div class="lhero__slide${i === 0 ? ' active' : ''}" style="background-image:url('${src}')"></div>`).join('')
+    : `<div class="lhero__slide active" style="background:${biz.color}22;display:flex;align-items:center;justify-content:center;font-size:6rem">${biz.emoji}</div>`;
+
+  const dotsHtml = galleryImgs.length > 1
+    ? `<div class="lhero__dots">${galleryImgs.map((_,i) => `<button class="lhero__dot${i===0?' active':''}" data-idx="${i}"></button>`).join('')}</div>`
+    : '';
+
+  const prevNextHtml = galleryImgs.length > 1
+    ? `<button class="lhero__arrow lhero__arrow--prev" aria-label="Previous">‹</button>
+       <button class="lhero__arrow lhero__arrow--next" aria-label="Next">›</button>`
+    : '';
+
   document.getElementById('js-listing-root').innerHTML = `
-    <div class="listing-hero">
-      <div class="container listing-hero__inner">
-        <a href="index.html" class="listing-back">← Back to What To Do Geelong</a>
-        <div class="listing-identity">
-          <div class="listing-avatar" style="background:${biz.color}22">${biz.emoji}</div>
-          <div>
-            <p class="listing-type">${biz.type}</p>
-            <h1 class="listing-name">${biz.name}</h1>
-            <p class="listing-location">📍 ${biz.location}</p>
-          </div>
-        </div>
-        <p class="listing-desc">${biz.description}</p>
-        ${biz.website ? `<a href="https://${biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm listing-web">🌐 ${biz.website}</a>` : ''}
+    <!-- HERO CAROUSEL -->
+    <div class="lhero">
+      <div class="lhero__track">${heroSlides}</div>
+      ${prevNextHtml}
+      ${dotsHtml}
+      <div class="lhero__badge-wrap">
+        <span class="lhero__type-badge">${biz.type}</span>
       </div>
+      <div class="lhero__actions">
+        <button class="ev-hero2__action-btn star-btn" id="js-biz-save-btn" aria-label="Save">
+          ${typeof wtdgIcon === 'function' ? wtdgIcon('heart', 20) : '♡'}
+        </button>
+        <button class="ev-hero2__action-btn" id="js-biz-share-btn" aria-label="Share">
+          ${typeof wtdgIcon === 'function' ? wtdgIcon('share', 20) : '↑'}
+        </button>
+      </div>
+    </div>
+
+    <!-- IDENTITY CARD -->
+    <div class="container">
+      <div class="lident">
+        <div class="lident__avatar" style="background:${biz.color}22">${biz.emoji}</div>
+        <div class="lident__info">
+          <h1 class="lident__name">${biz.name}</h1>
+          <p class="lident__loc">📍 ${biz.location}</p>
+        </div>
+        <div class="lident__links">
+          ${biz.website ? `<a href="https://${biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm">🌐 Website</a>` : ''}
+          ${biz.phone   ? `<a href="tel:${biz.phone}" class="btn btn--outline btn--sm">📞 Call</a>` : ''}
+        </div>
+      </div>
+      <p class="lident__desc">${biz.description}</p>
     </div>
 
     <div class="container listing-body">
@@ -1155,27 +1192,79 @@ async function initListingPage() {
     </div>
   `);
 
-  document.getElementById('js-inq-send')?.addEventListener('click', () => {
+  document.getElementById('js-inq-send')?.addEventListener('click', async () => {
     const name  = document.getElementById('inq-name').value.trim();
     const email = document.getElementById('inq-email').value.trim();
     const msg   = document.getElementById('inq-msg').value.trim();
-    if (!email || !msg) return;
+    if (!email || !msg) {
+      alert('Please enter your email and message.');
+      return;
+    }
+    const btn = document.getElementById('js-inq-send');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
 
-    // Save inquiry to the business profile if claimed
-    const { getBusinessProfiles, setBusinessProfiles } = window;
-    const inq = { name, email, message: msg, date: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }), unread: true };
+    // Save to Supabase inquiries table
     try {
-      const profiles = JSON.parse(localStorage.getItem('wtdg_biz_profiles') || '[]');
-      const idx = profiles.findIndex(p => p.id === biz.id);
-      if (idx >= 0) {
-        if (!profiles[idx].inquiries) profiles[idx].inquiries = [];
-        profiles[idx].inquiries.unshift(inq);
-        localStorage.setItem('wtdg_biz_profiles', JSON.stringify(profiles));
-      }
-    } catch(e) {}
+      await db.from('inquiries').insert({
+        business_id:   biz.id,
+        business_name: biz.name,
+        sender_name:   name || null,
+        sender_email:  email,
+        message:       msg,
+        status:        'unread',
+        created_at:    new Date().toISOString(),
+      });
+    } catch (_) {}
 
-    document.getElementById('js-inq-send').hidden = true;
+    // Track
+    if (typeof wtdgTrack === 'function') wtdgTrack('inquiry_sent', { business_name: biz.name });
+
+    btn.hidden = true;
     document.getElementById('js-inq-success').hidden = false;
+  });
+
+  // ── Carousel init ──────────────────────────────────────────
+  const track = document.querySelector('.lhero__track');
+  if (track && track.children.length > 1) {
+    let current = 0;
+    const slides = Array.from(track.children);
+    const dots   = Array.from(document.querySelectorAll('.lhero__dot'));
+
+    function goSlide(n) {
+      slides[current].classList.remove('active');
+      dots[current]?.classList.remove('active');
+      current = (n + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      dots[current]?.classList.add('active');
+    }
+
+    document.querySelector('.lhero__arrow--prev')?.addEventListener('click', () => goSlide(current - 1));
+    document.querySelector('.lhero__arrow--next')?.addEventListener('click', () => goSlide(current + 1));
+    dots.forEach(d => d.addEventListener('click', () => goSlide(+d.dataset.idx)));
+
+    // Auto-advance every 4s
+    setInterval(() => goSlide(current + 1), 4000);
+  }
+
+  // ── Save / share buttons ───────────────────────────────────
+  document.getElementById('js-biz-save-btn')?.addEventListener('click', async e => {
+    e.preventDefault();
+    if (typeof starItemToGuide === 'function') {
+      await starItemToGuide({ id: biz.id, type: 'business', title: biz.name, emoji: biz.emoji, color: biz.color, location: biz.location, slug: bizSlug }, e.currentTarget);
+      if (typeof updateItinBadge === 'function') updateItinBadge();
+      if (typeof trackSaveToGuide === 'function') trackSaveToGuide({ type: 'business', title: biz.name });
+    }
+  });
+  document.getElementById('js-biz-share-btn')?.addEventListener('click', () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: biz.name, url });
+      if (typeof trackShare === 'function') trackShare('native_share', biz.name);
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+      if (typeof trackShare === 'function') trackShare('copy_link', biz.name);
+    }
   });
 
   document.querySelectorAll('.listing-tab').forEach(tab => {
@@ -1450,66 +1539,156 @@ async function initEventPage() {
 }
 
 // ── EVENTS SEE-ALL PAGE ───────────────────────────────────
+// ── COLLECTION CARD BUILDER ───────────────────────────────
+function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, ctaLabel) {
+  const thumb = img
+    ? `<img src="${img}" alt="${name}" class="coll-card__img" loading="lazy" />`
+    : `<div class="coll-card__img-placeholder" style="background:${bg}22">${emoji}</div>`;
+  return `
+    <a href="${href}" class="coll-card">
+      ${thumb}
+      <div class="coll-card__body">
+        <div class="coll-card__type">${type}</div>
+        <div class="coll-card__name">${name}</div>
+        <div class="coll-card__desc">${desc || ''}</div>
+        <div class="coll-card__foot">
+          <span class="coll-card__loc"><span class="material-symbols-rounded" style="font-size:.85rem;vertical-align:-.1em">location_on</span> ${loc || ''}</span>
+          <div class="coll-card__badges">
+            ${badge1 ? `<span class="biz-badge biz-badge--event">${badge1}</span>` : ''}
+            ${badge2 ? `<span class="biz-badge biz-badge--promo">${badge2}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </a>`;
+}
+
+function collFilter(items, filterEl, searchEl, countEl, renderFn) {
+  let activeFilter = 'all';
+  let searchQ = '';
+
+  function render() {
+    const filtered = items.filter(item => {
+      const matchFilter = activeFilter === 'all' ||
+        (item.type || item.category || '').toLowerCase().includes(activeFilter);
+      const matchSearch = !searchQ ||
+        (item.name || item.title || '').toLowerCase().includes(searchQ) ||
+        (item.description || item.subtitle || '').toLowerCase().includes(searchQ) ||
+        (item.suburb || item.location || '').toLowerCase().includes(searchQ);
+      return matchFilter && matchSearch;
+    });
+    if (countEl) countEl.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+    return filtered;
+  }
+
+  if (filterEl) {
+    filterEl.querySelectorAll('.coll-filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeFilter = pill.dataset.filter;
+        renderFn(render());
+      });
+    });
+  }
+  if (searchEl) {
+    searchEl.addEventListener('input', () => {
+      searchQ = searchEl.value.toLowerCase().trim();
+      renderFn(render());
+    });
+  }
+  renderFn(render());
+}
+
 function initEventsPage() {
   const root = document.getElementById('js-events-root');
   if (!root) return;
 
-  root.innerHTML = EVENTS.map(ev => {
-    const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
-    return `
-      <a href="${evLink(ev)}" class="upcoming-item">
-        <div class="upcoming-item__date" style="background:${ev.color}22;color:${ev.color}">
-          <span class="upcoming-item__day">${ev.date.split(' ')[1]}</span>
-          <span class="upcoming-item__mon">${ev.date.split(' ')[0]}</span>
-        </div>
-        <div class="upcoming-item__body">
-          <span class="upcoming-item__cat">${ev.category}</span>
-          <span class="upcoming-item__title">${ev.title}</span>
-          <span class="upcoming-item__sub">📍 ${ev.location} · 🕐 ${ev.time}</span>
-          <span class="upcoming-item__ticket">🎟 ${ev.price}${biz ? ` · ${biz.name}` : ''}</span>
-        </div>
-        <span class="material-symbols-rounded" style="color:var(--teal);flex-shrink:0;align-self:center">chevron_right</span>
-      </a>
-    `;
-  }).join('');
+  function renderEvents(items) {
+    root.innerHTML = items.length ? items.map(ev => {
+      const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
+      return collCard(
+        evLink(ev), ev.color || '#4ac8d0', ev.emoji || '🎟',
+        ev.img || null,
+        ev.category,
+        ev.title,
+        `📍 ${ev.location} · 🕐 ${ev.time}`,
+        ev.location,
+        ev.price !== 'Free' ? ev.price : null,
+        biz ? biz.name : null
+      );
+    }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your search.</p></div>`;
+  }
+
+  collFilter(
+    EVENTS,
+    document.getElementById('js-events-filters'),
+    document.getElementById('js-events-search'),
+    document.getElementById('js-events-count'),
+    renderEvents
+  );
 }
 
-// ── EAT SEE-ALL PAGE ──────────────────────────────────────
+// ── EAT COLLECTION PAGE ───────────────────────────────────
 function initEatPage() {
   const root = document.getElementById('js-eat-root');
   if (!root) return;
 
   const eatBiz = BUSINESSES.filter(b => b.section === 'eat');
-  root.innerHTML = eatBiz.map(biz => {
-    const hasEvent = businessHasUpcoming(biz.id);
-    const hasPromo = businessHasPromo(biz.id);
-    return `
-      <a href="${bizLink(biz)}" class="biz-list-card">
-        ${biz.img ? `<img src="${biz.img}" alt="${biz.name}" class="biz-list-card__img" loading="lazy" />` : `<div class="biz-list-card__img" style="background:${biz.color}22;display:flex;align-items:center;justify-content:center;font-size:2.5rem">${biz.emoji}</div>`}
-        <div class="biz-list-card__body">
-          <div class="biz-list-card__top">
-            <div>
-              <span class="biz-list-card__type">${biz.type} · ${biz.suburb}</span>
-              <h3 class="biz-list-card__name">${biz.name}</h3>
-              <p class="biz-list-card__desc">${biz.description}</p>
-            </div>
-          </div>
-          <div class="biz-list-card__foot">
-            <span class="biz-list-card__loc">📍 ${biz.location}</span>
-            <div class="biz-list-card__badges">
-              ${hasEvent ? '<span class="biz-badge biz-badge--event">Event</span>' : ''}
-              ${hasPromo ? '<span class="biz-badge biz-badge--promo">Offer</span>' : ''}
-            </div>
-          </div>
-        </div>
-        <span class="material-symbols-rounded" style="color:var(--teal);flex-shrink:0;align-self:center;padding:.5rem">chevron_right</span>
-      </a>
-    `;
-  }).join('');
+
+  function renderEat(items) {
+    root.innerHTML = items.length ? items.map(biz => {
+      return collCard(
+        bizLink(biz), biz.color || '#4ac8d0', biz.emoji || '🍽️',
+        biz.img || null,
+        biz.type,
+        biz.name,
+        biz.description,
+        biz.suburb || biz.location,
+        businessHasUpcoming(biz.id) ? 'Event' : null,
+        businessHasPromo(biz.id) ? 'Offer' : null
+      );
+    }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
+  }
+
+  collFilter(
+    eatBiz,
+    document.getElementById('js-eat-filters'),
+    document.getElementById('js-eat-search'),
+    document.getElementById('js-eat-count'),
+    renderEat
+  );
 }
 
-// ── STAY SEE-ALL PAGE ─────────────────────────────────────
+// ── STAY COLLECTION PAGE ──────────────────────────────────
 function initStayPage() {
+  const root = document.getElementById('js-stay-root');
+  if (!root) return;
+
+  function renderStay(items) {
+    root.innerHTML = items.length ? items.map(s => {
+      return collCard(
+        bizLink(s), s.color || '#4ac8d0', s.emoji || '🛏️',
+        s.img || null,
+        s.type,
+        s.name,
+        s.description || `${s.stars || ''} · ${s.price || ''}`.trim().replace(/^· |· $/, ''),
+        s.suburb || s.location,
+        null, null
+      );
+    }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
+  }
+
+  collFilter(
+    STAYS,
+    document.getElementById('js-stay-filters'),
+    document.getElementById('js-stay-search'),
+    document.getElementById('js-stay-count'),
+    renderStay
+  );
+}
+
+// ── STAY SEE-ALL PAGE (legacy stub) ──────────────────────
+function _initStayPage_old() {
   const root = document.getElementById('js-stay-root');
   if (!root) return;
 

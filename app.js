@@ -1007,8 +1007,10 @@ function injectSEOMeta({ title, description, canonical, ogImage, type, extra }) 
 
 // ── LISTING PAGE ──────────────────────────────────────────
 async function initListingPage() {
-  const params = new URLSearchParams(window.location.search);
-  const slugParam = params.get('s');
+  const params    = new URLSearchParams(window.location.search);
+  // On Vercel, URL stays clean (/biz-slug) so read path; locally use ?s= or ?id=
+  const pathSlug  = window.location.pathname.replace(/^\//, '').split('/')[0] || null;
+  const slugParam = params.get('s') || (!params.get('id') && pathSlug && pathSlug !== 'listing.html' ? pathSlug : null);
   const idParam   = params.get('id');
 
   let biz = slugParam ? getBusinessBySlug(slugParam) : idParam ? getBusinessById(idParam) : null;
@@ -1018,7 +1020,6 @@ async function initListingPage() {
     const { data } = await db.from('businesses').select('*').eq('slug', slugParam).single();
     if (data) {
       biz = data;
-      // Normalize snake_case from DB
       if (biz.business_id) biz.businessId = biz.business_id;
     }
   }
@@ -1278,10 +1279,13 @@ async function initEventPage() {
   const root = document.getElementById('js-event-root');
   if (!root) return;
 
-  const params  = new URLSearchParams(window.location.search);
-  const sParam  = params.get('s');  // event slug
-  const bParam  = params.get('b');  // business slug (optional)
-  const idParam = params.get('id'); // legacy numeric id
+  const params    = new URLSearchParams(window.location.search);
+  const pathParts = window.location.pathname.replace(/^\//, '').split('/').filter(Boolean);
+  // /biz-slug/event-slug  OR  /events/event-slug  OR  local ?b=&s=
+  const isEventsPath = pathParts[0] === 'events';
+  const sParam  = params.get('s')  || (pathParts.length >= 2 ? pathParts[pathParts.length - 1] : null);
+  const bParam  = params.get('b')  || (pathParts.length >= 2 && !isEventsPath ? pathParts[0] : null);
+  const idParam = params.get('id');
 
   let ev = sParam ? getEventBySlug(sParam) : idParam ? EVENTS.find(e => e.id === parseInt(idParam, 10)) : null;
 
@@ -1584,8 +1588,10 @@ function initArticlePage() {
   const root = document.getElementById('js-article-root');
   if (!root) return;
 
-  const params  = new URLSearchParams(window.location.search);
-  const sParam  = params.get('s');
+  const params    = new URLSearchParams(window.location.search);
+  const pathParts = window.location.pathname.replace(/^\//, '').split('/').filter(Boolean);
+  // /news/article-slug  OR  local ?s=
+  const sParam  = params.get('s') || (pathParts[0] === 'news' && pathParts[1] ? pathParts[1] : null);
   const idParam = params.get('id');
   const article = sParam ? getArticleBySlug(sParam) : getArticleById(idParam);
 

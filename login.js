@@ -43,6 +43,11 @@ document.getElementById('js-login-form')?.addEventListener('submit', async e => 
   const name = data.user.user_metadata?.name || email.split('@')[0];
   setAccount({ id: data.user.id, name, email });
 
+  // Link any anonymous session guides to this user account
+  if (typeof linkSessionGuidesToUser === 'function') {
+    await linkSessionGuidesToUser(data.user.id);
+  }
+
   const next = new URLSearchParams(window.location.search).get('next') || 'account.html';
   window.location.href = next;
 });

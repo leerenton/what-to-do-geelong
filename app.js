@@ -1191,42 +1191,33 @@ async function initListingPage() {
   });
 }
 
-// ── STARRING / ITINERARY ─────────────────────────────────
-function getSaved() {
-  try { return JSON.parse(localStorage.getItem('wtdg_saved') || '[]'); } catch { return []; }
-}
-
-function toggleSave(item) {
-  const saved = getSaved();
-  const idx = saved.findIndex(s => s.id === item.id);
-  if (idx >= 0) { saved.splice(idx, 1); } else { saved.push(item); }
-  localStorage.setItem('wtdg_saved', JSON.stringify(saved));
-  updateItinBadge();
-  return idx < 0; // true = now saved
-}
-
-function isSaved(id) { return getSaved().some(s => s.id === id); }
-
+// ── STARRING → WTDGUIDES ─────────────────────────────────
 function updateItinBadge() {
-  const count = getSaved().length;
-  const badge = document.getElementById('js-itin-badge');
+  // Badge now links to guides page; count updated async
+  const badge   = document.getElementById('js-itin-badge');
   const countEl = document.getElementById('js-itin-count');
   if (!badge) return;
-  badge.hidden = count === 0;
-  if (countEl) countEl.textContent = count;
+  if (typeof loadGuides === 'function') {
+    loadGuides().then(guides => {
+      const total = guides.reduce((n, g) => n + (g.guide_items?.length || 0), 0);
+      badge.hidden = total === 0;
+      if (countEl) countEl.textContent = total;
+    }).catch(() => {});
+  }
 }
 
 function addStarBtn(el, item) {
   const btn = document.createElement('button');
-  btn.className = 'star-btn' + (isSaved(item.id) ? ' starred' : '');
-  btn.setAttribute('aria-label', 'Save to itinerary');
-  btn.textContent = isSaved(item.id) ? '⭐' : '☆';
-  btn.addEventListener('click', e => {
+  btn.className = 'star-btn';
+  btn.setAttribute('aria-label', 'Save to WTDGuide');
+  btn.textContent = '☆';
+  btn.addEventListener('click', async e => {
     e.preventDefault();
     e.stopPropagation();
-    const nowSaved = toggleSave(item);
-    btn.classList.toggle('starred', nowSaved);
-    btn.textContent = nowSaved ? '⭐' : '☆';
+    if (typeof starItemToGuide === 'function') {
+      await starItemToGuide(item, btn);
+      updateItinBadge();
+    }
   });
   el.style.position = 'relative';
   el.appendChild(btn);

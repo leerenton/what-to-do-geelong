@@ -84,7 +84,7 @@ async function initAccountNav() {
           </div>
           <div class="nav__acct-divider"></div>
           <a href="account.html" class="nav__acct-item"><span class="material-symbols-rounded">person</span> My Account</a>
-          <a href="itinerary.html" class="nav__acct-item"><span class="material-symbols-rounded">star</span> My Itinerary</a>
+          <a href="guides.html" class="nav__acct-item"><span class="material-symbols-rounded">star</span> My WTDGuides</a>
           ${profiles.length ? `
             <div class="nav__acct-divider"></div>
             <div class="nav__acct-section-label">My Businesses</div>

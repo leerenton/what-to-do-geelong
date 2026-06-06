@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div class="acct-section">
         <div class="acct-section-title"><span class="material-symbols-rounded">settings</span> Account</div>
         <div class="acct-menu-list">
-          <a href="itinerary.html" class="acct-menu-item">
+          <a href="guides.html" class="acct-menu-item">
             <span class="material-symbols-rounded">star</span> My itinerary
             <span class="material-symbols-rounded acct-menu-item__arrow">chevron_right</span>
           </a>

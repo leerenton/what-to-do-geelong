@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/" />
+  <title>WTDGuide — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="guides.css" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo-link">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+      </a>
+      <nav class="nav__links">
+        <a href="guides.html">← My WTDGuides</a>
+      </nav>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div id="js-guide-root"></div>
+
+  <footer class="footer" style="margin-top:3rem">
+    <div class="container footer__inner">
+      <span class="footer__logo">WHAT TO DO GEELONG!</span>
+      <p class="footer__copy">Your local guide to events, experiences &amp; places to stay in Geelong, Victoria.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="guides.js"></script>
+  <script src="guide-page.js"></script>
+</body>
+</html>

@@ -7,6 +7,7 @@ let BUSINESSES = [
   // ── CAFES ──────────────────────────────────────────────
   {
     id: 'pistol-pete',
+    slug: 'pistol-petes-coffee-geelong-west',
     name: "Pistol Pete's Coffee",
     type: 'Café',
     section: 'eat',
@@ -20,6 +21,7 @@ let BUSINESSES = [
   },
   {
     id: 'dr-morse',
+    slug: 'dr-morse-geelong',
     name: 'Dr Morse',
     type: 'Café',
     section: 'eat',
@@ -33,6 +35,7 @@ let BUSINESSES = [
   },
   {
     id: 'baba-ganoush',
+    slug: 'baba-ganoush-geelong',
     name: 'Baba Ganoush',
     type: 'Café',
     section: 'eat',
@@ -47,6 +50,7 @@ let BUSINESSES = [
   // ── RESTAURANTS ────────────────────────────────────────
   {
     id: 'igni',
+    slug: 'igni-restaurant-geelong',
     name: 'Igni',
     type: 'Restaurant',
     section: 'eat',
@@ -60,6 +64,7 @@ let BUSINESSES = [
   },
   {
     id: 'the-wharf',
+    slug: 'the-wharf-shed-geelong',
     name: 'The Wharf Shed',
     type: 'Restaurant',
     section: 'eat',
@@ -73,6 +78,7 @@ let BUSINESSES = [
   },
   {
     id: 'humble-rays',
+    slug: 'humble-rays-geelong-west',
     name: 'Humble Rays',
     type: 'Restaurant',
     section: 'eat',
@@ -86,6 +92,7 @@ let BUSINESSES = [
   },
   {
     id: 'eastern-beach',
+    slug: 'eastern-beach-kiosk-geelong',
     name: 'Eastern Beach Kiosk',
     type: 'Café & Kiosk',
     section: 'eat',
@@ -100,6 +107,7 @@ let BUSINESSES = [
   // ── BARS & PUBS ────────────────────────────────────────
   {
     id: 'little-creatures',
+    slug: 'little-creatures-brewing-geelong',
     name: 'Little Creatures Brewing',
     type: 'Bar & Restaurant',
     section: 'eat',
@@ -113,6 +121,7 @@ let BUSINESSES = [
   },
   {
     id: 'barwon-club',
+    slug: 'barwon-club-hotel-newtown',
     name: 'The Barwon Club Hotel',
     type: 'Pub',
     section: 'eat',
@@ -127,6 +136,7 @@ let BUSINESSES = [
   // ── MARKETS ────────────────────────────────────────────
   {
     id: 'farmers-market',
+    slug: 'geelong-farmers-market',
     name: 'Geelong Farmers Market',
     type: 'Market',
     section: 'eat',
@@ -141,6 +151,7 @@ let BUSINESSES = [
   // ── ARTS & CULTURE ─────────────────────────────────────
   {
     id: 'gpac',
+    slug: 'geelong-performing-arts-centre',
     name: 'GPAC',
     type: 'Arts & Culture',
     section: 'do',
@@ -154,6 +165,7 @@ let BUSINESSES = [
   },
   {
     id: 'geelong-art-gallery',
+    slug: 'geelong-art-gallery',
     name: 'Geelong Art Gallery',
     type: 'Gallery',
     section: 'do',
@@ -167,6 +179,7 @@ let BUSINESSES = [
   },
   {
     id: 'boom-gallery',
+    slug: 'boom-gallery-newtown',
     name: 'Boom Gallery',
     type: 'Gallery',
     section: 'do',
@@ -180,6 +193,7 @@ let BUSINESSES = [
   },
   {
     id: 'national-wool-museum',
+    slug: 'national-wool-museum-geelong',
     name: 'National Wool Museum',
     type: 'Museum',
     section: 'do',
@@ -197,6 +211,7 @@ let BUSINESSES = [
 let EVENTS = [
   {
     id: 1,
+    slug: 'geelong-farmers-market',
     businessId: 'farmers-market',
     title: 'Geelong Farmers Market',
     category: 'Markets',
@@ -211,6 +226,7 @@ let EVENTS = [
   },
   {
     id: 2,
+    slug: 'sunday-session-little-creatures-geelong',
     businessId: 'little-creatures',
     title: 'Sunday Session at Little Creatures',
     category: 'Music',
@@ -224,6 +240,7 @@ let EVENTS = [
   },
   {
     id: 3,
+    slug: 'importance-of-being-earnest-gpac-geelong',
     businessId: 'gpac',
     title: 'Opening Night: The Importance of Being Earnest',
     category: 'Theatre',
@@ -237,6 +254,7 @@ let EVENTS = [
   },
   {
     id: 4,
+    slug: 'open-studio-ceramic-art-weekend-boom-gallery',
     businessId: 'boom-gallery',
     title: 'Open Studio — Ceramic Art Weekend',
     category: 'Arts & Culture',
@@ -250,6 +268,7 @@ let EVENTS = [
   },
   {
     id: 5,
+    slug: 'latte-art-masterclass-pistol-petes-geelong',
     businessId: 'pistol-pete',
     title: 'Latte Art Masterclass',
     category: 'Food & Drink',
@@ -263,6 +282,7 @@ let EVENTS = [
   },
   {
     id: 6,
+    slug: 'surf-coast-trail-run-geelong',
     businessId: null,
     title: 'Surf Coast Trail Run',
     category: 'Sport',
@@ -276,6 +296,7 @@ let EVENTS = [
   },
   {
     id: 7,
+    slug: 'free-family-sunday-geelong-art-gallery',
     businessId: 'geelong-art-gallery',
     title: 'Free Family Sunday — Geelong Art Gallery',
     category: 'Arts & Culture',
@@ -289,6 +310,7 @@ let EVENTS = [
   },
   {
     id: 8,
+    slug: 'wool-tales-school-holiday-program-geelong',
     businessId: 'national-wool-museum',
     title: 'Wool Tales: School Holiday Program',
     category: 'Education',
@@ -302,6 +324,7 @@ let EVENTS = [
   },
   {
     id: 9,
+    slug: 'live-music-barwon-ramblers-newtown',
     businessId: 'barwon-club',
     title: 'Live Music: The Barwon Ramblers',
     category: 'Music',
@@ -456,6 +479,7 @@ let PROMOS = [
 let ARTICLES = [
   {
     id: 'top-5-cafes',
+    slug: 'top-5-cafes-geelong',
     type: 'guide',
     title: 'Top 5 Cafes in Geelong You Need to Visit',
     excerpt: 'From specialty single-origin pour-overs to legendary all-day brunch, Geelong\'s cafe scene has levelled up — here are our five favourites.',
@@ -469,6 +493,7 @@ let ARTICLES = [
   },
   {
     id: 'waterfront-guide',
+    slug: 'geelong-waterfront-guide',
     type: 'guide',
     title: 'The Ultimate Geelong Waterfront Guide',
     excerpt: 'Stretching 6km from Rippleside to St Helens, the Geelong waterfront is the city\'s beating heart. Here\'s everything you need to know.',
@@ -482,6 +507,7 @@ let ARTICLES = [
   },
   {
     id: 'weekend-itinerary',
+    slug: 'perfect-48-hours-in-geelong',
     type: 'guide',
     title: 'The Perfect 48 Hours in Geelong',
     excerpt: 'First time visiting? Here\'s our definitive two-day itinerary — markets, brunch, bay views, live music, and a day trip to the Surf Coast.',
@@ -495,6 +521,7 @@ let ARTICLES = [
   },
   {
     id: 'pistol-pete-expansion',
+    slug: 'pistol-petes-coffee-opens-cbd-flagship-geelong',
     type: 'news',
     title: 'Pistol Pete\'s Opens a CBD Flagship on Malop Street',
     excerpt: 'Geelong West\'s beloved specialty coffee institution has expanded to the CBD with a larger all-day venue and a dedicated events room.',
@@ -508,6 +535,7 @@ let ARTICLES = [
   },
   {
     id: 'gpac-2026-season',
+    slug: 'gpac-2026-season-geelong-performing-arts',
     type: 'news',
     title: 'GPAC Announces a Big 2026 Season — Including Two Australian Premieres',
     excerpt: 'The Geelong Performing Arts Centre has unveiled its 2026 program, featuring two Australian premiere productions and a major new commission.',
@@ -521,6 +549,7 @@ let ARTICLES = [
   },
   {
     id: 'foreshore-history',
+    slug: 'geelong-foreshore-history-city-and-bay',
     type: 'history',
     title: 'The Geelong Foreshore: A City\'s Relationship With Its Bay',
     excerpt: 'For most of its European history, Geelong\'s waterfront was industrial — a working port, not a promenade. The transformation took decades.',
@@ -536,6 +565,7 @@ let ARTICLES = [
   },
   {
     id: 'geelong-jail-history',
+    slug: 'old-geelong-jail-bluestone-heritage',
     type: 'history',
     title: 'The Old Geelong Jail: From Bluestone Prison to Heritage Icon',
     excerpt: 'Built in the 1850s from local bluestone, the Old Geelong Jail is one of the finest examples of colonial penal architecture in Australia.',
@@ -551,6 +581,7 @@ let ARTICLES = [
   },
   {
     id: 'paper-mill-history',
+    slug: 'geelong-paper-mill-fyansford-history',
     type: 'history',
     title: 'The Paper Mill: Geelong\'s Industrial Heart',
     excerpt: 'For over a century, the Australian Paper Mills at Fyansford was one of Geelong\'s largest employers. Its transformation tells the story of a city changing its economic identity.',
@@ -566,6 +597,7 @@ let ARTICLES = [
   },
   {
     id: 'the-gretchen',
+    slug: 'the-gretchen-hotel-geelong-history',
     type: 'history',
     title: 'The Gretchen: Geelong\'s Most Storied Corner Hotel',
     excerpt: 'Built in 1854, the Gretchen Hotel is one of the oldest surviving hotel buildings in Geelong — and it has had many lives.',
@@ -584,6 +616,32 @@ let ARTICLES = [
 // ── HELPERS ───────────────────────────────────────────────
 function getBusinessById(id) {
   return BUSINESSES.find(b => b.id === id) || null;
+}
+function getBusinessBySlug(slug) {
+  return BUSINESSES.find(b => b.slug === slug) || null;
+}
+function getEventBySlug(slug) {
+  return EVENTS.find(e => e.slug === slug) || null;
+}
+function getArticleBySlug(slug) {
+  return ARTICLES.find(a => a.slug === slug || a.id === slug) || null;
+}
+
+// ── LINK BUILDERS (slug-based URLs) ───────────────────────
+function bizLink(biz) {
+  return `listing.html?s=${biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))}`;
+}
+function evLink(ev) {
+  const eSlug = ev.slug || slugify(ev.title);
+  if (ev.businessId) {
+    const biz = getBusinessById(ev.businessId);
+    const bSlug = biz ? (biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))) : '';
+    if (bSlug) return `event.html?b=${bSlug}&s=${eSlug}`;
+  }
+  return `event.html?s=${eSlug}`;
+}
+function artLink(art) {
+  return `article.html?s=${art.slug || art.id}`;
 }
 
 function getEventsForBusiness(businessId) {
@@ -637,7 +695,7 @@ function renderFeatured(events) {
   const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
 
   el.innerHTML = `
-    <a href="event.html?id=${ev.id}" class="featured-card">
+    <a href="${evLink(ev)}" class="featured-card">
       <div class="featured-card__img" style="background:${ev.color}22">${ev.emoji}</div>
       <div class="featured-card__body">
         <span class="featured-card__badge">⭐ Featured</span>
@@ -672,7 +730,7 @@ function renderEvents(events) {
       `<span class="ev-tag ${t === 'Free' ? 'ev-tag--free' : ''}">${t}</span>`
     ).join('');
     return `
-      <a href="event.html?id=${ev.id}" class="event-card">
+      <a href="${evLink(ev)}" class="event-card">
         <div class="event-card__thumb" style="background:${ev.color}22">${ev.emoji}</div>
         <div class="event-card__body">
           <span class="event-card__cat">${ev.category}</span>
@@ -729,7 +787,7 @@ function renderEatStrip() {
     if (hasPromo) badges.push('<span class="biz-badge biz-badge--promo">Offer</span>');
 
     return `
-      <a href="listing.html?id=${biz.id}" class="biz-card">
+      <a href="${bizLink(biz)}" class="biz-card">
         ${biz.img
           ? `<img src="${biz.img}" alt="${biz.name}" class="biz-card__img" loading="lazy" />`
           : `<div class="biz-card__img-placeholder" style="background:${biz.color}22">${biz.emoji}</div>`
@@ -781,7 +839,7 @@ function renderOffers() {
         <div class="offer-card__body">
           <span class="offer-card__tag">${pr.tag}</span>
           <span class="offer-card__title">${pr.title}</span>
-          ${biz ? `<a href="listing.html?id=${biz.id}" class="offer-card__biz">${biz.emoji} ${biz.name}</a>` : ''}
+          ${biz ? `<a href="${bizLink(biz)}" class="offer-card__biz">${biz.emoji} ${biz.name}</a>` : ''}
           <span class="offer-card__expires">⏳ ${pr.expires}</span>
         </div>
       </div>
@@ -914,11 +972,52 @@ function initPersonaliseCTAs() {
   });
 }
 
+// ── SEO META INJECTION ────────────────────────────────────
+function injectSEOMeta({ title, description, canonical, ogImage, type, extra }) {
+  const set = (sel, attr, val) => {
+    let el = document.querySelector(sel);
+    if (!el) { el = document.createElement('meta'); document.head.appendChild(el); }
+    el.setAttribute(attr, val);
+  };
+  document.title = title;
+  set('meta[name="description"]',          'content', description);
+  set('meta[property="og:title"]',         'content', title);
+  set('meta[property="og:description"]',   'content', description);
+  set('meta[property="og:type"]',          'content', type === 'article' ? 'article' : 'website');
+  set('meta[property="og:url"]',           'content', canonical);
+  if (ogImage) set('meta[property="og:image"]', 'content', ogImage);
+  set('meta[name="twitter:card"]',         'content', 'summary_large_image');
+  set('meta[name="twitter:title"]',        'content', title);
+  set('meta[name="twitter:description"]',  'content', description);
+  // Canonical link
+  let link = document.querySelector('link[rel="canonical"]');
+  if (!link) { link = document.createElement('link'); link.rel = 'canonical'; document.head.appendChild(link); }
+  link.href = canonical;
+  // JSON-LD or extra tags
+  if (extra) {
+    const div = document.createElement('div');
+    div.innerHTML = extra;
+    [...div.children].forEach(el => document.head.appendChild(el));
+  }
+}
+
 // ── LISTING PAGE ──────────────────────────────────────────
-function initListingPage() {
+async function initListingPage() {
   const params = new URLSearchParams(window.location.search);
-  const id = params.get('id');
-  const biz = id ? getBusinessById(id) : null;
+  const slugParam = params.get('s');
+  const idParam   = params.get('id');
+
+  let biz = slugParam ? getBusinessBySlug(slugParam) : idParam ? getBusinessById(idParam) : null;
+
+  // Fallback: fetch from Supabase by slug if not in local data
+  if (!biz && slugParam && typeof db !== 'undefined') {
+    const { data } = await db.from('businesses').select('*').eq('slug', slugParam).single();
+    if (data) {
+      biz = data;
+      // Normalize snake_case from DB
+      if (biz.business_id) biz.businessId = biz.business_id;
+    }
+  }
 
   if (!biz) {
     document.getElementById('js-listing-root').innerHTML =
@@ -926,7 +1025,27 @@ function initListingPage() {
     return;
   }
 
-  document.title = `${biz.name} — WTDG`;
+  const bizSlug  = biz.slug || slugify(biz.name + '-' + (biz.suburb || ''));
+  const canonUrl = `https://whattodogeelong.com.au/${bizSlug}`;
+  const metaDesc = `${biz.name} in ${biz.suburb || 'Geelong'} — ${biz.description ? biz.description.slice(0, 140) + '…' : 'What To Do Geelong'}`;
+  document.title = `${biz.name} ${biz.suburb ? '· ' + biz.suburb : ''} — What To Do Geelong`;
+  injectSEOMeta({
+    title:       `${biz.name} — ${biz.type} in Geelong`,
+    description: metaDesc,
+    canonical:   canonUrl,
+    ogImage:     biz.img || '',
+    type:        'place',
+    extra: `
+      <script type="application/ld+json">${JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": biz.name,
+        "description": biz.description || '',
+        "address": { "@type": "PostalAddress", "addressLocality": biz.suburb || 'Geelong', "addressRegion": "VIC", "addressCountry": "AU" },
+        "url": biz.website ? 'https://' + biz.website.replace(/^https?:\/\//, '') : canonUrl,
+        "image": biz.img || '',
+      })}<\/script>`,
+  });
 
   const events = getEventsForBusiness(biz.id);
   const promos = getPromosForBusiness(biz.id);
@@ -1006,7 +1125,7 @@ function initListingPage() {
       <div class="container listing-body">
         <h2 class="section-title" style="margin-bottom:1rem"><span class="material-symbols-rounded">auto_stories</span> From the Edit</h2>
         <div class="ed-scroll">
-          ${relatedToListing.map(a => `<a href="article.html?id=${a.id}" class="ed-mini-card"><div class="ed-mini-card__img" style="background-image:url('${a.heroImg}')"></div><div class="ed-mini-card__body">${articleTypeBadge(a.type)}<h4 class="ed-mini-card__title">${a.title}</h4></div></a>`).join('')}
+          ${relatedToListing.map(a => `<a href="${artLink(a)}" class="ed-mini-card"><div class="ed-mini-card__img" style="background-image:url('${a.heroImg}')"></div><div class="ed-mini-card__body">${articleTypeBadge(a.type)}<h4 class="ed-mini-card__title">${a.title}</h4></div></a>`).join('')}
         </div>
       </div>
     `);
@@ -1151,21 +1270,51 @@ function initNav() {
 }
 
 // ── EVENT DETAIL PAGE ─────────────────────────────────────
-function initEventPage() {
+async function initEventPage() {
   const root = document.getElementById('js-event-root');
   if (!root) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const id = parseInt(params.get('id'), 10);
-  const ev = EVENTS.find(e => e.id === id);
+  const params  = new URLSearchParams(window.location.search);
+  const sParam  = params.get('s');  // event slug
+  const bParam  = params.get('b');  // business slug (optional)
+  const idParam = params.get('id'); // legacy numeric id
+
+  let ev = sParam ? getEventBySlug(sParam) : idParam ? EVENTS.find(e => e.id === parseInt(idParam, 10)) : null;
+
+  // Supabase fallback by slug
+  if (!ev && sParam && typeof db !== 'undefined') {
+    const { data } = await db.from('events').select('*').eq('slug', sParam).single();
+    if (data) ev = data;
+  }
 
   if (!ev) {
     root.innerHTML = '<p style="padding:2rem">Event not found. <a href="index.html">Go home</a></p>';
     return;
   }
 
-  const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
-  document.title = `${ev.title} — WTDG`;
+  const biz = ev.businessId ? getBusinessById(ev.businessId) : (ev.business_id ? getBusinessById(ev.business_id) : null);
+  const evSlug  = ev.slug || slugify(ev.title);
+  const bizSlug = biz ? (biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))) : null;
+  const canonUrl = bizSlug ? `https://whattodogeelong.com.au/${bizSlug}/${evSlug}` : `https://whattodogeelong.com.au/events/${evSlug}`;
+
+  document.title = `${ev.title} — What To Do Geelong`;
+  injectSEOMeta({
+    title:       `${ev.title} | ${ev.date} — ${ev.location}`,
+    description: `${ev.title} on ${ev.date} at ${ev.location}. ${ev.price === 'Free' ? 'Free entry.' : ev.price + ' entry.'} Geelong events guide.`,
+    canonical:   canonUrl,
+    ogImage:     biz?.img || '',
+    type:        'event',
+    extra: `
+      <script type="application/ld+json">${JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": ev.title,
+        "startDate": ev.date,
+        "location": { "@type": "Place", "name": ev.location, "address": { "@type": "PostalAddress", "addressLocality": "Geelong", "addressRegion": "VIC", "addressCountry": "AU" } },
+        "offers": { "@type": "Offer", "price": ev.price === 'Free' ? '0' : ev.price?.replace(/[^0-9.]/g, '') || '0', "priceCurrency": "AUD", "availability": "https://schema.org/InStock" },
+        "organizer": biz ? { "@type": "Organization", "name": biz.name, "url": biz.website ? 'https://' + biz.website.replace(/^https?:\/\//, '') : '' } : undefined,
+      })}<\/script>`,
+  });
 
   root.innerHTML = `
     <div class="ev-hero" style="background:${ev.color}18;border-bottom:3px solid ${ev.color}">
@@ -1190,7 +1339,7 @@ function initEventPage() {
       ${biz ? `
         <div class="ev-biz-card">
           <div class="ev-biz-card__label">Presented by</div>
-          <a href="listing.html?id=${biz.id}" class="ev-biz-link">
+          <a href="${bizLink(biz)}" class="ev-biz-link">
             <div class="ev-biz-link__avatar" style="background:${biz.color}22">${biz.emoji}</div>
             <div class="ev-biz-link__info">
               <span class="ev-biz-link__name">${biz.name}</span>
@@ -1211,7 +1360,7 @@ function initEventPage() {
         <div class="ev-also" style="margin-top:2rem">
           <h2 class="ev-also__title">From the Edit</h2>
           <div class="ed-scroll">
-            ${getArticlesForEvent(ev.id).map(a => `<a href="article.html?id=${a.id}" class="ed-mini-card"><div class="ed-mini-card__img" style="background-image:url('${a.heroImg}')"></div><div class="ed-mini-card__body">${articleTypeBadge(a.type)}<h4 class="ed-mini-card__title">${a.title}</h4></div></a>`).join('')}
+            ${getArticlesForEvent(ev.id).map(a => `<a href="${artLink(a)}" class="ed-mini-card"><div class="ed-mini-card__img" style="background-image:url('${a.heroImg}')"></div><div class="ed-mini-card__body">${articleTypeBadge(a.type)}<h4 class="ed-mini-card__title">${a.title}</h4></div></a>`).join('')}
           </div>
         </div>
       ` : ''}
@@ -1223,7 +1372,7 @@ function initEventPage() {
   const strip = document.getElementById('js-ev-also-scroll');
   if (strip) {
     strip.innerHTML = others.map(e => `
-      <a href="event.html?id=${e.id}" class="event-card">
+      <a href="${evLink(e)}" class="event-card">
         <div class="event-card__thumb" style="background:${e.color}22">${e.emoji}</div>
         <div class="event-card__body">
           <span class="event-card__cat">${e.category}</span>
@@ -1245,7 +1394,7 @@ function initEventsPage() {
   root.innerHTML = EVENTS.map(ev => {
     const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
     return `
-      <a href="event.html?id=${ev.id}" class="upcoming-item">
+      <a href="${evLink(ev)}" class="upcoming-item">
         <div class="upcoming-item__date" style="background:${ev.color}22;color:${ev.color}">
           <span class="upcoming-item__day">${ev.date.split(' ')[1]}</span>
           <span class="upcoming-item__mon">${ev.date.split(' ')[0]}</span>
@@ -1272,7 +1421,7 @@ function initEatPage() {
     const hasEvent = businessHasUpcoming(biz.id);
     const hasPromo = businessHasPromo(biz.id);
     return `
-      <a href="listing.html?id=${biz.id}" class="biz-list-card">
+      <a href="${bizLink(biz)}" class="biz-list-card">
         ${biz.img ? `<img src="${biz.img}" alt="${biz.name}" class="biz-list-card__img" loading="lazy" />` : `<div class="biz-list-card__img" style="background:${biz.color}22;display:flex;align-items:center;justify-content:center;font-size:2.5rem">${biz.emoji}</div>`}
         <div class="biz-list-card__body">
           <div class="biz-list-card__top">
@@ -1328,7 +1477,7 @@ function initRotatingBanner() {
 
   function buildItems() {
     ticker.innerHTML = items.map((a, i) => `
-      <a href="article.html?id=${a.id}" class="ticker-item${i === 0 ? ' ticker-item--active' : ''}">
+      <a href="${artLink(a)}" class="ticker-item${i === 0 ? ' ticker-item--active' : ''}">
         <span class="material-symbols-rounded ticker-item__icon">${typeIcon[a.type] || 'article'}</span>
         <span class="ticker-item__text">${a.title}</span>
         <span class="ticker-item__cta">Read →</span>
@@ -1399,7 +1548,7 @@ function initEditorialPage() {
   function render(filter) {
     const filtered = filter === 'all' ? ARTICLES : ARTICLES.filter(a => a.type === filter);
     root.innerHTML = filtered.map(a => `
-      <a href="article.html?id=${a.id}" class="ed-card">
+      <a href="${artLink(a)}" class="ed-card">
         <div class="ed-card__img" style="background-image:url('${a.heroImg}')"></div>
         <div class="ed-card__body">
           ${articleTypeBadge(a.type)}
@@ -1431,15 +1580,26 @@ function initArticlePage() {
   const root = document.getElementById('js-article-root');
   if (!root) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const article = getArticleById(params.get('id'));
+  const params  = new URLSearchParams(window.location.search);
+  const sParam  = params.get('s');
+  const idParam = params.get('id');
+  const article = sParam ? getArticleBySlug(sParam) : getArticleById(idParam);
 
   if (!article) {
     root.innerHTML = '<p style="padding:3rem 1rem">Article not found. <a href="editorial.html">Back to editorial</a></p>';
     return;
   }
 
-  document.title = `${article.title} — WTDG`;
+  const artSlug  = article.slug || article.id;
+  const canonUrl = `https://whattodogeelong.com.au/news/${artSlug}`;
+  document.title = `${article.title} — What To Do Geelong`;
+  injectSEOMeta({
+    title:       article.title,
+    description: article.excerpt || article.title,
+    canonical:   canonUrl,
+    ogImage:     article.heroImg || '',
+    type:        'article',
+  });
 
   const relBiz = (article.businessIds || []).map(getBusinessById).filter(Boolean);
   const relEvents = (article.eventIds || []).map(id => EVENTS.find(e => e.id === id)).filter(Boolean);
@@ -1506,7 +1666,7 @@ function initArticlePage() {
           <h2 class="art-related__title"><span class="material-symbols-rounded">storefront</span> Related Businesses</h2>
           <div class="art-related__grid">
             ${relBiz.map(biz => `
-              <a href="listing.html?id=${biz.id}" class="art-biz-chip">
+              <a href="${bizLink(biz)}" class="art-biz-chip">
                 <div class="art-biz-chip__avatar" style="background:${biz.color}22">${biz.emoji}</div>
                 <div>
                   <span class="art-biz-chip__name">${biz.name}</span>
@@ -1524,7 +1684,7 @@ function initArticlePage() {
           <h2 class="art-related__title"><span class="material-symbols-rounded">event</span> Related Events</h2>
           <div class="art-related__grid">
             ${relEvents.map(ev => `
-              <a href="event.html?id=${ev.id}" class="art-biz-chip">
+              <a href="${evLink(ev)}" class="art-biz-chip">
                 <div class="art-biz-chip__avatar" style="background:${ev.color}22">${ev.emoji}</div>
                 <div>
                   <span class="art-biz-chip__name">${ev.title}</span>
@@ -1550,7 +1710,7 @@ function initArticlePage() {
   if (moreStrip) {
     const others = ARTICLES.filter(a => a.id !== article.id).slice(0, 5);
     moreStrip.innerHTML = others.map(a => `
-      <a href="article.html?id=${a.id}" class="ed-mini-card">
+      <a href="${artLink(a)}" class="ed-mini-card">
         <div class="ed-mini-card__img" style="background-image:url('${a.heroImg}')"></div>
         <div class="ed-mini-card__body">
           ${articleTypeBadge(a.type)}
@@ -1568,7 +1728,7 @@ function initWhatWasGeelongPage() {
 
   const historyArticles = ARTICLES.filter(a => a.type === 'history');
   root.innerHTML = historyArticles.map(a => `
-    <a href="article.html?id=${a.id}" class="wwg-card">
+    <a href="${artLink(a)}" class="wwg-card">
       <div class="wwg-card__imgs">
         <img src="${a.beforeImg || a.heroImg}" alt="Then" class="wwg-card__img" loading="lazy" />
         <div class="wwg-card__divider"><span class="material-symbols-rounded">swap_horiz</span></div>
@@ -1619,7 +1779,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editPreview = document.getElementById('js-editorial-preview');
     if (editPreview) {
       editPreview.innerHTML = ARTICLES.slice(0, 5).map(a => `
-        <a href="article.html?id=${a.id}" class="ed-mini-card">
+        <a href="${artLink(a)}" class="ed-mini-card">
           <div class="ed-mini-card__img" style="background-image:url('${a.heroImg}')"></div>
           <div class="ed-mini-card__body">
             ${articleTypeBadge(a.type)}

@@ -51,6 +51,34 @@ async function loadAllData() {
 }
 window.loadAllData = loadAllData;
 
+// ── SLUG UTILITY ─────────────────────────────────────────
+function slugify(str) {
+  return String(str)
+    .toLowerCase()
+    .replace(/[''`]/g, '')          // strip apostrophes
+    .replace(/[^a-z0-9]+/g, '-')   // non-alphanumeric → hyphen
+    .replace(/^-+|-+$/g, '');       // trim leading/trailing hyphens
+}
+window.slugify = slugify;
+
+// Build the canonical URL path for a business listing
+function bizUrl(biz) {
+  return '/' + (biz.slug || slugify(biz.name + '-' + biz.suburb));
+}
+// Build URL for an event (optionally scoped to a business)
+function eventUrl(ev, biz) {
+  const eSlug = ev.slug || slugify(ev.title);
+  if (biz) return '/' + (biz.slug || slugify(biz.name + '-' + biz.suburb)) + '/' + eSlug;
+  return '/events/' + eSlug;
+}
+// Build URL for an article
+function articleUrl(art) {
+  return '/news/' + (art.slug || slugify(art.title));
+}
+window.bizUrl = bizUrl;
+window.eventUrl = eventUrl;
+window.articleUrl = articleUrl;
+
 // ── AUTH HELPERS ──────────────────────────────────────────
 async function getSupabaseUser() {
   const { data: { user } } = await db.auth.getUser();

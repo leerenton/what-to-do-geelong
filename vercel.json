@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/news/:slug",   "destination": "/article.html?s=:slug" },
+    { "source": "/events/:slug", "destination": "/event.html?s=:slug" },
+    { "source": "/:biz/:item",   "destination": "/event.html?b=:biz&s=:item" },
+    { "source": "/:slug",        "destination": "/listing.html?s=:slug" }
+  ]
+}

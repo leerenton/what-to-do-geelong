@@ -138,131 +138,180 @@ function renderItemsMini(items) {
 // ── EVENTS TAB ────────────────────────────────────────────
 function renderEvents() {
   const canAdd = currentBiz.plan === 'featured' || bizEvents.length < 1;
-  const limitMsg = currentBiz.plan === 'free' && bizEvents.length >= 1
-    ? '<p style="font-size:.82rem;color:var(--mid);margin-bottom:.75rem">Free plan: 1 active event. <button class="gw-link" onclick="switchTab(\'settings\')">Upgrade to Featured</button> for unlimited.</p>'
-    : '';
+  const atLimit = currentBiz.plan === 'free' && bizEvents.length >= 1;
 
   return `
-    <div class="dash-panel" id="panel-events">
-      ${limitMsg}
+    <div class="dash-panel active" id="panel-events">
       <div class="dash-section-header">
-        <div class="dash-section-title"><span class="material-symbols-rounded">event</span> Your Events</div>
+        <div class="dash-section-title"><span class="material-symbols-rounded">event</span> Your Events <span class="dash-count">${bizEvents.length}</span></div>
+        ${canAdd ? `<button class="btn btn--teal btn--sm" id="js-ev-open-form">+ Add event</button>` : ''}
       </div>
-      <div class="dash-item-list" id="js-events-list">${renderEventItems()}</div>
+
+      ${atLimit ? `<div class="dash-limit-bar">Free plan: 1 active event. <button class="gw-link" onclick="switchTab('settings')">Upgrade to Featured</button> for unlimited.</div>` : ''}
+
+      <!-- ADD FORM (hidden by default) -->
       ${canAdd ? `
-        <div class="dash-add-card">
-          <div class="dash-add-card__title">+ Add an event</div>
+        <div class="dash-add-card" id="js-ev-form" style="display:none">
+          <div class="dash-add-card__title">New Event</div>
           <div class="dash-form">
+            <div class="dash-field"><label class="dash-label">Event name *</label>
+              <input class="dash-input" id="ev-title" placeholder="e.g. Jazz Night at the Bar" /></div>
             <div class="dash-row">
-              <div class="dash-field"><label class="dash-label">Event name *</label>
-                <input class="dash-input" id="ev-title" placeholder="e.g. Jazz Night" /></div>
               <div class="dash-field"><label class="dash-label">Category</label>
                 <select class="dash-input" id="ev-cat">
                   <option>Music</option><option>Food & Drink</option><option>Arts & Culture</option>
-                  <option>Family</option><option>Markets</option><option>Theatre</option><option>Sport</option><option>Education</option><option>Other</option>
+                  <option>Theatre</option><option>Markets</option><option>Sport</option>
+                  <option>Education</option><option>Festivals</option><option>Nightlife</option><option>Other</option>
                 </select></div>
+              <div class="dash-field"><label class="dash-label">Emoji</label>
+                <input class="dash-input" id="ev-emoji" placeholder="🎵" maxlength="2" /></div>
             </div>
             <div class="dash-row">
               <div class="dash-field"><label class="dash-label">Date *</label>
                 <input class="dash-input" type="date" id="ev-date" /></div>
               <div class="dash-field"><label class="dash-label">Time</label>
-                <input class="dash-input" type="text" id="ev-time" placeholder="e.g. 6pm – 9pm" /></div>
+                <input class="dash-input" type="text" id="ev-time" placeholder="e.g. 7pm – 10pm" /></div>
             </div>
             <div class="dash-row">
               <div class="dash-field"><label class="dash-label">Price</label>
                 <input class="dash-input" id="ev-price" placeholder="e.g. $25 or Free" /></div>
-              <div class="dash-field"><label class="dash-label">Emoji</label>
-                <input class="dash-input" id="ev-emoji" placeholder="🎵" maxlength="2" /></div>
+              <div class="dash-field"><label class="dash-label">Location</label>
+                <input class="dash-input" id="ev-location" placeholder="Leave blank to use business address" /></div>
+            </div>
+            <div class="dash-field"><label class="dash-label">Tags</label>
+              <div class="dash-tag-row">
+                ${['Free','Family Friendly','Outdoors','All Ages','Accessible','Bookings Required','Under $20','Under $50'].map(t =>
+                  `<button type="button" class="dash-tag-chip" data-tag="${t}">${t}</button>`
+                ).join('')}
+              </div>
             </div>
             <div class="dash-form-btns">
-              <button class="btn btn--teal btn--sm" id="js-ev-add">Add event</button>
+              <button class="btn btn--teal btn--sm" id="js-ev-add">Save event</button>
+              <button class="btn btn--outline btn--sm" id="js-ev-cancel">Cancel</button>
             </div>
           </div>
         </div>
       ` : ''}
+
+      <!-- EVENT LIST -->
+      <div id="js-events-list">${renderEventItems()}</div>
     </div>
   `;
 }
 
 function renderEventItems() {
-  if (!bizEvents.length) return '<p style="color:var(--mid);font-size:.85rem;margin-bottom:.75rem">No events added yet.</p>';
-  return bizEvents.map(ev => `
-    <div class="dash-item" data-evid="${ev.id}">
-      <span class="dash-item__emoji">${ev.emoji || '📅'}</span>
-      <div class="dash-item__body">
-        <div class="dash-item__title">${ev.title}</div>
-        <div class="dash-item__meta">${ev.date || ''} · ${ev.time || ''} · ${ev.price || ''}</div>
+  if (!bizEvents.length) return `
+    <div class="dash-empty">
+      <span class="material-symbols-rounded">event_available</span>
+      <p>No events yet. Add your first event to get it listed on the homepage.</p>
+    </div>`;
+
+  return `<div class="dash-event-cards">${bizEvents.map(ev => `
+    <div class="dash-event-card" data-evid="${ev.id}">
+      <div class="dash-event-card__left">
+        <span class="dash-event-card__emoji">${ev.emoji || '📅'}</span>
+        <div>
+          <div class="dash-event-card__title">${ev.title}</div>
+          <div class="dash-event-card__meta">
+            ${ev.date ? `<span><span class="material-symbols-rounded">calendar_today</span>${ev.date}</span>` : ''}
+            ${ev.time ? `<span><span class="material-symbols-rounded">schedule</span>${ev.time}</span>` : ''}
+            ${ev.price ? `<span><span class="material-symbols-rounded">confirmation_number</span>${ev.price}</span>` : ''}
+          </div>
+          ${ev.category ? `<span class="dash-event-card__cat">${ev.category}</span>` : ''}
+          ${(() => { const tags = Array.isArray(ev.tags) ? ev.tags : (typeof ev.tags === 'string' ? ev.tags.replace(/[{}]/g,'').split(',').filter(Boolean) : []); return tags.length ? `<div class="dash-event-card__tags">${tags.map(t=>`<span class="dash-tag-pill">${t.trim()}</span>`).join('')}</div>` : ''; })()}
+        </div>
       </div>
-      <div class="dash-item__actions">
-        <button class="dash-item__btn dash-item__btn--danger js-ev-del" data-evid="${ev.id}">
+      <div class="dash-event-card__actions">
+        <button class="dash-item__btn js-ev-del" data-evid="${ev.id}" title="Delete">
           <span class="material-symbols-rounded">delete</span>
         </button>
       </div>
     </div>
-  `).join('');
+  `).join('')}</div>`;
 }
 
 // ── OFFERS TAB ────────────────────────────────────────────
 function renderOffers() {
   const canAdd = currentBiz.plan === 'featured' || bizOffers.length < 1;
-  const limitMsg = currentBiz.plan === 'free' && bizOffers.length >= 1
-    ? '<p style="font-size:.82rem;color:var(--mid);margin-bottom:.75rem">Free plan: 1 active offer. <button class="gw-link" onclick="switchTab(\'settings\')">Upgrade to Featured</button> for unlimited.</p>'
-    : '';
+  const atLimit = currentBiz.plan === 'free' && bizOffers.length >= 1;
 
   return `
-    <div class="dash-panel" id="panel-offers">
-      ${limitMsg}
+    <div class="dash-panel active" id="panel-offers">
       <div class="dash-section-header">
-        <div class="dash-section-title"><span class="material-symbols-rounded">local_offer</span> Your Offers</div>
+        <div class="dash-section-title"><span class="material-symbols-rounded">local_offer</span> Your Offers <span class="dash-count">${bizOffers.length}</span></div>
+        ${canAdd ? `<button class="btn btn--teal btn--sm" id="js-of-open-form">+ Add offer</button>` : ''}
       </div>
-      <div class="dash-item-list" id="js-offers-list">${renderOfferItems()}</div>
+
+      ${atLimit ? `<div class="dash-limit-bar">Free plan: 1 active offer. <button class="gw-link" onclick="switchTab('settings')">Upgrade to Featured</button> for unlimited.</div>` : ''}
+
+      <!-- ADD FORM (hidden by default) -->
       ${canAdd ? `
-        <div class="dash-add-card">
-          <div class="dash-add-card__title">+ Add an offer</div>
+        <div class="dash-add-card" id="js-of-form" style="display:none">
+          <div class="dash-add-card__title">New Offer</div>
           <div class="dash-form">
             <div class="dash-field"><label class="dash-label">Offer title *</label>
               <input class="dash-input" id="of-title" placeholder="e.g. 20% off Tuesday lunch" /></div>
             <div class="dash-field"><label class="dash-label">Description</label>
-              <input class="dash-input" id="of-desc" placeholder="Details of the deal…" /></div>
+              <textarea class="dash-input" id="of-desc" rows="2" placeholder="Terms, details, or how to redeem…"></textarea></div>
             <div class="dash-row">
-              <div class="dash-field"><label class="dash-label">Expires</label>
-                <input class="dash-input" id="of-expires" placeholder="e.g. Ends 30 Jun" /></div>
+              <div class="dash-field"><label class="dash-label">Offer type</label>
+                <select class="dash-input" id="of-tag">
+                  <option>Discount</option><option>Happy Hour</option><option>Weekly Special</option>
+                  <option>Loyalty Deal</option><option>Gift with Purchase</option><option>Special Menu</option><option>Other</option>
+                </select></div>
               <div class="dash-field"><label class="dash-label">Emoji</label>
                 <input class="dash-input" id="of-emoji" placeholder="🎉" maxlength="2" /></div>
             </div>
+            <div class="dash-field"><label class="dash-label">Expires / When valid</label>
+              <input class="dash-input" id="of-expires" placeholder="e.g. Every Friday · Ends 30 Jun · Ongoing" /></div>
             <div class="dash-form-btns">
-              <button class="btn btn--teal btn--sm" id="js-of-add">Add offer</button>
+              <button class="btn btn--teal btn--sm" id="js-of-add">Save offer</button>
+              <button class="btn btn--outline btn--sm" id="js-of-cancel">Cancel</button>
             </div>
           </div>
         </div>
       ` : ''}
+
+      <!-- OFFER LIST -->
+      <div id="js-offers-list">${renderOfferItems()}</div>
     </div>
   `;
 }
 
 function renderOfferItems() {
-  if (!bizOffers.length) return '<p style="color:var(--mid);font-size:.85rem;margin-bottom:.75rem">No offers added yet.</p>';
-  return bizOffers.map(of => `
-    <div class="dash-item" data-ofid="${of.id}">
-      <span class="dash-item__emoji">${of.emoji || '🎉'}</span>
-      <div class="dash-item__body">
-        <div class="dash-item__title">${of.title}</div>
-        <div class="dash-item__meta">${of.description || ''} · ${of.expires || ''}</div>
+  if (!bizOffers.length) return `
+    <div class="dash-empty">
+      <span class="material-symbols-rounded">redeem</span>
+      <p>No offers yet. Add a deal or special to attract customers.</p>
+    </div>`;
+
+  return `<div class="dash-event-cards">${bizOffers.map(of => `
+    <div class="dash-event-card" data-ofid="${of.id}">
+      <div class="dash-event-card__left">
+        <span class="dash-event-card__emoji">${of.emoji || '🎉'}</span>
+        <div>
+          <div class="dash-event-card__title">${of.title}</div>
+          <div class="dash-event-card__meta">
+            ${of.expires ? `<span><span class="material-symbols-rounded">schedule</span>${of.expires}</span>` : ''}
+          </div>
+          ${of.tag ? `<span class="dash-event-card__cat">${of.tag}</span>` : ''}
+          ${of.description ? `<p class="dash-event-card__desc">${of.description}</p>` : ''}
+        </div>
       </div>
-      <div class="dash-item__actions">
-        <button class="dash-item__btn dash-item__btn--danger js-of-del" data-ofid="${of.id}">
+      <div class="dash-event-card__actions">
+        <button class="dash-item__btn js-of-del" data-ofid="${of.id}" title="Delete">
           <span class="material-symbols-rounded">delete</span>
         </button>
       </div>
     </div>
-  `).join('');
+  `).join('')}</div>`;
 }
 
 // ── GALLERY TAB ───────────────────────────────────────────
 function renderGallery() {
   const isFeatured = currentBiz.plan === 'featured';
   return `
-    <div class="dash-panel" id="panel-gallery">
+    <div class="dash-panel active" id="panel-gallery">
       ${!isFeatured ? `
         <div class="dash-upgrade-banner">
           <div class="dash-upgrade-banner__text">
@@ -281,7 +330,7 @@ function renderGallery() {
 // ── INQUIRIES TAB ─────────────────────────────────────────
 function renderInquiries() {
   return `
-    <div class="dash-panel" id="panel-inquiries">
+    <div class="dash-panel active" id="panel-inquiries">
       <div class="dash-section-title" style="margin-bottom:.85rem"><span class="material-symbols-rounded">mail</span> Inquiries</div>
       <p style="color:var(--mid);font-size:.85rem">Inquiries submitted via your listing will appear here.</p>
     </div>
@@ -291,7 +340,7 @@ function renderInquiries() {
 // ── SETTINGS TAB ─────────────────────────────────────────
 function renderSettings() {
   return `
-    <div class="dash-panel" id="panel-settings">
+    <div class="dash-panel active" id="panel-settings">
       <div class="dash-section-title" style="margin-bottom:1rem"><span class="material-symbols-rounded">store</span> Business Details</div>
       <div class="dash-settings-form">
         <div class="dash-field"><label class="dash-label">Business name</label>
@@ -343,17 +392,51 @@ function switchTab(id) {
   document.getElementById('js-dash-root').innerHTML = tabPanels[id]();
   bindPanelEvents(id);
 }
+window.switchTab = switchTab;
 
 function bindPanelEvents(tab) {
   if (tab === 'events') {
+    // Toggle form — reset fields on open
+    const selectedTags = new Set();
+    document.getElementById('js-ev-open-form')?.addEventListener('click', () => {
+      const form = document.getElementById('js-ev-form');
+      const opening = form.style.display === 'none';
+      form.style.display = opening ? 'block' : 'none';
+      if (opening) {
+        ['ev-title','ev-time','ev-price','ev-emoji','ev-location'].forEach(id => {
+          const el = document.getElementById(id); if (el) el.value = '';
+        });
+        document.getElementById('ev-date').value = '';
+        document.getElementById('ev-cat').selectedIndex = 0;
+        selectedTags.clear();
+        document.querySelectorAll('.dash-tag-chip').forEach(c => c.classList.remove('active'));
+      }
+    });
+    document.getElementById('js-ev-cancel')?.addEventListener('click', () => {
+      document.getElementById('js-ev-form').style.display = 'none';
+    });
+
+    // Tag chips
+    document.querySelectorAll('.dash-tag-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const tag = chip.dataset.tag;
+        if (selectedTags.has(tag)) { selectedTags.delete(tag); chip.classList.remove('active'); }
+        else { selectedTags.add(tag); chip.classList.add('active'); }
+      });
+    });
+
     document.getElementById('js-ev-add')?.addEventListener('click', async () => {
       const title = document.getElementById('ev-title').value.trim();
-      if (!title) return;
-
       const rawDate = document.getElementById('ev-date').value;
-      const formattedDate = rawDate
-        ? new Date(rawDate).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })
-        : 'TBC';
+      if (!title || !rawDate) {
+        alert('Please enter an event name and date.');
+        return;
+      }
+      const btn = document.getElementById('js-ev-add');
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      const formattedDate = new Date(rawDate + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+      const locationVal = document.getElementById('ev-location').value.trim() || currentBiz.location || currentBiz.suburb || '';
 
       const { data, error } = await db.from('events').insert({
         business_id: currentBiz.id,
@@ -361,28 +444,41 @@ function bindPanelEvents(tab) {
         category:   document.getElementById('ev-cat').value,
         date:       formattedDate,
         time:       document.getElementById('ev-time').value || '',
-        price:      document.getElementById('ev-price').value || 'TBC',
+        price:      document.getElementById('ev-price').value || 'Free',
         emoji:      document.getElementById('ev-emoji').value || '📅',
         color:      currentBiz.color || '#4ac8d0',
-        tags:       [],
-        location:   currentBiz.location || currentBiz.suburb || '',
+        tags:       [...selectedTags],
+        location:   locationVal,
       }).select().single();
 
-      if (!error && data) {
-        bizEvents.push(data);
-        document.getElementById('js-events-list').innerHTML = renderEventItems();
-        ['ev-title','ev-time','ev-price','ev-emoji'].forEach(id => { document.getElementById(id).value = ''; });
-        document.getElementById('ev-date').value = '';
-        bindEventDeleteHandlers();
-      }
+      btn.disabled = false; btn.textContent = 'Save event';
+
+      if (error) { alert('Could not save event: ' + error.message); return; }
+      bizEvents.push(data);
+      document.getElementById('js-events-list').innerHTML = renderEventItems();
+      document.getElementById('js-ev-form').style.display = 'none';
+      bindEventDeleteHandlers();
     });
+
     bindEventDeleteHandlers();
   }
 
   if (tab === 'offers') {
+    // Toggle form
+    document.getElementById('js-of-open-form')?.addEventListener('click', () => {
+      const form = document.getElementById('js-of-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+    document.getElementById('js-of-cancel')?.addEventListener('click', () => {
+      document.getElementById('js-of-form').style.display = 'none';
+    });
+
     document.getElementById('js-of-add')?.addEventListener('click', async () => {
       const title = document.getElementById('of-title').value.trim();
-      if (!title) return;
+      if (!title) { alert('Please enter an offer title.'); return; }
+
+      const btn = document.getElementById('js-of-add');
+      btn.disabled = true; btn.textContent = 'Saving…';
 
       const { data, error } = await db.from('promos').insert({
         id:          'p-' + Date.now().toString(36),
@@ -391,16 +487,18 @@ function bindPanelEvents(tab) {
         description: document.getElementById('of-desc').value || '',
         expires:     document.getElementById('of-expires').value || 'Ongoing',
         emoji:       document.getElementById('of-emoji').value || '🎉',
-        tag:         'Offer',
+        tag:         document.getElementById('of-tag').value || 'Offer',
       }).select().single();
 
-      if (!error && data) {
-        bizOffers.push(data);
-        document.getElementById('js-offers-list').innerHTML = renderOfferItems();
-        ['of-title','of-desc','of-expires','of-emoji'].forEach(id => { document.getElementById(id).value = ''; });
-        bindOfferDeleteHandlers();
-      }
+      btn.disabled = false; btn.textContent = 'Save offer';
+
+      if (error) { alert('Could not save offer: ' + error.message); return; }
+      bizOffers.push(data);
+      document.getElementById('js-offers-list').innerHTML = renderOfferItems();
+      document.getElementById('js-of-form').style.display = 'none';
+      bindOfferDeleteHandlers();
     });
+
     bindOfferDeleteHandlers();
   }
 

@@ -1,0 +1,18 @@
+# What To Do Geelong — Netlify URL rewrites
+# Order matters: more specific routes first
+
+# News / editorial
+/news/:slug             /article.html?s=:slug               200
+
+# Standalone events (no business)
+/events/:slug           /event.html?s=:slug                 200
+
+# Business event pages: /business-slug/event-slug
+/:biz/:item             /event.html?b=:biz&s=:item          200
+
+# Business listing pages
+/:slug                  /listing.html?s=:slug               200
+
+# Static file passthrough (handled automatically, but explicit for clarity)
+/*.html                 /:splat                             200
+/assets/*               /assets/:splat                      200

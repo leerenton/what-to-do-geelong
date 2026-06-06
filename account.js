@@ -1,10 +1,15 @@
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await db.auth.getSession();
   const acct = getAccount();
-  if (!acct) { window.location.href = 'login.html?next=account.html'; return; }
+  if (!session && !acct) { window.location.href = 'login.html?next=account.html'; return; }
 
-  const profiles  = getBusinessProfiles();
+  let profiles = [];
+  if (session) {
+    const { data } = await db.from('businesses').select('*').eq('owner_id', session.user.id);
+    profiles = data || [];
+  }
   const saved     = JSON.parse(localStorage.getItem('wtdg_saved') || '[]');
   const prefs     = JSON.parse(localStorage.getItem('wtdg_prefs') || '{}');
   const entered   = JSON.parse(localStorage.getItem('wtdg_entered') || '[]');

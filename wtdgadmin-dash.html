@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+
+  <!-- Sidebar -->
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <!-- Main -->
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Dashboard</span>
+      <div class="adm-topbar__right">
+        <!-- Date filter -->
+        <div class="adm-date-filter" id="js-date-filter">
+          <button class="adm-date-btn active" data-period="30d">30 Days</button>
+          <button class="adm-date-btn" data-period="90d">90 Days</button>
+          <button class="adm-date-btn" data-period="ytd">YTD</button>
+          <button class="adm-date-btn" data-period="custom">Custom</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom date row (hidden by default) -->
+    <div id="js-custom-date-row" style="display:none;padding:.75rem 2rem;border-bottom:1px solid var(--adm-border);display:none;align-items:center;gap:.75rem;flex-wrap:wrap">
+      <label style="font-size:.82rem;color:var(--adm-mid)">From</label>
+      <input type="date" class="adm-input" id="js-date-from" style="width:auto;margin:0;padding:.35rem .6rem" />
+      <label style="font-size:.82rem;color:var(--adm-mid)">To</label>
+      <input type="date" class="adm-input" id="js-date-to" style="width:auto;margin:0;padding:.35rem .6rem" />
+      <button class="adm-btn adm-btn--sm" id="js-custom-apply">Apply</button>
+    </div>
+
+    <div class="adm-content" id="js-adm-content">
+      <div style="color:var(--adm-mid);padding:2rem 0">Loading dashboard…</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script src="wtdgadmin-shell.js?v=1"></script>
+<script src="wtdgadmin-dash.js?v=1"></script>
+</body>
+</html>

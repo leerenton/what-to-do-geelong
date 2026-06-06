@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Businesses — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Businesses</span>
+      <div class="adm-topbar__right">
+        <span id="js-biz-count" style="font-size:.82rem;color:var(--adm-mid)"></span>
+      </div>
+    </div>
+
+    <div class="adm-content">
+      <!-- Quick stats -->
+      <div class="adm-stats" style="margin-bottom:1.5rem" id="js-biz-stats"></div>
+
+      <div class="adm-toolbar">
+        <div class="adm-search">
+          <span class="adm-search__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input type="search" id="js-biz-search" placeholder="Search businesses…" />
+        </div>
+        <select class="adm-select" id="js-biz-tier">
+          <option value="">All tiers</option>
+          <option value="free">Free</option>
+          <option value="starter">Starter</option>
+          <option value="growth">Growth</option>
+          <option value="premium">Premium</option>
+        </select>
+        <select class="adm-select" id="js-biz-claimed">
+          <option value="">All</option>
+          <option value="claimed">Claimed only</option>
+          <option value="unclaimed">Unclaimed only</option>
+        </select>
+        <select class="adm-select" id="js-biz-sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Name A–Z</option>
+        </select>
+      </div>
+
+      <div class="adm-table-wrap" id="js-biz-table">
+        <div class="adm-table-empty">Loading businesses…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script src="wtdgadmin-shell.js?v=1"></script>
+<script>
+let allBiz = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
+  initAdminShell('Businesses');
+  await loadBiz();
+
+  ['js-biz-search','js-biz-tier','js-biz-claimed','js-biz-sort'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderBiz);
+    document.getElementById(id)?.addEventListener('change', renderBiz);
+  });
+});
+
+async function loadBiz() {
+  const { data, error } = await db.from('businesses').select('*').order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('js-biz-table').innerHTML = '<div class="adm-table-empty">Could not load businesses.</div>';
+    return;
+  }
+  allBiz = data || [];
+
+  const { PRICING } = window.wtdgAdminAuth;
+  const paid = allBiz.filter(b => b.subscription_tier && b.subscription_tier !== 'free' && b.subscription_tier !== '');
+  const mrr  = allBiz.reduce((s, b) => s + (PRICING[b.subscription_tier] || 0), 0);
+  const claimed = allBiz.filter(b => b.is_claimed);
+
+  document.getElementById('js-biz-count').textContent = `${allBiz.length} total`;
+  document.getElementById('js-biz-stats').innerHTML = `
+    ${sc('Total Listings', allBiz.length)}
+    ${sc('Claimed', claimed.length)}
+    ${sc('Paid Plans', paid.length, 'green')}
+    ${sc('Free Plans', allBiz.length - paid.length)}
+    ${sc('MRR', '$'+mrr.toLocaleString(), 'teal')}`;
+
+  renderBiz();
+}
+
+function sc(label, value, variant='') {
+  return `<div class="adm-stat${variant?' adm-stat--'+variant:''}"><div class="adm-stat__label">${label}</div><div class="adm-stat__value">${value}</div></div>`;
+}
+
+function renderBiz() {
+  const q       = document.getElementById('js-biz-search').value.toLowerCase();
+  const tier    = document.getElementById('js-biz-tier').value;
+  const claimed = document.getElementById('js-biz-claimed').value;
+  const sort    = document.getElementById('js-biz-sort').value;
+
+  let list = allBiz.filter(b => {
+    const matchQ = (b.name||'').toLowerCase().includes(q) || (b.suburb||'').toLowerCase().includes(q);
+    const matchT = !tier || (b.subscription_tier || 'free') === tier;
+    const matchC = !claimed
+      || (claimed === 'claimed' && b.is_claimed)
+      || (claimed === 'unclaimed' && !b.is_claimed);
+    return matchQ && matchT && matchC;
+  });
+
+  if (sort === 'oldest') list.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
+  else if (sort === 'name') list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+
+  if (!list.length) {
+    document.getElementById('js-biz-table').innerHTML = '<div class="adm-table-empty">No businesses match filters.</div>';
+    return;
+  }
+
+  const { PRICING } = window.wtdgAdminAuth;
+  const rows = list.map(b => {
+    const tier = b.subscription_tier || 'free';
+    const price = PRICING[tier] || 0;
+    const tierBadge = tier === 'free'
+      ? `<span class="adm-badge adm-badge--blue">${tier}</span>`
+      : `<span class="adm-badge adm-badge--green">${tier} · $${price}/mo</span>`;
+    const claimedBadge = b.is_claimed
+      ? `<span class="adm-badge adm-badge--teal">Claimed</span>`
+      : `<span class="adm-badge adm-badge--amber">Unclaimed</span>`;
+    return `<tr>
+      <td>
+        <div style="font-weight:600">${b.name || '—'}</div>
+        <div style="font-size:.75rem;color:var(--adm-mid)">${b.suburb || b.category || ''}</div>
+      </td>
+      <td>${tierBadge}</td>
+      <td>${claimedBadge}</td>
+      <td style="color:var(--adm-mid);font-size:.8rem">${fmtDate(b.created_at)}</td>
+      <td>
+        <a href="listing.html?id=${b.id}" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm">View listing</a>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('js-biz-table').innerHTML = `
+    <table class="adm-table">
+      <thead><tr><th>Business</th><th>Plan</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+}
+</script>
+</body>
+</html>

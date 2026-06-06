@@ -1313,21 +1313,55 @@ async function initEventPage() {
       })}<\/script>`,
   });
 
+  const heroImg = biz?.img || ev.img || '';
+  const isThisWeekend = true; // TODO: derive from ev.date
+
   root.innerHTML = `
-    <div class="ev-hero" style="background:${ev.color}18;border-bottom:3px solid ${ev.color}">
-      <div class="container ev-hero__inner">
-        <a href="index.html" class="listing-back">← Back to What To Do Geelong</a>
-        <div class="ev-hero__emoji">${ev.emoji}</div>
-        <span class="ev-hero__cat">${ev.category}</span>
-        <h1 class="ev-hero__title">${ev.title}</h1>
-        <div class="ev-hero__meta">
-          <span><span class="material-symbols-rounded">calendar_month</span> ${ev.date}</span>
-          <span><span class="material-symbols-rounded">schedule</span> ${ev.time}</span>
-          <span><span class="material-symbols-rounded">location_on</span> ${ev.location}</span>
+    <div class="ev-hero2">
+      <!-- Hero image / emoji background -->
+      <div class="ev-hero2__img-wrap">
+        ${heroImg
+          ? `<img src="${heroImg}" alt="${ev.title}" class="ev-hero2__img" />`
+          : `<div class="ev-hero2__img ev-hero2__img--emoji" style="background:${ev.color}22"><span>${ev.emoji}</span></div>`
+        }
+
+        <!-- Top-left: category badge -->
+        <div class="ev-hero2__cat-badge">
+          <span class="ev-hero2__cat-emoji">${ev.emoji}</span>
+          <span>${ev.category}</span>
         </div>
-        <div class="ev-hero__price-row">
+
+        <!-- Top-right: actions -->
+        <div class="ev-hero2__actions">
+          <button class="ev-hero2__action-btn star-btn" id="js-ev-save-btn" aria-label="Save to WTDGuide">
+            ${wtdgIcon('heart', 20)}
+          </button>
+          <button class="ev-hero2__action-btn" id="js-ev-share-btn" aria-label="Share">
+            ${wtdgIcon('share', 20)}
+          </button>
+        </div>
+
+        <!-- Bottom-right: views badge -->
+        <div class="ev-hero2__views">
+          ${wtdgIcon('views', 16, '#fff')}
+          <span>${Math.floor(Math.random()*3000+500).toLocaleString()} people viewed this week</span>
+        </div>
+      </div>
+
+      <!-- Info card -->
+      <div class="ev-hero2__card">
+        <h1 class="ev-hero2__title">${ev.title}</h1>
+        <div class="ev-hero2__meta">
+          <span>${wtdgIcon('calendar', 16, 'var(--teal)')} ${ev.date}</span>
+          ${ev.time ? `<span>${wtdgIcon('clock', 16, 'var(--teal)')} ${ev.time}</span>` : ''}
+          <span>${wtdgIcon('location', 16, 'var(--teal)')} ${ev.location}</span>
+        </div>
+        <div class="ev-hero2__price-row">
           <span class="ev-price ${ev.price === 'Free' ? 'ev-price--free' : ''}">${ev.price}</span>
-          ${ev.price !== 'Free' ? `<a href="#" class="btn btn--teal">Get Tickets →</a>` : `<span class="btn btn--teal">Free Entry</span>`}
+          ${ev.price !== 'Free'
+            ? `<a href="#" class="btn btn--teal btn--sm js-ticket-btn" data-event-title="${ev.title}" data-price="${ev.price}">${wtdgIcon('ticket', 16, '#fff')} Get Tickets</a>`
+            : `<span class="btn btn--teal btn--sm">Free Entry</span>`}
+          ${isThisWeekend ? `<span class="ev-hero2__weekend-pill">${wtdgIcon('weekend', 14, 'var(--teal)')} This weekend</span>` : ''}
         </div>
       </div>
     </div>
@@ -1363,6 +1397,38 @@ async function initEventPage() {
       ` : ''}
     </div>
   `;
+
+  // Wire save button
+  const saveBtn = document.getElementById('js-ev-save-btn');
+  if (saveBtn && typeof starItemToGuide === 'function') {
+    const item = { id: String(ev.id), type: 'event', title: ev.title, emoji: ev.emoji, color: ev.color,
+      date: ev.date, time: ev.time, location: ev.location, price: ev.price, slug: evSlug };
+    saveBtn.addEventListener('click', async e => {
+      e.preventDefault();
+      await starItemToGuide(item, saveBtn);
+      updateItinBadge();
+      if (typeof trackSaveToGuide === 'function') trackSaveToGuide(item);
+    });
+  }
+
+  // Wire ticket button tracking
+  document.querySelector('.js-ticket-btn')?.addEventListener('click', function() {
+    if (typeof trackTicketClick === 'function') {
+      trackTicketClick(this.dataset.eventTitle, this.href, this.dataset.price);
+    }
+  });
+
+  // Wire share button
+  document.getElementById('js-ev-share-btn')?.addEventListener('click', () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: ev.title, url });
+      if (typeof trackShare === 'function') trackShare('native_share', ev.title);
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+      if (typeof trackShare === 'function') trackShare('copy_link', ev.title);
+    }
+  });
 
   // Render other events in the strip
   const others = EVENTS.filter(e => e.id !== ev.id).slice(0, 6);

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    .mode-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .mode-card {
+      background: var(--adm-card); border: 2px solid var(--adm-border);
+      border-radius: var(--adm-radius); padding: 1.5rem; cursor: pointer;
+      transition: border-color .2s, background .2s; position: relative;
+    }
+    .mode-card:hover { border-color: var(--adm-teal); }
+    .mode-card.active { border-color: var(--adm-teal); background: var(--adm-teal-dim); }
+    .mode-card__icon { font-size: 2rem; margin-bottom: .75rem; display: block; }
+    .mode-card__title { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
+    .mode-card__desc { font-size: .82rem; color: var(--adm-mid); line-height: 1.5; }
+    .mode-card__check {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--adm-teal); display: none;
+      align-items: center; justify-content: center;
+    }
+    .mode-card.active .mode-card__check { display: flex; }
+    .mode-card__check svg { width: 13px; height: 13px; stroke: #fff; }
+    .adm-save-btn {
+      background: var(--adm-teal); color: #fff; border: none; border-radius: .5rem;
+      padding: .7rem 1.75rem; font-size: .9rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: opacity .15s;
+    }
+    .adm-save-btn:hover { opacity: .9; }
+    .adm-save-btn:disabled { opacity: .5; cursor: default; }
+    .adm-status { margin-top: 1rem; font-size: .85rem; font-weight: 600; min-height: 1.2em; }
+    .adm-status--ok  { color: var(--adm-green); }
+    .adm-status--err { color: var(--adm-red); }
+    .adm-info-box {
+      background: var(--adm-card2); border: 1px solid var(--adm-border);
+      border-radius: var(--adm-radius); padding: 1.1rem 1.25rem;
+      font-size: .83rem; color: var(--adm-mid); line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .adm-info-box strong { color: var(--adm-text); }
+    .adm-section-sep { border: none; border-top: 1px solid var(--adm-border); margin: 2rem 0; }
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Site Settings</span>
+    </div>
+
+    <div class="adm-content">
+
+      <!-- Site Mode -->
+      <div class="adm-section">
+        <div class="adm-section__header" style="margin-bottom:.5rem">
+          <span class="adm-section__title">Site Mode</span>
+        </div>
+        <div class="adm-info-box">
+          <strong>Admin bypass:</strong> Your account always sees the live site regardless of mode — visitors will see the selected mode below.
+          The mode is cached for 2 minutes on each visitor's browser.
+        </div>
+
+        <div class="mode-cards" id="js-mode-cards">
+          <div class="mode-card" data-mode="live">
+            <span class="mode-card__check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="mode-card__icon">🌐</span>
+            <div class="mode-card__title">Live</div>
+            <div class="mode-card__desc">Normal operation. All visitors see the full site.</div>
+          </div>
+          <div class="mode-card" data-mode="maintenance">
+            <span class="mode-card__check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="mode-card__icon">⚙️</span>
+            <div class="mode-card__title">Maintenance</div>
+            <div class="mode-card__desc">Shows a "back soon, essential updates in progress" holding page to all visitors.</div>
+          </div>
+          <div class="mode-card" data-mode="coming_soon">
+            <span class="mode-card__check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="mode-card__icon">🚀</span>
+            <div class="mode-card__title">Coming Soon</div>
+            <div class="mode-card__desc">Shows a branded "launching soon" page with email capture. Great before going live.</div>
+          </div>
+        </div>
+
+        <button class="adm-save-btn" id="js-save-mode">Save Mode</button>
+        <div class="adm-status" id="js-mode-status"></div>
+      </div>
+
+      <hr class="adm-section-sep" />
+
+      <!-- Preview links -->
+      <div class="adm-section">
+        <div class="adm-section__header"><span class="adm-section__title">Preview Pages</span></div>
+        <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:1rem">Open these in a private/incognito window to see what visitors see.</p>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <a href="maintenance.html" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">Preview Maintenance</a>
+          <a href="comingsoon.html" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">Preview Coming Soon</a>
+          <a href="index.html" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">View Live Site</a>
+        </div>
+      </div>
+
+      <hr class="adm-section-sep" />
+
+      <!-- Admin emails -->
+      <div class="adm-section">
+        <div class="adm-section__header"><span class="adm-section__title">Super Admin Accounts</span></div>
+        <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:1rem">Defined in <code style="background:var(--adm-card2);padding:.1rem .4rem;border-radius:.3rem">wtdgadmin.js</code> and <code style="background:var(--adm-card2);padding:.1rem .4rem;border-radius:.3rem">sitemode.js</code>. To add an admin, update the <code>ADMIN_EMAILS</code> array in both files.</p>
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead><tr><th>Email</th><th>Status</th></tr></thead>
+            <tbody id="js-admin-list"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script src="wtdgadmin-shell.js?v=1"></script>
+<script>
+let selectedMode = 'live';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
+  initAdminShell('Site Settings');
+
+  // Load current mode
+  await loadCurrentMode();
+
+  // Card selection
+  document.querySelectorAll('.mode-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      selectedMode = card.dataset.mode;
+    });
+  });
+
+  // Save
+  document.getElementById('js-save-mode').addEventListener('click', saveMode);
+
+  // Admin list
+  const list = document.getElementById('js-admin-list');
+  list.innerHTML = ADMIN_EMAILS.map(e =>
+    `<tr><td style="font-weight:600">${e}</td><td><span class="adm-badge adm-badge--teal">Super Admin</span></td></tr>`
+  ).join('');
+});
+
+async function loadCurrentMode() {
+  try {
+    const { data } = await db.from('site_settings').select('value').eq('key', 'site_mode').single();
+    const mode = data?.value || 'live';
+    selectedMode = mode;
+    document.querySelectorAll('.mode-card').forEach(c => {
+      c.classList.toggle('active', c.dataset.mode === mode);
+    });
+  } catch (_) {
+    // site_settings table may not exist yet — show setup hint
+    document.getElementById('js-mode-status').textContent = '⚠ Could not load — run the setup SQL first (see below).';
+    document.getElementById('js-mode-status').className = 'adm-status adm-status--err';
+  }
+}
+
+async function saveMode() {
+  const btn = document.getElementById('js-save-mode');
+  const status = document.getElementById('js-mode-status');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  status.textContent = '';
+  status.className = 'adm-status';
+
+  try {
+    const { error } = await db.from('site_settings')
+      .upsert({ key: 'site_mode', value: selectedMode, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    status.textContent = `✓ Site mode set to "${selectedMode}" — active within 2 minutes for visitors.`;
+    status.className = 'adm-status adm-status--ok';
+  } catch (err) {
+    status.textContent = '✗ Save failed: ' + (err.message || 'Unknown error');
+    status.className = 'adm-status adm-status--err';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save Mode';
+}
+</script>
+</body>
+</html>

@@ -48,11 +48,14 @@ document.getElementById('js-login-form')?.addEventListener('submit', async e => 
     await linkSessionGuidesToUser(data.user.id);
   }
 
+  if (typeof trackLogin === 'function') trackLogin('email');
+
   const next = new URLSearchParams(window.location.search).get('next') || 'account.html';
   window.location.href = next;
 });
 
 document.getElementById('js-google-btn')?.addEventListener('click', async () => {
+  if (typeof trackLogin === 'function') trackLogin('google');
   const { error } = await db.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin + '/account.html' }

@@ -1203,7 +1203,140 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   flex-shrink: 0;
 }
 
-/* ── EVENT DETAIL PAGE ───────────────────────────────────── */
+/* ── WTDG ICON ───────────────────────────────────────────── */
+.wtdg-cat-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.4rem; height: 2.4rem;
+  background: color-mix(in srgb, var(--teal) 12%, white);
+  border-radius: 50%;
+}
+.wtdg-icon { display: inline-flex; align-items: center; vertical-align: middle; }
+
+/* ── EVENT DETAIL PAGE v2 ────────────────────────────────── */
+.ev-hero2 { position: relative; }
+
+.ev-hero2__nav {
+  padding: .75rem 0 .5rem;
+}
+.ev-hero2__back {
+  display: inline-flex; align-items: center; gap: .35rem;
+  background: var(--cream); border: 1.5px solid var(--border);
+  border-radius: 999px; padding: .4rem .85rem;
+  font-size: .82rem; font-weight: 600; color: var(--dark);
+  text-decoration: none; cursor: pointer;
+  transition: background .15s;
+}
+.ev-hero2__back:hover { background: var(--border); }
+.ev-hero2__back svg { flex-shrink: 0; }
+
+.ev-hero2__img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  max-height: 60vh;
+  border-radius: 0 0 1.5rem 1.5rem;
+  overflow: hidden;
+  background: var(--cream);
+}
+@media (min-width: 640px) {
+  .ev-hero2__img-wrap {
+    aspect-ratio: 21/9;
+    max-height: 60vh;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+.ev-hero2__img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.ev-hero2__img--emoji {
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(5rem, 18vw, 9rem);
+}
+
+/* gradient overlay so text is readable */
+.ev-hero2__img-wrap::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.18) 0%, transparent 40%, transparent 55%, rgba(0,0,0,.45) 100%);
+  pointer-events: none;
+}
+
+/* Category badge — top left */
+.ev-hero2__cat-badge {
+  position: absolute; top: 1rem; left: 1rem; z-index: 5;
+  display: flex; align-items: center; gap: .45rem;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(6px);
+  border-radius: 999px; padding: .35rem .85rem .35rem .5rem;
+  font-size: .82rem; font-weight: 700; color: var(--dark);
+  box-shadow: 0 1px 6px rgba(0,0,0,.12);
+}
+.ev-hero2__cat-emoji { font-size: 1.1rem; line-height: 1; }
+
+/* Action buttons — individually positioned top right */
+.ev-hero2__actions { display: contents; }
+.ev-hero2__action-btn {
+  position: absolute; top: 1rem; z-index: 5;
+  width: 2.4rem; height: 2.4rem; border-radius: 50%;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(6px);
+  border: none; cursor: pointer; color: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,.12);
+  transition: background .15s, transform .15s;
+}
+.ev-hero2__action-btn:nth-child(1) { right: 4rem; }
+.ev-hero2__action-btn:nth-child(2) { right: 1rem; }
+.ev-hero2__action-btn:hover { background: #fff; transform: scale(1.08); }
+.ev-hero2__action-btn.starred { color: #e53e3e; }
+.ev-hero2__action-btn.starred svg { fill: #e53e3e; stroke: #e53e3e; }
+
+/* Views badge — bottom right */
+.ev-hero2__views {
+  position: absolute; bottom: 1rem; right: 1rem; z-index: 5;
+  display: flex; align-items: center; gap: .4rem;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+  border-radius: 999px; padding: .35rem .8rem;
+  font-size: .75rem; font-weight: 600; color: #fff;
+}
+
+/* Info card — below image */
+.ev-hero2__card {
+  padding: 1.25rem var(--gutter) 1rem;
+}
+@media (min-width: 640px) {
+  .ev-hero2__card { padding: 1.25rem 0 1rem; max-width: 720px; margin: 0 auto; }
+}
+
+.ev-hero2__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 5vw, 2.5rem);
+  font-weight: 900; color: var(--dark);
+  margin: 0 0 .65rem; line-height: 1.15;
+}
+
+.ev-hero2__meta {
+  display: flex; flex-wrap: wrap; gap: .35rem 1.1rem;
+  font-size: .87rem; color: var(--mid); margin-bottom: 1rem;
+}
+.ev-hero2__meta span {
+  display: inline-flex; align-items: center; gap: .3rem;
+}
+.ev-hero2__meta svg { flex-shrink: 0; }
+
+.ev-hero2__price-row {
+  display: flex; align-items: center; gap: .65rem; flex-wrap: wrap;
+}
+.ev-hero2__weekend-pill {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: color-mix(in srgb, var(--teal) 10%, white);
+  border: 1.5px solid color-mix(in srgb, var(--teal) 25%, white);
+  border-radius: 999px; padding: .3rem .75rem;
+  font-size: .78rem; font-weight: 600; color: var(--teal);
+}
+
+/* ── EVENT DETAIL PAGE (legacy, kept for fallback) ────────── */
 .ev-hero { padding: 0; }
 .ev-hero__inner { padding-block: 2rem; }
 .ev-hero__emoji { font-size: 3.5rem; line-height: 1; margin-bottom: .5rem; }
@@ -1263,7 +1396,9 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   gap: .85rem;
   text-decoration: none;
   color: inherit;
+  min-width: 0;
 }
+.ev-biz-link__info { min-width: 0; }
 .ev-biz-link__avatar {
   width: 48px;
   height: 48px;

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Users</span>
+      <div class="adm-topbar__right">
+        <span id="js-user-count" style="font-size:.82rem;color:var(--adm-mid)"></span>
+      </div>
+    </div>
+
+    <div class="adm-content">
+      <div class="adm-toolbar">
+        <div class="adm-search">
+          <span class="adm-search__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input type="search" id="js-user-search" placeholder="Search by name or email…" />
+        </div>
+        <select class="adm-select" id="js-user-sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Name A–Z</option>
+        </select>
+      </div>
+
+      <div class="adm-table-wrap" id="js-user-table">
+        <div class="adm-table-empty">Loading users…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User detail modal -->
+<div class="adm-modal-overlay" id="js-user-modal" hidden>
+  <div class="adm-modal">
+    <button class="adm-modal__close" id="js-modal-close">✕</button>
+    <h2 class="adm-modal__title" id="js-modal-name">User</h2>
+    <div id="js-modal-body"></div>
+    <div class="adm-modal__actions">
+      <button class="adm-btn adm-btn--sm" id="js-modal-impersonate">👁 View as this user</button>
+      <button class="adm-btn adm-btn--outline adm-btn--sm" id="js-modal-close2">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script src="wtdgadmin-shell.js?v=1"></script>
+<script>
+let allUsers = [];
+let activeUser = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
+  initAdminShell('Users');
+  await loadUsers();
+
+  document.getElementById('js-user-search').addEventListener('input', renderTable);
+  document.getElementById('js-user-sort').addEventListener('change', renderTable);
+  document.getElementById('js-modal-close').addEventListener('click', closeModal);
+  document.getElementById('js-modal-close2').addEventListener('click', closeModal);
+  document.getElementById('js-modal-impersonate').addEventListener('click', impersonateActive);
+});
+
+async function loadUsers() {
+  const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('js-user-table').innerHTML = `<div class="adm-table-empty">Could not load users.<br><small>Have you created the <code>profiles</code> table? See setup SQL below.</small><br><br><a href="#" onclick="showSql()" style="color:var(--adm-teal)">Show setup SQL →</a><pre id="js-sql-hint" style="display:none;background:var(--adm-card2);padding:1rem;border-radius:.5rem;font-size:.72rem;margin-top:1rem;text-align:left;overflow:auto">${setupSql()}</pre></div>`;
+    return;
+  }
+  allUsers = data || [];
+  document.getElementById('js-user-count').textContent = `${allUsers.length} total`;
+  renderTable();
+}
+
+function renderTable() {
+  const q      = document.getElementById('js-user-search').value.toLowerCase();
+  const sort   = document.getElementById('js-user-sort').value;
+  let filtered = allUsers.filter(u =>
+    (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
+  );
+  if (sort === 'oldest') filtered.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  else if (sort === 'name') filtered.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+
+  if (!filtered.length) {
+    document.getElementById('js-user-table').innerHTML = '<div class="adm-table-empty">No users found.</div>';
+    return;
+  }
+
+  const rows = filtered.map(u => `
+    <tr data-id="${u.id}">
+      <td>
+        <div style="font-weight:600">${u.name || '<em style="opacity:.5">No name</em>'}</div>
+        <div style="font-size:.75rem;color:var(--adm-mid)">${u.email || ''}</div>
+      </td>
+      <td style="color:var(--adm-mid);font-size:.8rem">${fmtDate(u.created_at)}</td>
+      <td style="color:var(--adm-mid);font-size:.8rem">${fmtDate(u.last_sign_in)}</td>
+      <td>
+        <button class="adm-btn adm-btn--outline adm-btn--sm js-view-user" data-id="${u.id}">View</button>
+        <button class="adm-btn adm-btn--sm js-imp-user" data-id="${u.id}" style="margin-left:.35rem">👁 View as</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('js-user-table').innerHTML = `
+    <table class="adm-table">
+      <thead><tr>
+        <th>User</th><th>Joined</th><th>Last Sign In</th><th>Actions</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  document.querySelectorAll('.js-view-user').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.dataset.id));
+  });
+  document.querySelectorAll('.js-imp-user').forEach(btn => {
+    btn.addEventListener('click', () => impersonateUser(btn.dataset.id));
+  });
+}
+
+function openModal(userId) {
+  const u = allUsers.find(x => x.id === userId);
+  if (!u) return;
+  activeUser = u;
+  document.getElementById('js-modal-name').textContent = u.name || u.email || 'User';
+  document.getElementById('js-modal-body').innerHTML = `
+    <div class="adm-modal__row"><span class="adm-modal__key">ID</span><span style="font-size:.75rem;font-family:monospace">${u.id}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Email</span><span>${u.email || '—'}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Name</span><span>${u.name || '—'}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Joined</span><span>${fmtDate(u.created_at)}</span></div>
+    <div class="adm-modal__row"><span class="adm-modal__key">Last sign in</span><span>${fmtDate(u.last_sign_in)}</span></div>`;
+  document.getElementById('js-user-modal').hidden = false;
+}
+
+function closeModal() {
+  document.getElementById('js-user-modal').hidden = true;
+  activeUser = null;
+}
+
+function impersonateActive() {
+  if (activeUser) impersonateUser(activeUser.id);
+}
+
+function impersonateUser(userId) {
+  const u = allUsers.find(x => x.id === userId);
+  if (!u) return;
+  const adminSession = window.wtdgAdminAuth.getAdminSession();
+  window.wtdgAdminImp.startImpersonation(
+    { id: u.id, name: u.name, email: u.email },
+    { email: adminSession?.email, userId: adminSession?.userId }
+  );
+  window.location.href = 'index.html';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function setupSql() {
+  return `-- Run this in your Supabase SQL editor:
+CREATE TABLE IF NOT EXISTS profiles (
+  id uuid REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  email text,
+  name text,
+  created_at timestamptz DEFAULT now(),
+  last_sign_in timestamptz
+);
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public_read" ON profiles FOR SELECT USING (true);
+GRANT SELECT ON profiles TO anon, authenticated;
+
+-- Auto-create profile on signup:
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, name, created_at)
+  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'name', NEW.created_at)
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END; $$;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();`;
+}
+
+function showSql() {
+  const el = document.getElementById('js-sql-hint');
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+window.showSql = showSql;
+</script>
+</body>
+</html>

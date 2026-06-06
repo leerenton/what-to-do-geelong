@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — WTDG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+</head>
+<body class="adm-body">
+
+<div class="adm-login">
+  <div class="adm-login__card">
+    <div class="adm-login__logo">
+      <span style="font-weight:800;font-size:1rem">WTDG</span>
+      <span class="adm-login__logo-badge">SUPER ADMIN</span>
+    </div>
+    <h1 class="adm-login__title">Admin Sign In</h1>
+    <p class="adm-login__sub">Restricted access. Super admin accounts only.</p>
+
+    <form id="js-adm-login-form" novalidate>
+      <input type="email" class="adm-input" id="js-adm-email" placeholder="Admin email address" autocomplete="email" required />
+      <input type="password" class="adm-input" id="js-adm-password" placeholder="Password" autocomplete="current-password" required />
+      <button type="submit" class="adm-btn" id="js-adm-submit">Sign In</button>
+      <p class="adm-error" id="js-adm-error"></p>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script>
+(async () => {
+  // If already logged in as admin, redirect straight to dashboard
+  try {
+    const cached = getAdminSession();
+    if (cached && ADMIN_EMAILS.includes(cached.email) && (Date.now() - cached.at < 4 * 60 * 60 * 1000)) {
+      window.location.href = 'wtdgadmin-dash.html';
+      return;
+    }
+    const timeout = new Promise(r => setTimeout(() => r(null), 3000));
+    const session = await Promise.race([db.auth.getSession().then(r => r.data?.session ?? null), timeout]);
+    if (session?.user && ADMIN_EMAILS.includes(session.user.email)) {
+      setAdminSession(session.user.email, session.user.id);
+      window.location.href = 'wtdgadmin-dash.html';
+    }
+  } catch (_) {}
+})();
+
+const form = document.getElementById('js-adm-login-form');
+const errEl = document.getElementById('js-adm-error');
+const submitBtn = document.getElementById('js-adm-submit');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errEl.classList.remove('visible');
+  const email    = document.getElementById('js-adm-email').value.trim();
+  const password = document.getElementById('js-adm-password').value;
+
+  if (!ADMIN_EMAILS.includes(email)) {
+    errEl.textContent = 'This account does not have admin access.';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Signing in…';
+
+  try {
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    if (!ADMIN_EMAILS.includes(data.user.email)) throw new Error('Not an admin account.');
+
+    setAdminSession(data.user.email, data.user.id);
+    window.location.href = 'wtdgadmin-dash.html';
+  } catch (err) {
+    errEl.textContent = err.message || 'Sign in failed.';
+    errEl.classList.add('visible');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Sign In';
+  }
+});
+</script>
+</body>
+</html>

@@ -41,18 +41,30 @@ async function initAccountNav() {
   const hamburger = document.querySelector('.nav__hamburger');
   if (!hamburger) return;
 
-  const acct = getAccount();
+  // ── Impersonation override ────────────────────────────────
+  // If admin is viewing as a user, show THAT user's nav identity
+  let impersonatedUser = null;
+  try {
+    const imp = JSON.parse(sessionStorage.getItem('wtdg_admin_impersonating'));
+    if (imp?.targetUser) impersonatedUser = imp.targetUser;
+  } catch (_) {}
 
-  // Load businesses from Supabase if logged in
+  // Use impersonated user data OR real account
+  let acct = impersonatedUser
+    ? { name: impersonatedUser.name || impersonatedUser.email, email: impersonatedUser.email }
+    : getAccount();
+
+  // Load businesses from Supabase if logged in (skip for impersonation — we don't have their session)
   let profiles = [];
-  if (acct && typeof db !== 'undefined') {
-    const { data: { session } } = await db.auth.getSession();
-    if (session) {
-      const { data } = await db.from('businesses').select('id, name, emoji, color').eq('owner_id', session.user.id);
-      profiles = data || [];
-      // Clear stale localStorage biz data
-      localStorage.removeItem('wtdg_biz_profiles');
-    }
+  if (acct && !impersonatedUser && typeof db !== 'undefined') {
+    try {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        const { data } = await db.from('businesses').select('id, name, emoji, color').eq('owner_id', session.user.id);
+        profiles = data || [];
+        localStorage.removeItem('wtdg_biz_profiles');
+      }
+    } catch (_) {}
   }
 
   const wrap = document.createElement('div');
@@ -143,3 +155,30 @@ async function initAccountNav() {
 }
 
 document.addEventListener('DOMContentLoaded', initAccountNav);
+
+// ── ADMIN IMPERSONATION BANNER ────────────────────────────────
+// Shows a persistent banner on public pages when admin is viewing as a user.
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const imp = JSON.parse(sessionStorage.getItem('wtdg_admin_impersonating'));
+    if (!imp) return;
+
+    document.body.style.paddingBottom = '56px';
+
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.25rem;font-size:.82rem;font-weight:600;font-family:inherit;box-shadow:0 -4px 24px rgba(124,58,237,.4)';
+    bar.innerHTML = `
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <span style="background:rgba(255,255,255,.2);border-radius:.35rem;padding:.15rem .5rem;font-size:.7rem;font-weight:800;letter-spacing:.06em">ADMIN MODE</span>
+        Viewing as <strong style="margin-left:.3rem">${imp.targetUser.name || imp.targetUser.email}</strong>
+        <span style="opacity:.7;font-size:.75rem">(${imp.targetUser.email || ''})</span>
+      </div>
+      <button id="js-adm-exit-imp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:.4rem;padding:.3rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit">Exit &amp; Return to Admin</button>`;
+    document.body.appendChild(bar);
+
+    document.getElementById('js-adm-exit-imp')?.addEventListener('click', () => {
+      sessionStorage.removeItem('wtdg_admin_impersonating');
+      window.location.href = 'wtdgadmin-users.html';
+    });
+  } catch (_) {}
+});

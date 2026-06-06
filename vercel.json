@@ -1,5 +1,15 @@
 {
   "rewrites": [
+    { "source": "/wtdgadmin",              "destination": "/wtdgadmin.html" },
+    { "source": "/wtdgadmin/dash",         "destination": "/wtdgadmin-dash.html" },
+    { "source": "/wtdgadmin/users",        "destination": "/wtdgadmin-users.html" },
+    { "source": "/wtdgadmin/businesses",   "destination": "/wtdgadmin-businesses.html" },
+    { "source": "/wtdgadmin/events",       "destination": "/wtdgadmin-events.html" },
+    { "source": "/wtdgadmin/offers",       "destination": "/wtdgadmin-offers.html" },
+    { "source": "/wtdgadmin/revenue",      "destination": "/wtdgadmin-revenue.html" },
+    { "source": "/wtdgadmin/settings",     "destination": "/wtdgadmin-settings.html" },
+    { "source": "/maintenance",            "destination": "/maintenance.html" },
+    { "source": "/coming-soon",            "destination": "/comingsoon.html" },
     { "source": "/news/:slug",   "destination": "/article.html?s=:slug" },
     { "source": "/events/:slug", "destination": "/event.html?s=:slug" },
     { "source": "/guide/:id",    "destination": "/guide.html?id=:id" },

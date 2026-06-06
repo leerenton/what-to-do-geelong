@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coming Soon — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <meta name="robots" content="index, follow" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f2f2c 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      color: #f1f5f9;
+    }
+    .logo-img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      border-radius: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(42,180,160,.25);
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(42,180,160,.2);
+      border: 1px solid rgba(42,180,160,.4);
+      color: #2ab4a0;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.25rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      color: #f1f5f9;
+    }
+    h1 span { color: #2ab4a0; }
+    p {
+      color: #94a3b8;
+      font-size: 1.05rem;
+      max-width: 440px;
+      line-height: 1.65;
+      margin-bottom: 2.5rem;
+    }
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      justify-content: center;
+      margin-bottom: 2.5rem;
+      max-width: 480px;
+    }
+    .feature-pill {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: .4rem .9rem;
+      font-size: .82rem;
+      color: #cbd5e1;
+    }
+    .notify-form {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 420px;
+      width: 100%;
+    }
+    .notify-input {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: .6rem;
+      padding: .7rem 1rem;
+      color: #f1f5f9;
+      font-size: .9rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .notify-input::placeholder { color: #64748b; }
+    .notify-input:focus { border-color: #2ab4a0; }
+    .notify-btn {
+      background: #2ab4a0;
+      color: #fff;
+      border: none;
+      border-radius: .6rem;
+      padding: .7rem 1.35rem;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: opacity .15s;
+    }
+    .notify-btn:hover { opacity: .9; }
+    .notify-thanks { display: none; color: #2ab4a0; font-weight: 600; font-size: .9rem; margin-top: .75rem; }
+    .city { margin-top: 3rem; color: #334155; font-size: .8rem; letter-spacing: .05em; }
+  </style>
+</head>
+<body>
+  <img src="assets/logo.jpg" alt="What To Do Geelong" class="logo-img" onerror="this.style.display='none'" />
+  <div class="badge">✦ Launching Soon</div>
+  <h1>Geelong's new<br><span>event guide</span> is coming</h1>
+  <p>We're building something exciting — a better way to discover events, places and things to do in Geelong. Stay tuned.</p>
+
+  <div class="features">
+    <span class="feature-pill">🎟 Events & Festivals</span>
+    <span class="feature-pill">🍽 Food & Drink</span>
+    <span class="feature-pill">🏨 Places to Stay</span>
+    <span class="feature-pill">🗺 Local Guides</span>
+    <span class="feature-pill">🎨 Arts & Culture</span>
+    <span class="feature-pill">🐾 Family & Pets</span>
+  </div>
+
+  <form class="notify-form" id="js-notify-form" novalidate>
+    <input type="email" class="notify-input" id="js-notify-email" placeholder="Get notified when we launch…" />
+    <button type="submit" class="notify-btn">Notify me</button>
+  </form>
+  <div class="notify-thanks" id="js-notify-thanks">🎉 You're on the list! We'll be in touch.</div>
+
+  <div class="city">GEELONG, VICTORIA · AUSTRALIA</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=2"></script>
+  <script>
+  document.getElementById('js-notify-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('js-notify-email').value.trim();
+    if (!email) return;
+    // Store in Supabase notify_list table (create if needed), or just show thanks
+    try {
+      if (typeof db !== 'undefined') {
+        await db.from('notify_list').insert({ email, created_at: new Date().toISOString() });
+      }
+    } catch (_) {}
+    document.getElementById('js-notify-form').style.display = 'none';
+    document.getElementById('js-notify-thanks').style.display = 'block';
+  });
+  </script>
+</body>
+</html>

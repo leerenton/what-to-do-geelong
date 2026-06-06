@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offers — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Offers &amp; Promos</span>
+      <div class="adm-topbar__right">
+        <span id="js-offer-count" style="font-size:.82rem;color:var(--adm-mid)"></span>
+      </div>
+    </div>
+
+    <div class="adm-content">
+      <div class="adm-stats" style="margin-bottom:1.5rem" id="js-offer-stats"></div>
+
+      <div class="adm-toolbar">
+        <div class="adm-search">
+          <span class="adm-search__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input type="search" id="js-offer-search" placeholder="Search offers…" />
+        </div>
+        <select class="adm-select" id="js-offer-sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="expiry">By expiry</option>
+        </select>
+      </div>
+
+      <div class="adm-table-wrap" id="js-offer-table">
+        <div class="adm-table-empty">Loading offers…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=2"></script>
+<script src="wtdgadmin.js?v=1"></script>
+<script src="wtdgadmin-shell.js?v=1"></script>
+<script>
+let allOffers = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
+  initAdminShell('Offers & Promos');
+  await loadOffers();
+  ['js-offer-search','js-offer-sort'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderOffers);
+    document.getElementById(id)?.addEventListener('change', renderOffers);
+  });
+});
+
+async function loadOffers() {
+  const { data, error } = await db.from('promos').select('*').order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('js-offer-table').innerHTML = '<div class="adm-table-empty">Could not load offers. (Table may be named differently.)</div>';
+    return;
+  }
+  allOffers = data || [];
+  const now = new Date();
+  const active  = allOffers.filter(o => !o.expires_at || new Date(o.expires_at) > now);
+  const expired = allOffers.length - active.length;
+
+  document.getElementById('js-offer-count').textContent = `${allOffers.length} total`;
+  document.getElementById('js-offer-stats').innerHTML = `
+    ${sc('Total Offers', allOffers.length)}
+    ${sc('Active', active.length, 'green')}
+    ${sc('Expired', expired)}`;
+
+  renderOffers();
+}
+
+function sc(l,v,variant=''){return`<div class="adm-stat${variant?' adm-stat--'+variant:''}"><div class="adm-stat__label">${l}</div><div class="adm-stat__value">${v}</div></div>`;}
+
+function renderOffers() {
+  const q    = document.getElementById('js-offer-search').value.toLowerCase();
+  const sort = document.getElementById('js-offer-sort').value;
+  const now  = new Date();
+
+  let list = allOffers.filter(o => (o.title||o.name||'').toLowerCase().includes(q));
+  if (sort === 'oldest') list.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
+  else if (sort === 'expiry') list.sort((a,b) => new Date(a.expires_at||'9999')-new Date(b.expires_at||'9999'));
+
+  if (!list.length) {
+    document.getElementById('js-offer-table').innerHTML = '<div class="adm-table-empty">No offers found.</div>';
+    return;
+  }
+
+  const rows = list.map(o => {
+    const isActive = !o.expires_at || new Date(o.expires_at) > now;
+    return `<tr>
+      <td>
+        <div style="font-weight:600">${o.title || o.name || '—'}</div>
+        <div style="font-size:.75rem;color:var(--adm-mid)">${o.description || o.subtitle || ''}</div>
+      </td>
+      <td><span class="adm-badge ${isActive?'adm-badge--green':'adm-badge--red'}">${isActive?'Active':'Expired'}</span></td>
+      <td style="font-size:.82rem;color:var(--adm-mid)">${o.expires_at ? fmtDate(o.expires_at) : 'No expiry'}</td>
+      <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(o.created_at)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('js-offer-table').innerHTML = `
+    <table class="adm-table">
+      <thead><tr><th>Offer</th><th>Status</th><th>Expires</th><th>Added</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+}
+</script>
+</body>
+</html>

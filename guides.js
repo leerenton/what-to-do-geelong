@@ -55,15 +55,27 @@ async function createGuide({ name, dateFrom, dateTo } = {}) {
 }
 window.createGuide = createGuide;
 
-async function updateGuide(id, { name, dateFrom, dateTo }) {
-  const { error } = await db.from('guides').update({
-    name,
-    date_from: dateFrom || null,
-    date_to:   dateTo   || null,
-  }).eq('id', id);
+async function updateGuide(id, { name, dateFrom, dateTo, description, isPublic, isAnyday }) {
+  const patch = { name };
+  if (dateFrom  !== undefined) patch.date_from    = dateFrom    || null;
+  if (dateTo    !== undefined) patch.date_to      = dateTo      || null;
+  if (description !== undefined) patch.description = description || null;
+  if (isPublic  !== undefined) patch.is_public    = !!isPublic;
+  if (isAnyday  !== undefined) patch.is_anyday    = !!isAnyday;
+  const { error } = await db.from('guides').update(patch).eq('id', id);
   return !error;
 }
 window.updateGuide = updateGuide;
+
+// Load all public guides (community feed)
+async function loadPublicGuides() {
+  const { data } = await db.from('guides')
+    .select('*, guide_items(*)')
+    .eq('is_public', true)
+    .order('created_at', { ascending: false });
+  return data || [];
+}
+window.loadPublicGuides = loadPublicGuides;
 
 async function deleteGuide(id) {
   await db.from('guides').delete().eq('id', id);

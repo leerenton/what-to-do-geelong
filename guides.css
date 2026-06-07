@@ -52,10 +52,39 @@
   color: inherit;
   display: block;
 }
-.guide-card__name { font-weight: 700; font-size: 1.05rem; color: var(--dark); margin-bottom: .3rem; }
+.guide-card__name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .25rem; }
+.guide-card__name { font-weight: 700; font-size: 1.05rem; color: var(--dark); }
+.guide-card__badges { display: flex; gap: .35rem; flex-shrink: 0; }
+.guide-card__public-badge {
+  display: inline-flex; align-items: center; gap: .2rem;
+  background: rgba(42,180,160,.12); color: #2ab4a0;
+  font-size: .7rem; font-weight: 700; border-radius: 999px;
+  padding: .15rem .5rem;
+}
+.guide-card__public-badge .material-symbols-rounded { font-size: .8rem; }
+.guide-card__anyday-badge {
+  display: inline-flex; align-items: center; gap: .2rem;
+  background: rgba(90,130,255,.1); color: #3a86ff;
+  font-size: .7rem; font-weight: 700; border-radius: 999px;
+  padding: .15rem .5rem;
+}
+.guide-card__anyday-badge .material-symbols-rounded { font-size: .8rem; }
+.guide-card__desc { font-size: .85rem; color: var(--mid); margin: .2rem 0 .4rem; }
 .guide-card__meta { display: flex; gap: 1rem; font-size: .82rem; color: var(--mid); flex-wrap: wrap; }
 .guide-card__meta span { display: flex; align-items: center; gap: .25rem; }
 .guide-card__meta .material-symbols-rounded { font-size: .95rem; }
+
+/* Community guides section */
+.guides-community { padding: 2.5rem 0 3rem; }
+.guides-community__header {
+  display: flex; align-items: center; gap: .6rem;
+  margin-bottom: 1.25rem; flex-wrap: wrap;
+}
+.guides-community__header .material-symbols-rounded { color: var(--teal); font-size: 1.3rem; }
+.guides-community__title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 900; margin: 0; }
+.guides-community__sub { font-size: .85rem; color: var(--mid); margin-left: auto; }
+.guides-list--community .guide-card { border-color: rgba(42,180,160,.25); }
+.guide-card--community:hover { border-color: var(--teal); }
 .guide-card__actions { display: flex; padding: 0 .75rem; gap: .25rem; }
 .guide-card__btn {
   background: none; border: none; padding: .5rem;
@@ -85,6 +114,48 @@
   outline: none;
 }
 .guide-hero__name-input:focus { border-bottom-color: var(--teal); }
+.guide-hero__desc-input {
+  width: 100%; background: transparent; border: none;
+  border-bottom: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.75);
+  font-size: .95rem; font-family: inherit; padding: .2rem 0; margin-bottom: .85rem;
+  outline: none;
+}
+.guide-hero__desc-input:focus { border-bottom-color: var(--teal); }
+.guide-hero__desc-input::placeholder { color: rgba(255,255,255,.35); }
+.guide-hero__desc { color: rgba(255,255,255,.75); font-size: .95rem; margin: 0 0 .6rem; }
+.guide-hero__toggles-row {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .85rem;
+}
+.guide-hero__actions-row { margin-top: .75rem; }
+.guide-hero__public-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: rgba(42,180,160,.18); color: var(--teal);
+  font-size: .8rem; font-weight: 700; border-radius: 999px;
+  padding: .2rem .65rem; margin-top: .4rem;
+}
+.guide-toggle__hint { font-size: .8rem; color: rgba(255,255,255,.5); }
+
+/* Toggle switch */
+.guide-toggle {
+  display: inline-flex; align-items: center; gap: .5rem;
+  cursor: pointer; user-select: none;
+}
+.guide-toggle input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.guide-toggle__track {
+  position: relative; width: 34px; height: 18px;
+  background: rgba(255,255,255,.2); border-radius: 999px;
+  transition: background .2s;
+}
+.guide-toggle__track::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; transition: left .2s;
+}
+.guide-toggle input:checked ~ .guide-toggle__track { background: var(--teal); }
+.guide-toggle input:checked ~ .guide-toggle__track::after { left: 18px; }
+.guide-toggle__label { font-size: .85rem; color: rgba(255,255,255,.8); }
+.guide-toggle--public .guide-toggle__label { color: var(--teal); font-weight: 700; }
+
 .guide-hero__dates-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
 .guide-hero__date-input {
   background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);

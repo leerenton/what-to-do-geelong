@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
+<!-- End Google Tag Manager -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Guides — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="guides.css" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager -->
+
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo-link">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+      </a>
+      <nav class="nav__links">
+        <a href="eat.html">Eat</a>
+        <a href="stay.html">Stay</a>
+        <a href="index.html#offers">Offers</a>
+        <a href="editorial.html">Read</a>
+        <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
+      </nav>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="cgp-hero">
+    <div class="container cgp-hero__inner">
+      <span class="cgp-hero__eyebrow"><span class="material-symbols-rounded">public</span> Community</span>
+      <h1 class="cgp-hero__title">Community Guides</h1>
+      <p class="cgp-hero__sub">Real Geelong itineraries shared by locals — wine trails, weekend plans, foodie routes and more.</p>
+
+      <!-- Search -->
+      <div class="cgp-search-wrap">
+        <span class="material-symbols-rounded cgp-search-icon">search</span>
+        <input
+          class="cgp-search"
+          id="js-cg-search"
+          type="search"
+          placeholder="Search guides e.g. wine, waterfront, weekend…"
+          autocomplete="off"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="container" style="padding-top:1.25rem">
+    <div class="chip-row" id="js-cg-chips">
+      <button class="chip chip--active" data-filter="trending">🔥 Trending</button>
+      <button class="chip" data-filter="newest">✨ Newest</button>
+      <button class="chip" data-filter="anyday">🗓️ Any day</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <section class="page-section">
+    <div class="container">
+      <div id="js-cg-count" class="cgp-count"></div>
+      <div class="cgp-grid" id="js-cg-grid"></div>
+      <div class="cgp-empty" id="js-cg-empty" style="display:none">
+        <span class="material-symbols-rounded">search_off</span>
+        <p>No guides found. Try a different keyword.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="page-section page-section--alt">
+    <div class="container">
+      <div class="cgp-cta">
+        <div class="cgp-cta__icon">🗺️</div>
+        <div>
+          <h3 class="cgp-cta__title">Have a great Geelong itinerary?</h3>
+          <p class="cgp-cta__sub">Build a WTDGuide, set it to public, and share it with the community.</p>
+        </div>
+        <a href="guides.html" class="btn btn--teal btn--lg">Create a guide →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__logo">WHAT TO DO GEELONG!</div>
+      <p class="footer__copy">Your local guide to events, experiences & places to stay in Geelong, Victoria.</p>
+      <nav class="footer__nav">
+        <a href="#">About</a>
+        <a href="#">Submit an Event</a>
+        <a href="#">Advertise</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="sitemode.js?v=1"></script>
+  <script src="analytics.js?v=1"></script>
+  <script src="auth.js"></script>
+  <script src="view-tracker.js"></script>
+  <script src="guides.js"></script>
+  <script src="community-guides-page.js"></script>
+</body>
+</html>

@@ -7,30 +7,127 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=2" />
   <meta name="robots" content="noindex, nofollow" />
 </head>
 <body class="adm-body">
 
+<!-- Drawer overlay -->
+<div class="adm-drawer-overlay" id="js-drawer-overlay"></div>
+
+<!-- Edit / New Event Drawer -->
+<div class="adm-drawer" id="js-ev-drawer">
+  <div class="adm-drawer__head">
+    <h2 class="adm-drawer__title" id="js-drawer-title">New Event</h2>
+    <button class="adm-drawer__close" id="js-drawer-close">✕</button>
+  </div>
+  <div class="adm-drawer__body">
+
+    <div class="adm-field">
+      <label>Title *</label>
+      <input type="text" id="ef-title" placeholder="Event name" />
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Category</label>
+        <select id="ef-cat">
+          <option>Music</option><option>Markets</option><option>Arts</option>
+          <option>Food & Drink</option><option>Family</option><option>Outdoors</option>
+          <option>Community</option><option>Workshops</option><option>Sports</option>
+          <option>Theatre</option><option>Comedy</option><option>Festival</option>
+          <option>Exhibition</option><option>Other</option>
+        </select>
+      </div>
+      <div class="adm-field">
+        <label>Emoji</label>
+        <input type="text" id="ef-emoji" placeholder="🎵" maxlength="4" />
+      </div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Date (display)</label>
+        <input type="text" id="ef-date" placeholder="Sat 14 Jun" />
+      </div>
+      <div class="adm-field">
+        <label>Time</label>
+        <input type="text" id="ef-time" placeholder="7:30pm" />
+      </div>
+    </div>
+    <div class="adm-field">
+      <label>Location / Venue</label>
+      <input type="text" id="ef-location" placeholder="GPAC, 50 Little Malop St, Geelong" />
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Price</label>
+        <input type="text" id="ef-price" placeholder="Free or $25" />
+      </div>
+      <div class="adm-field">
+        <label>Ticket / Link URL</label>
+        <input type="url" id="ef-url" placeholder="https://…" />
+      </div>
+    </div>
+    <div class="adm-field">
+      <label>Description</label>
+      <textarea id="ef-desc" rows="3" placeholder="Short event description…"></textarea>
+    </div>
+    <div class="adm-field">
+      <label>Slug (URL)</label>
+      <input type="text" id="ef-slug" placeholder="auto-generated" />
+    </div>
+    <div class="adm-field">
+      <label>Associated Business</label>
+      <select id="ef-biz">
+        <option value="">None</option>
+      </select>
+    </div>
+
+    <!-- Hero image -->
+    <div class="adm-field">
+      <label>Hero Image</label>
+      <div class="adm-upload-zone" id="ef-img-zone">
+        <input type="file" id="ef-img-file" accept="image/*" />
+        📷 Drop an image here or click to upload
+      </div>
+      <img class="adm-upload-preview" id="ef-img-preview" style="display:none" alt="" />
+      <input type="url" id="ef-img" placeholder="Or paste an image URL…" style="margin-top:.4rem" />
+    </div>
+
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Latitude</label>
+        <input type="number" id="ef-lat" step="any" placeholder="-38.14" />
+      </div>
+      <div class="adm-field">
+        <label>Longitude</label>
+        <input type="number" id="ef-lng" step="any" placeholder="144.36" />
+      </div>
+    </div>
+
+  </div>
+  <div class="adm-drawer__footer">
+    <button class="adm-btn adm-btn--sm" id="js-ev-save">Save Event</button>
+    <button class="adm-btn adm-btn--outline adm-btn--sm" id="js-ev-cancel">Cancel</button>
+    <span id="js-ev-save-status" style="font-size:.82rem;margin-left:.5rem"></span>
+    <button class="adm-btn adm-btn--sm" style="background:var(--adm-red);margin-left:auto" id="js-ev-delete" hidden>Delete</button>
+  </div>
+</div>
+
 <div class="adm-layout">
   <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
-
   <div class="adm-main">
     <div class="adm-topbar">
       <span class="adm-topbar__title" id="js-adm-page-title">Events</span>
       <div class="adm-topbar__right">
         <span id="js-ev-count" style="font-size:.82rem;color:var(--adm-mid)"></span>
+        <button class="adm-btn adm-btn--sm" id="js-new-ev-btn">+ New Event</button>
       </div>
     </div>
-
     <div class="adm-content">
       <div class="adm-stats" style="margin-bottom:1.5rem" id="js-ev-stats"></div>
-
       <div class="adm-toolbar">
         <div class="adm-search">
-          <span class="adm-search__icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </span>
+          <span class="adm-search__icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
           <input type="search" id="js-ev-search" placeholder="Search events…" />
         </div>
         <select class="adm-select" id="js-ev-cat">
@@ -38,14 +135,14 @@
           <option>Music</option><option>Markets</option><option>Arts</option>
           <option>Food & Drink</option><option>Family</option><option>Outdoors</option>
           <option>Community</option><option>Workshops</option><option>Sports</option>
+          <option>Theatre</option><option>Comedy</option><option>Festival</option>
         </select>
         <select class="adm-select" id="js-ev-sort">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
-          <option value="event-date">By event date</option>
+          <option value="alpha">A – Z</option>
         </select>
       </div>
-
       <div class="adm-table-wrap" id="js-ev-table">
         <div class="adm-table-empty">Loading events…</div>
       </div>
@@ -57,94 +154,200 @@
 <script src="supabase.js?v=2"></script>
 <script src="wtdgadmin.js?v=1"></script>
 <script src="wtdgadmin-shell.js?v=1"></script>
+<script src="wtdgadmin-upload.js"></script>
 <script>
-let allEvents = [];
+let allEvents = [], allBiz = [], editingId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const admin = await requireAdminAuth();
   if (!admin) return;
   initAdminShell('Events');
-  await loadEvents();
+
+  document.getElementById('js-new-ev-btn').addEventListener('click', () => openDrawer(null));
+  document.getElementById('js-drawer-close').addEventListener('click', closeDrawer);
+  document.getElementById('js-ev-cancel').addEventListener('click', closeDrawer);
+  document.getElementById('js-drawer-overlay').addEventListener('click', closeDrawer);
+  document.getElementById('js-ev-save').addEventListener('click', saveEvent);
+  document.getElementById('js-ev-delete').addEventListener('click', deleteEvent);
+
   ['js-ev-search','js-ev-cat','js-ev-sort'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', renderEvents);
-    document.getElementById(id)?.addEventListener('change', renderEvents);
+    document.getElementById(id)?.addEventListener('input', renderTable);
+    document.getElementById(id)?.addEventListener('change', renderTable);
   });
+
+  // Auto-generate slug from title
+  document.getElementById('ef-title').addEventListener('input', () => {
+    if (!editingId) {
+      const t = document.getElementById('ef-title').value;
+      document.getElementById('ef-slug').value = t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    }
+  });
+
+  // Bind image upload
+  bindUploadZone({
+    zoneEl: document.getElementById('ef-img-zone'),
+    fileInput: document.getElementById('ef-img-file'),
+    urlInput: document.getElementById('ef-img'),
+    previewEl: document.getElementById('ef-img-preview'),
+    folder: 'events',
+  });
+
+  await Promise.all([loadEvents(), loadBizList()]);
 });
+
+async function loadBizList() {
+  const { data } = await db.from('businesses').select('id,name').order('name');
+  allBiz = data || [];
+  const sel = document.getElementById('ef-biz');
+  allBiz.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.id; opt.textContent = b.name;
+    sel.appendChild(opt);
+  });
+}
 
 async function loadEvents() {
   const { data, error } = await db.from('events').select('*').order('created_at', { ascending: false });
-  if (error) {
-    document.getElementById('js-ev-table').innerHTML = '<div class="adm-table-empty">Could not load events.</div>';
-    return;
-  }
+  if (error) { document.getElementById('js-ev-table').innerHTML = '<div class="adm-table-empty">Could not load events.</div>'; return; }
   allEvents = data || [];
+  updateStats();
+  renderTable();
+}
+
+function updateStats() {
   const now = new Date();
-  const upcoming = allEvents.filter(e => e.date && new Date(e.date) >= now);
-  const past     = allEvents.filter(e => e.date && new Date(e.date) < now);
-  const free     = allEvents.filter(e => e.price === 'Free' || e.price === 0 || e.price === '$0');
-
-  document.getElementById('js-ev-count').textContent = `${allEvents.length} total`;
+  const upcoming = allEvents.filter(e => e.date && new Date(e.date) >= now).length;
+  const free = allEvents.filter(e => String(e.price||'').toLowerCase() === 'free').length;
+  document.getElementById('js-ev-count').textContent = `${allEvents.length} events`;
   document.getElementById('js-ev-stats').innerHTML = `
-    ${sc('Total Events', allEvents.length)}
-    ${sc('Upcoming', upcoming.length, 'teal')}
-    ${sc('Past', past.length)}
-    ${sc('Free Entry', free.length)}`;
-
-  renderEvents();
+    ${sc('Total',allEvents.length)} ${sc('Upcoming',upcoming,'teal')} ${sc('Free Entry',free)}`;
 }
 
-function sc(label, value, variant='') {
-  return `<div class="adm-stat${variant?' adm-stat--'+variant:''}"><div class="adm-stat__label">${label}</div><div class="adm-stat__value">${value}</div></div>`;
+function sc(label, value, v='') {
+  return `<div class="adm-stat${v?' adm-stat--'+v:''}"><div class="adm-stat__label">${label}</div><div class="adm-stat__value">${value}</div></div>`;
 }
 
-function renderEvents() {
+function renderTable() {
   const q    = document.getElementById('js-ev-search').value.toLowerCase();
   const cat  = document.getElementById('js-ev-cat').value;
   const sort = document.getElementById('js-ev-sort').value;
-
-  let list = allEvents.filter(e =>
-    (e.title||'').toLowerCase().includes(q) &&
+  let list   = allEvents.filter(e =>
+    (!q   || (e.title||'').toLowerCase().includes(q) || (e.location||'').toLowerCase().includes(q)) &&
     (!cat || (e.category||'') === cat)
   );
-
   if (sort === 'oldest') list.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
-  else if (sort === 'event-date') list.sort((a,b) => new Date(a.date||0)-new Date(b.date||0));
+  else if (sort === 'alpha') list.sort((a,b) => (a.title||'').localeCompare(b.title||''));
 
-  if (!list.length) {
-    document.getElementById('js-ev-table').innerHTML = '<div class="adm-table-empty">No events found.</div>';
-    return;
-  }
+  if (!list.length) { document.getElementById('js-ev-table').innerHTML = '<div class="adm-table-empty">No events found.</div>'; return; }
 
-  const now = new Date();
-  const rows = list.map(e => {
-    const eDate = e.date ? new Date(e.date) : null;
-    const isPast = eDate && eDate < now;
-    return `<tr>
+  const rows = list.map(e => `
+    <tr>
       <td>
-        <div style="font-weight:600">${e.title || '—'}</div>
-        <div style="font-size:.75rem;color:var(--adm-mid)">${e.location || ''}</div>
+        <span style="font-size:1.1rem;margin-right:.35rem">${e.emoji||'📅'}</span>
+        <strong>${e.title||'—'}</strong>
+        <div style="font-size:.75rem;color:var(--adm-mid);margin-top:.1rem">${e.location||''}</div>
       </td>
-      <td><span class="adm-badge adm-badge--blue">${e.category || '—'}</span></td>
-      <td style="font-size:.82rem;color:${isPast?'var(--adm-mid)':'var(--adm-text)'}">${e.date || '—'}</td>
-      <td style="font-size:.82rem">${e.price || '—'}</td>
-      <td style="color:var(--adm-mid);font-size:.78rem">${fmtDate(e.created_at)}</td>
-      <td>
-        <a href="event.html?id=${e.id}" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm">View</a>
+      <td><span class="adm-badge adm-badge--blue">${e.category||'—'}</span></td>
+      <td style="font-size:.82rem">${e.date||'—'}</td>
+      <td style="font-size:.82rem">${e.price||'—'}</td>
+      <td style="display:flex;gap:.3rem;flex-wrap:wrap">
+        <button class="adm-btn adm-btn--sm adm-btn--outline" onclick="openDrawer('${e.id}')">Edit</button>
       </td>
-    </tr>`;
-  }).join('');
+    </tr>`).join('');
 
   document.getElementById('js-ev-table').innerHTML = `
     <table class="adm-table">
-      <thead><tr><th>Event</th><th>Category</th><th>Date</th><th>Price</th><th>Added</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Event</th><th>Category</th><th>Date</th><th>Price</th><th>Actions</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
+}
+
+function openDrawer(id) {
+  editingId = id;
+  const e = id ? allEvents.find(x => String(x.id) === String(id)) : null;
+  document.getElementById('js-drawer-title').textContent = e ? 'Edit Event' : 'New Event';
+  document.getElementById('ef-title').value    = e?.title    || '';
+  document.getElementById('ef-cat').value      = e?.category || 'Music';
+  document.getElementById('ef-emoji').value    = e?.emoji    || '';
+  document.getElementById('ef-date').value     = e?.date     || '';
+  document.getElementById('ef-time').value     = e?.time     || '';
+  document.getElementById('ef-location').value = e?.location || '';
+  document.getElementById('ef-price').value    = e?.price    || '';
+  document.getElementById('ef-url').value      = e?.url      || '';
+  document.getElementById('ef-desc').value     = e?.description || '';
+  document.getElementById('ef-slug').value     = e?.slug     || '';
+  document.getElementById('ef-biz').value      = e?.business_id || '';
+  document.getElementById('ef-img').value      = e?.img      || '';
+  document.getElementById('ef-lat').value      = e?.lat      || '';
+  document.getElementById('ef-lng').value      = e?.lng      || '';
+
+  const prev = document.getElementById('ef-img-preview');
+  prev.src = e?.img || ''; prev.style.display = e?.img ? 'block' : 'none';
+
+  document.getElementById('js-ev-delete').hidden = !e;
+  document.getElementById('js-ev-save-status').textContent = '';
+  document.getElementById('js-ev-drawer').classList.add('open');
+  document.getElementById('js-drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('js-ev-drawer').classList.remove('open');
+  document.getElementById('js-drawer-overlay').classList.remove('open');
+  editingId = null;
+}
+
+async function saveEvent() {
+  const title = document.getElementById('ef-title').value.trim();
+  if (!title) { alert('Title is required.'); return; }
+  const slug = document.getElementById('ef-slug').value.trim() ||
+    title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+  const payload = {
+    title, slug,
+    category:    document.getElementById('ef-cat').value,
+    emoji:       document.getElementById('ef-emoji').value.trim() || null,
+    date:        document.getElementById('ef-date').value.trim()  || null,
+    time:        document.getElementById('ef-time').value.trim()  || null,
+    location:    document.getElementById('ef-location').value.trim() || null,
+    price:       document.getElementById('ef-price').value.trim()    || null,
+    url:         document.getElementById('ef-url').value.trim()       || null,
+    description: document.getElementById('ef-desc').value.trim()     || null,
+    business_id: document.getElementById('ef-biz').value             || null,
+    img:         document.getElementById('ef-img').value.trim()       || null,
+    lat:         parseFloat(document.getElementById('ef-lat').value)  || null,
+    lng:         parseFloat(document.getElementById('ef-lng').value)  || null,
+  };
+
+  const status = document.getElementById('js-ev-save-status');
+  status.textContent = 'Saving…'; status.style.color = 'var(--adm-mid)';
+
+  let error;
+  if (editingId) {
+    ({ error } = await db.from('events').update(payload).eq('id', editingId));
+  } else {
+    ({ error } = await db.from('events').insert(payload));
+  }
+
+  if (error) { status.textContent = '✗ ' + error.message; status.style.color = 'var(--adm-red)'; return; }
+  status.textContent = '✓ Saved'; status.style.color = 'var(--adm-green)';
+  closeDrawer();
+  await loadEvents();
+}
+
+async function deleteEvent() {
+  if (!editingId || !confirm('Delete this event? This cannot be undone.')) return;
+  const { error } = await db.from('events').delete().eq('id', editingId);
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  closeDrawer();
+  await loadEvents();
 }
 
 function fmtDate(d) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
 }
+
+window.openDrawer = openDrawer;
 </script>
 </body>
 </html>

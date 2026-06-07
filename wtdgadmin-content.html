@@ -7,10 +7,39 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=2" />
+  <!-- Quill WYSIWYG -->
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
   <meta name="robots" content="noindex, nofollow" />
   <style>
-    .adm-tabs { display: flex; gap: .35rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--adm-border); padding-bottom: 0; }
+    /* Quill dark-mode overrides */
+    .ql-toolbar.ql-snow {
+      background: var(--adm-card2); border-color: var(--adm-border) !important;
+      border-radius: .45rem .45rem 0 0;
+    }
+    .ql-container.ql-snow {
+      background: var(--adm-card); border-color: var(--adm-border) !important;
+      border-radius: 0 0 .45rem .45rem; color: var(--adm-text);
+      font-family: 'DM Sans', sans-serif; font-size: .9rem; min-height: 280px;
+    }
+    .ql-editor { min-height: 280px; }
+    .ql-snow .ql-stroke { stroke: var(--adm-mid) !important; }
+    .ql-snow .ql-fill  { fill:   var(--adm-mid) !important; }
+    .ql-snow .ql-picker-label { color: var(--adm-mid) !important; }
+    .ql-snow .ql-picker-options { background: var(--adm-card) !important; border-color: var(--adm-border) !important; }
+    .ql-snow .ql-picker-item { color: var(--adm-text) !important; }
+    .ql-snow.ql-toolbar button:hover .ql-stroke,
+    .ql-snow.ql-toolbar button.ql-active .ql-stroke { stroke: var(--adm-teal) !important; }
+    .ql-snow.ql-toolbar button:hover .ql-fill,
+    .ql-snow.ql-toolbar button.ql-active .ql-fill  { fill:   var(--adm-teal) !important; }
+    .ql-snow .ql-picker-label:hover,
+    .ql-snow .ql-picker-label.ql-active { color: var(--adm-teal) !important; }
+    .ql-editor p, .ql-editor h2, .ql-editor h3 { margin-bottom: .5rem; }
+    .ql-editor blockquote { border-left: 3px solid var(--adm-teal); padding-left: .85rem; color: var(--adm-mid); }
+    .ql-editor a { color: var(--adm-teal); }
+
+    /* Tab system */
+    .adm-tabs { display: flex; gap: .35rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--adm-border); }
     .adm-tab {
       padding: .6rem 1.1rem; font-size: .85rem; font-weight: 600;
       color: var(--adm-mid); cursor: pointer; border: none; background: none;
@@ -21,22 +50,88 @@
     .adm-tab.active { color: var(--adm-teal); border-bottom-color: var(--adm-teal); }
     .adm-tab-panel { display: none; }
     .adm-tab-panel.active { display: block; }
-    .adm-edit-form { background: var(--adm-card); border: 1px solid var(--adm-border); border-radius: var(--adm-radius); padding: 1.5rem; margin-bottom: 1.5rem; }
-    .adm-edit-form h3 { font-size: .95rem; font-weight: 700; margin-bottom: 1rem; }
-    .adm-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
-    @media (max-width: 600px) { .adm-form-grid { grid-template-columns: 1fr; } }
-    .adm-form-field { display: flex; flex-direction: column; gap: .3rem; }
-    .adm-form-field label { font-size: .78rem; font-weight: 600; color: var(--adm-mid); }
-    .adm-form-field input, .adm-form-field select, .adm-form-field textarea {
-      background: var(--adm-bg); border: 1px solid var(--adm-border); border-radius: .45rem;
-      padding: .55rem .75rem; color: var(--adm-text); font-size: .85rem; font-family: inherit; outline: none;
-    }
-    .adm-form-field input:focus, .adm-form-field select:focus, .adm-form-field textarea:focus { border-color: var(--adm-teal); }
-    .adm-form-field textarea { resize: vertical; min-height: 80px; }
-    .adm-form-full { grid-column: 1 / -1; }
   </style>
 </head>
 <body class="adm-body">
+
+<!-- Drawer overlay -->
+<div class="adm-drawer-overlay" id="js-drawer-overlay"></div>
+
+<!-- Article Edit Drawer -->
+<div class="adm-drawer" id="js-art-drawer" style="width:min(720px,100vw)">
+  <div class="adm-drawer__head">
+    <h2 class="adm-drawer__title" id="js-drawer-title">New Article</h2>
+    <button class="adm-drawer__close" id="js-drawer-close">✕</button>
+  </div>
+  <div class="adm-drawer__body">
+
+    <div class="adm-field">
+      <label>Headline *</label>
+      <input type="text" id="af-title" placeholder="Article headline" />
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Type</label>
+        <select id="af-type">
+          <option value="guide">Guide</option>
+          <option value="news">News</option>
+          <option value="history">What Was Geelong</option>
+          <option value="feature">Feature</option>
+        </select>
+      </div>
+      <div class="adm-field">
+        <label>Associate to Business</label>
+        <select id="af-business"><option value="">None</option></select>
+      </div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Slug (URL)</label>
+        <input type="text" id="af-slug" placeholder="auto-generated from title" />
+      </div>
+      <div class="adm-field">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="af-tags" placeholder="geelong, food, news" />
+      </div>
+    </div>
+    <div class="adm-field">
+      <label>Excerpt / Summary</label>
+      <textarea id="af-excerpt" rows="2" placeholder="Short description shown on article cards…"></textarea>
+    </div>
+
+    <!-- Hero image with upload -->
+    <div class="adm-field">
+      <label>Hero Image</label>
+      <div class="adm-upload-zone" id="af-img-zone">
+        <input type="file" id="af-img-file" accept="image/*" />
+        📷 Drop a hero image here or click to upload
+      </div>
+      <img class="adm-upload-preview" id="af-img-preview" style="display:none;max-height:200px" alt="" />
+      <input type="url" id="af-img" placeholder="Or paste an image URL (Unsplash etc.)…" style="margin-top:.4rem" />
+    </div>
+
+    <!-- WYSIWYG -->
+    <div class="adm-field">
+      <label>Content</label>
+      <div id="af-quill-editor"></div>
+      <!-- Hidden textarea holds HTML for save -->
+      <textarea id="af-content" style="display:none"></textarea>
+    </div>
+
+    <!-- Inline image upload helper note -->
+    <p style="font-size:.75rem;color:var(--adm-mid);margin-top:.35rem">
+      💡 To insert an image inside the article: click the 📷 button in the Quill toolbar — it opens a file picker and uploads directly to storage.
+    </p>
+
+  </div>
+  <div class="adm-drawer__footer">
+    <button class="adm-btn adm-btn--sm" id="js-art-save">Save Article</button>
+    <button class="adm-btn adm-btn--outline adm-btn--sm" id="js-art-cancel">Cancel</button>
+    <span id="js-art-save-status" style="font-size:.82rem;margin-left:.5rem"></span>
+    <button class="adm-btn adm-btn--sm" style="background:var(--adm-red);margin-left:auto" id="js-art-delete" hidden>Delete</button>
+  </div>
+</div>
+
 <div class="adm-layout">
   <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
   <div class="adm-main">
@@ -47,67 +142,13 @@
       </div>
     </div>
     <div class="adm-content">
-
       <div class="adm-tabs">
         <button class="adm-tab active" data-tab="articles">Articles / News</button>
         <button class="adm-tab" data-tab="submissions">Business Submissions</button>
       </div>
 
-      <!-- Articles tab -->
+      <!-- Articles -->
       <div class="adm-tab-panel active" id="js-tab-articles">
-
-        <!-- New / Edit form (hidden by default) -->
-        <div class="adm-edit-form" id="js-article-form" style="display:none">
-          <h3 id="js-form-title">New Article</h3>
-          <div class="adm-form-grid">
-            <div class="adm-form-field adm-form-full">
-              <label>Headline *</label>
-              <input type="text" id="af-title" placeholder="Article headline" />
-            </div>
-            <div class="adm-form-field">
-              <label>Type</label>
-              <select id="af-type">
-                <option value="guide">Guide</option>
-                <option value="news">News</option>
-                <option value="feature">Feature</option>
-                <option value="interview">Interview</option>
-                <option value="listicle">List</option>
-              </select>
-            </div>
-            <div class="adm-form-field">
-              <label>Associate to Business</label>
-              <select id="af-business">
-                <option value="">None</option>
-              </select>
-            </div>
-            <div class="adm-form-field">
-              <label>Hero Image URL</label>
-              <input type="url" id="af-img" placeholder="https://…" />
-            </div>
-            <div class="adm-form-field">
-              <label>Slug (URL)</label>
-              <input type="text" id="af-slug" placeholder="auto-generated from title" />
-            </div>
-            <div class="adm-form-field">
-              <label>Tags (comma separated)</label>
-              <input type="text" id="af-tags" placeholder="food, geelong, winter" />
-            </div>
-            <div class="adm-form-field adm-form-full">
-              <label>Excerpt / Summary</label>
-              <textarea id="af-excerpt" placeholder="Short description shown in cards…"></textarea>
-            </div>
-            <div class="adm-form-field adm-form-full">
-              <label>Content (HTML or plain text)</label>
-              <textarea id="af-content" style="min-height:160px" placeholder="Full article content…"></textarea>
-            </div>
-          </div>
-          <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap">
-            <button class="adm-btn adm-btn--sm" id="js-save-article">Save Article</button>
-            <button class="adm-btn adm-btn--outline adm-btn--sm" onclick="cancelArticleForm()">Cancel</button>
-            <div id="js-article-save-status" style="font-size:.82rem;align-self:center"></div>
-          </div>
-        </div>
-
         <div class="adm-toolbar">
           <div class="adm-search">
             <span class="adm-search__icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
@@ -115,20 +156,16 @@
           </div>
           <select class="adm-select" id="js-art-type">
             <option value="">All types</option>
-            <option value="guide">Guide</option>
-            <option value="news">News</option>
-            <option value="feature">Feature</option>
-            <option value="interview">Interview</option>
-            <option value="listicle">List</option>
+            <option value="guide">Guide</option><option value="news">News</option>
+            <option value="history">History</option><option value="feature">Feature</option>
           </select>
         </div>
-
         <div class="adm-table-wrap" id="js-articles-table">
           <div class="adm-table-empty">Loading articles…</div>
         </div>
       </div>
 
-      <!-- Business submissions tab -->
+      <!-- Submissions -->
       <div class="adm-tab-panel" id="js-tab-submissions">
         <div class="adm-toolbar">
           <div class="adm-search">
@@ -137,54 +174,112 @@
           </div>
           <select class="adm-select" id="js-sub-status">
             <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <select class="adm-select" id="js-sub-type">
-            <option value="">All types</option>
-            <option value="event">Event</option>
-            <option value="business">Business</option>
-            <option value="promo">Promo/Offer</option>
+            <option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
           </select>
         </div>
         <div class="adm-table-wrap" id="js-submissions-table">
           <div class="adm-table-empty">Loading submissions…</div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script src="supabase.js?v=2"></script>
 <script src="wtdgadmin.js?v=1"></script>
 <script src="wtdgadmin-shell.js?v=1"></script>
+<script src="wtdgadmin-upload.js"></script>
 <script>
 let allArticles = [], allBizList = [], allSubmissions = [];
-let editingArticleId = null;
+let editingId = null, quill = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const admin = await requireAdminAuth();
   if (!admin) return;
   initAdminShell('Content');
   setupTabs();
+  initQuill();
 
-  document.getElementById('js-new-article-btn').addEventListener('click', showArticleForm);
-  document.getElementById('js-save-article').addEventListener('click', saveArticle);
+  document.getElementById('js-new-article-btn').addEventListener('click', () => openDrawer(null));
+  document.getElementById('js-drawer-close').addEventListener('click', closeDrawer);
+  document.getElementById('js-art-cancel').addEventListener('click', closeDrawer);
+  document.getElementById('js-drawer-overlay').addEventListener('click', closeDrawer);
+  document.getElementById('js-art-save').addEventListener('click', saveArticle);
+  document.getElementById('js-art-delete').addEventListener('click', deleteArticle);
+
   ['js-art-search','js-art-type'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', renderArticles);
     document.getElementById(id)?.addEventListener('change', renderArticles);
   });
-  ['js-sub-search','js-sub-status','js-sub-type'].forEach(id => {
+  ['js-sub-search','js-sub-status'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', renderSubmissions);
     document.getElementById(id)?.addEventListener('change', renderSubmissions);
   });
 
-  await Promise.all([loadArticles(), loadBusinessList(), loadSubmissions()]);
+  document.getElementById('af-title').addEventListener('input', () => {
+    if (!editingId) {
+      const t = document.getElementById('af-title').value;
+      document.getElementById('af-slug').value = t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    }
+  });
+
+  // Bind hero image upload ONCE at init — not on every drawer open
+  bindUploadZone({
+    zoneEl:    document.getElementById('af-img-zone'),
+    fileInput: document.getElementById('af-img-file'),
+    urlInput:  document.getElementById('af-img'),
+    previewEl: document.getElementById('af-img-preview'),
+    folder:    'articles',
+  });
+
+  await Promise.all([loadArticles(), loadBizList(), loadSubmissions()]);
 });
 
+// ── Quill WYSIWYG ─────────────────────────────────────────
+function initQuill() {
+  // Custom image handler — uploads to Supabase Storage then inserts into editor
+  function imageHandler() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+      const range = quill.getSelection(true);
+      quill.insertText(range.index, '⏳ Uploading image…', 'user');
+      const url = await uploadMediaFile(file, 'articles');
+      quill.deleteText(range.index, 19); // remove placeholder
+      if (url) {
+        quill.insertEmbed(range.index, 'image', url, 'user');
+        quill.setSelection(range.index + 1);
+      } else {
+        quill.insertText(range.index, '[Upload failed]', 'user');
+      }
+    };
+  }
+
+  quill = new Quill('#af-quill-editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: {
+        container: [
+          [{ header: [2, 3, false] }],
+          ['bold', 'italic', 'underline'],
+          ['blockquote', 'link'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['image'],
+          ['clean'],
+        ],
+        handlers: { image: imageHandler },
+      },
+    },
+  });
+}
+
+// ── Tabs ──────────────────────────────────────────────────
 function setupTabs() {
   document.querySelectorAll('.adm-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -196,15 +291,15 @@ function setupTabs() {
   });
 }
 
-// ── ARTICLES ──────────────────────────────────────────────────
+// ── Articles ──────────────────────────────────────────────
 async function loadArticles() {
   const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
   allArticles = data || [];
   renderArticles();
 }
 
-async function loadBusinessList() {
-  const { data } = await db.from('businesses').select('id, name').order('name');
+async function loadBizList() {
+  const { data } = await db.from('businesses').select('id,name').order('name');
   allBizList = data || [];
   const sel = document.getElementById('af-business');
   allBizList.forEach(b => {
@@ -218,7 +313,7 @@ function renderArticles() {
   const q    = document.getElementById('js-art-search').value.toLowerCase();
   const type = document.getElementById('js-art-type').value;
   let list = allArticles.filter(a =>
-    (!q || (a.title||'').toLowerCase().includes(q)) &&
+    (!q    || (a.title||'').toLowerCase().includes(q)) &&
     (!type || a.type === type)
   );
   if (!list.length) {
@@ -228,101 +323,114 @@ function renderArticles() {
   const rows = list.map(a => `
     <tr>
       <td>
-        <div style="font-weight:600">${a.title || '—'}</div>
-        <div style="font-size:.75rem;color:var(--adm-mid)">${a.slug || ''}</div>
+        ${a.hero_img ? `<img src="${a.hero_img}" style="width:48px;height:36px;object-fit:cover;border-radius:.35rem;margin-right:.5rem;vertical-align:middle" />` : ''}
+        <strong>${a.title||'—'}</strong>
+        <div style="font-size:.75rem;color:var(--adm-mid);margin-top:.1rem">${a.slug||''}</div>
       </td>
-      <td><span class="adm-badge adm-badge--blue">${a.type || '—'}</span></td>
-      <td style="font-size:.78rem;color:var(--adm-mid)">${a.business_id ? (allBizList.find(b=>b.id===a.business_id)?.name || a.business_id) : '—'}</td>
-      <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(a.created_at)}</td>
-      <td style="display:flex;gap:.35rem;flex-wrap:wrap">
-        <button class="adm-btn adm-btn--outline adm-btn--sm" onclick="editArticle('${a.id}')">Edit</button>
+      <td><span class="adm-badge adm-badge--blue">${a.type||'—'}</span></td>
+      <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(a.created_at||a.published_at)}</td>
+      <td style="display:flex;gap:.3rem;flex-wrap:wrap">
+        <button class="adm-btn adm-btn--sm adm-btn--outline" onclick="openDrawer('${a.id}')">Edit</button>
         <a href="article.html?s=${a.slug}" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm">View</a>
-        <button class="adm-btn adm-btn--sm" style="background:var(--adm-red)" onclick="deleteArticle('${a.id}')">Delete</button>
       </td>
     </tr>`).join('');
   document.getElementById('js-articles-table').innerHTML = `
     <table class="adm-table">
-      <thead><tr><th>Title</th><th>Type</th><th>Business</th><th>Created</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Actions</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 }
 
-function showArticleForm(articleData = null) {
-  editingArticleId = articleData?.id || null;
-  document.getElementById('js-form-title').textContent = articleData ? 'Edit Article' : 'New Article';
-  document.getElementById('af-title').value    = articleData?.title || '';
-  document.getElementById('af-type').value     = articleData?.type || 'guide';
-  document.getElementById('af-business').value = articleData?.business_id || '';
-  document.getElementById('af-img').value      = articleData?.hero_img || '';
-  document.getElementById('af-slug').value     = articleData?.slug || '';
-  document.getElementById('af-tags').value     = (articleData?.tags || []).join(', ');
-  document.getElementById('af-excerpt').value  = articleData?.excerpt || '';
-  document.getElementById('af-content').value  = articleData?.content || '';
-  document.getElementById('js-article-form').style.display = '';
-  document.getElementById('js-article-form').scrollIntoView({ behavior: 'smooth' });
+function openDrawer(id) {
+  editingId = id;
+  const a = id ? allArticles.find(x => String(x.id) === String(id)) : null;
+  document.getElementById('js-drawer-title').textContent = a ? 'Edit Article' : 'New Article';
+  document.getElementById('af-title').value    = a?.title    || '';
+  document.getElementById('af-type').value     = a?.type     || 'news';
+  document.getElementById('af-business').value = (a?.business_ids || [])[0] || '';
+  document.getElementById('af-slug').value     = a?.slug     || '';
+  document.getElementById('af-tags').value     = (a?.tags || []).join(', ');
+  document.getElementById('af-excerpt').value  = a?.excerpt  || '';
+  document.getElementById('af-img').value      = a?.hero_img || '';
+
+  // Load content into Quill
+  if (quill) {
+    quill.root.innerHTML = a?.content || '';
+  }
+
+  const prev = document.getElementById('af-img-preview');
+  const heroImg = a?.hero_img || '';
+  prev.src = heroImg; prev.style.display = heroImg ? 'block' : 'none';
+
+  document.getElementById('js-art-delete').hidden = !a;
+  document.getElementById('js-art-save-status').textContent = '';
+  document.getElementById('js-art-drawer').classList.add('open');
+  document.getElementById('js-drawer-overlay').classList.add('open');
 }
 
-function cancelArticleForm() {
-  document.getElementById('js-article-form').style.display = 'none';
-  editingArticleId = null;
-}
-
-function editArticle(id) {
-  const a = allArticles.find(x => x.id === id);
-  if (a) showArticleForm(a);
-}
-
-async function deleteArticle(id) {
-  if (!confirm('Delete this article? This cannot be undone.')) return;
-  const { error } = await db.from('articles').delete().eq('id', id);
-  if (error) { alert('Delete failed: ' + error.message); return; }
-  allArticles = allArticles.filter(a => a.id !== id);
-  renderArticles();
+function closeDrawer() {
+  document.getElementById('js-art-drawer').classList.remove('open');
+  document.getElementById('js-drawer-overlay').classList.remove('open');
+  editingId = null;
 }
 
 async function saveArticle() {
   const title = document.getElementById('af-title').value.trim();
-  if (!title) { alert('Title is required.'); return; }
+  if (!title) { alert('Headline is required.'); return; }
 
   const slug = document.getElementById('af-slug').value.trim() ||
-    title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+  // Get HTML from Quill
+  const content = quill ? quill.root.innerHTML : document.getElementById('af-content').value;
 
   const payload = {
-    title,
-    type:        document.getElementById('af-type').value,
-    business_id: document.getElementById('af-business').value || null,
-    hero_img:    document.getElementById('af-img').value.trim() || null,
-    slug,
+    title, slug,
+    type:         document.getElementById('af-type').value,
+    business_ids: document.getElementById('af-business').value ? [document.getElementById('af-business').value] : [],
+    hero_img:     document.getElementById('af-img').value.trim() || null,
     tags:        document.getElementById('af-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
     excerpt:     document.getElementById('af-excerpt').value.trim() || null,
-    content:     document.getElementById('af-content').value.trim() || null,
-    updated_at:  new Date().toISOString(),
+    content,
   };
 
-  const statusEl = document.getElementById('js-article-save-status');
-  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--adm-mid)';
+  const status = document.getElementById('js-art-save-status');
+  status.textContent = 'Saving…'; status.style.color = 'var(--adm-mid)';
 
   let error;
-  if (editingArticleId) {
-    ({ error } = await db.from('articles').update(payload).eq('id', editingArticleId));
+  if (editingId) {
+    ({ error } = await db.from('articles').update(payload).eq('id', editingId));
+    if (!error) {
+      const idx = allArticles.findIndex(a => String(a.id) === String(editingId));
+      if (idx >= 0) allArticles[idx] = { ...allArticles[idx], ...payload };
+      // Re-fetch just this article to get the true saved state
+      const { data: fresh } = await db.from('articles').select('*').eq('id', editingId).single();
+      if (fresh) allArticles[idx >= 0 ? idx : allArticles.length] = fresh;
+    }
   } else {
-    payload.created_at = new Date().toISOString();
+    payload.id          = slug;
+    payload.created_at  = new Date().toISOString();
+    payload.published_at = new Date().toISOString().split('T')[0];
     ({ error } = await db.from('articles').insert(payload));
   }
 
-  if (error) {
-    statusEl.textContent = '✗ ' + error.message; statusEl.style.color = 'var(--adm-red)';
-    return;
-  }
-  statusEl.textContent = '✓ Saved'; statusEl.style.color = 'var(--adm-green)';
-  cancelArticleForm();
+  if (error) { status.textContent = '✗ ' + error.message; status.style.color = 'var(--adm-red)'; return; }
+  status.textContent = '✓ Saved!'; status.style.color = 'var(--adm-green)';
+  setTimeout(closeDrawer, 800);
   await loadArticles();
 }
 
-// ── BUSINESS SUBMISSIONS ──────────────────────────────────────
+async function deleteArticle() {
+  if (!editingId || !confirm('Delete this article permanently?')) return;
+  const { error } = await db.from('articles').delete().eq('id', editingId);
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  closeDrawer();
+  await loadArticles();
+}
+
+// ── Submissions ────────────────────────────────────────────
 async function loadSubmissions() {
-  // Try a 'submissions' table — falls back gracefully if not yet created
-  const { data } = await db.from('submissions').select('*').order('created_at', { ascending: false });
+  const { data } = await db.from('submissions').select('*').order('created_at', { ascending: false }).limit(200);
   allSubmissions = data || [];
   renderSubmissions();
 }
@@ -330,58 +438,30 @@ async function loadSubmissions() {
 function renderSubmissions() {
   const q      = document.getElementById('js-sub-search').value.toLowerCase();
   const status = document.getElementById('js-sub-status').value;
-  const type   = document.getElementById('js-sub-type').value;
-
   let list = allSubmissions.filter(s =>
-    (!q || (s.title||s.name||'').toLowerCase().includes(q) || (s.business_name||'').toLowerCase().includes(q)) &&
-    (!status || s.status === status) &&
-    (!type || s.type === type)
+    (!q      || (s.title||s.name||'').toLowerCase().includes(q)) &&
+    (!status || s.status === status)
   );
-
-  if (allSubmissions.length === 0) {
-    document.getElementById('js-submissions-table').innerHTML = `<div class="adm-table-empty">
-      No submissions yet — or run setup SQL:<br><br>
-      <pre style="background:var(--adm-card2);padding:1rem;border-radius:.5rem;font-size:.72rem;text-align:left;overflow:auto">
-CREATE TABLE IF NOT EXISTS submissions (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  type text, -- 'event' | 'business' | 'promo'
-  title text, name text, business_name text,
-  description text, contact_email text,
-  data jsonb, status text DEFAULT 'pending',
-  created_at timestamptz DEFAULT now()
-);
-ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "insert_anon" ON submissions FOR INSERT WITH CHECK (true);
-CREATE POLICY "admin_all"   ON submissions FOR ALL   USING (true);
-GRANT ALL ON submissions TO anon, authenticated;
-      </pre>
-    </div>`;
+  if (!allSubmissions.length) {
+    document.getElementById('js-submissions-table').innerHTML = `<div class="adm-table-empty">No submissions yet. Create the submissions table via the SQL editor first.</div>`;
     return;
   }
-
   if (!list.length) {
     document.getElementById('js-submissions-table').innerHTML = '<div class="adm-table-empty">No submissions match filters.</div>';
     return;
   }
-
-  const statusBadge = s => ({
-    pending:  '<span class="adm-badge adm-badge--amber">Pending</span>',
-    approved: '<span class="adm-badge adm-badge--green">Approved</span>',
-    rejected: '<span class="adm-badge adm-badge--red">Rejected</span>',
-  }[s] || `<span class="adm-badge">${s}</span>`);
-
+  const badge = s => ({ pending:'<span class="adm-badge adm-badge--amber">Pending</span>', approved:'<span class="adm-badge adm-badge--green">Approved</span>', rejected:'<span class="adm-badge adm-badge--red">Rejected</span>' }[s] || `<span class="adm-badge">${s}</span>`);
   const rows = list.map(s => `
     <tr>
-      <td><div style="font-weight:600">${s.title || s.name || '—'}</div><div style="font-size:.75rem;color:var(--adm-mid)">${s.business_name || s.contact_email || ''}</div></td>
-      <td><span class="adm-badge adm-badge--blue">${s.type || '—'}</span></td>
-      <td>${statusBadge(s.status)}</td>
+      <td><strong>${s.title||s.name||'—'}</strong><div style="font-size:.75rem;color:var(--adm-mid)">${s.contact_email||''}</div></td>
+      <td><span class="adm-badge adm-badge--blue">${s.type||'—'}</span></td>
+      <td>${badge(s.status)}</td>
       <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(s.created_at)}</td>
-      <td style="display:flex;gap:.35rem;flex-wrap:wrap">
-        <button class="adm-btn adm-btn--sm" style="background:var(--adm-green)" onclick="approveSubmission('${s.id}')">✓ Approve</button>
-        <button class="adm-btn adm-btn--sm adm-btn--danger" onclick="rejectSubmission('${s.id}')">✕ Reject</button>
+      <td style="display:flex;gap:.3rem">
+        <button class="adm-btn adm-btn--sm" style="background:var(--adm-green)" onclick="updateSub('${s.id}','approved')">✓</button>
+        <button class="adm-btn adm-btn--sm" style="background:var(--adm-red)"   onclick="updateSub('${s.id}','rejected')">✕</button>
       </td>
     </tr>`).join('');
-
   document.getElementById('js-submissions-table').innerHTML = `
     <table class="adm-table">
       <thead><tr><th>Submission</th><th>Type</th><th>Status</th><th>Received</th><th>Actions</th></tr></thead>
@@ -389,16 +469,10 @@ GRANT ALL ON submissions TO anon, authenticated;
     </table>`;
 }
 
-async function approveSubmission(id) {
-  await db.from('submissions').update({ status: 'approved' }).eq('id', id);
+async function updateSub(id, status) {
+  await db.from('submissions').update({ status }).eq('id', id);
   const s = allSubmissions.find(x => x.id === id);
-  if (s) s.status = 'approved';
-  renderSubmissions();
-}
-async function rejectSubmission(id) {
-  await db.from('submissions').update({ status: 'rejected' }).eq('id', id);
-  const s = allSubmissions.find(x => x.id === id);
-  if (s) s.status = 'rejected';
+  if (s) s.status = status;
   renderSubmissions();
 }
 
@@ -406,7 +480,9 @@ function fmtDate(d) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
 }
-window.cancelArticleForm = cancelArticleForm;
+
+window.openDrawer = openDrawer;
+window.updateSub  = updateSub;
 </script>
 </body>
 </html>

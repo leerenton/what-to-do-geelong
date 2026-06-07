@@ -716,6 +716,83 @@ function articleTypeBadge(type) {
 }
 
 // ── RENDER FEATURED EVENT ─────────────────────────────────
+// ── MASONRY HERO ──────────────────────────────────────────
+function renderMasonryHero(events, articles, settings, trendingScores) {
+  const section = document.getElementById('js-masonry-hero');
+  if (!section) return;
+
+  // Hide if admin toggled off
+  if (settings.showMasonry === false) { section.style.display = 'none'; return; }
+
+  // Pick top trending event (with image)
+  function topTrendingEvent(exclude) {
+    const scored = events
+      .filter(e => e.img && !exclude.includes(e.id))
+      .map(e => ({ e, score: (trendingScores.get ? (trendingScores.get(`event:${e.id}`) || {}).score || 0 : 0) }))
+      .sort((a, b) => b.score - a.score);
+    return (scored[0] || { e: events.find(e => e.img && !exclude.includes(e.id)) })?.e || null;
+  }
+
+  // Pick top trending article (with image)
+  function topTrendingArticle() {
+    const scored = articles
+      .filter(a => a.heroImg)
+      .map(a => ({ a, score: (trendingScores.get ? (trendingScores.get(`article:${a.id}`) || {}).score || 0 : 0) }))
+      .sort((a, b) => b.score - a.score);
+    return scored[0]?.a || articles.find(a => a.heroImg) || null;
+  }
+
+  const mainEv  = topTrendingEvent([]);
+  const article = topTrendingArticle();
+  const btmEv   = topTrendingEvent(mainEv ? [mainEv.id] : []);
+
+  // Need at least the main event with an image
+  if (!mainEv) { section.style.display = 'none'; return; }
+
+  // Populate main (left)
+  const mainEl  = document.getElementById('js-mh-main');
+  const mainImg = document.getElementById('js-mh-main-img');
+  mainEl.href = evLink(mainEv);
+  mainImg.src = mainEv.img;
+  mainImg.alt = mainEv.title;
+  document.getElementById('js-mh-main-badge').textContent = mainEv.category || 'Event';
+  document.getElementById('js-mh-main-title').textContent = mainEv.title;
+  document.getElementById('js-mh-main-sub').textContent =
+    [mainEv.date, mainEv.location].filter(Boolean).join(' · ');
+
+  // Populate top-right (article or fallback event)
+  const topEl  = document.getElementById('js-mh-top');
+  const topImg = document.getElementById('js-mh-top-img');
+  if (article) {
+    topEl.href = artLink(article);
+    topImg.src = article.heroImg;
+    topImg.alt = article.title;
+    document.getElementById('js-mh-top-badge').textContent = article.type || 'Article';
+    document.getElementById('js-mh-top-badge').classList.add('masonry-hero__badge--article');
+    document.getElementById('js-mh-top-title').textContent = article.title;
+  } else if (btmEv) {
+    topEl.href = evLink(btmEv);
+    topImg.src = btmEv.img;
+    topImg.alt = btmEv.title;
+    document.getElementById('js-mh-top-badge').textContent = btmEv.category || 'Event';
+    document.getElementById('js-mh-top-title').textContent = btmEv.title;
+  }
+
+  // Populate bottom-right (second event)
+  const btmEl  = document.getElementById('js-mh-btm');
+  const btmImg = document.getElementById('js-mh-btm-img');
+  const btmEvFinal = btmEv || events.find(e => e.img && e.id !== mainEv.id);
+  if (btmEvFinal) {
+    btmEl.href = evLink(btmEvFinal);
+    btmImg.src = btmEvFinal.img;
+    btmImg.alt = btmEvFinal.title;
+    document.getElementById('js-mh-btm-badge').textContent = btmEvFinal.category || 'Event';
+    document.getElementById('js-mh-btm-title').textContent = btmEvFinal.title;
+  }
+
+  section.style.display = 'block';
+}
+
 function renderFeatured(events) {
   const el = document.getElementById('js-featured-event');
   if (!el) return;
@@ -760,14 +837,17 @@ function renderEvents(events) {
     const tagPills = (ev.tags || []).slice(0, 2).map(t =>
       `<span class="ev-tag ${t === 'Free' ? 'ev-tag--free' : ''}">${t}</span>`
     ).join('');
+    const thumb = ev.img
+      ? `<img class="event-card__thumb-img" src="${ev.img}" alt="${ev.title}" loading="lazy" />`
+      : `<div class="event-card__thumb" style="background:${ev.color||'#e8f4ff'}22">${ev.emoji||'📅'}</div>`;
     return `
       <a href="${evLink(ev)}" class="event-card">
-        <div class="event-card__thumb" style="background:${ev.color}22">${ev.emoji}</div>
+        ${thumb}
         <div class="event-card__body">
           <span class="event-card__cat">${ev.category}</span>
           <h3 class="event-card__title">${ev.title}</h3>
           <div class="event-card__meta">📍 ${ev.location}</div>
-          <div class="event-card__meta">🕐 ${ev.time}</div>
+          <div class="event-card__meta">🕐 ${ev.time || 'See event'}</div>
           ${tagPills ? `<div class="ev-tags">${tagPills}</div>` : ''}
           <button class="event-card__cta ${isFree ? 'event-card__cta--free' : ''}">${isFree ? 'Free Entry' : 'Get Tickets →'}</button>
         </div>
@@ -777,39 +857,73 @@ function renderEvents(events) {
 }
 
 // ── RENDER UPCOMING LIST ──────────────────────────────────
-function renderUpcoming() {
+// Parse a freeform event date string → Date object (or null if unparseable)
+// Handles: "Sun 15 Jun", "Sat 28 – Sun 29 Jun", "Daily Jun 14–22", "Daily until Jul 6"
+function parseEventDate(str) {
+  if (!str || str.toLowerCase().startsWith('daily') && !str.match(/\d/)) return null;
+  const MONTHS = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
+  // Find first "day month" pair, e.g. "15 Jun" or "Jun 14"
+  const m = str.match(/(\d{1,2})\s+([A-Za-z]{3})|([A-Za-z]{3})\s+(\d{1,2})/);
+  if (!m) return null;
+  const day   = parseInt(m[1] || m[4]);
+  const monStr = (m[2] || m[3]).toLowerCase().slice(0, 3);
+  const month  = MONTHS[monStr];
+  if (month === undefined) return null;
+  const now  = new Date();
+  const year = now.getFullYear();
+  const d    = new Date(year, month, day);
+  // If that date is more than 2 weeks in the past, assume next year
+  if (d < new Date(now - 14 * 864e5)) d.setFullYear(year + 1);
+  return d;
+}
+
+function renderUpcoming(events) {
   const list = document.getElementById('js-upcoming-list');
   if (!list) return;
 
-  const upcoming = [
-    { day: '21', mon: 'Jun', cat: 'Food & Drink', title: 'Winter Solstice Degustation', loc: 'Igni Restaurant', price: 'From $95', teal: false },
-    { day: '28', mon: 'Jun', cat: 'Music', title: 'Surf Coast Country Music Festival', loc: 'Torquay Beach', price: 'From $35', teal: false },
-    { day: '5',  mon: 'Jul', cat: 'Arts', title: 'MELT Street Art Geelong', loc: 'CBD Laneways', price: 'Free', teal: true },
-    { day: '12', mon: 'Jul', cat: 'Family', title: 'School Holiday Circus Spectacular', loc: 'Johnstone Park', price: 'From $18', teal: false },
-  ];
+  // Use passed events (possibly trending-sorted) or fall back to EVENTS global
+  const source = events || EVENTS;
+  const now    = new Date();
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  list.innerHTML = upcoming.map(u => `
-    <a href="#" class="upcoming-item">
-      <div class="upcoming-item__date ${u.teal ? 'upcoming-item__date--teal' : ''}">
-        <span class="upcoming-item__day">${u.day}</span>
-        <span class="upcoming-item__mon">${u.mon}</span>
-      </div>
-      <div class="upcoming-item__body">
-        <span class="upcoming-item__cat">${u.cat}</span>
-        <span class="upcoming-item__title">${u.title}</span>
-        <span class="upcoming-item__sub">📍 ${u.loc}</span>
-        <span class="upcoming-item__ticket">🎟 ${u.price}</span>
-      </div>
-    </a>
-  `).join('');
+  // Parse dates, filter to upcoming or ongoing, sort chronologically
+  const parsed = source
+    .map(ev => ({ ev, d: parseEventDate(ev.date) }))
+    .filter(({ d }) => d && d >= new Date(now - 864e5)) // allow events that started today
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 6); // show up to 6
+
+  if (!parsed.length) {
+    list.innerHTML = '<p style="color:#999;padding:.5rem 0;font-size:.9rem">No upcoming events found.</p>';
+    return;
+  }
+
+  list.innerHTML = parsed.map(({ ev, d }, i) => {
+    const isFree = ev.price === 'Free';
+    const teal   = isFree; // teal date block for free events (matches original design)
+    return `
+      <a href="${evLink(ev)}" class="upcoming-item">
+        <div class="upcoming-item__date ${teal ? 'upcoming-item__date--teal' : ''}">
+          <span class="upcoming-item__day">${d.getDate()}</span>
+          <span class="upcoming-item__mon">${MONTHS[d.getMonth()]}</span>
+        </div>
+        <div class="upcoming-item__body">
+          <span class="upcoming-item__cat">${ev.category}</span>
+          <span class="upcoming-item__title">${ev.title}</span>
+          <span class="upcoming-item__sub">📍 ${ev.location}</span>
+          <span class="upcoming-item__ticket">🎟 ${ev.price}</span>
+        </div>
+      </a>
+    `;
+  }).join('');
 }
 
 // ── RENDER EAT STRIP ──────────────────────────────────────
-function renderEatStrip() {
+function renderEatStrip(eatBiz) {
   const strip = document.getElementById('js-eat-strip');
   if (!strip) return;
 
-  const eatBiz = BUSINESSES.filter(b => b.section === 'eat');
+  if (!eatBiz) eatBiz = BUSINESSES.filter(b => b.section === 'eat');
   strip.innerHTML = eatBiz.map(biz => {
     const hasEvent = businessHasUpcoming(biz.id);
     const hasPromo = businessHasPromo(biz.id);
@@ -834,11 +948,12 @@ function renderEatStrip() {
 }
 
 // ── RENDER STAYS ──────────────────────────────────────────
-function renderStays() {
+function renderStays(stays) {
   const scroll = document.getElementById('js-stay-grid');
   if (!scroll) return;
 
-  scroll.innerHTML = STAYS.map(s => `
+  if (!stays) stays = STAYS;
+  scroll.innerHTML = stays.map(s => `
     <a href="#" class="stay-card">
       ${s.img
         ? `<img src="${s.img}" alt="${s.name}" class="stay-card__img" loading="lazy" />`
@@ -875,6 +990,57 @@ function renderOffers() {
         </div>
       </div>
     `;
+  }).join('');
+}
+
+// ── COMMUNITY GUIDES STRIP ────────────────────────────────
+async function renderCommunityGuidesStrip() {
+  const strip = document.getElementById('js-community-guides-strip');
+  if (!strip) return;
+
+  let guides = [];
+  try {
+    if (typeof loadPublicGuides === 'function') {
+      guides = await loadPublicGuides();
+    }
+  } catch {}
+
+  if (!guides.length) {
+    document.getElementById('community-guides')?.style.setProperty('display', 'none');
+    return;
+  }
+
+  // Sort by trending (7d views) if tracker available
+  if (window.wtdgViews) {
+    const scores = await wtdgViews.getAllTrendingScores('7d');
+    guides.sort((a, b) => {
+      const sa = scores.get(`guide:${a.id}`)?.score || 0;
+      const sb = scores.get(`guide:${b.id}`)?.score || 0;
+      return sb - sa;
+    });
+  }
+
+  const guideUrl = g => window.IS_LOCAL ? `guide.html?id=${g.id}` : `/guide/${g.id}`;
+  const top = guides.slice(0, 6);
+
+  strip.innerHTML = top.map(g => {
+    const count = (g.guide_items || []).length;
+    const tag   = g.is_anyday ? 'Any day' : (g.date_from ? formatGuideDate(g.date_from) : null);
+    // Pick an emoji from the first item, fall back to map
+    const firstEmoji = g.guide_items?.[0]?.item_data?.emoji || '🗺️';
+    return `
+      <a href="${guideUrl(g)}" class="cg-card">
+        <div class="cg-card__icon">${firstEmoji}</div>
+        <div class="cg-card__body">
+          <div class="cg-card__name">${g.name}</div>
+          ${g.description ? `<div class="cg-card__desc">${g.description}</div>` : ''}
+          <div class="cg-card__meta">
+            <span><span class="material-symbols-rounded">star</span>${count} stop${count !== 1 ? 's' : ''}</span>
+            ${tag ? `<span><span class="material-symbols-rounded">calendar_month</span>${tag}</span>` : ''}
+          </div>
+        </div>
+        <span class="material-symbols-rounded cg-card__arrow">chevron_right</span>
+      </a>`;
   }).join('');
 }
 
@@ -1127,6 +1293,7 @@ async function initListingPage() {
         <div class="lident__info">
           <h1 class="lident__name">${biz.name}</h1>
           <p class="lident__loc">📍 ${biz.location}</p>
+          <p class="lident__views" id="js-biz-view-count" style="display:none"></p>
         </div>
         <div class="lident__links">
           ${biz.website ? `<a href="https://${biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm">🌐 Website</a>` : ''}
@@ -1253,6 +1420,21 @@ async function initListingPage() {
     document.getElementById('js-inq-success').hidden = false;
   });
 
+  // ── View tracking ───────────────────────────────────────────
+  if (window.wtdgViews) {
+    window.wtdgViews.track(biz.id, 'business');
+    // Show view count after a short delay so it doesn't block page paint
+    window.wtdgViews.getCount(biz.id, 'business', '7d').then(count => {
+      if (count > 0) {
+        const el = document.getElementById('js-biz-view-count');
+        if (el) {
+          el.textContent = `👁 ${window.wtdgViews.formatViews(count)} views this week`;
+          el.style.display = '';
+        }
+      }
+    });
+  }
+
   // ── Carousel init ──────────────────────────────────────────
   const track = document.querySelector('.lhero__track');
   if (track && track.children.length > 1) {
@@ -1280,7 +1462,7 @@ async function initListingPage() {
   document.getElementById('js-biz-save-btn')?.addEventListener('click', async e => {
     e.preventDefault();
     if (typeof starItemToGuide === 'function') {
-      await starItemToGuide({ id: biz.id, type: 'business', title: biz.name, emoji: biz.emoji, color: biz.color, location: biz.location, slug: bizSlug }, e.currentTarget);
+      await starItemToGuide({ id: biz.id, type: 'business', title: biz.name, emoji: biz.emoji, color: biz.color, location: biz.location, slug: bizSlug, lat: biz.lat, lng: biz.lng }, e.currentTarget);
       if (typeof updateItinBadge === 'function') updateItinBadge();
       if (typeof trackSaveToGuide === 'function') trackSaveToGuide({ type: 'business', title: biz.name });
     }
@@ -1485,6 +1667,20 @@ async function initEventPage() {
     </div>
 
     <div class="container ev-body">
+      ${(ev.description || ev.description) ? `
+        <div class="ev-description">
+          <p>${ev.description}</p>
+        </div>
+      ` : ''}
+
+      ${ev.url ? `
+        <div class="ev-cta-row">
+          <a href="${ev.url}" target="_blank" rel="noopener" class="btn btn--teal">
+            ${ev.price === 'Free' ? '📍 More info' : '🎟️ Get Tickets'}
+          </a>
+        </div>
+      ` : ''}
+
       ${biz ? `
         <div class="ev-biz-card">
           <div class="ev-biz-card__label">Presented by</div>
@@ -1516,11 +1712,16 @@ async function initEventPage() {
     </div>
   `;
 
+  // Track this as a real page view (user has opened and is reading the event)
+  if (window.wtdgViews) {
+    window.wtdgViews.track(String(ev.id), 'event');
+  }
+
   // Wire save button
   const saveBtn = document.getElementById('js-ev-save-btn');
   if (saveBtn && typeof starItemToGuide === 'function') {
     const item = { id: String(ev.id), type: 'event', title: ev.title, emoji: ev.emoji, color: ev.color,
-      date: ev.date, time: ev.time, location: ev.location, price: ev.price, slug: evSlug };
+      date: ev.date, time: ev.time, location: ev.location, price: ev.price, slug: evSlug, lat: ev.lat, lng: ev.lng };
     saveBtn.addEventListener('click', async e => {
       e.preventDefault();
       await starItemToGuide(item, saveBtn);
@@ -1569,13 +1770,16 @@ async function initEventPage() {
 
 // ── EVENTS SEE-ALL PAGE ───────────────────────────────────
 // ── COLLECTION CARD BUILDER ───────────────────────────────
-function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, ctaLabel, lat, lng) {
+// collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, lat, lng, itemId, itemType)
+// itemId + itemType are used for view tracking and view-count badges
+function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, lat, lng, itemId, itemType) {
   const thumb = img
     ? `<img src="${img}" alt="${name}" class="coll-card__img" loading="lazy" />`
     : `<div class="coll-card__img-placeholder" style="background:${bg}22">${emoji}</div>`;
-  const latAttr = (lat && lng) ? ` data-lat="${lat}" data-lng="${lng}"` : '';
+  const latAttr  = (lat  && lng)      ? ` data-lat="${lat}" data-lng="${lng}"` : '';
+  const trackAttr = (itemId && itemType) ? ` data-id="${itemId}" data-type="${itemType}"` : '';
   return `
-    <a href="${href}" class="coll-card"${latAttr}>
+    <a href="${href}" class="coll-card"${latAttr}${trackAttr}>
       ${thumb}
       <div class="coll-card__body">
         <div class="coll-card__type">${type}</div>
@@ -1645,10 +1849,12 @@ function initEventsPage() {
         ev.location,
         ev.price !== 'Free' ? ev.price : null,
         biz ? biz.name : null,
-        ev.lat, ev.lng
+        ev.lat, ev.lng,
+        String(ev.id), 'event'
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+    if (window.wtdgViews) window.wtdgViews.injectViewBadges('event');
   }
 
   collFilter(
@@ -1679,10 +1885,12 @@ function initEatPage() {
         biz.suburb || biz.location,
         businessHasUpcoming(biz.id) ? 'Event' : null,
         businessHasPromo(biz.id) ? 'Offer' : null,
-        biz.lat, biz.lng
+        biz.lat, biz.lng,
+        biz.id, 'business'
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+    if (window.wtdgViews) window.wtdgViews.injectViewBadges('business');
   }
 
   collFilter(
@@ -1710,10 +1918,12 @@ function initStayPage() {
         s.description || `${s.stars || ''} · ${s.price || ''}`.trim().replace(/^· |· $/, ''),
         s.suburb || s.location,
         null, null,
-        s.lat, s.lng
+        s.lat, s.lng,
+        s.id, 'stay'
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+    if (window.wtdgViews) window.wtdgViews.injectViewBadges('stay');
   }
 
   collFilter(
@@ -1829,7 +2039,7 @@ function initEditorialPage() {
   function render(filter) {
     const filtered = filter === 'all' ? ARTICLES : ARTICLES.filter(a => a.type === filter);
     root.innerHTML = filtered.map(a => `
-      <a href="${artLink(a)}" class="ed-card">
+      <a href="${artLink(a)}" class="ed-card" data-id="${a.id}" data-type="article">
         <div class="ed-card__img" style="background-image:url('${a.heroImg}')"></div>
         <div class="ed-card__body">
           ${articleTypeBadge(a.type)}
@@ -1842,6 +2052,8 @@ function initEditorialPage() {
         </div>
       </a>
     `).join('');
+    // Show view counts on article cards after render
+    if (window.wtdgViews) window.wtdgViews.injectViewBadges('article');
   }
 
   filterBtns.forEach(btn => {
@@ -1989,6 +2201,11 @@ function initArticlePage() {
     </div>
   `;
 
+  // Track this as a real article read
+  if (window.wtdgViews) {
+    window.wtdgViews.track(article.id, 'article');
+  }
+
   const moreStrip = document.getElementById('js-art-more');
   if (moreStrip) {
     const others = ARTICLES.filter(a => a.id !== article.id).slice(0, 5);
@@ -2036,7 +2253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const remote = await loadAllData();
     if (remote) {
       if (remote.businesses.length) BUSINESSES = remote.businesses;
-      if (remote.events.length)     EVENTS     = remote.events;
+      if (remote.events.length)     EVENTS     = remote.events.filter(e => !e.isRecurring);
       if (remote.stays.length)      STAYS      = remote.stays;
       if (remote.promos.length)     PROMOS     = remote.promos;
       if (remote.articles.length)   ARTICLES   = remote.articles;
@@ -2046,22 +2263,53 @@ document.addEventListener('DOMContentLoaded', async () => {
   initAdPopup();
 
   if (document.getElementById('js-event-scroll')) {
-    renderFeatured(EVENTS);
-    renderEvents(EVENTS);
-    renderUpcoming();
-    renderEatStrip();
-    renderStays();
+    // Load homepage sort settings and trending scores, then render
+    let _hpSettings = { sort: 'latest', period: '7d' };
+    if (typeof loadHomepageSettings === 'function') {
+      _hpSettings = await loadHomepageSettings();
+    }
+
+    let _trendingScores = new Map();
+    if (_hpSettings.sort === 'trending' && window.wtdgViews) {
+      _trendingScores = await window.wtdgViews.getAllTrendingScores(_hpSettings.period);
+    }
+
+    // Sort helper — sorts by trending score if setting is 'trending', else original order
+    function applyHomepageSort(items, type) {
+      if (_hpSettings.sort !== 'trending' || !_trendingScores.size) return items;
+      return [...items].sort((a, b) => {
+        const aScore = (_trendingScores.get(`${type}:${a.id}`) || {}).score || 0;
+        const bScore = (_trendingScores.get(`${type}:${b.id}`) || {}).score || 0;
+        return bScore - aScore;
+      });
+    }
+
+    const sortedEvents   = applyHomepageSort(EVENTS, 'event');
+    const sortedBiz      = applyHomepageSort(BUSINESSES.filter(b => b.section === 'eat'), 'business');
+    const sortedStays    = applyHomepageSort(STAYS, 'stay');
+    const sortedArticles = applyHomepageSort(ARTICLES, 'article');
+
+    renderMasonryHero(sortedEvents, sortedArticles, _hpSettings, _trendingScores);
+    renderFeatured(sortedEvents);
+    renderEvents(sortedEvents);
+    renderUpcoming(sortedEvents);
+    renderEatStrip(sortedBiz);
+    renderStays(sortedStays);
     renderOffers();
+    renderCommunityGuidesStrip();
     initChips();
     initDateBar();
     initPersonaliseCTAs();
     initRotatingBanner();
     updateItinBadge();
 
-    // Editorial preview strip on homepage
+    // Note: views are only tracked on actual detail page visits (listing.html, event.html)
+    // — not on card grid renders. This keeps trending scores meaningful.
+
+    // Editorial preview strip on homepage — sorted by trending if enabled
     const editPreview = document.getElementById('js-editorial-preview');
     if (editPreview) {
-      editPreview.innerHTML = ARTICLES.slice(0, 5).map(a => `
+      editPreview.innerHTML = sortedArticles.slice(0, 5).map(a => `
         <a href="${artLink(a)}" class="ed-mini-card">
           <div class="ed-mini-card__img" style="background-image:url('${a.heroImg}')"></div>
           <div class="ed-mini-card__body">

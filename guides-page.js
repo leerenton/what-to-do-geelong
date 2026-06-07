@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       `;
       document.getElementById('js-create-first')?.addEventListener('click', openCreateForm);
+      renderCommunityGuides();
       return;
     }
 
@@ -69,27 +70,47 @@ document.addEventListener('DOMContentLoaded', async () => {
           ${guides.map(g => renderGuideCard(g)).join('')}
         </div>
       </div>
+
+      <div id="js-community-guides-section"></div>
     `;
 
     document.getElementById('js-new-guide-btn')?.addEventListener('click', openCreateForm);
     bindGuideActions();
+    renderCommunityGuides();
   }
 
-  function renderGuideCard(g) {
+  function renderGuideCard(g, isCommunity = false) {
     const itemCount = (g.guide_items || []).length;
-    const dateStr = g.date_from
-      ? `${formatGuideDate(g.date_from)}${g.date_to ? ' – ' + formatGuideDate(g.date_to) : ''}`
-      : 'No dates set';
-    const shareUrl = window.IS_LOCAL ? `guide.html?id=${g.id}` : `/guide/${g.id}`;
+    let dateStr = '';
+    if (g.is_anyday) {
+      dateStr = 'Any day';
+    } else if (g.date_from) {
+      dateStr = `${formatGuideDate(g.date_from)}${g.date_to ? ' – ' + formatGuideDate(g.date_to) : ''}`;
+    } else {
+      dateStr = 'No dates set';
+    }
+
+    const publicBadge = g.is_public
+      ? `<span class="guide-card__public-badge"><span class="material-symbols-rounded">public</span> Public</span>`
+      : '';
+    const anydayBadge = g.is_anyday
+      ? `<span class="guide-card__anyday-badge"><span class="material-symbols-rounded">explore</span> Any day</span>`
+      : '';
+
     return `
-      <div class="guide-card" data-id="${g.id}">
+      <div class="guide-card${isCommunity ? ' guide-card--community' : ''}" data-id="${g.id}">
         <a href="${guideUrl(g)}" class="guide-card__body">
-          <div class="guide-card__name">${g.name}</div>
+          <div class="guide-card__name-row">
+            <div class="guide-card__name">${g.name}</div>
+            <div class="guide-card__badges">${publicBadge}${anydayBadge}</div>
+          </div>
+          ${g.description ? `<div class="guide-card__desc">${g.description}</div>` : ''}
           <div class="guide-card__meta">
-            <span><span class="material-symbols-rounded">calendar_month</span>${dateStr}</span>
+            ${!g.is_anyday ? `<span><span class="material-symbols-rounded">calendar_month</span>${dateStr}</span>` : ''}
             <span><span class="material-symbols-rounded">star</span>${itemCount} item${itemCount !== 1 ? 's' : ''}</span>
           </div>
         </a>
+        ${!isCommunity ? `
         <div class="guide-card__actions">
           <button class="guide-card__btn js-copy-link" data-url="${window.location.origin}/${window.IS_LOCAL ? 'guide.html?id=' : 'guide/'}${g.id}" title="Copy shareable link">
             <span class="material-symbols-rounded">link</span>
@@ -97,9 +118,69 @@ document.addEventListener('DOMContentLoaded', async () => {
           <button class="guide-card__btn js-delete-guide" data-id="${g.id}" title="Delete guide">
             <span class="material-symbols-rounded">delete</span>
           </button>
+        </div>` : `
+        <div class="guide-card__actions">
+          <button class="guide-card__btn js-copy-link" data-url="${window.location.origin}/${window.IS_LOCAL ? 'guide.html?id=' : 'guide/'}${g.id}" title="Copy link">
+            <span class="material-symbols-rounded">link</span>
+          </button>
+        </div>`}
+      </div>
+    `;
+  }
+
+  async function renderCommunityGuides() {
+    // Find or create the community section container
+    let section = document.getElementById('js-community-guides-section');
+    if (!section) {
+      section = document.createElement('div');
+      section.id = 'js-community-guides-section';
+      root.appendChild(section);
+    }
+
+    // Load public guides
+    const publicGuides = await loadPublicGuides();
+
+    // Exclude user's own guides (already shown above)
+    const myIds = new Set(guides.map(g => g.id));
+    const community = publicGuides.filter(g => !myIds.has(g.id));
+
+    if (!community.length) return; // nothing to show
+
+    // Sort by trending views (7d) if view-tracker is available
+    if (window.wtdgViews) {
+      const scores = await wtdgViews.getAllTrendingScores('7d');
+      community.sort((a, b) => {
+        const sa = scores.get(`guide:${a.id}`)?.score || 0;
+        const sb = scores.get(`guide:${b.id}`)?.score || 0;
+        return sb - sa;
+      });
+    }
+
+    section.innerHTML = `
+      <div class="container">
+        <div class="guides-community">
+          <div class="guides-community__header">
+            <span class="material-symbols-rounded">public</span>
+            <h2 class="guides-community__title">Community Guides</h2>
+            <span class="guides-community__sub">Shared by Geelong locals — free to explore</span>
+          </div>
+          <div class="guides-list guides-list--community">
+            ${community.map(g => renderGuideCard(g, true)).join('')}
+          </div>
         </div>
       </div>
     `;
+
+    // Wire copy-link buttons in community section
+    section.querySelectorAll('.js-copy-link').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(btn.dataset.url).then(() => {
+          btn.innerHTML = '<span class="material-symbols-rounded">check</span>';
+          setTimeout(() => { btn.innerHTML = '<span class="material-symbols-rounded">link</span>'; }, 2000);
+        });
+      });
+    });
   }
 
   function openCreateForm() {

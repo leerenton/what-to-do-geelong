@@ -94,6 +94,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
+  <!-- MASONRY HERO -->
+  <section class="masonry-hero" id="js-masonry-hero" style="display:none">
+    <div class="container masonry-hero__grid">
+      <a class="masonry-hero__main" id="js-mh-main" href="#">
+        <div class="masonry-hero__img-wrap">
+          <img id="js-mh-main-img" src="" alt="" loading="eager" />
+          <div class="masonry-hero__overlay"></div>
+        </div>
+        <div class="masonry-hero__info">
+          <span class="masonry-hero__badge" id="js-mh-main-badge">Event</span>
+          <h2 class="masonry-hero__title" id="js-mh-main-title"></h2>
+          <p class="masonry-hero__sub" id="js-mh-main-sub"></p>
+        </div>
+      </a>
+      <div class="masonry-hero__stack">
+        <a class="masonry-hero__small" id="js-mh-top" href="#">
+          <div class="masonry-hero__img-wrap">
+            <img id="js-mh-top-img" src="" alt="" loading="lazy" />
+            <div class="masonry-hero__overlay"></div>
+          </div>
+          <div class="masonry-hero__info">
+            <span class="masonry-hero__badge masonry-hero__badge--article" id="js-mh-top-badge">Article</span>
+            <h3 class="masonry-hero__title masonry-hero__title--sm" id="js-mh-top-title"></h3>
+          </div>
+        </a>
+        <a class="masonry-hero__small" id="js-mh-btm" href="#">
+          <div class="masonry-hero__img-wrap">
+            <img id="js-mh-btm-img" src="" alt="" loading="lazy" />
+            <div class="masonry-hero__overlay"></div>
+          </div>
+          <div class="masonry-hero__info">
+            <span class="masonry-hero__badge" id="js-mh-btm-badge">Event</span>
+            <h3 class="masonry-hero__title masonry-hero__title--sm" id="js-mh-btm-title"></h3>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- THIS WEEKEND -->
   <section class="page-section" id="do">
     <div class="container">
@@ -220,6 +259,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </section>
 
+  <!-- COMMUNITY GUIDES -->
+  <section class="cg-strip-section" id="community-guides">
+    <div class="container">
+      <div class="cg-strip-header">
+        <div>
+          <h2 class="cg-strip-title"><span class="material-symbols-rounded">map</span> Community Guides</h2>
+          <p class="cg-strip-sub">Real Geelong itineraries, built by locals</p>
+        </div>
+        <a href="community-guides.html" class="cg-strip-see-all">See all <span class="material-symbols-rounded">arrow_forward</span></a>
+      </div>
+      <div class="cg-strip-list" id="js-community-guides-strip"></div>
+    </div>
+  </section>
+
   <!-- THE EDIT -->
   <section class="page-section page-section--alt" id="editorial">
     <div class="container">
@@ -264,6 +317,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script src="icons.js"></script>
   <script src="auth.js"></script>
   <script src="guides.js"></script>
-  <script src="app.js?v=3"></script>
+  <script src="view-tracker.js"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

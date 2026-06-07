@@ -246,3 +246,71 @@ body.adm-body {
 .adm-modal__key { color: var(--adm-mid); }
 .adm-modal__close { position: absolute; top: 1rem; right: 1rem; background: var(--adm-card2); border: none; color: var(--adm-mid); border-radius: .4rem; padding: .3rem .5rem; cursor: pointer; }
 .adm-modal__actions { display: flex; gap: .5rem; margin-top: 1.25rem; flex-wrap: wrap; }
+
+/* ── Slide-in Drawer ──────────────────────────────────────── */
+.adm-drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 1000; opacity: 0; pointer-events: none; transition: opacity .22s;
+}
+.adm-drawer-overlay.open { opacity: 1; pointer-events: all; }
+.adm-drawer {
+  position: fixed; top: 0; right: -110%; width: min(580px, 100vw);
+  height: 100vh; background: var(--adm-bg); border-left: 1px solid var(--adm-border);
+  z-index: 1001; overflow-y: auto; transition: right .25s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+}
+.adm-drawer.open { right: 0; }
+.adm-drawer__head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--adm-border);
+  background: var(--adm-card); position: sticky; top: 0; z-index: 2;
+}
+.adm-drawer__title { font-size: 1rem; font-weight: 700; margin: 0; }
+.adm-drawer__close {
+  background: var(--adm-card2); border: none; color: var(--adm-mid);
+  border-radius: .4rem; padding: .35rem .55rem; cursor: pointer; font-size: .85rem; line-height: 1;
+}
+.adm-drawer__close:hover { color: var(--adm-text); }
+.adm-drawer__body { padding: 1.5rem; flex: 1; }
+.adm-drawer__footer {
+  padding: 1rem 1.5rem; border-top: 1px solid var(--adm-border);
+  background: var(--adm-card); display: flex; gap: .65rem; align-items: center;
+  position: sticky; bottom: 0; z-index: 2;
+}
+
+/* ── Form helpers ─────────────────────────────────────────── */
+.adm-field { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .85rem; }
+.adm-field label { font-size: .76rem; font-weight: 600; color: var(--adm-mid); text-transform: uppercase; letter-spacing: .04em; }
+.adm-field input, .adm-field select, .adm-field textarea {
+  background: var(--adm-card); border: 1px solid var(--adm-border); border-radius: .45rem;
+  padding: .55rem .75rem; color: var(--adm-text); font-size: .875rem; font-family: inherit; outline: none;
+  transition: border-color .15s;
+}
+.adm-field input:focus, .adm-field select:focus, .adm-field textarea:focus { border-color: var(--adm-teal); }
+.adm-field textarea { resize: vertical; min-height: 80px; }
+.adm-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.adm-field-row--3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ── Upload zone ──────────────────────────────────────────── */
+.adm-upload-zone {
+  border: 2px dashed var(--adm-border); border-radius: .6rem;
+  padding: 1.25rem; text-align: center; cursor: pointer;
+  color: var(--adm-mid); font-size: .82rem; transition: border-color .15s, background .15s;
+  background: var(--adm-card2);
+}
+.adm-upload-zone:hover, .adm-upload-zone.drag-over {
+  border-color: var(--adm-teal); background: rgba(42,180,160,.06); color: var(--adm-teal);
+}
+.adm-upload-zone input[type="file"] { display: none; }
+.adm-upload-preview {
+  width: 100%; max-height: 160px; object-fit: cover;
+  border-radius: .45rem; margin-top: .5rem; display: block;
+}
+.adm-upload-row { display: flex; gap: .5rem; align-items: flex-start; }
+.adm-upload-row input { flex: 1; }
+.adm-upload-btn {
+  background: var(--adm-card2); border: 1px solid var(--adm-border); border-radius: .45rem;
+  padding: .5rem .75rem; cursor: pointer; color: var(--adm-mid); font-size: .8rem;
+  white-space: nowrap; transition: border-color .15s;
+}
+.adm-upload-btn:hover { border-color: var(--adm-teal); color: var(--adm-teal); }

@@ -83,6 +83,39 @@ window.bizUrl = bizUrl;
 window.eventUrl = eventUrl;
 window.articleUrl = articleUrl;
 
+// ── HOMEPAGE SETTINGS ────────────────────────────────────
+// Returns { sort: 'latest'|'trending', period: '24h'|'7d'|'30d' }
+async function loadHomepageSettings() {
+  try {
+    const { data } = await db
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['homepage_sort', 'trending_period', 'show_masonry']);
+    const map = {};
+    (data || []).forEach(r => {
+      try { map[r.key] = JSON.parse(r.value); } catch { map[r.key] = r.value; }
+    });
+    return {
+      sort:        map['homepage_sort']   || 'latest',
+      period:      map['trending_period'] || '7d',
+      showMasonry: map['show_masonry'] !== false, // default on
+    };
+  } catch {
+    return { sort: 'latest', period: '7d' };
+  }
+}
+
+async function saveHomepageSetting(key, value) {
+  try {
+    await db.from('site_settings')
+      .upsert({ key, value: JSON.stringify(value) }, { onConflict: 'key' });
+    return true;
+  } catch { return false; }
+}
+
+window.loadHomepageSettings  = loadHomepageSettings;
+window.saveHomepageSetting   = saveHomepageSetting;
+
 // ── AUTH HELPERS ──────────────────────────────────────────
 async function getSupabaseUser() {
   const { data: { user } } = await db.auth.getUser();

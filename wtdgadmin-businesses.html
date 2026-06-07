@@ -7,44 +7,170 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="wtdgadmin.css?v=1" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=2" />
   <meta name="robots" content="noindex, nofollow" />
 </head>
 <body class="adm-body">
 
-<div class="adm-layout">
-  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+<!-- Drawer overlay -->
+<div class="adm-drawer-overlay" id="js-drawer-overlay"></div>
 
-  <div class="adm-main">
-    <div class="adm-topbar">
-      <span class="adm-topbar__title" id="js-adm-page-title">Businesses</span>
-      <div class="adm-topbar__right">
-        <span id="js-biz-count" style="font-size:.82rem;color:var(--adm-mid)"></span>
+<!-- Edit / New Business Drawer -->
+<div class="adm-drawer" id="js-biz-drawer">
+  <div class="adm-drawer__head">
+    <h2 class="adm-drawer__title" id="js-drawer-title">New Business</h2>
+    <button class="adm-drawer__close" id="js-drawer-close">✕</button>
+  </div>
+  <div class="adm-drawer__body">
+
+    <div class="adm-field">
+      <label>Business Name *</label>
+      <input type="text" id="bf-name" placeholder="e.g. Pistol Pete's Coffee" />
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Slug (URL)</label>
+        <input type="text" id="bf-slug" placeholder="auto-generated" />
+      </div>
+      <div class="adm-field">
+        <label>Emoji</label>
+        <input type="text" id="bf-emoji" placeholder="☕" maxlength="4" />
+      </div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Category</label>
+        <select id="bf-category">
+          <option>Café</option><option>Restaurant</option><option>Bar</option>
+          <option>Pub</option><option>Bar & Restaurant</option><option>Seafood</option>
+          <option>Market</option><option>Gallery</option><option>Museum</option>
+          <option>Theatre</option><option>Retail / Shop</option>
+          <option>Hotel</option><option>Tour</option><option>Activity</option>
+          <option>Waterfront</option><option>Other</option>
+        </select>
+      </div>
+      <div class="adm-field">
+        <label>Section</label>
+        <select id="bf-section">
+          <option value="eat">Eat & Drink</option>
+          <option value="do">Things to Do</option>
+          <option value="shop">Shop</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="adm-field">
+      <label>Description</label>
+      <textarea id="bf-desc" rows="3" placeholder="Short description shown on the listing…"></textarea>
+    </div>
+    <div class="adm-field">
+      <label>Address / Location</label>
+      <input type="text" id="bf-location" placeholder="116 Pakington St, Geelong West VIC 3218" />
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Suburb</label>
+        <input type="text" id="bf-suburb" placeholder="Geelong West" />
+      </div>
+      <div class="adm-field">
+        <label>Accent Colour</label>
+        <input type="color" id="bf-color" value="#4ac8d0" style="height:2.5rem;padding:.2rem .3rem" />
+      </div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Website</label>
+        <input type="url" id="bf-website" placeholder="https://…" />
+      </div>
+      <div class="adm-field">
+        <label>Phone</label>
+        <input type="tel" id="bf-phone" placeholder="03 5222 …" />
+      </div>
+    </div>
+    <div class="adm-field">
+      <label>Contact Email</label>
+      <input type="email" id="bf-email" placeholder="hello@business.com.au" />
+    </div>
+
+    <!-- Hero image upload -->
+    <div class="adm-field">
+      <label>Hero / Profile Image</label>
+      <div class="adm-upload-zone" id="bf-img-zone">
+        <input type="file" id="bf-img-file" accept="image/*" />
+        📷 Drop an image here or click to upload
+      </div>
+      <img class="adm-upload-preview" id="bf-img-preview" style="display:none" alt="" />
+      <input type="url" id="bf-img" placeholder="Or paste an image URL…" style="margin-top:.4rem" />
+    </div>
+
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Latitude</label>
+        <input type="number" id="bf-lat" step="any" placeholder="-38.14" />
+      </div>
+      <div class="adm-field">
+        <label>Longitude</label>
+        <input type="number" id="bf-lng" step="any" placeholder="144.36" />
       </div>
     </div>
 
-    <div class="adm-content">
-      <!-- Quick stats -->
-      <div class="adm-stats" style="margin-bottom:1.5rem" id="js-biz-stats"></div>
+    <hr style="border:none;border-top:1px solid var(--adm-border);margin:1rem 0" />
+    <p style="font-size:.78rem;font-weight:700;color:var(--adm-mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem">Subscription</p>
 
-      <div class="adm-toolbar">
-        <div class="adm-search">
-          <span class="adm-search__icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </span>
-          <input type="search" id="js-biz-search" placeholder="Search businesses…" />
-        </div>
-        <select class="adm-select" id="js-biz-tier">
-          <option value="">All tiers</option>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Plan Tier</label>
+        <select id="bf-tier">
           <option value="free">Free</option>
           <option value="starter">Starter</option>
           <option value="growth">Growth</option>
           <option value="premium">Premium</option>
         </select>
+      </div>
+      <div class="adm-field">
+        <label>Claimed</label>
+        <select id="bf-claimed">
+          <option value="false">Unclaimed</option>
+          <option value="true">Claimed</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+  <div class="adm-drawer__footer">
+    <button class="adm-btn adm-btn--sm" id="js-biz-save">Save Business</button>
+    <button class="adm-btn adm-btn--outline adm-btn--sm" id="js-biz-cancel">Cancel</button>
+    <span id="js-biz-save-status" style="font-size:.82rem;margin-left:.5rem"></span>
+    <button class="adm-btn adm-btn--sm" style="background:var(--adm-red);margin-left:auto" id="js-biz-delete" hidden>Delete</button>
+  </div>
+</div>
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Businesses</span>
+      <div class="adm-topbar__right">
+        <span id="js-biz-count" style="font-size:.82rem;color:var(--adm-mid)"></span>
+        <button class="adm-btn adm-btn--sm" id="js-new-biz-btn">+ New Business</button>
+      </div>
+    </div>
+    <div class="adm-content">
+      <div class="adm-stats" style="margin-bottom:1.5rem" id="js-biz-stats"></div>
+      <div class="adm-toolbar">
+        <div class="adm-search">
+          <span class="adm-search__icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input type="search" id="js-biz-search" placeholder="Search businesses…" />
+        </div>
+        <select class="adm-select" id="js-biz-tier">
+          <option value="">All tiers</option>
+          <option value="free">Free</option><option value="starter">Starter</option>
+          <option value="growth">Growth</option><option value="premium">Premium</option>
+        </select>
         <select class="adm-select" id="js-biz-claimed">
           <option value="">All</option>
-          <option value="claimed">Claimed only</option>
-          <option value="unclaimed">Unclaimed only</option>
+          <option value="claimed">Claimed</option>
+          <option value="unclaimed">Unclaimed</option>
         </select>
         <select class="adm-select" id="js-biz-sort">
           <option value="newest">Newest first</option>
@@ -52,7 +178,6 @@
           <option value="name">Name A–Z</option>
         </select>
       </div>
-
       <div class="adm-table-wrap" id="js-biz-table">
         <div class="adm-table-empty">Loading businesses…</div>
       </div>
@@ -64,92 +189,105 @@
 <script src="supabase.js?v=2"></script>
 <script src="wtdgadmin.js?v=1"></script>
 <script src="wtdgadmin-shell.js?v=1"></script>
+<script src="wtdgadmin-upload.js"></script>
 <script>
-let allBiz = [];
+let allBiz = [], editingId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const admin = await requireAdminAuth();
   if (!admin) return;
   initAdminShell('Businesses');
-  await loadBiz();
+
+  document.getElementById('js-new-biz-btn').addEventListener('click', () => openDrawer(null));
+  document.getElementById('js-drawer-close').addEventListener('click', closeDrawer);
+  document.getElementById('js-biz-cancel').addEventListener('click', closeDrawer);
+  document.getElementById('js-drawer-overlay').addEventListener('click', closeDrawer);
+  document.getElementById('js-biz-save').addEventListener('click', saveBusiness);
+  document.getElementById('js-biz-delete').addEventListener('click', deleteBusiness);
 
   ['js-biz-search','js-biz-tier','js-biz-claimed','js-biz-sort'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', renderBiz);
-    document.getElementById(id)?.addEventListener('change', renderBiz);
+    document.getElementById(id)?.addEventListener('input', renderTable);
+    document.getElementById(id)?.addEventListener('change', renderTable);
   });
+
+  document.getElementById('bf-name').addEventListener('input', () => {
+    if (!editingId) {
+      const t = document.getElementById('bf-name').value;
+      document.getElementById('bf-slug').value = t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    }
+  });
+
+  bindUploadZone({
+    zoneEl: document.getElementById('bf-img-zone'),
+    fileInput: document.getElementById('bf-img-file'),
+    urlInput: document.getElementById('bf-img'),
+    previewEl: document.getElementById('bf-img-preview'),
+    folder: 'businesses',
+  });
+
+  await loadBiz();
 });
 
 async function loadBiz() {
   const { data, error } = await db.from('businesses').select('*').order('created_at', { ascending: false });
-  if (error) {
-    document.getElementById('js-biz-table').innerHTML = '<div class="adm-table-empty">Could not load businesses.</div>';
-    return;
-  }
+  if (error) { document.getElementById('js-biz-table').innerHTML = '<div class="adm-table-empty">Could not load businesses.</div>'; return; }
   allBiz = data || [];
+  updateStats();
+  renderTable();
+}
 
+function updateStats() {
   const { PRICING } = window.wtdgAdminAuth;
-  const paid = allBiz.filter(b => b.subscription_tier && b.subscription_tier !== 'free' && b.subscription_tier !== '');
-  const mrr  = allBiz.reduce((s, b) => s + (PRICING[b.subscription_tier] || 0), 0);
+  const paid    = allBiz.filter(b => b.subscription_tier && b.subscription_tier !== 'free');
   const claimed = allBiz.filter(b => b.is_claimed);
-
-  document.getElementById('js-biz-count').textContent = `${allBiz.length} total`;
+  const mrr     = allBiz.reduce((s, b) => s + (PRICING[b.subscription_tier] || 0), 0);
+  document.getElementById('js-biz-count').textContent = `${allBiz.length} businesses`;
   document.getElementById('js-biz-stats').innerHTML = `
-    ${sc('Total Listings', allBiz.length)}
-    ${sc('Claimed', claimed.length)}
-    ${sc('Paid Plans', paid.length, 'green')}
-    ${sc('Free Plans', allBiz.length - paid.length)}
-    ${sc('MRR', '$'+mrr.toLocaleString(), 'teal')}`;
-
-  renderBiz();
+    ${sc('Total',allBiz.length)} ${sc('Claimed',claimed.length,'teal')}
+    ${sc('Paid Plans',paid.length,'green')} ${sc('MRR','$'+mrr.toLocaleString(),'teal')}`;
 }
 
-function sc(label, value, variant='') {
-  return `<div class="adm-stat${variant?' adm-stat--'+variant:''}"><div class="adm-stat__label">${label}</div><div class="adm-stat__value">${value}</div></div>`;
+function sc(label, value, v='') {
+  return `<div class="adm-stat${v?' adm-stat--'+v:''}"><div class="adm-stat__label">${label}</div><div class="adm-stat__value">${value}</div></div>`;
 }
 
-function renderBiz() {
+function renderTable() {
   const q       = document.getElementById('js-biz-search').value.toLowerCase();
   const tier    = document.getElementById('js-biz-tier').value;
   const claimed = document.getElementById('js-biz-claimed').value;
   const sort    = document.getElementById('js-biz-sort').value;
 
   let list = allBiz.filter(b => {
-    const matchQ = (b.name||'').toLowerCase().includes(q) || (b.suburb||'').toLowerCase().includes(q);
-    const matchT = !tier || (b.subscription_tier || 'free') === tier;
-    const matchC = !claimed
-      || (claimed === 'claimed' && b.is_claimed)
-      || (claimed === 'unclaimed' && !b.is_claimed);
-    return matchQ && matchT && matchC;
+    const mQ = (b.name||'').toLowerCase().includes(q) || (b.suburb||'').toLowerCase().includes(q);
+    const mT = !tier    || (b.subscription_tier||'free') === tier;
+    const mC = !claimed || (claimed==='claimed' && b.is_claimed) || (claimed==='unclaimed' && !b.is_claimed);
+    return mQ && mT && mC;
   });
 
   if (sort === 'oldest') list.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
   else if (sort === 'name') list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
 
-  if (!list.length) {
-    document.getElementById('js-biz-table').innerHTML = '<div class="adm-table-empty">No businesses match filters.</div>';
-    return;
-  }
+  if (!list.length) { document.getElementById('js-biz-table').innerHTML = '<div class="adm-table-empty">No businesses match filters.</div>'; return; }
 
   const { PRICING } = window.wtdgAdminAuth;
   const rows = list.map(b => {
-    const tier = b.subscription_tier || 'free';
-    const price = PRICING[tier] || 0;
-    const tierBadge = tier === 'free'
-      ? `<span class="adm-badge adm-badge--blue">${tier}</span>`
-      : `<span class="adm-badge adm-badge--green">${tier} · $${price}/mo</span>`;
-    const claimedBadge = b.is_claimed
-      ? `<span class="adm-badge adm-badge--teal">Claimed</span>`
-      : `<span class="adm-badge adm-badge--amber">Unclaimed</span>`;
+    const t = b.subscription_tier || 'free';
+    const tierBadge    = t === 'free' ? `<span class="adm-badge adm-badge--blue">${t}</span>`
+                                      : `<span class="adm-badge adm-badge--green">${t} · $${PRICING[t]||0}/mo</span>`;
+    const claimedBadge = b.is_claimed ? `<span class="adm-badge adm-badge--teal">Claimed</span>`
+                                      : `<span class="adm-badge adm-badge--amber">Unclaimed</span>`;
     return `<tr>
       <td>
-        <div style="font-weight:600">${b.name || '—'}</div>
-        <div style="font-size:.75rem;color:var(--adm-mid)">${b.suburb || b.category || ''}</div>
+        <span style="font-size:1.1rem;margin-right:.35rem">${b.emoji||'🏪'}</span>
+        <strong>${b.name||'—'}</strong>
+        <div style="font-size:.75rem;color:var(--adm-mid);margin-top:.1rem">${b.suburb||b.category||''}</div>
       </td>
       <td>${tierBadge}</td>
       <td>${claimedBadge}</td>
-      <td style="color:var(--adm-mid);font-size:.8rem">${fmtDate(b.created_at)}</td>
-      <td>
-        <a href="listing.html?id=${b.id}" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm">View listing</a>
+      <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(b.created_at)}</td>
+      <td style="display:flex;gap:.3rem;flex-wrap:wrap">
+        <button class="adm-btn adm-btn--sm adm-btn--outline" onclick="openDrawer('${b.id}')">Edit</button>
+        <a href="listing.html?s=${b.slug}" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm">View</a>
       </td>
     </tr>`;
   }).join('');
@@ -161,10 +299,98 @@ function renderBiz() {
     </table>`;
 }
 
+function openDrawer(id) {
+  editingId = id;
+  const b = id ? allBiz.find(x => String(x.id) === String(id)) : null;
+  document.getElementById('js-drawer-title').textContent = b ? 'Edit Business' : 'New Business';
+  document.getElementById('bf-name').value     = b?.name     || '';
+  document.getElementById('bf-slug').value     = b?.slug     || '';
+  document.getElementById('bf-emoji').value    = b?.emoji    || '';
+  document.getElementById('bf-category').value = b?.category || 'Café';
+  document.getElementById('bf-section').value  = b?.section  || 'eat';
+  document.getElementById('bf-desc').value     = b?.description || '';
+  document.getElementById('bf-location').value = b?.location  || '';
+  document.getElementById('bf-suburb').value   = b?.suburb    || '';
+  document.getElementById('bf-color').value    = b?.color     || '#4ac8d0';
+  document.getElementById('bf-website').value  = b?.website   || '';
+  document.getElementById('bf-phone').value    = b?.phone     || '';
+  document.getElementById('bf-email').value    = b?.email     || '';
+  document.getElementById('bf-img').value      = b?.img       || '';
+  document.getElementById('bf-lat').value      = b?.lat       || '';
+  document.getElementById('bf-lng').value      = b?.lng       || '';
+  document.getElementById('bf-tier').value     = b?.subscription_tier || 'free';
+  document.getElementById('bf-claimed').value  = String(!!b?.is_claimed);
+
+  const prev = document.getElementById('bf-img-preview');
+  prev.src = b?.img || ''; prev.style.display = b?.img ? 'block' : 'none';
+
+  document.getElementById('js-biz-delete').hidden = !b;
+  document.getElementById('js-biz-save-status').textContent = '';
+  document.getElementById('js-biz-drawer').classList.add('open');
+  document.getElementById('js-drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('js-biz-drawer').classList.remove('open');
+  document.getElementById('js-drawer-overlay').classList.remove('open');
+  editingId = null;
+}
+
+async function saveBusiness() {
+  const name = document.getElementById('bf-name').value.trim();
+  if (!name) { alert('Business name is required.'); return; }
+  const slug = document.getElementById('bf-slug').value.trim() ||
+    name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+  const payload = {
+    name, slug,
+    emoji:             document.getElementById('bf-emoji').value.trim()    || null,
+    category:          document.getElementById('bf-category').value,
+    section:           document.getElementById('bf-section').value,
+    description:       document.getElementById('bf-desc').value.trim()     || null,
+    location:          document.getElementById('bf-location').value.trim() || null,
+    suburb:            document.getElementById('bf-suburb').value.trim()   || null,
+    color:             document.getElementById('bf-color').value           || null,
+    website:           document.getElementById('bf-website').value.trim()  || null,
+    phone:             document.getElementById('bf-phone').value.trim()    || null,
+    email:             document.getElementById('bf-email').value.trim()    || null,
+    img:               document.getElementById('bf-img').value.trim()      || null,
+    lat:               parseFloat(document.getElementById('bf-lat').value) || null,
+    lng:               parseFloat(document.getElementById('bf-lng').value) || null,
+    subscription_tier: document.getElementById('bf-tier').value,
+    is_claimed:        document.getElementById('bf-claimed').value === 'true',
+  };
+
+  const status = document.getElementById('js-biz-save-status');
+  status.textContent = 'Saving…'; status.style.color = 'var(--adm-mid)';
+
+  let error;
+  if (editingId) {
+    ({ error } = await db.from('businesses').update(payload).eq('id', editingId));
+  } else {
+    ({ error } = await db.from('businesses').insert(payload));
+  }
+
+  if (error) { status.textContent = '✗ ' + error.message; status.style.color = 'var(--adm-red)'; return; }
+  status.textContent = '✓ Saved'; status.style.color = 'var(--adm-green)';
+  closeDrawer();
+  await loadBiz();
+}
+
+async function deleteBusiness() {
+  if (!editingId || !confirm('Delete this business? This cannot be undone.')) return;
+  const { error } = await db.from('businesses').delete().eq('id', editingId);
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  closeDrawer();
+  await loadBiz();
+}
+
 function fmtDate(d) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
 }
+
+window.openDrawer = openDrawer;
 </script>
 </body>
 </html>

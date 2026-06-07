@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homepage Settings — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css" />
+  <style>
+    /* ── Sort option cards ── */
+    .hp-sort-options { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem; }
+    .hp-sort-option { cursor: pointer; }
+    .hp-sort-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .hp-sort-option__card {
+      display: flex; align-items: flex-start; gap: 1rem;
+      background: var(--adm-bg); border: 1.5px solid var(--adm-border);
+      border-radius: .6rem; padding: .9rem 1.1rem; transition: border-color .15s;
+    }
+    .hp-sort-option__card:hover { border-color: var(--adm-teal); }
+    .hp-sort-option input:checked + .hp-sort-option__card {
+      border-color: var(--adm-teal); background: var(--adm-teal-dim);
+    }
+    .hp-sort-option__icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; margin-top: .1rem; }
+    .hp-sort-option__card strong { display: block; font-weight: 700; color: var(--adm-text); margin-bottom: .2rem; font-size: .92rem; }
+    .hp-sort-option__card p { font-size: .8rem; color: var(--adm-mid); margin: 0; line-height: 1.4; }
+
+    /* ── Period pills ── */
+    .hp-period-options { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .85rem; }
+    .hp-period-pill { cursor: pointer; }
+    .hp-period-pill input { position: absolute; opacity: 0; pointer-events: none; }
+    .hp-period-pill span {
+      display: block; padding: .35rem 1rem;
+      border: 1.5px solid var(--adm-border); border-radius: 999px;
+      font-weight: 600; font-size: .82rem; color: var(--adm-mid); transition: all .15s;
+    }
+    .hp-period-pill:hover span { border-color: var(--adm-teal); color: var(--adm-teal); }
+    .hp-period-pill input:checked + span {
+      background: var(--adm-teal); border-color: var(--adm-teal); color: #fff;
+    }
+    .hp-period-note {
+      margin-top: .75rem; font-size: .8rem; color: var(--adm-mid);
+      border-left: 3px solid var(--adm-teal); padding-left: .7rem;
+      min-height: 1.1em; line-height: 1.45;
+    }
+
+    /* ── Save row ── */
+    .hp-save-row { display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem; }
+    .hp-save-status { font-size: .85rem; font-weight: 600; }
+
+    /* ── Period tabs (leaderboard) ── */
+    .hp-tabs { display: flex; gap: .4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .hp-tab {
+      padding: .3rem .85rem; border-radius: 999px;
+      border: 1.5px solid var(--adm-border); background: none;
+      color: var(--adm-mid); font-weight: 600; font-size: .8rem;
+      cursor: pointer; font-family: inherit; transition: all .15s;
+    }
+    .hp-tab:hover { border-color: var(--adm-teal); color: var(--adm-teal); }
+    .hp-tab.active { background: var(--adm-teal); border-color: var(--adm-teal); color: #fff; }
+
+    /* ── Leaderboard ── */
+    .hp-lb-header, .hp-lb-row {
+      display: grid;
+      grid-template-columns: 2rem 1fr 8rem 5rem 9rem;
+      gap: .5rem; align-items: center;
+      padding: .5rem .5rem;
+    }
+    .hp-lb-header {
+      font-size: .68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--adm-mid);
+      border-bottom: 1px solid var(--adm-border);
+    }
+    .hp-lb-row { border-bottom: 1px solid var(--adm-border); font-size: .85rem; }
+    .hp-lb-row:last-child { border-bottom: none; }
+    .hp-lb-row:hover { background: var(--adm-card2, #263144); border-radius: .4rem; }
+    .hp-lb-rank { font-weight: 800; color: var(--adm-mid); font-size: .8rem; }
+    .hp-lb-id { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--adm-text); }
+    .hp-lb-type { font-size: .75rem; color: var(--adm-mid); }
+    .hp-lb-count { font-weight: 700; text-align: right; color: var(--adm-teal); font-size: .88rem; }
+    .hp-lb-bar-wrap { background: var(--adm-border); border-radius: 999px; height: 5px; overflow: hidden; }
+    .hp-lb-bar { height: 100%; background: var(--adm-teal); border-radius: 999px; transition: width .4s ease; }
+
+    .hp-empty {
+      padding: 2.5rem; text-align: center; color: var(--adm-mid);
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    }
+    .hp-empty p { margin: 0; font-size: .88rem; }
+
+    /* Disabled state for period card */
+    .hp-section-dim { opacity: .45; pointer-events: none; transition: opacity .2s; }
+
+    @keyframes adm-spin { to { transform: rotate(360deg); } }
+    .adm-spin { display: inline-block; animation: adm-spin .9s linear infinite; }
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title"></span>
+    </div>
+
+    <div class="adm-content">
+      <div style="max-width: 700px">
+
+        <!-- ── SORT MODE ──────────────────────────────────────── -->
+        <div class="adm-section">
+          <div class="adm-section__header">
+            <span class="adm-section__title">
+              <span class="material-symbols-rounded" style="font-size:1rem;vertical-align:-.1em;margin-right:.3rem">home</span>
+              Homepage Sort Order
+            </span>
+          </div>
+          <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:.85rem">
+            Controls the order businesses and events appear in the homepage strips.
+          </p>
+          <div class="hp-sort-options">
+            <label class="hp-sort-option">
+              <input type="radio" name="hp-sort" value="latest" />
+              <div class="hp-sort-option__card">
+                <span class="hp-sort-option__icon">🕐</span>
+                <div>
+                  <strong>Latest</strong>
+                  <p>Show the most recently added listings first. Good for a fresh, constantly-updated feel.</p>
+                </div>
+              </div>
+            </label>
+            <label class="hp-sort-option">
+              <input type="radio" name="hp-sort" value="trending" />
+              <div class="hp-sort-option__card">
+                <span class="hp-sort-option__icon">🔥</span>
+                <div>
+                  <strong>Trending</strong>
+                  <p>Show the most-viewed listings first, based on the trending period below. Rewards popular spots.</p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- ── TRENDING PERIOD ────────────────────────────────── -->
+        <div class="adm-section" id="js-period-section">
+          <div class="adm-section__header">
+            <span class="adm-section__title">
+              <span class="material-symbols-rounded" style="font-size:1rem;vertical-align:-.1em;margin-right:.3rem">schedule</span>
+              Trending Period
+            </span>
+          </div>
+          <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:.85rem">
+            How far back to look when calculating which listings are trending.
+          </p>
+          <div class="hp-period-options">
+            <label class="hp-period-pill">
+              <input type="radio" name="hp-period" value="24h" /><span>24 hours</span>
+            </label>
+            <label class="hp-period-pill">
+              <input type="radio" name="hp-period" value="7d" /><span>7 days</span>
+            </label>
+            <label class="hp-period-pill">
+              <input type="radio" name="hp-period" value="30d" /><span>30 days</span>
+            </label>
+          </div>
+          <p class="hp-period-note" id="js-period-note"></p>
+        </div>
+
+        <!-- ── MASONRY HERO TOGGLE ───────────────────────────── -->
+        <div class="adm-section">
+          <div class="adm-section__header">
+            <span class="adm-section__title">
+              <span class="material-symbols-rounded" style="font-size:1rem;vertical-align:-.1em;margin-right:.3rem">grid_view</span>
+              Masonry Hero
+            </span>
+          </div>
+          <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:.85rem">
+            Show a photo grid at the top of the homepage featuring trending events and articles.
+          </p>
+          <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer">
+            <input type="checkbox" id="hp-masonry-toggle" style="width:1.1rem;height:1.1rem;accent-color:var(--adm-teal)" />
+            <span style="font-size:.9rem;font-weight:600">Show masonry hero on homepage</span>
+          </label>
+        </div>
+
+        <!-- ── SAVE ───────────────────────────────────────────── -->
+        <div class="hp-save-row">
+          <button class="adm-btn adm-btn--sm" id="js-hp-save" style="background:var(--adm-teal);width:auto">
+            Save settings
+          </button>
+          <span class="hp-save-status" id="js-hp-status" hidden></span>
+        </div>
+
+      </div><!-- /max-width -->
+
+      <!-- ── TRENDING LEADERBOARD ──────────────────────────────── -->
+      <div class="adm-section" style="margin-top: 2.5rem">
+        <div class="adm-section__header">
+          <span class="adm-section__title">
+            <span class="material-symbols-rounded" style="font-size:1rem;vertical-align:-.1em;margin-right:.3rem">trending_up</span>
+            Trending Right Now
+            <span class="adm-badge adm-badge--teal" id="js-trend-period-label" style="margin-left:.5rem"></span>
+          </span>
+        </div>
+        <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:1rem">
+          Most-viewed listings across businesses, events and stays. Updates live from your <code style="font-size:.78rem;color:var(--adm-teal)">page_views</code> table.
+        </p>
+
+        <div class="hp-tabs" id="js-trend-tabs">
+          <button class="hp-tab active" data-period="24h">24h</button>
+          <button class="hp-tab" data-period="7d">7 days</button>
+          <button class="hp-tab" data-period="30d">30 days</button>
+          <button class="hp-tab" data-period="all">All time</button>
+        </div>
+
+        <div class="adm-table-wrap" id="js-leaderboard">
+          <div class="hp-empty">
+            <span class="material-symbols-rounded adm-spin" style="font-size:1.5rem;color:var(--adm-teal)">progress_activity</span>
+            <p>Loading…</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /adm-content -->
+  </div><!-- /adm-main -->
+</div><!-- /adm-layout -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="auth.js"></script>
+<script src="admin-auth.js"></script>
+<script src="wtdgadmin-shell.js"></script>
+<script>
+'use strict';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  initAdminShell('Homepage Settings');
+
+  const settings = await loadHomepageSettings();
+  setSort(settings.sort);
+  setPeriod(settings.period);
+  updatePeriodNote(settings.period);
+  syncPeriodSection(settings.sort);
+  document.getElementById('hp-masonry-toggle').checked = settings.showMasonry !== false;
+
+  // Sort radio → dim/show period section
+  document.querySelectorAll('input[name="hp-sort"]').forEach(r => {
+    r.addEventListener('change', () => syncPeriodSection(r.value));
+  });
+
+  // Period radio → update note
+  document.querySelectorAll('input[name="hp-period"]').forEach(r => {
+    r.addEventListener('change', () => updatePeriodNote(r.value));
+  });
+
+  // Save
+  document.getElementById('js-hp-save').addEventListener('click', async () => {
+    const sort   = document.querySelector('input[name="hp-sort"]:checked')?.value   || 'latest';
+    const period = document.querySelector('input[name="hp-period"]:checked')?.value || '7d';
+    const btn    = document.getElementById('js-hp-save');
+    const status = document.getElementById('js-hp-status');
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    const showMasonry = document.getElementById('hp-masonry-toggle').checked;
+    const [ok1, ok2, ok3] = await Promise.all([
+      saveHomepageSetting('homepage_sort',   sort),
+      saveHomepageSetting('trending_period', period),
+      saveHomepageSetting('show_masonry',    showMasonry),
+    ]);
+
+    btn.disabled = false; btn.textContent = 'Save settings';
+    status.hidden = false;
+    status.textContent = (ok1 && ok2 && ok3) ? '✅  Saved.' : '❌  Save failed.';
+    status.style.color  = (ok1 && ok2 && ok3) ? 'var(--adm-teal)' : 'var(--adm-red)';
+    setTimeout(() => { status.hidden = true; }, 3000);
+  });
+
+  // Leaderboard
+  const initPeriod = settings.period || '7d';
+  document.getElementById('js-trend-period-label').textContent = periodLabel(initPeriod);
+  await loadLeaderboard(initPeriod);
+
+  // Make the matching tab active
+  const matchTab = document.querySelector(`.hp-tab[data-period="${initPeriod}"]`);
+  if (matchTab) { document.querySelectorAll('.hp-tab').forEach(t => t.classList.remove('active')); matchTab.classList.add('active'); }
+
+  document.querySelectorAll('.hp-tab').forEach(tab => {
+    tab.addEventListener('click', async () => {
+      document.querySelectorAll('.hp-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('js-trend-period-label').textContent = periodLabel(tab.dataset.period);
+      await loadLeaderboard(tab.dataset.period);
+    });
+  });
+});
+
+function setSort(val) {
+  const r = document.querySelector(`input[name="hp-sort"][value="${val}"]`);
+  if (r) r.checked = true;
+}
+function setPeriod(val) {
+  const r = document.querySelector(`input[name="hp-period"][value="${val}"]`);
+  if (r) r.checked = true;
+}
+function syncPeriodSection(sort) {
+  const el = document.getElementById('js-period-section');
+  if (el) el.classList.toggle('hp-section-dim', sort !== 'trending');
+}
+function updatePeriodNote(period) {
+  const notes = {
+    '24h': 'Most reactive — catches overnight spikes and viral moments immediately.',
+    '7d':  'Balanced — smooths daily swings while surfacing what\'s genuinely popular this week.',
+    '30d': 'Most stable — best for established venues with consistent traffic.',
+  };
+  const el = document.getElementById('js-period-note');
+  if (el) el.textContent = notes[period] || '';
+}
+function periodLabel(p) {
+  return { '24h': 'Last 24h', '7d': 'Last 7 days', '30d': 'Last 30 days', 'all': 'All time' }[p] || p;
+}
+
+async function loadLeaderboard(period) {
+  const root = document.getElementById('js-leaderboard');
+  root.innerHTML = '<div class="hp-empty"><span class="material-symbols-rounded adm-spin" style="font-size:1.5rem;color:var(--adm-teal)">progress_activity</span><p>Loading…</p></div>';
+
+  const col = period === '24h' ? 'views_24h' : period === '30d' ? 'views_30d' : period === 'all' ? 'views_all' : 'views_7d';
+
+  try {
+    const { data, error } = await db
+      .from('trending_scores')
+      .select('item_id,item_type,views_24h,views_7d,views_30d,views_all')
+      .order(col, { ascending: false })
+      .limit(25);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      root.innerHTML = '<div class="hp-empty"><span class="material-symbols-rounded" style="font-size:2rem;color:var(--adm-border)">bar_chart</span><p>No view data yet. Views appear here as users browse the site.</p></div>';
+      return;
+    }
+
+    const max = data[0]?.[col] || 1;
+    const typeIcon = { business: '🏪', event: '📅', stay: '🛏️' };
+
+    root.innerHTML = `
+      <div class="hp-lb-header">
+        <span>#</span><span>Listing ID</span><span>Type</span><span style="text-align:right">Views</span><span></span>
+      </div>
+      ${data.map((row, i) => `
+        <div class="hp-lb-row">
+          <span class="hp-lb-rank">${i + 1}</span>
+          <span class="hp-lb-id" title="${row.item_id}">${row.item_id}</span>
+          <span class="hp-lb-type">${typeIcon[row.item_type] || ''} ${row.item_type}</span>
+          <span class="hp-lb-count">${(row[col] || 0).toLocaleString()}</span>
+          <div class="hp-lb-bar-wrap"><div class="hp-lb-bar" style="width:${Math.round((row[col]/max)*100)}%"></div></div>
+        </div>
+      `).join('')}
+    `;
+  } catch (e) {
+    root.innerHTML = `<div class="hp-empty" style="color:var(--adm-red)">Error: ${e.message}</div>`;
+  }
+}
+</script>
+</body>
+</html>

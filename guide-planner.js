@@ -1,12 +1,12 @@
 'use strict';
-/* ── Guide Planner v2 ────────────────────────────────────────────
+/* ── Guide Planner v3 ────────────────────────────────────────────
    Day-by-day itinerary with:
    - Stops grouped by planned_date, undated in "Unscheduled"
+   - "Any day" mode — no date pickers, all stops in one section
    - Date picker per stop (updates Supabase + re-renders planner)
    - Dwell time per stop (editable, defaults by venue type)
    - Walking time + distance between consecutive stops on same day
-   - Day summary: venue time + walking time + day total
-   - Grand total across all days
+   - Per-day summary pills (no redundant grand total header)
    - Full map with all pins + dashed route lines per day (Leaflet)
    ──────────────────────────────────────────────────────────────── */
 
@@ -61,8 +61,8 @@ function fmtDate(iso) {
 }
 
 // ── COORD ENRICHMENT ──────────────────────────────────────
-// item_data saved before lat/lng was added won't have coords.
-// Look them up from the global BUSINESSES / EVENTS / STAYS arrays.
+// Fallback: look up coords from global data arrays if item_data is missing them.
+// (Supabase coord fetch now happens in guide-page.js before planner init.)
 function enrichCoords(item) {
   const d = item.item_data || {};
   if (d.lat && d.lng) return;
@@ -74,7 +74,7 @@ function enrichCoords(item) {
     ...(window.STAYS || []),
   ];
   const src = sources.find(s => String(s.id) === id || s.slug === id);
-  if (src && src.lat) { d.lat = src.lat; d.lng = src.lng; }
+  if (src?.lat) { d.lat = src.lat; d.lng = src.lng; }
 }
 
 // ── DWELL STORE ───────────────────────────────────────────
@@ -96,7 +96,8 @@ function esc(str) {
 function initGuidePlanner(guide, items, isOwner) {
   if (!items.length) return;
 
-  const guideId = guide.id;
+  const guideId  = guide.id;
+  const isAnyday = !!guide.is_anyday;
 
   // Enrich all items with coords from global data arrays
   items.forEach(enrichCoords);
@@ -110,6 +111,10 @@ function initGuidePlanner(guide, items, isOwner) {
 
   // ── DAY GROUPING ────────────────────────────────────────
   function groupByDay() {
+    if (isAnyday) {
+      // All stops in one "any day" group
+      return [{ date: 'anyday', items: [...items] }];
+    }
     const dated = items
       .filter(i => i.planned_date)
       .sort((a, b) => a.planned_date.localeCompare(b.planned_date));
@@ -139,12 +144,10 @@ function initGuidePlanner(guide, items, isOwner) {
   // ── BUILD PLANNER HTML ───────────────────────────────────
   function buildPlanner() {
     const days = groupByDay();
-    let grandDwell = 0, grandTravel = 0, grandStops = 0;
 
     const daySections = days.map((day) => {
-      const { date, dayItems } = { date: day.date, dayItems: day.items };
+      const { date, items: dayItems } = day;
       let dayDwell = 0, dayTravel = 0;
-      grandStops += dayItems.length;
 
       const stopRows = dayItems.map((item, idx) => {
         const d = item.item_data || {};
@@ -179,7 +182,7 @@ function initGuidePlanner(guide, items, isOwner) {
                     <span class="gp-dwell-unit">mins</span>
                   ` : `<span class="gp-dwell-val">${fmtMins(dwell)}</span>`}
                 </label>
-                ${isOwner ? `
+                ${isOwner && !isAnyday ? `
                   <label class="gp-date-row" title="Which day?">
                     <span class="material-symbols-rounded">calendar_today</span>
                     <input type="date" class="gp-date-input js-stop-date"
@@ -199,18 +202,22 @@ function initGuidePlanner(guide, items, isOwner) {
             </div>` : ''}`;
       }).join('');
 
-      grandDwell  += dayDwell;
-      grandTravel += dayTravel;
       const dayTotal = dayDwell + dayTravel;
+
+      // Header label
+      let headerLabel;
+      if (date === 'anyday') {
+        headerLabel = `<span class="material-symbols-rounded">explore</span> Any day`;
+      } else if (date) {
+        headerLabel = `<span class="material-symbols-rounded">calendar_month</span> ${fmtDate(date)}`;
+      } else {
+        headerLabel = `<span class="material-symbols-rounded">schedule_send</span> Not yet scheduled`;
+      }
 
       return `
         <div class="gp-day">
           <div class="gp-day__header">
-            <div class="gp-day__label">
-              ${date
-                ? `<span class="material-symbols-rounded">calendar_month</span> ${fmtDate(date)}`
-                : `<span class="material-symbols-rounded">schedule_send</span> Not yet scheduled`}
-            </div>
+            <div class="gp-day__label">${headerLabel}</div>
             <div class="gp-day__pills">
               <span class="gp-day__pill">${dayItems.length} stop${dayItems.length !== 1 ? 's' : ''}</span>
               ${dayDwell  ? `<span class="gp-day__pill">${fmtMins(dayDwell)} venues</span>` : ''}
@@ -222,24 +229,7 @@ function initGuidePlanner(guide, items, isOwner) {
         </div>`;
     }).join('');
 
-    const grandTotal = grandDwell + grandTravel;
-    const datedDays  = days.filter(d => d.date).length;
-
-    return `
-      <div class="gp-grand">
-        <div class="gp-grand__stat">
-          <span class="material-symbols-rounded">place</span>
-          <strong>${grandStops}</strong> stop${grandStops !== 1 ? 's' : ''}
-          ${datedDays > 1 ? `<span>across <strong>${datedDays}</strong> days</span>` : ''}
-        </div>
-        ${grandDwell  ? `<div class="gp-grand__stat"><span class="material-symbols-rounded">storefront</span><strong>${fmtMins(grandDwell)}</strong> at venues</div>` : ''}
-        ${grandTravel ? `<div class="gp-grand__stat"><span class="material-symbols-rounded">directions_walk</span><strong>${fmtMins(grandTravel)}</strong> walking</div>` : ''}
-        <div class="gp-grand__stat gp-grand__total">
-          <span class="material-symbols-rounded">wb_sunny</span>
-          <strong>${fmtMins(grandTotal)}</strong> total
-        </div>
-      </div>
-      ${daySections}`;
+    return daySections;
   }
 
   // ── MAP ───────────────────────────────────────────────────
@@ -268,7 +258,7 @@ function initGuidePlanner(guide, items, isOwner) {
     const dayColors = ['#2ab4a0','#3a86ff','#e76f51','#9b5de5','#f59e0b','#52b788'];
     const bounds = [];
 
-    // Route polylines per day
+    // Route polylines per day (or single route for anyday)
     groupByDay().forEach((day, dIdx) => {
       const coords = day.items
         .filter(i => i.item_data?.lat)
@@ -294,7 +284,7 @@ function initGuidePlanner(guide, items, isOwner) {
       const marker = L.marker([d.lat, d.lng], { icon }).addTo(leafletMap);
       marker.bindPopup(`<strong>${d.emoji || '📍'} ${esc(d.title || d.name || '')}</strong>
         ${d.location ? `<br><small>${esc(d.location)}</small>` : ''}
-        ${item.planned_date ? `<br><small style="color:#2ab4a0">${fmtDate(item.planned_date)}</small>` : ''}`);
+        ${item.planned_date && !isAnyday ? `<br><small style="color:#2ab4a0">${fmtDate(item.planned_date)}</small>` : ''}`);
       bounds.push([d.lat, d.lng]);
     });
 
@@ -317,7 +307,6 @@ function initGuidePlanner(guide, items, isOwner) {
         saveDwell(guideId, dwellMap);
         panel.innerHTML = buildPlanner();
         bindEvents();
-        // Refresh map route lines (travel times affect map labels)
         if (leafletMap) { leafletMap.remove(); leafletMap = null; initMap(); }
       });
     });
@@ -346,9 +335,10 @@ function initGuidePlanner(guide, items, isOwner) {
   container.innerHTML = `
     <div class="gp-header">
       <h2 class="gp-title">
-        <span class="material-symbols-rounded">calendar_month</span> Day Planner
+        <span class="material-symbols-rounded">calendar_month</span> ${isAnyday ? 'Guide Itinerary' : 'Day Planner'}
       </h2>
-      ${isOwner ? `<p class="gp-hint">Set dates on each stop to organise your itinerary by day. Edit the minutes field to adjust time at each venue.</p>` : ''}
+      ${isOwner && !isAnyday ? `<p class="gp-hint">Set dates on each stop to organise your itinerary by day. Edit the minutes field to adjust time at each venue.</p>` : ''}
+      ${isOwner && isAnyday ? `<p class="gp-hint">This is an any-day guide — stops are not tied to a specific date. Edit the minutes field to adjust time at each venue.</p>` : ''}
     </div>
     <div id="js-gp-panel">${buildPlanner()}</div>
     <div class="gp-map-section">
@@ -362,7 +352,7 @@ function initGuidePlanner(guide, items, isOwner) {
   guideBody?.appendChild(container);
 
   bindEvents();
-  setTimeout(initMap, 150); // let DOM settle before Leaflet initialises
+  setTimeout(initMap, 150);
 }
 
 window.initGuidePlanner = initGuidePlanner;

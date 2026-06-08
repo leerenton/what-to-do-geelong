@@ -16,7 +16,7 @@ const GOOGLE_KEY   = 'AIzaSyDHUrQ0uu0j0VDjigRhxoS44h-9Y4p1PZY';
 const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1aHhzenF5eXpyYnpyaHduZWV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDcyNTc1OCwiZXhwIjoyMDk2MzAxNzU4fQ.iXhO6IWYgZl-58thx2ZUySg5Dt0-s9QXYS98j4fvRQ8';
 
-const MAX_REQUESTS = 5;   // ← hard cap on Google API calls this run
+const MAX_REQUESTS = 4;   // ← hard cap on Google API calls this run
 const DELAY_MS     = 400; // ← ms between requests
 const DRY_RUN      = false; // ← set true to preview without saving
 
@@ -163,6 +163,9 @@ async function searchPlaces({ query, bias, maxResults }) {
         'places.websiteUri',
         'places.types',
         'places.photos',
+        'places.editorialSummary',
+        'places.regularOpeningHours',
+        'places.priceLevel',
       ].join(','),
     },
   }, payload);
@@ -253,7 +256,15 @@ async function main() {
         ? place.websiteUri.replace(/^https?:\/\//, '').replace(/\/$/, '')
         : null;
 
-      const name = place.displayName?.text || 'Unknown';
+      const name        = place.displayName?.text || 'Unknown';
+      const description = place.editorialSummary?.text || null;
+      const hours       = place.regularOpeningHours
+        ? {
+            periods:      place.regularOpeningHours.periods || [],
+            weekdayDescriptions: place.regularOpeningHours.weekdayDescriptions || [],
+          }
+        : null;
+
       const biz  = {
         id:              slugify(name + '-' + suburb),
         google_place_id: place.id,
@@ -270,6 +281,8 @@ async function main() {
         website,
         rating:          place.rating || null,
         img:             photo,
+        description,
+        opening_hours:   hours,
         is_claimed:      false,
         plan:            'free',
         created_at:      new Date().toISOString(),
@@ -281,6 +294,8 @@ async function main() {
       console.log('      Rating :', place.rating || '—');
       console.log('      Phone  :', place.nationalPhoneNumber || '—');
       console.log('      Website:', website || '—');
+      console.log('      Desc   :', description || '—');
+      console.log('      Hours  :', hours ? hours.weekdayDescriptions[0] + '…' : '—');
       console.log('      Photo  :', photo ? '✓' : '—');
       console.log('      LatLng :', place.location?.latitude, place.location?.longitude);
 

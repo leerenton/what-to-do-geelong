@@ -1199,6 +1199,17 @@ function injectSEOMeta({ title, description, canonical, ogImage, type, extra }) 
 }
 
 // ── LISTING PAGE ──────────────────────────────────────────
+function getTodayHours(openingHours) {
+  if (!openingHours?.weekdayDescriptions?.length) return 'See hours';
+  // weekdayDescriptions is Mon–Sun (index 0=Mon, 6=Sun); JS getDay() is 0=Sun
+  const jsDay  = new Date().getDay();
+  const idx    = jsDay === 0 ? 6 : jsDay - 1;
+  const line   = openingHours.weekdayDescriptions[idx] || '';
+  // "Monday: 7:00 AM – 4:00 PM" → strip day name
+  const hours  = line.replace(/^[^:]+:\s*/, '');
+  return hours ? `Today: ${hours}` : 'See hours';
+}
+
 async function initListingPage() {
   const params    = new URLSearchParams(window.location.search);
   // On Vercel, URL stays clean (/biz-slug) so read path; locally use ?s= or ?id=
@@ -1300,7 +1311,18 @@ async function initListingPage() {
           ${biz.phone   ? `<a href="tel:${biz.phone}" class="btn btn--outline btn--sm">📞 Call</a>` : ''}
         </div>
       </div>
-      <p class="lident__desc">${biz.description}</p>
+      ${biz.description ? `<p class="lident__desc">${biz.description}</p>` : ''}
+      ${biz.openingHours?.weekdayDescriptions?.length ? `
+        <div class="lident__hours">
+          <button class="lident__hours-toggle" id="js-hours-toggle">
+            <span class="material-symbols-rounded">schedule</span>
+            <span id="js-hours-today">${getTodayHours(biz.openingHours)}</span>
+            <span class="material-symbols-rounded lident__hours-chev">expand_more</span>
+          </button>
+          <ul class="lident__hours-list" id="js-hours-list" hidden>
+            ${biz.openingHours.weekdayDescriptions.map(d => `<li>${d}</li>`).join('')}
+          </ul>
+        </div>` : ''}
     </div>
 
     <div class="container listing-body">
@@ -1446,6 +1468,15 @@ async function initListingPage() {
       document.getElementById('js-inq-success').hidden = false;
     });
   }
+
+  // ── Opening hours toggle ────────────────────────────────────
+  document.getElementById('js-hours-toggle')?.addEventListener('click', () => {
+    const list = document.getElementById('js-hours-list');
+    const chev = document.querySelector('.lident__hours-chev');
+    if (!list) return;
+    list.hidden = !list.hidden;
+    if (chev) chev.style.transform = list.hidden ? '' : 'rotate(180deg)';
+  });
 
   // ── Distance display on listing page ───────────────────────
   if (window.wtdgLocation && biz.lat && biz.lng) {

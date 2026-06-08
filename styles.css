@@ -2462,6 +2462,29 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* Rating + distance on listing page */
 .lident__rating { color: var(--teal); font-size: .82rem; font-weight: 700; margin-left: .5rem; }
 .lident__dist   { color: var(--mid);  font-size: .82rem; font-weight: 600; }
+
+/* Opening hours */
+.lident__hours { margin-top: .75rem; }
+.lident__hours-toggle {
+  display: inline-flex; align-items: center; gap: .35rem;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: .6rem; padding: .45rem .85rem;
+  font-size: .85rem; font-weight: 600; color: var(--dark);
+  cursor: pointer; font-family: var(--font-body);
+  transition: border-color .15s;
+}
+.lident__hours-toggle:hover { border-color: var(--teal); }
+.lident__hours-toggle .material-symbols-rounded { font-size: 1rem; color: var(--teal); }
+.lident__hours-chev { color: var(--mid) !important; transition: transform .2s; }
+.lident__hours-list {
+  list-style: none; margin: .5rem 0 0; padding: .6rem .9rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: .6rem; font-size: .83rem; color: var(--dark);
+  display: flex; flex-direction: column; gap: .3rem;
+  max-width: 320px;
+}
+.lident__hours-list li { line-height: 1.5; }
+.lident__hours-list li:nth-child(odd) { color: var(--mid); }
 .coll-body  { padding-top: 1rem; padding-bottom: 3rem; }
 .coll-topbar {
   display: flex; align-items: center; flex-wrap: wrap;

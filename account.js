@@ -2,7 +2,15 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await db.auth.getSession();
-  const acct = getAccount();
+  let acct = getAccount();
+
+  // If localStorage is missing but Supabase session exists, rebuild acct from session
+  if (!acct && session) {
+    const u = session.user;
+    acct = { id: u.id, name: u.user_metadata?.name || u.email.split('@')[0], email: u.email };
+    setAccount(acct);
+  }
+
   if (!session && !acct) { window.location.href = 'login.html?next=account.html'; return; }
 
   let profiles = [];

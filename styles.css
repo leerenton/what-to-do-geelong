@@ -2553,6 +2553,121 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   margin: .15rem 0 0; display: flex; align-items: center; gap: .25rem;
 }
 
+/* ── Listing page redesign ──────────────────────────────────── */
+.lhero--full { width: 100%; max-height: 480px; }
+@media (max-width: 639px) { .lhero--full { max-height: 260px; } }
+
+/* Business header bar */
+.lheader {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; padding: 1.5rem 0 1rem;
+}
+.lheader__left { display: flex; align-items: flex-start; gap: 1rem; flex: 1; min-width: 0; }
+.lheader__info { flex: 1; min-width: 0; }
+.lheader__actions {
+  display: flex; gap: .5rem; flex-wrap: wrap; flex-shrink: 0;
+  align-items: flex-start;
+}
+.lheader__actions .btn .material-symbols-rounded { font-size: .9rem; vertical-align: middle; }
+@media (max-width: 640px) {
+  .lheader { flex-direction: column; }
+  .lheader__actions { width: 100%; }
+  .lheader__actions .btn { flex: 1; justify-content: center; text-align: center; }
+}
+
+/* Tags */
+.listing-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+.listing-tag {
+  display: inline-flex; align-items: center; gap: .25rem;
+  font-size: .72rem; font-weight: 600; letter-spacing: .02em;
+  padding: .3rem .65rem; border-radius: 99px;
+  background: var(--bg, #f5f4f0); color: var(--mid, #6b7280);
+  border: 1px solid rgba(0,0,0,.07);
+}
+
+/* Two-column layout */
+.listing-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  padding-block: 1.25rem 3.5rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .listing-layout { grid-template-columns: 1fr; }
+  .listing-sidebar { order: -1; }
+}
+
+.listing-main > .lident__desc { margin: 0 0 1.5rem; }
+
+/* Sidebar info cards */
+.linfo-card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.linfo-card__header {
+  display: flex; align-items: center; gap: .5rem;
+  margin-bottom: .75rem;
+}
+.linfo-card__header .material-symbols-rounded { color: var(--teal); font-size: 1.15rem; }
+.linfo-card__header h3 { font-family: var(--font-head); font-size: 1rem; font-weight: 800; margin: 0; }
+.linfo-card__today {
+  font-size: .9rem; font-weight: 700; color: var(--teal);
+  margin: 0 0 .5rem;
+}
+.linfo-card__toggle {
+  background: none; border: none; cursor: pointer;
+  font-size: .82rem; color: var(--mid); padding: 0;
+  display: flex; align-items: center; gap: .25rem;
+}
+.linfo-card__toggle .material-symbols-rounded { font-size: .9rem; transition: transform .2s; }
+.linfo-card__hours-list {
+  list-style: none; margin: .75rem 0 0; padding: 0;
+  font-size: .82rem; line-height: 1;
+}
+.linfo-card__hours-list li {
+  display: flex; justify-content: space-between;
+  padding: .35rem 0;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+  color: var(--mid);
+}
+.linfo-card__hours-list li:last-child { border-bottom: none; }
+.linfo-card__hours-list li.linfo-today { color: var(--dark); font-weight: 700; }
+
+/* Map card */
+.linfo-card--map { padding: 0; overflow: hidden; }
+.linfo-card--map iframe { border-radius: 14px 14px 0 0; }
+.linfo-directions-btn {
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+  background: var(--teal); color: #fff;
+  font-size: .875rem; font-weight: 700;
+  padding: .75rem 1rem;
+  text-decoration: none; transition: background .15s;
+}
+.linfo-directions-btn:hover { background: #0e8f7a; }
+.linfo-directions-btn .material-symbols-rounded { font-size: 1rem; }
+.linfo-address {
+  font-size: .78rem; color: var(--mid); margin: 0;
+  padding: .6rem 1rem;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+/* Contact rows */
+.linfo-row {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+  text-decoration: none; color: var(--dark);
+  font-size: .875rem;
+  transition: color .15s;
+}
+.linfo-row:last-child { border-bottom: none; padding-bottom: 0; }
+.linfo-row:hover { color: var(--teal); }
+.linfo-row .material-symbols-rounded { font-size: 1rem; color: var(--teal); flex-shrink: 0; }
+
 /* ── Community Guides Homepage Strip ──────────────────────── */
 .cg-strip-section {
   background: #1e3a5f;

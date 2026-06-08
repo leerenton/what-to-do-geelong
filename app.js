@@ -1199,6 +1199,22 @@ function injectSEOMeta({ title, description, canonical, ogImage, type, extra }) 
 }
 
 // ── LISTING PAGE ──────────────────────────────────────────
+function getBizTags(biz) {
+  const tags = [];
+  const t = (biz.type || '').toLowerCase();
+  const name = (biz.name || '').toLowerCase();
+  if (['family','kids','child','amusement','fairy','play','park','aquatic','mini golf','bowling','cinema','movie'].some(k => t.includes(k) || name.includes(k))) tags.push({ label: 'Family Friendly', icon: '👨‍👩‍👧' });
+  if (['bar','pub','brewery','winery','distillery','cocktail','nightclub'].some(k => t.includes(k))) tags.push({ label: 'Licensed Venue', icon: '🍺' });
+  if (['café','cafe','coffee','bakery','brunch'].some(k => t.includes(k))) tags.push({ label: 'Café & Coffee', icon: '☕' });
+  if (['restaurant','dining','bistro'].some(k => t.includes(k))) tags.push({ label: 'Dine In', icon: '🍽️' });
+  if (['park','garden','outdoor','nature','beach','coast','walking','hiking','trail','adventure','surf'].some(k => t.includes(k) || name.includes(k))) tags.push({ label: 'Outdoors', icon: '🌿' });
+  if (['gallery','museum','art','culture','theatre','theater','cinema'].some(k => t.includes(k))) tags.push({ label: 'Arts & Culture', icon: '🎨' });
+  if (['hotel','motel','accommodation','bnb','hostel','resort'].some(k => t.includes(k))) tags.push({ label: 'Accommodation', icon: '🏨' });
+  if (biz.rating && biz.rating >= 4.5) tags.push({ label: 'Highly Rated', icon: '⭐' });
+  if (biz.plan === 'premium') tags.push({ label: 'WTDG Partner', icon: '✓' });
+  return tags.slice(0, 5);
+}
+
 function getTodayHours(openingHours) {
   if (!openingHours?.weekdayDescriptions?.length) return 'See hours';
   // weekdayDescriptions is Mon–Sun (index 0=Mon, 6=Sun); JS getDay() is 0=Sun
@@ -1278,9 +1294,36 @@ async function initListingPage() {
        <button class="lhero__arrow lhero__arrow--next" aria-label="Next">›</button>`
     : '';
 
+  const bizTags = getBizTags(biz);
+  const mapsQuery = encodeURIComponent(biz.name + ' ' + (biz.location || biz.suburb || 'Geelong'));
+  const mapsUrl = biz.lat && biz.lng
+    ? `https://www.google.com/maps/dir/?api=1&destination=${biz.lat},${biz.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+  const mapEmbedUrl = biz.lat && biz.lng
+    ? `https://maps.google.com/maps?q=${biz.lat},${biz.lng}&z=15&output=embed`
+    : `https://maps.google.com/maps?q=${mapsQuery}&z=15&output=embed`;
+
+  const openingHoursHtml = biz.openingHours?.weekdayDescriptions?.length ? `
+    <div class="linfo-card">
+      <div class="linfo-card__header">
+        <span class="material-symbols-rounded">schedule</span>
+        <h3>Opening Hours</h3>
+      </div>
+      <p class="linfo-card__today" id="js-hours-today">${getTodayHours(biz.openingHours)}</p>
+      <button class="linfo-card__toggle" id="js-hours-toggle">
+        Show all hours <span class="material-symbols-rounded lident__hours-chev">expand_more</span>
+      </button>
+      <ul class="linfo-card__hours-list" id="js-hours-list" hidden>
+        ${biz.openingHours.weekdayDescriptions.map(d => {
+          const isToday = d.startsWith(new Date().toLocaleDateString('en-AU',{weekday:'long'}));
+          return `<li class="${isToday ? 'linfo-today' : ''}">${d}</li>`;
+        }).join('')}
+      </ul>
+    </div>` : '';
+
   document.getElementById('js-listing-root').innerHTML = `
-    <!-- HERO CAROUSEL -->
-    <div class="lhero">
+    <!-- HERO CAROUSEL — full width -->
+    <div class="lhero lhero--full">
       <div class="lhero__track">${heroSlides}</div>
       ${prevNextHtml}
       ${dotsHtml}
@@ -1297,82 +1340,119 @@ async function initListingPage() {
       </div>
     </div>
 
-    <!-- IDENTITY CARD -->
+    <!-- BUSINESS HEADER -->
     <div class="container">
-      <div class="lident">
-        <div class="lident__avatar" style="background:${biz.color}22">${biz.emoji}</div>
-        <div class="lident__info">
-          <h1 class="lident__name">${biz.name}</h1>
-          <p class="lident__loc">📍 ${biz.location}${biz.rating ? ` <span class="lident__rating">★ ${biz.rating}</span>` : ''}<span class="lident__dist" id="js-listing-dist"></span></p>
-          <p class="lident__views" id="js-biz-view-count" style="display:none"></p>
+      <div class="lheader">
+        <div class="lheader__left">
+          <div class="lident__avatar" style="background:${biz.color}22">${biz.emoji}</div>
+          <div class="lheader__info">
+            <h1 class="lident__name">${biz.name}</h1>
+            <p class="lident__loc">
+              <span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle;color:var(--teal)">location_on</span>
+              ${biz.suburb || biz.location || 'Geelong'}${biz.rating ? ` <span class="lident__rating">★ ${biz.rating}</span>` : ''}<span class="lident__dist" id="js-listing-dist"></span>
+            </p>
+            <p class="lident__views" id="js-biz-view-count" style="display:none"></p>
+            ${bizTags.length ? `<div class="listing-tags">${bizTags.map(t => `<span class="listing-tag">${t.icon} ${t.label}</span>`).join('')}</div>` : ''}
+          </div>
         </div>
-        <div class="lident__links">
-          ${biz.website ? `<a href="https://${biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm">🌐 Website</a>` : ''}
-          ${biz.phone   ? `<a href="tel:${biz.phone}" class="btn btn--outline btn--sm">📞 Call</a>` : ''}
+        <div class="lheader__actions">
+          ${biz.website ? `<a href="https://${biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><span class="material-symbols-rounded">language</span> Website</a>` : ''}
+          ${biz.phone   ? `<a href="tel:${biz.phone}" class="btn btn--outline btn--sm"><span class="material-symbols-rounded">call</span> Call</a>` : ''}
+          <a href="${mapsUrl}" target="_blank" rel="noopener" class="btn btn--teal btn--sm"><span class="material-symbols-rounded">directions</span> Directions</a>
         </div>
       </div>
-      ${biz.description ? `<p class="lident__desc">${biz.description}</p>` : ''}
-      ${biz.openingHours?.weekdayDescriptions?.length ? `
-        <div class="lident__hours">
-          <button class="lident__hours-toggle" id="js-hours-toggle">
-            <span class="material-symbols-rounded">schedule</span>
-            <span id="js-hours-today">${getTodayHours(biz.openingHours)}</span>
-            <span class="material-symbols-rounded lident__hours-chev">expand_more</span>
-          </button>
-          <ul class="lident__hours-list" id="js-hours-list" hidden>
-            ${biz.openingHours.weekdayDescriptions.map(d => `<li>${d}</li>`).join('')}
-          </ul>
-        </div>` : ''}
     </div>
 
-    <div class="container listing-body">
-      <div class="listing-tabs" role="tablist">
-        <button class="listing-tab listing-tab--active" role="tab" data-tab="events">
-          Events <span class="tab-count">${events.length}</span>
-        </button>
-        <button class="listing-tab" role="tab" data-tab="promos">
-          Offers <span class="tab-count">${promos.length}</span>
-        </button>
-      </div>
+    <!-- TWO-COLUMN BODY -->
+    <div class="container listing-layout">
 
-      <div id="js-tab-events" class="tab-panel">
-        ${events.length ? `
-          <div class="event-grid event-grid--stagger">
-            ${events.map(ev => `
-              <div class="event-card">
-                <div class="event-card__img-placeholder" style="background:${ev.color}22">${ev.emoji}</div>
-                <div class="event-card__body">
-                  <span class="event-card__tag">${ev.category}</span>
-                  <h3 class="event-card__title">${ev.title}</h3>
-                  <div class="event-card__meta">📅 ${ev.date} &nbsp;🕐 ${ev.time}</div>
-                  <div class="event-card__meta">📍 ${ev.location}</div>
-                  <div class="event-card__footer">
-                    <span class="event-card__price ${ev.price === 'Free' ? 'event-card__price--free' : ''}">${ev.price}</span>
+      <!-- MAIN COLUMN -->
+      <div class="listing-main">
+        ${biz.description ? `<p class="lident__desc">${biz.description}</p>` : ''}
+
+        <!-- TABS -->
+        <div class="listing-tabs" role="tablist">
+          <button class="listing-tab listing-tab--active" role="tab" data-tab="events">
+            Events <span class="tab-count">${events.length}</span>
+          </button>
+          <button class="listing-tab" role="tab" data-tab="promos">
+            Offers <span class="tab-count">${promos.length}</span>
+          </button>
+        </div>
+
+        <div id="js-tab-events" class="tab-panel">
+          ${events.length ? `
+            <div class="event-grid event-grid--stagger">
+              ${events.map(ev => `
+                <div class="event-card">
+                  <div class="event-card__img-placeholder" style="background:${ev.color}22">${ev.emoji}</div>
+                  <div class="event-card__body">
+                    <span class="event-card__tag">${ev.category}</span>
+                    <h3 class="event-card__title">${ev.title}</h3>
+                    <div class="event-card__meta">📅 ${ev.date} &nbsp;🕐 ${ev.time}</div>
+                    <div class="event-card__meta">📍 ${ev.location}</div>
+                    <div class="event-card__footer">
+                      <span class="event-card__price ${ev.price === 'Free' ? 'event-card__price--free' : ''}">${ev.price}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            `).join('')}
-          </div>
-        ` : '<p class="listing-empty">No upcoming events right now. Check back soon.</p>'}
+              `).join('')}
+            </div>
+          ` : '<p class="listing-empty">No upcoming events right now. Check back soon.</p>'}
+        </div>
+
+        <div id="js-tab-promos" class="tab-panel tab-panel--hidden">
+          ${promos.length ? `
+            <div class="promo-list">
+              ${promos.map(pr => `
+                <div class="promo-card">
+                  <div class="promo-card__icon">${pr.emoji}</div>
+                  <div class="promo-card__body">
+                    <span class="promo-card__tag">${pr.tag}</span>
+                    <h3 class="promo-card__title">${pr.title}</h3>
+                    <p class="promo-card__desc">${pr.description}</p>
+                    <p class="promo-card__expires">⏳ ${pr.expires}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : '<p class="listing-empty">No active offers right now.</p>'}
+        </div>
       </div>
 
-      <div id="js-tab-promos" class="tab-panel tab-panel--hidden">
-        ${promos.length ? `
-          <div class="promo-list">
-            ${promos.map(pr => `
-              <div class="promo-card">
-                <div class="promo-card__icon">${pr.emoji}</div>
-                <div class="promo-card__body">
-                  <span class="promo-card__tag">${pr.tag}</span>
-                  <h3 class="promo-card__title">${pr.title}</h3>
-                  <p class="promo-card__desc">${pr.description}</p>
-                  <p class="promo-card__expires">⏳ ${pr.expires}</p>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        ` : '<p class="listing-empty">No active offers right now.</p>'}
-      </div>
+      <!-- SIDEBAR -->
+      <aside class="listing-sidebar">
+        ${openingHoursHtml}
+
+        <!-- Map & Directions -->
+        <div class="linfo-card linfo-card--map">
+          <iframe
+            src="${mapEmbedUrl}"
+            width="100%" height="200" style="border:0;border-radius:8px;display:block"
+            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+          <a href="${mapsUrl}" target="_blank" rel="noopener" class="linfo-directions-btn">
+            <span class="material-symbols-rounded">directions</span> Get Directions
+          </a>
+          ${biz.location ? `<p class="linfo-address">${biz.location}</p>` : ''}
+        </div>
+
+        <!-- Contact details -->
+        ${biz.phone || biz.website ? `
+        <div class="linfo-card">
+          ${biz.phone ? `
+            <a href="tel:${biz.phone}" class="linfo-row">
+              <span class="material-symbols-rounded">call</span>
+              <span>${biz.phone}</span>
+            </a>` : ''}
+          ${biz.website ? `
+            <a href="https://${biz.website}" target="_blank" rel="noopener" class="linfo-row">
+              <span class="material-symbols-rounded">language</span>
+              <span>${biz.website.replace(/^https?:\/\//, '')}</span>
+            </a>` : ''}
+        </div>` : ''}
+      </aside>
+
     </div>
   `;
 

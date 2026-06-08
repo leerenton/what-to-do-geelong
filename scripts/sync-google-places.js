@@ -16,15 +16,28 @@ const GOOGLE_KEY   = 'AIzaSyDHUrQ0uu0j0VDjigRhxoS44h-9Y4p1PZY';
 const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1aHhzenF5eXpyYnpyaHduZWV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDcyNTc1OCwiZXhwIjoyMDk2MzAxNzU4fQ.iXhO6IWYgZl-58thx2ZUySg5Dt0-s9QXYS98j4fvRQ8';
 
-const MAX_REQUESTS = 7;   // ← hard cap on Google API calls this run
-const DELAY_MS     = 400; // ← ms between requests
+const MAX_REQUESTS = 2;    // ← hard cap on Google API calls this run
+const DELAY_MS     = 400;  // ← ms between requests
 const DRY_RUN      = false; // ← set true to preview without saving
+const CLEAR_FIRST  = false; // ← set true to wipe unclaimed before run (full refresh)
 
 let requestCount = 0;
 
 // ── SEARCH QUERIES ────────────────────────────────────────────
 // Each query = 1 API request, returns up to maxResultCount places
 const SEARCHES = [
+  // ── Drink ─────────────────────────────────────────────────
+  {
+    query: 'wineries cellar door Bellarine Peninsula Victoria',
+    type: 'Winery', emoji: '🍷', color: '#6B2737',
+    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 40000 },
+  },
+  {
+    query: 'brewery craft beer distillery Geelong Bellarine Victoria',
+    type: 'Brewery', emoji: '🍺', color: '#C47F17',
+    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 40000 },
+  },
+
   // ── Eat ──────────────────────────────────────────────────
   {
     query: 'best cafes coffee Geelong Victoria',
@@ -213,12 +226,12 @@ async function upsertBusiness(biz) {
   }
 }
 
-// ── PHOTO URL ─────────────────────────────────────────────────
-function getPhotoUrl(place) {
-  const ref = place.photos?.[0]?.name;
-  if (!ref) return null;
-  // Google Places photo URL (no extra request needed)
-  return `https://places.googleapis.com/v1/${ref}/media?maxHeightPx=600&maxWidthPx=800&key=${GOOGLE_KEY}`;
+// ── PHOTO URLs ────────────────────────────────────────────────
+function getPhotoUrls(place, max = 5) {
+  const photos = place.photos || [];
+  return photos.slice(0, max).map(p =>
+    `https://places.googleapis.com/v1/${p.name}/media?maxHeightPx=800&maxWidthPx=1200&key=${GOOGLE_KEY}`
+  );
 }
 
 // ── MAIN ──────────────────────────────────────────────────────
@@ -227,10 +240,11 @@ async function main() {
   console.log(' WTDG Google Places Sync');
   console.log(`  MAX_REQUESTS : ${MAX_REQUESTS}`);
   console.log(`  DRY_RUN      : ${DRY_RUN}`);
+  console.log(`  CLEAR_FIRST  : ${CLEAR_FIRST}`);
   console.log('═══════════════════════════════════════');
 
-  // 1. Clear unclaimed businesses
-  if (!DRY_RUN) await deleteAllUnclaimed();
+  // 1. Optionally clear unclaimed businesses (skip for incremental runs)
+  if (!DRY_RUN && CLEAR_FIRST) await deleteAllUnclaimed();
 
   // 2. Get existing place IDs to avoid duplicates on incremental runs
   const existingIds = DRY_RUN ? new Set() : await getExistingPlaceIds();
@@ -251,7 +265,7 @@ async function main() {
 
       const suburb  = extractSuburb(place.formattedAddress);
       const emoji   = guessEmoji(place.types);
-      const photo   = getPhotoUrl(place);
+      const photos  = getPhotoUrls(place, 5);
       const website = place.websiteUri
         ? place.websiteUri.replace(/^https?:\/\//, '').replace(/\/$/, '')
         : null;
@@ -280,7 +294,8 @@ async function main() {
         phone:           place.nationalPhoneNumber || null,
         website,
         rating:          place.rating || null,
-        img:             photo,
+        img:             photos[0] || null,
+        gallery:         photos.length > 1 ? photos.slice(1) : null,
         description,
         opening_hours:   hours,
         is_claimed:      false,
@@ -296,7 +311,7 @@ async function main() {
       console.log('      Website:', website || '—');
       console.log('      Desc   :', description || '—');
       console.log('      Hours  :', hours ? hours.weekdayDescriptions[0] + '…' : '—');
-      console.log('      Photo  :', photo ? '✓' : '—');
+      console.log('      Photos :', photos.length ? `✓ ${photos.length}` : '—');
       console.log('      LatLng :', place.location?.latitude, place.location?.longitude);
 
       if (!DRY_RUN) {

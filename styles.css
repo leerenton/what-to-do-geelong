@@ -2263,9 +2263,14 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .lhero__slide {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
-  opacity: 0; transition: opacity .6s ease;
+  opacity: 0; transition: opacity .5s ease;
+  will-change: opacity;
 }
 .lhero__slide.active { opacity: 1; }
+/* Hide arrows on touch devices — swipe is the gesture */
+@media (hover: none) {
+  .lhero__arrow { display: none; }
+}
 
 .lhero__arrow {
   position: absolute; top: 50%; transform: translateY(-50%);

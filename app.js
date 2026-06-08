@@ -1606,8 +1606,25 @@ async function initListingPage() {
     document.querySelector('.lhero__arrow--next')?.addEventListener('click', () => goSlide(current + 1));
     dots.forEach(d => d.addEventListener('click', () => goSlide(+d.dataset.idx)));
 
-    // Auto-advance every 4s
-    setInterval(() => goSlide(current + 1), 4000);
+    // Auto-advance every 5s
+    const autoTimer = setInterval(() => goSlide(current + 1), 5000);
+
+    // ── Touch / swipe support ────────────────────────────────
+    let touchStartX = 0;
+    let touchStartY = 0;
+    track.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    track.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      // Only trigger if horizontal swipe is dominant and > 40px
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        clearInterval(autoTimer);
+        goSlide(dx < 0 ? current + 1 : current - 1);
+      }
+    }, { passive: true });
   }
 
   // ── Save / share buttons ───────────────────────────────────

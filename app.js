@@ -802,9 +802,11 @@ function renderFeatured(events) {
 
   const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
 
+  const featImg = ev.heroImg || biz?.img || null;
+
   el.innerHTML = `
     <a href="${evLink(ev)}" class="featured-card">
-      <div class="featured-card__img" style="background:${ev.color}22">${ev.emoji}</div>
+      <div class="featured-card__img${featImg ? ' featured-card__img--photo' : ''}" style="${featImg ? `background-image:url('${featImg}')` : `background:${ev.color}22`}">${featImg ? '' : ev.emoji}</div>
       <div class="featured-card__body">
         <span class="featured-card__badge">⭐ Featured</span>
         <span class="featured-card__cat">${ev.category}</span>

@@ -29,9 +29,10 @@
   }
 
   // ── Track a single view ──────────────────────────────────────
-  // itemId   – the record id (string or number)
-  // itemType – 'business' | 'event' | 'stay'
-  async function track(itemId, itemType) {
+  // itemId       – the record id (string or number)
+  // itemType     – 'business' | 'event' | 'stay' | 'guide'
+  // itemCategory – e.g. 'Sports', 'Music' (optional, used for email personalisation)
+  async function track(itemId, itemType, itemCategory) {
     if (!itemId || !itemType) return;
     const key = `${itemType}:${itemId}`;
     if (getLogged().has(key)) return;   // already tracked this session
@@ -42,10 +43,19 @@
     setTimeout(async () => {
       try {
         if (typeof window.db === 'undefined') return;
+        // Attach logged-in user + category for personalised email digest
+        let userId = null;
+        let category = itemCategory || null;
+        try {
+          const { data: { user } } = await window.db.auth.getUser();
+          if (user) userId = user.id;
+        } catch {}
         await window.db.from('page_views').insert({
           item_id:   String(itemId),
           item_type: itemType,
           viewed_at: new Date().toISOString(),
+          user_id:   userId,
+          category:  category,
         });
       } catch (e) {
         // Silently ignore — tracking should never break the app

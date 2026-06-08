@@ -1422,7 +1422,7 @@ async function initListingPage() {
 
   // ── View tracking ───────────────────────────────────────────
   if (window.wtdgViews) {
-    window.wtdgViews.track(biz.id, 'business');
+    window.wtdgViews.track(biz.id, 'business', biz.type);
     // Show view count after a short delay so it doesn't block page paint
     window.wtdgViews.getCount(biz.id, 'business', '7d').then(count => {
       if (count > 0) {
@@ -1714,7 +1714,7 @@ async function initEventPage() {
 
   // Track this as a real page view (user has opened and is reading the event)
   if (window.wtdgViews) {
-    window.wtdgViews.track(String(ev.id), 'event');
+    window.wtdgViews.track(String(ev.id), 'event', ev.category);
   }
 
   // Wire save button
@@ -2203,7 +2203,7 @@ function initArticlePage() {
 
   // Track this as a real article read
   if (window.wtdgViews) {
-    window.wtdgViews.track(article.id, 'article');
+    window.wtdgViews.track(article.id, 'article', article.type);
   }
 
   const moreStrip = document.getElementById('js-art-more');

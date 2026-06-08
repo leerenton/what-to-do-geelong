@@ -115,6 +115,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .acct-menu-item__arrow { margin-left: auto; color: var(--mid); font-size: 1rem; }
     .acct-menu-item--danger { color: #e76f51; }
     .acct-menu-item--danger .material-symbols-rounded { color: #e76f51; }
+
+    /* Digest toggle */
+    .digest-toggle-row {
+      display: flex; align-items: center; gap: .85rem;
+      cursor: pointer; user-select: none;
+    }
+    .digest-toggle-row input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .digest-toggle-wrap { flex-shrink: 0; }
+    .digest-toggle-track {
+      display: inline-flex; align-items: center;
+      width: 44px; height: 24px; border-radius: 12px;
+      background: var(--border); transition: background .2s;
+      position: relative;
+    }
+    .digest-toggle-thumb {
+      position: absolute; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.18);
+      transition: transform .2s;
+    }
+    input[type="checkbox"]:checked ~ .digest-toggle-track { background: var(--teal); }
+    input[type="checkbox"]:checked ~ .digest-toggle-track .digest-toggle-thumb { transform: translateX(20px); }
+    .digest-toggle-text { font-size: .9rem; font-weight: 600; color: var(--dark); }
   </style>
   <!-- Google AdSense verification -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>

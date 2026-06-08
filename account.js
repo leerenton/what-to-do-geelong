@@ -6,9 +6,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!session && !acct) { window.location.href = 'login.html?next=account.html'; return; }
 
   let profiles = [];
+  let digestEnabled = false;
   if (session) {
-    const { data } = await db.from('businesses').select('*').eq('owner_id', session.user.id);
-    profiles = data || [];
+    const [bizRes, digestRes] = await Promise.all([
+      db.from('businesses').select('*').eq('owner_id', session.user.id),
+      db.from('email_preferences').select('weekly_digest').eq('user_id', session.user.id).maybeSingle(),
+    ]);
+    profiles = bizRes.data || [];
+    // If row doesn't exist yet, treat as not subscribed
+    digestEnabled = digestRes.data?.weekly_digest === true;
   }
   const saved     = JSON.parse(localStorage.getItem('wtdg_saved') || '[]');
   const prefs     = JSON.parse(localStorage.getItem('wtdg_prefs') || '{}');
@@ -91,6 +97,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       ` : ''}
 
+      <!-- EMAIL DIGEST -->
+      ${session ? `
+        <div class="acct-section" id="js-digest-section">
+          <div class="acct-section-title"><span class="material-symbols-rounded">mail</span> Weekly Digest</div>
+          <p style="font-size:.88rem;color:var(--mid);margin:0 0 1rem;line-height:1.55">Get a personalised roundup of what's on in Geelong every Sunday morning — tailored to what you've been exploring.</p>
+          <label class="digest-toggle-row" id="js-digest-label">
+            <span class="digest-toggle-wrap">
+              <input type="checkbox" id="js-digest-check" ${digestEnabled ? 'checked' : ''} />
+              <span class="digest-toggle-track"><span class="digest-toggle-thumb"></span></span>
+            </span>
+            <span class="digest-toggle-text">${digestEnabled ? 'Weekly digest enabled ✅' : 'Subscribe to weekly digest'}</span>
+          </label>
+          <p id="js-digest-status" style="font-size:.8rem;color:var(--teal);margin:.5rem 0 0;min-height:1.2em"></p>
+        </div>
+      ` : ''}
+
       <!-- QUICK LINKS -->
       <div class="acct-section">
         <div class="acct-section-title"><span class="material-symbols-rounded">settings</span> Account</div>
@@ -113,4 +135,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   `;
 
   document.getElementById('js-logout-btn')?.addEventListener('click', logout);
+
+  // ── Email digest toggle ───────────────────────────────────
+  const digestCheck = document.getElementById('js-digest-check');
+  const digestStatus = document.getElementById('js-digest-status');
+  const digestLabel = document.getElementById('js-digest-label');
+
+  if (digestCheck && session) {
+    digestCheck.addEventListener('change', async () => {
+      const enabled = digestCheck.checked;
+      digestLabel.style.pointerEvents = 'none';
+      digestStatus.textContent = 'Saving…';
+
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: session.user.id,
+            email: session.user.email,
+            weekly_digest: enabled,
+          }),
+        });
+        if (res.ok) {
+          digestStatus.textContent = enabled ? 'You\'re subscribed! Look out for Sundays. ✅' : 'Unsubscribed. You won\'t receive the digest.';
+          digestCheck.closest('label').querySelector('.digest-toggle-text').textContent =
+            enabled ? 'Weekly digest enabled ✅' : 'Subscribe to weekly digest';
+        } else {
+          const err = await res.json().catch(() => ({}));
+          digestStatus.textContent = 'Something went wrong. Please try again.';
+          digestCheck.checked = !enabled; // revert
+          console.error('Digest toggle error:', err);
+        }
+      } catch (e) {
+        digestStatus.textContent = 'Network error. Please try again.';
+        digestCheck.checked = !enabled;
+      }
+
+      digestLabel.style.pointerEvents = '';
+      setTimeout(() => { if (digestStatus) digestStatus.textContent = ''; }, 4000);
+    });
+  }
 });

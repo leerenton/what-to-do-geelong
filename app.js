@@ -1367,13 +1367,14 @@ async function initListingPage() {
     `);
   }
 
-  // Inquiry form (all listings)
+  // Inquiry form — claimed businesses only; unclaimed get a locked overlay
+  const isClaimed = !!biz.is_claimed;
   document.getElementById('js-listing-root').insertAdjacentHTML('beforeend', `
     <div class="container listing-body">
-      <div class="listing-inq-card">
+      <div class="listing-inq-card${isClaimed ? '' : ' listing-inq-card--locked'}">
         <h3 class="listing-inq-title"><span class="material-symbols-rounded">mail</span> Send an inquiry</h3>
         <p class="listing-inq-sub">Ask ${biz.name} a question — they'll get back to you directly.</p>
-        <div class="listing-inq-form">
+        <div class="listing-inq-form" style="${isClaimed ? '' : 'filter:blur(4px);pointer-events:none;user-select:none'}">
           <div class="listing-inq-row">
             <input type="text"  class="ob-input" id="inq-name"  placeholder="Your name" />
             <input type="email" class="ob-input" id="inq-email" placeholder="Your email" />
@@ -1384,41 +1385,67 @@ async function initListingPage() {
         <div id="js-inq-success" hidden style="color:var(--teal);font-weight:700;padding:.5rem 0">
           ✓ Inquiry sent! ${biz.name} will be in touch.
         </div>
+        ${!isClaimed ? `
+          <div class="inq-claim-overlay">
+            <span class="inq-claim-icon">🏪</span>
+            <p class="inq-claim-title">Is this your business?</p>
+            <p class="inq-claim-sub">Claim your listing to activate the inquiry form and start receiving customer messages directly.</p>
+            <a href="business-signup.html?claim=${encodeURIComponent(biz.slug)}" class="btn btn--teal inq-claim-btn">Claim &amp; activate →</a>
+          </div>
+        ` : ''}
       </div>
     </div>
   `);
 
-  document.getElementById('js-inq-send')?.addEventListener('click', async () => {
-    const name  = document.getElementById('inq-name').value.trim();
-    const email = document.getElementById('inq-email').value.trim();
-    const msg   = document.getElementById('inq-msg').value.trim();
-    if (!email || !msg) {
-      alert('Please enter your email and message.');
-      return;
-    }
-    const btn = document.getElementById('js-inq-send');
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
+  if (isClaimed) {
+    document.getElementById('js-inq-send')?.addEventListener('click', async () => {
+      const name  = document.getElementById('inq-name').value.trim();
+      const email = document.getElementById('inq-email').value.trim();
+      const msg   = document.getElementById('inq-msg').value.trim();
+      if (!email || !msg) {
+        alert('Please enter your email and message.');
+        return;
+      }
+      const btn = document.getElementById('js-inq-send');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
 
-    // Save to Supabase inquiries table
-    try {
-      await db.from('inquiries').insert({
-        business_id:   biz.id,
-        business_name: biz.name,
-        sender_name:   name || null,
-        sender_email:  email,
-        message:       msg,
-        status:        'unread',
-        created_at:    new Date().toISOString(),
-      });
-    } catch (_) {}
+      // Save to Supabase inquiries table
+      try {
+        await db.from('inquiries').insert({
+          business_id:   biz.id,
+          business_name: biz.name,
+          sender_name:   name || null,
+          sender_email:  email,
+          message:       msg,
+          status:        'unread',
+          created_at:    new Date().toISOString(),
+        });
+      } catch (_) {}
 
-    // Track
-    if (typeof wtdgTrack === 'function') wtdgTrack('inquiry_sent', { business_name: biz.name });
+      // Email the business owner
+      try {
+        await fetch('/api/send-inquiry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            business_id:   biz.id,
+            business_name: biz.name,
+            business_slug: biz.slug,
+            owner_id:      biz.owner_id,
+            sender_name:   name || null,
+            sender_email:  email,
+            message:       msg,
+          }),
+        });
+      } catch (_) {}
 
-    btn.hidden = true;
-    document.getElementById('js-inq-success').hidden = false;
-  });
+      if (typeof wtdgTrack === 'function') wtdgTrack('inquiry_sent', { business_name: biz.name });
+
+      btn.hidden = true;
+      document.getElementById('js-inq-success').hidden = false;
+    });
+  }
 
   // ── View tracking ───────────────────────────────────────────
   if (window.wtdgViews) {

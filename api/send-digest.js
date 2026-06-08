@@ -120,12 +120,12 @@ function buildEmail({ userName, categories, events, unsubUrl }) {
   const greeting = userName ? `Hi ${userName.split(' ')[0]}` : 'Hey there';
   const isPersonalised = categories.length > 0;
   const intro = isPersonalised
-    ? `Based on what you've been exploring — <strong>${categories.join(', ')}</strong> — here's what's on in Geelong this weekend that we think you'll love.`
-    : `Here's what's happening around Geelong this weekend. Get out and explore the best of our city.`;
+    ? `Based on what you've been exploring — <strong>${categories.join(', ')}</strong> — here's what's on in Geelong this weekend and beyond that we think you'll love.`
+    : `Your Friday roundup of what's happening around Geelong this weekend and into the coming week. Get out and explore the best of our city.`;
 
   const eventCards = events.map(eventCard).join('');
-  const weekend = new Date();
-  const sat = new Date(weekend); sat.setDate(sat.getDate() + (6 - sat.getDay()));
+  const now = new Date();
+  const sat = new Date(now); sat.setDate(now.getDate() + ((6 - now.getDay() + 7) % 7 || 7));
   const sun = new Date(sat); sun.setDate(sat.getDate() + 1);
   const fmt = d => d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
   const weekendLabel = `${fmt(sat)} – ${fmt(sun)}`;
@@ -145,7 +145,7 @@ function buildEmail({ userName, categories, events, unsubUrl }) {
         <!-- Header -->
         <tr><td style="background:#0f2240;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center">
           <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7dd3fc">What To Do Geelong</p>
-          <h1 style="margin:0;font-size:24px;font-weight:800;color:#fff;line-height:1.2">What's On This Weekend</h1>
+          <h1 style="margin:0;font-size:24px;font-weight:800;color:#fff;line-height:1.2">Your Weekend in Geelong 🎉</h1>
           <p style="margin:8px 0 0;font-size:14px;color:#bfdbfe">${weekendLabel}</p>
         </td></tr>
 
@@ -262,7 +262,7 @@ module.exports = async function handler(req, res) {
 
         const subjectLine = categories.length
           ? `Your ${categories[0]} picks for this weekend in Geelong 🏙️`
-          : `What's on in Geelong this weekend 🏙️`;
+          : `What's on in Geelong this weekend & beyond 🏙️`;
 
         const result = await sendEmail({
           to:      pref.email,

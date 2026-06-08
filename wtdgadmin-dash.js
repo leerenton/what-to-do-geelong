@@ -39,12 +39,9 @@ function setupDigestTools() {
 
   const status = document.getElementById('js-digest-admin-status');
 
-  // Test send to specific email
+  // Test send to all admin emails
   document.getElementById('js-test-digest-btn')?.addEventListener('click', async () => {
-    const email = document.getElementById('js-test-digest-email').value.trim();
-    if (!email) { status.textContent = '⚠️ Enter an email address first'; return; }
-    const url = `/api/test-digest?email=${encodeURIComponent(email)}`;
-    await callDigest(url, `Sending test to ${email}`, status);
+    await callDigest('/api/test-digest', 'Sending test to admin accounts', status);
   });
 
   // Send to all subscribers
@@ -205,12 +202,8 @@ async function loadDashboard() {
       <div style="font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--adm-mid);margin-bottom:.85rem">📧 Email Digest</div>
       <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
         <div>
-          <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Send test to specific email</label>
-          <div style="display:flex;gap:.5rem">
-            <input type="email" id="js-test-digest-email" placeholder="email@example.com"
-              style="font-size:.85rem;padding:.4rem .7rem;border:1px solid var(--adm-border);border-radius:6px;background:var(--adm-bg);color:var(--adm-text);width:220px" />
-            <button class="adm-btn adm-btn--sm" id="js-test-digest-btn" style="white-space:nowrap">Send test</button>
-          </div>
+          <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Send preview to admin accounts</label>
+          <button class="adm-btn adm-btn--sm" id="js-test-digest-btn">Send test email</button>
         </div>
         <div style="border-left:1px solid var(--adm-border);padding-left:.75rem">
           <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Send to all subscribers</label>

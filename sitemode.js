@@ -22,7 +22,7 @@
   if (exempt.some(e => page.includes(e))) return;
 
   // ── Admin bypass ────────────────────────────────────────
-  const ADMIN_EMAILS = ['lee.renton81@gmail.com']; // keep in sync with wtdgadmin.js
+  const ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au']; // keep in sync with wtdgadmin.js
   try {
     const acct = JSON.parse(localStorage.getItem('wtdg_account') || 'null');
     if (acct?.email && ADMIN_EMAILS.includes(acct.email)) return; // admin sees everything

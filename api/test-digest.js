@@ -11,6 +11,7 @@ const CRON_SECRET  = process.env.CRON_SECRET;
 const SITE_URL     = 'https://whattodogeelong.com.au';
 const FROM_EMAIL   = 'hello@whattodogeelong.com.au';
 const FROM_NAME    = 'What To Do Geelong';
+const ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au'];
 
 function httpsRequest(options, body) {
   return new Promise((resolve, reject) => {
@@ -65,7 +66,7 @@ function eventCard(ev) {
     </table>`;
 }
 
-function buildEmail(events, toEmail) {
+function buildEmail(events) {
   const weekend = new Date();
   const sat = new Date(weekend); sat.setDate(sat.getDate() + (6 - sat.getDay()));
   const sun = new Date(sat); sun.setDate(sat.getDate() + 1);
@@ -111,9 +112,6 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorised' });
   }
 
-  const email = req.query?.email || req.body?.email;
-  if (!email) return res.status(400).json({ error: 'Missing email query param' });
-
   if (!RESEND_KEY || !SUPABASE_KEY) {
     return res.status(500).json({ error: 'Missing environment variables' });
   }
@@ -124,29 +122,30 @@ module.exports = async function handler(req, res) {
       'events?is_recurring=eq.false&select=id,title,category,emoji,date,location,price,img,slug,description&order=created_at.desc&limit=4'
     );
     const events = evRes.body || [];
+    const html = buildEmail(events);
 
-    const html = buildEmail(events, email);
-    const bodyStr = JSON.stringify({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
-      to: [email],
-      subject: `[TEST] What's on in Geelong this weekend 🏙️`,
-      html,
-    });
-
-    const result = await httpsRequest({
-      hostname: 'api.resend.com', port: 443,
-      path: '/emails', method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_KEY}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(bodyStr),
-      },
-    }, bodyStr);
-
-    if (result.status >= 200 && result.status < 300) {
-      return res.status(200).json({ ok: true, sent: 1, to: email });
+    let sent = 0, errors = 0;
+    for (const email of ADMIN_EMAILS) {
+      const bodyStr = JSON.stringify({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: [email],
+        subject: `[TEST] What's on in Geelong this weekend 🏙️`,
+        html,
+      });
+      const result = await httpsRequest({
+        hostname: 'api.resend.com', port: 443,
+        path: '/emails', method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_KEY}`,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(bodyStr),
+        },
+      }, bodyStr);
+      if (result.status >= 200 && result.status < 300) sent++;
+      else errors++;
     }
-    return res.status(500).json({ error: result.body });
+
+    return res.status(200).json({ ok: true, sent, errors, to: ADMIN_EMAILS });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

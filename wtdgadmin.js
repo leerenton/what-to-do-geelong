@@ -7,7 +7,7 @@
 // ── CONFIG ────────────────────────────────────────────────────
 const ADMIN_EMAILS = [
   'lee.renton81@gmail.com',
-  // add more super admin emails here
+  'adele@whattodogeelong.com.au',
 ];
 window.ADMIN_EMAILS = ADMIN_EMAILS;
 

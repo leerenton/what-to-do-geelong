@@ -1679,6 +1679,21 @@ function initNav() {
   const links = document.querySelector('.nav__links');
   if (!hamburger || !links) return;
 
+  // Inject a close button at the top of the mobile menu
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'nav__mobile-close';
+  closeBtn.setAttribute('aria-label', 'Close menu');
+  closeBtn.innerHTML = '<span class="material-symbols-rounded">close</span>';
+  links.prepend(closeBtn);
+
+  function closeMenu() {
+    links.classList.remove('nav--open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  closeBtn.addEventListener('click', closeMenu);
+
   hamburger.addEventListener('click', () => {
     const isOpen = links.classList.toggle('nav--open');
     hamburger.setAttribute('aria-expanded', isOpen);
@@ -1687,10 +1702,7 @@ function initNav() {
 
   // Close when clicking a plain link (not a dropdown toggle)
   links.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      links.classList.remove('nav--open');
-      document.body.style.overflow = '';
-    });
+    a.addEventListener('click', closeMenu);
   });
 
   // Dropdown toggle — click-based (works on desktop hover AND mobile tap)

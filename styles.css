@@ -1648,6 +1648,15 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .nav__drop-divider { background: rgba(255,255,255,.1); }
   .nav__cats-link { color: #e8c842 !important; }
   .nav__hamburger { display: flex; }
+  .nav__mobile-close {
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; top: 1rem; right: 1rem;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.1); border: none; border-radius: 50%;
+    color: #fff; cursor: pointer;
+    font-size: 1.4rem; z-index: 200;
+  }
+  .nav__mobile-close .material-symbols-rounded { font-size: 1.5rem; }
 
   .featured-card { flex-direction: column; min-height: unset; }
   .featured-card__img { width: 100%; height: 120px; }

@@ -9,9 +9,12 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://duhxszqyyzrbzrhwneey.s
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const CRON_SECRET  = process.env.CRON_SECRET;
 const SITE_URL     = 'https://whattodogeelong.com.au';
-const FROM_EMAIL   = 'hello@whattodogeelong.com.au';
-const FROM_NAME    = 'What To Do Geelong';
+const FROM_NAME    = 'What To Do Geelong (Test)';
 const ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au'];
+// Use verified domain when available; fall back to Resend sandbox for testing
+const FROM_EMAIL   = process.env.RESEND_DOMAIN_VERIFIED === 'true'
+  ? 'hello@whattodogeelong.com.au'
+  : 'onboarding@resend.dev';
 
 function httpsRequest(options, body) {
   return new Promise((resolve, reject) => {

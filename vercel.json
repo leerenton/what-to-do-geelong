@@ -19,6 +19,7 @@
     { "source": "/wtdgadmin/content",      "destination": "/wtdgadmin-content.html" },
     { "source": "/wtdgadmin/promotions",   "destination": "/wtdgadmin-promotions.html" },
     { "source": "/do",                      "destination": "/do.html" },
+    { "source": "/drink",                   "destination": "/drink.html" },
     { "source": "/advertise",              "destination": "/advertise.html" },
     { "source": "/maintenance",            "destination": "/maintenance.html" },
     { "source": "/coming-soon",            "destination": "/comingsoon.html" },

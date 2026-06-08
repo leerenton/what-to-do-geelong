@@ -1942,6 +1942,42 @@ function initEatPage() {
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-eat-filters');
 }
 
+// ── DRINK COLLECTION PAGE ─────────────────────────────────
+function initDrinkPage() {
+  const root = document.getElementById('js-drink-root');
+  if (!root) return;
+
+  const drinkBiz = BUSINESSES.filter(b => b.section === 'drink');
+
+  function renderDrink(items) {
+    root.innerHTML = items.length ? items.map(biz => {
+      return collCard(
+        bizLink(biz), biz.color || '#f4a261', biz.emoji || '🍺',
+        biz.img || null,
+        biz.type,
+        biz.name,
+        biz.description,
+        biz.suburb || biz.location,
+        businessHasUpcoming(biz.id) ? 'Event' : null,
+        businessHasPromo(biz.id) ? 'Offer' : null,
+        biz.lat, biz.lng,
+        biz.id, 'business'
+      );
+    }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
+    if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+    if (window.wtdgViews) window.wtdgViews.injectViewBadges('business');
+  }
+
+  collFilter(
+    drinkBiz,
+    document.getElementById('js-drink-filters'),
+    document.getElementById('js-drink-search'),
+    document.getElementById('js-drink-count'),
+    renderDrink
+  );
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-drink-filters');
+}
+
 // ── DO / ACTIVITIES COLLECTION PAGE ───────────────────────
 function initDoPage() {
   const root = document.getElementById('js-do-root');
@@ -2330,7 +2366,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (remote.businesses.length) BUSINESSES = remote.businesses.map(b => ({
         ...b,
         section: b.section || (
-          ['Café','Restaurant','Bar','Bakery','Pub','Winery','Brewery','Food'].some(t => b.type?.includes(t)) ? 'eat' :
+          ['Bar','Pub','Winery','Brewery','Distillery','Cocktail','Nightclub'].some(t => b.type?.includes(t)) ? 'drink' :
+          ['Café','Restaurant','Bakery','Food'].some(t => b.type?.includes(t)) ? 'eat' :
           ['Activity','Adventure','Attraction','Museum','Gallery','Garden','Park','Theatre','Cinema','Sport','Leisure'].some(t => b.type?.includes(t)) ? 'do' :
           ['Hotel','Motel','Accommodation','BnB','Hostel'].some(t => b.type?.includes(t)) ? 'stay' :
           'eat'
@@ -2420,6 +2457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('js-event-root'))     initEventPage();
   if (document.getElementById('js-events-root'))    initEventsPage();
   if (document.getElementById('js-eat-root'))       initEatPage();
+  if (document.getElementById('js-drink-root'))     initDrinkPage();
   if (document.getElementById('js-do-root'))        initDoPage();
   if (document.getElementById('js-stay-root'))      initStayPage();
   if (document.getElementById('js-editorial-root')) initEditorialPage();

@@ -10,67 +10,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>What Was Geelong — What To Do Geelong</title>
+  <title>Things to Do — What To Do Geelong</title>
+  <meta name="description" content="Discover the best activities, attractions and experiences in and around Geelong. From adventure sports to cultural gems." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Google AdSense verification -->
+  <link rel="stylesheet" href="styles.css?v=6" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
-  <style>
-    .wwg-hero {
-      position: relative;
-      min-height: 52vh;
-      display: flex;
-      align-items: flex-end;
-      background: #1a0a3a;
-      overflow: hidden;
-    }
-    .wwg-hero__img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: .3;
-      filter: sepia(.6);
-    }
-    .wwg-hero__overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, #1a0a3a 0%, rgba(26,10,58,.4) 70%, transparent 100%);
-    }
-    .wwg-hero__content {
-      position: relative;
-      z-index: 1;
-      padding: 2.5rem var(--gutter) 3rem;
-      color: var(--white);
-      max-width: 660px;
-    }
-    .wwg-hero__eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      font-size: .75rem;
-      font-weight: 800;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: #c4b5f4;
-      margin-bottom: .75rem;
-    }
-    .wwg-hero__title {
-      font-family: var(--font-head);
-      font-size: clamp(2.2rem, 6vw, 3.5rem);
-      font-weight: 900;
-      line-height: 1.1;
-      margin-bottom: .75rem;
-    }
-    .wwg-hero__sub {
-      font-size: 1.05rem;
-      color: rgba(255,255,255,.75);
-      line-height: 1.65;
-    }
-  </style>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -85,7 +31,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </a>
       <nav class="nav__links">
         <a href="eat.html">Eat</a>
-        <a href="do.html">Do</a>
+        <a href="do.html" class="nav__active">Do</a>
         <a href="stay.html">Stay</a>
         <a href="index.html#offers">Offers</a>
         <div class="nav__drop">
@@ -102,49 +48,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <a href="editorial.html">Read</a>
         <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
       </nav>
+      <a href="guides.html" class="itin-badge" id="js-itin-badge" hidden>
+        <span class="material-symbols-rounded">star</span> <span id="js-itin-count">0</span>
+      </a>
       <button class="nav__hamburger" aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
-  <!-- HERO -->
-  <div class="wwg-hero">
-    <img
-      class="wwg-hero__img"
-      src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1400&q=80"
-      alt="Historic Geelong"
-    />
-    <div class="wwg-hero__overlay"></div>
-    <div class="wwg-hero__content">
-      <span class="wwg-hero__eyebrow"><span class="material-symbols-rounded">history_edu</span> The Edit</span>
-      <h1 class="wwg-hero__title">What Was Geelong</h1>
-      <p class="wwg-hero__sub">Before the promenade, before the cafes — Geelong has always been something. Explore the stories, places, and transformations that made the city what it is today.</p>
+  <!-- Collection Hero -->
+  <div class="coll-hero coll-hero--do">
+    <div class="coll-hero__inner container">
+      <p class="coll-hero__eyebrow">🎯 Things to do in Geelong</p>
+      <h1 class="coll-hero__title">What To Do</h1>
+      <p class="coll-hero__sub">Adventures, attractions and experiences — from the Surf Coast to the Bellarine and beyond.</p>
     </div>
   </div>
 
-  <!-- BACK LINK -->
-  <div class="container" style="padding-top:1.5rem">
-    <a href="editorial.html" class="listing-back">← Back to The Edit</a>
-  </div>
-
-  <!-- HISTORY CARDS -->
-  <section class="page-section">
-    <div class="container">
-      <div class="wwg-grid" id="js-wwg-root"></div>
-    </div>
-  </section>
-
-  <!-- SUBMIT A STORY BANNER -->
-  <section class="promo-banner" style="background:#1a0a3a">
-    <div class="container promo-banner__inner">
-      <div>
-        <h2 class="promo-banner__title">Know a Geelong story?</h2>
-        <p class="promo-banner__sub">We're always looking for new histories — old buildings, lost businesses, before-and-after transformations. Send us your story.</p>
+  <!-- Filters + Grid -->
+  <div class="coll-body container">
+    <div class="coll-topbar">
+      <div class="coll-filters" id="js-do-filters">
+        <button class="coll-filter-pill active" data-filter="all">All</button>
+        <button class="coll-filter-pill" data-filter="activity">Activities</button>
+        <button class="coll-filter-pill" data-filter="attraction">Attractions</button>
+        <button class="coll-filter-pill" data-filter="adventure">Adventure</button>
+        <button class="coll-filter-pill" data-filter="art">Arts & Culture</button>
+        <button class="coll-filter-pill" data-filter="sport">Sport</button>
+        <button class="coll-filter-pill" data-filter="nature">Nature</button>
+        <button class="coll-filter-pill" data-filter="family">Family</button>
       </div>
-      <a href="mailto:hello@whattodogeelong.com.au" class="btn btn--teal btn--lg">Get in touch →</a>
+      <div class="coll-search-wrap">
+        <span class="material-symbols-rounded">search</span>
+        <input class="coll-search" type="text" id="js-do-search" placeholder="Search activities…" />
+      </div>
     </div>
-  </section>
+    <p class="coll-count" id="js-do-count"></p>
+    <div class="coll-grid" id="js-do-root">
+      <div class="coll-loading">
+        <span class="material-symbols-rounded" style="font-size:2rem;color:#ccc">hiking</span>
+        <p>Loading…</p>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="container footer__inner">
@@ -153,7 +100,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <nav class="footer__nav">
         <a href="#">About</a>
         <a href="#">Submit an Event</a>
-        <a href="#">Advertise</a>
+        <a href="advertise.html">Advertise</a>
         <a href="#">Contact</a>
       </nav>
     </div>
@@ -161,7 +108,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
+  <script src="sitemode.js?v=1"></script>
+  <script src="analytics.js?v=1"></script>
+  <script src="icons.js"></script>
   <script src="auth.js"></script>
-  <script src="app.js"></script>
+  <script src="guides.js"></script>
+  <script src="location.js"></script>
+  <script src="view-tracker.js"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

@@ -4,22 +4,29 @@
 //
 // SAFETY CONTROLS:
 //   MAX_REQUESTS — hard stop on Google API calls per run
-//   DELAY_MS     — pause between each request (avoid bursting)
+//   DELAY_MS     — pause between requests (avoid bursting)
 //   DRY_RUN      — set true to print without writing to Supabase
+//   CLEAR_FIRST  — set true to wipe unclaimed before run (full refresh)
+//   MAX_PHOTOS   — max photos to download & store per place
 //
+// Images are downloaded from Google and stored in Supabase Storage
+// (bucket: business-images) so URLs are permanent and free to serve.
 // ──────────────────────────────────────────────────────────────
 
 const https = require('https');
+const url   = require('url');
 
 // ── CONFIG ────────────────────────────────────────────────────
-const GOOGLE_KEY   = 'AIzaSyDHUrQ0uu0j0VDjigRhxoS44h-9Y4p1PZY';
-const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1aHhzenF5eXpyYnpyaHduZWV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDcyNTc1OCwiZXhwIjoyMDk2MzAxNzU4fQ.iXhO6IWYgZl-58thx2ZUySg5Dt0-s9QXYS98j4fvRQ8';
+const GOOGLE_KEY    = 'AIzaSyDHUrQ0uu0j0VDjigRhxoS44h-9Y4p1PZY';
+const SUPABASE_URL  = 'https://duhxszqyyzrbzrhwneey.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1aHhzenF5eXpyYnpyaHduZWV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDcyNTc1OCwiZXhwIjoyMDk2MzAxNzU4fQ.iXhO6IWYgZl-58thx2ZUySg5Dt0-s9QXYS98j4fvRQ8';
+const STORAGE_BUCKET = 'business-images';
 
-const MAX_REQUESTS = 2;    // ← hard cap on Google API calls this run
+const MAX_REQUESTS = 9;    // ← hard cap on Google API calls this run
 const DELAY_MS     = 400;  // ← ms between requests
 const DRY_RUN      = false; // ← set true to preview without saving
-const CLEAR_FIRST  = false; // ← set true to wipe unclaimed before run (full refresh)
+const CLEAR_FIRST  = true;  // ← wipe unclaimed before full refresh
+const MAX_PHOTOS   = 4;     // ← photos to store per place
 
 let requestCount = 0;
 
@@ -136,6 +143,96 @@ function httpsRequest(options, body) {
     if (body) req.write(JSON.stringify(body));
     req.end();
   });
+}
+
+// ── IMAGE DOWNLOAD (follows redirects) ───────────────────────
+function downloadImage(imageUrl) {
+  return new Promise((resolve, reject) => {
+    function fetch(fetchUrl, redirects = 0) {
+      if (redirects > 5) return reject(new Error('Too many redirects'));
+      const parsed = new URL(fetchUrl);
+      const opts = {
+        hostname: parsed.hostname,
+        path:     parsed.pathname + parsed.search,
+        method:   'GET',
+        headers:  { 'User-Agent': 'WTDG-Scraper/1.0' },
+      };
+      const req = https.request(opts, res => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          return fetch(res.headers.location, redirects + 1);
+        }
+        if (res.statusCode !== 200) {
+          res.resume();
+          return reject(new Error(`HTTP ${res.statusCode} for ${fetchUrl}`));
+        }
+        const chunks = [];
+        res.on('data', c => chunks.push(c));
+        res.on('end', () => resolve({
+          buffer:      Buffer.concat(chunks),
+          contentType: res.headers['content-type'] || 'image/jpeg',
+        }));
+      });
+      req.on('error', reject);
+      req.end();
+    }
+    fetch(imageUrl);
+  });
+}
+
+// ── SUPABASE STORAGE UPLOAD ───────────────────────────────────
+async function uploadImage(buffer, contentType, storagePath) {
+  const parsed  = new URL(SUPABASE_URL);
+  const apiPath = `/storage/v1/object/${STORAGE_BUCKET}/${storagePath}`;
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: parsed.hostname,
+      port:     443,
+      path:     apiPath,
+      method:   'POST',
+      headers: {
+        'Authorization':  `Bearer ${SUPABASE_KEY}`,
+        'apikey':         SUPABASE_KEY,
+        'Content-Type':   contentType,
+        'Content-Length': buffer.length,
+        'x-upsert':       'true',   // overwrite if re-running
+      },
+    }, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${storagePath}`;
+          resolve(publicUrl);
+        } else {
+          reject(new Error(`Storage upload failed (${res.statusCode}): ${d.slice(0,200)}`));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(buffer);
+    req.end();
+  });
+}
+
+// ── DOWNLOAD + STORE PHOTOS FOR A PLACE ──────────────────────
+async function storePhotos(placeId, googlePhotoUrls) {
+  const stored = [];
+  for (let i = 0; i < googlePhotoUrls.length; i++) {
+    const googleUrl = googlePhotoUrls[i];
+    try {
+      process.stdout.write(`      📸 Photo ${i + 1}/${googlePhotoUrls.length} downloading…`);
+      const { buffer, contentType } = await downloadImage(googleUrl);
+      const ext  = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
+      const path = `${placeId}/${i}.${ext}`;
+      const publicUrl = await uploadImage(buffer, contentType, path);
+      stored.push(publicUrl);
+      process.stdout.write(` ✓ (${Math.round(buffer.length / 1024)}kb)\n`);
+    } catch (err) {
+      process.stdout.write(` ✗ ${err.message}\n`);
+    }
+    await sleep(150);
+  }
+  return stored;
 }
 
 // ── GOOGLE PLACES SEARCH ──────────────────────────────────────
@@ -263,9 +360,9 @@ async function main() {
         continue;
       }
 
-      const suburb  = extractSuburb(place.formattedAddress);
-      const emoji   = guessEmoji(place.types);
-      const photos  = getPhotoUrls(place, 5);
+      const suburb      = extractSuburb(place.formattedAddress);
+      const emoji       = guessEmoji(place.types);
+      const googlePhotos = getPhotoUrls(place, MAX_PHOTOS);
       const website = place.websiteUri
         ? place.websiteUri.replace(/^https?:\/\//, '').replace(/\/$/, '')
         : null;
@@ -294,8 +391,8 @@ async function main() {
         phone:           place.nationalPhoneNumber || null,
         website,
         rating:          place.rating || null,
-        img:             photos[0] || null,
-        gallery:         photos.length > 1 ? photos.slice(1) : null,
+        img:             null,   // set after photo upload below
+        gallery:         null,   // set after photo upload below
         description,
         opening_hours:   hours,
         is_claimed:      false,
@@ -311,10 +408,18 @@ async function main() {
       console.log('      Website:', website || '—');
       console.log('      Desc   :', description || '—');
       console.log('      Hours  :', hours ? hours.weekdayDescriptions[0] + '…' : '—');
-      console.log('      Photos :', photos.length ? `✓ ${photos.length}` : '—');
+      console.log('      Photos :', googlePhotos.length ? `${googlePhotos.length} available` : '—');
       console.log('      LatLng :', place.location?.latitude, place.location?.longitude);
 
       if (!DRY_RUN) {
+        // Download & store photos in Supabase Storage
+        let storedPhotos = [];
+        if (googlePhotos.length) {
+          storedPhotos = await storePhotos(place.id, googlePhotos);
+        }
+        biz.img     = storedPhotos[0]  || null;
+        biz.gallery = storedPhotos.length > 1 ? storedPhotos.slice(1) : null;
+
         await upsertBusiness(biz);
         totalSaved++;
       }

@@ -12,7 +12,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   initAdminShell('Dashboard');
   setupDateFilter();
   await loadDashboard();
+  setupDigestTools();
 });
+
+// ── EMAIL DIGEST TOOLS ────────────────────────────────────────
+function setupDigestTools() {
+  async function callDigest(url, label, status) {
+    status.textContent = `${label}…`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer wtdg-cron-2026' },
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        status.textContent = json.sent !== undefined
+          ? `✅ Sent to ${json.sent} subscriber${json.sent !== 1 ? 's' : ''}${json.errors ? ` (${json.errors} errors)` : ''}`
+          : '✅ Done';
+      } else {
+        status.textContent = `❌ Error: ${json.error || res.status}`;
+      }
+    } catch (e) {
+      status.textContent = `❌ Network error: ${e.message}`;
+    }
+  }
+
+  const status = document.getElementById('js-digest-admin-status');
+
+  // Test send to specific email
+  document.getElementById('js-test-digest-btn')?.addEventListener('click', async () => {
+    const email = document.getElementById('js-test-digest-email').value.trim();
+    if (!email) { status.textContent = '⚠️ Enter an email address first'; return; }
+    const url = `/api/test-digest?email=${encodeURIComponent(email)}`;
+    await callDigest(url, `Sending test to ${email}`, status);
+  });
+
+  // Send to all subscribers
+  document.getElementById('js-send-digest-all-btn')?.addEventListener('click', async () => {
+    if (!confirm('Send the weekly digest to ALL subscribed users now?')) return;
+    await callDigest('/api/send-digest', 'Sending digest to all subscribers', status);
+  });
+}
 
 // ── DATE FILTER ───────────────────────────────────────────────
 function setupDateFilter() {
@@ -158,6 +198,26 @@ async function loadDashboard() {
       <a href="wtdgadmin-businesses.html" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">View Businesses</a>
       <a href="wtdgadmin-events.html" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">View Events</a>
       <a href="wtdgadmin-revenue.html" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">Revenue Dashboard →</a>
+    </div>
+
+    <!-- Email tools -->
+    <div style="margin-top:1.5rem;padding:1.25rem;background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:10px">
+      <div style="font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--adm-mid);margin-bottom:.85rem">📧 Email Digest</div>
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+        <div>
+          <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Send test to specific email</label>
+          <div style="display:flex;gap:.5rem">
+            <input type="email" id="js-test-digest-email" placeholder="email@example.com"
+              style="font-size:.85rem;padding:.4rem .7rem;border:1px solid var(--adm-border);border-radius:6px;background:var(--adm-bg);color:var(--adm-text);width:220px" />
+            <button class="adm-btn adm-btn--sm" id="js-test-digest-btn" style="white-space:nowrap">Send test</button>
+          </div>
+        </div>
+        <div style="border-left:1px solid var(--adm-border);padding-left:.75rem">
+          <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Send to all subscribers</label>
+          <button class="adm-btn adm-btn--sm adm-btn--outline" id="js-send-digest-all-btn">Send digest now</button>
+        </div>
+      </div>
+      <p id="js-digest-admin-status" style="margin:.65rem 0 0;font-size:.82rem;color:var(--adm-teal);min-height:1.2em"></p>
     </div>`;
 }
 

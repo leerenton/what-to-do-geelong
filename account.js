@@ -8,13 +8,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   let profiles = [];
   let digestEnabled = false;
   if (session) {
-    const [bizRes, digestRes] = await Promise.all([
-      db.from('businesses').select('*').eq('owner_id', session.user.id),
-      db.from('email_preferences').select('weekly_digest').eq('user_id', session.user.id).maybeSingle(),
-    ]);
-    profiles = bizRes.data || [];
-    // If row doesn't exist yet, treat as not subscribed
-    digestEnabled = digestRes.data?.weekly_digest === true;
+    try {
+      const { data } = await db.from('businesses').select('*').eq('owner_id', session.user.id);
+      profiles = data || [];
+    } catch (_) {}
+    try {
+      const { data } = await db.from('email_preferences').select('weekly_digest').eq('user_id', session.user.id).maybeSingle();
+      digestEnabled = data?.weekly_digest === true;
+    } catch (_) {}
   }
   const saved     = JSON.parse(localStorage.getItem('wtdg_saved') || '[]');
   const prefs     = JSON.parse(localStorage.getItem('wtdg_prefs') || '{}');

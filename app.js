@@ -2016,7 +2016,7 @@ function initEventsPage() {
     document.getElementById('js-events-count'),
     renderEvents
   );
-  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-events-filters');
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-events-loc');
 }
 
 // ── EAT COLLECTION PAGE ───────────────────────────────────
@@ -2052,7 +2052,7 @@ function initEatPage() {
     document.getElementById('js-eat-count'),
     renderEat
   );
-  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-eat-filters');
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-eat-loc');
 }
 
 // ── DRINK COLLECTION PAGE ─────────────────────────────────
@@ -2088,7 +2088,7 @@ function initDrinkPage() {
     document.getElementById('js-drink-count'),
     renderDrink
   );
-  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-drink-filters');
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-drink-loc');
 }
 
 // ── DO / ACTIVITIES COLLECTION PAGE ───────────────────────
@@ -2124,7 +2124,7 @@ function initDoPage() {
     document.getElementById('js-do-count'),
     renderDo
   );
-  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-do-filters');
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-do-loc');
 }
 
 // ── STAY COLLECTION PAGE ──────────────────────────────────
@@ -2157,7 +2157,7 @@ function initStayPage() {
     document.getElementById('js-stay-count'),
     renderStay
   );
-  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-stay-filters');
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-stay-loc');
 }
 
 // ── STAY SEE-ALL PAGE (legacy stub) ──────────────────────

@@ -769,6 +769,11 @@ function renderSettings() {
             <li>✓ Unlimited offers</li>
             <li>✓ Featured in weekly email</li>
           </ul>
+          ${currentBiz.stripe_customer_id ? `
+            <button class="btn btn--outline btn--sm" id="js-manage-billing" style="margin-top:.85rem">
+              <span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle">credit_card</span>
+              Manage billing / cancel
+            </button>` : ''}
         ` : `
           <p style="font-size:.82rem;color:var(--mid);margin:.5rem 0 1rem">Upgrade to Gold to unlock enquiries, homepage rotation, promoted events, and more.</p>
           <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--gold">Upgrade to Gold — $249/yr</a>
@@ -962,6 +967,25 @@ function bindPanelEvents(tab) {
         renderSwitcher();
         const msg = document.getElementById('js-save-msg');
         if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
+      }
+    });
+
+    document.getElementById('js-manage-billing')?.addEventListener('click', async () => {
+      const btn = document.getElementById('js-manage-billing');
+      btn.disabled = true; btn.textContent = 'Opening billing portal…';
+      try {
+        const res  = await fetch('/api/stripe-portal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customerId: currentBiz.stripe_customer_id }),
+        });
+        const json = await res.json();
+        if (json.url) { window.location.href = json.url; }
+        else throw new Error(json.error);
+      } catch (e) {
+        alert('Could not open billing portal. Please email hello@whattodogeelong.com.au');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle">credit_card</span> Manage billing / cancel';
       }
     });
 

@@ -131,15 +131,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="promo-modal-backdrop" id="js-promo-modal" style="display:none">
       <div class="promo-modal">
         <button class="promo-modal__close" id="js-modal-close">×</button>
-        <div class="promo-modal__icon">🎉</div>
-        <h2 class="promo-modal__title">You've selected <span id="js-modal-plan">Spotlight</span></h2>
-        <p class="promo-modal__sub">Your event will be promoted for <strong id="js-modal-days">14 days</strong> starting today.</p>
-        <div class="promo-modal__price-row">
-          <span>Total</span>
-          <strong id="js-modal-price">$99</strong>
+        <div id="js-promo-modal-body">
+          <div class="promo-modal__icon">🎉</div>
+          <h2 class="promo-modal__title">You've selected <span id="js-modal-plan">Spotlight</span></h2>
+          <p class="promo-modal__sub">Your event will be promoted for <strong id="js-modal-days">14 days</strong> starting today.</p>
+          <div class="promo-modal__price-row">
+            <span>Total</span>
+            <strong id="js-modal-price">$99</strong>
+          </div>
+          <button class="btn btn--teal" id="js-modal-pay-btn" style="width:100%;text-align:center;margin-top:.75rem">
+            Pay now via Stripe →
+          </button>
+          <p style="font-size:.72rem;color:var(--mid);text-align:center;margin:.6rem 0 0">
+            <span class="material-symbols-rounded" style="font-size:.85rem;vertical-align:middle">lock</span>
+            Secure checkout · 30-day money-back guarantee
+          </p>
         </div>
-        <p class="promo-modal__note">Payment via Stripe — coming soon. In the meantime, <a href="mailto:hello@whattodogeelong.com.au?subject=Event promotion enquiry" class="promo-modal__link">email us to get started →</a></p>
-        <a href="mailto:hello@whattodogeelong.com.au?subject=Event promotion — [Package] package" id="js-modal-email-btn" class="btn btn--teal" style="width:100%;text-align:center">Get started →</a>
       </div>
     </div>
 
@@ -193,20 +200,75 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
     })();
 
+    // Handle success return from Stripe
+    if (params.get('success') === '1') {
+      document.getElementById('js-promo-modal').style.display = 'flex';
+      document.getElementById('js-promo-modal-body').innerHTML = `
+        <div style="text-align:center;padding:.5rem 0">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🚀</div>
+          <h2 style="margin:0 0 .5rem;font-size:1.2rem;font-weight:800">Your event is now promoted!</h2>
+          <p style="font-size:.88rem;color:var(--mid);margin:0 0 1.25rem;line-height:1.6">
+            It will appear in the homepage featured strip and events page. Our social team will be in touch for the social post.
+          </p>
+          <a href="business-dashboard.html" class="btn btn--teal" style="width:100%;text-align:center">Back to dashboard →</a>
+        </div>`;
+    }
+
+    let selectedPlan = null;
+
     // Package selection → modal
     document.querySelectorAll('.promo-card__btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const plan  = btn.dataset.plan;
-        const meta  = planMeta[plan];
+        selectedPlan   = btn.dataset.plan;
+        const meta     = planMeta[selectedPlan];
         document.getElementById('js-modal-plan').textContent  = meta.label;
         document.getElementById('js-modal-days').textContent  = meta.days + ' days';
         document.getElementById('js-modal-price').textContent = meta.price;
-
-        const emailBtn = document.getElementById('js-modal-email-btn');
-        emailBtn.href = `mailto:hello@whattodogeelong.com.au?subject=Event promotion — ${meta.label} package${evId ? ' (Event ID: ' + evId + ')' : ''}`;
-
         document.getElementById('js-promo-modal').style.display = 'flex';
       });
+    });
+
+    // Pay button → Stripe Checkout
+    document.getElementById('js-modal-pay-btn').addEventListener('click', async () => {
+      if (!selectedPlan) return;
+      const payBtn = document.getElementById('js-modal-pay-btn');
+      payBtn.disabled = true;
+      payBtn.textContent = 'Redirecting to checkout…';
+
+      let bizId = null, userId = null;
+      try {
+        const { data: { user } } = await db.auth.getUser();
+        if (user) {
+          userId = user.id;
+          const { data: biz } = await db.from('businesses').select('id').eq('owner_id', user.id).limit(1).single();
+          if (biz) bizId = biz.id;
+        }
+      } catch (_) {}
+
+      try {
+        const res = await fetch('/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type:       `event_${selectedPlan}`,
+            bizId,
+            eventId:    evId,
+            userId,
+            successUrl: window.location.origin + '/promote-event.html' + (evId ? `?ev=${evId}` : ''),
+            cancelUrl:  window.location.origin + '/promote-event.html' + (evId ? `?ev=${evId}` : ''),
+          }),
+        });
+        const json = await res.json();
+        if (json.url) {
+          window.location.href = json.url;
+        } else {
+          throw new Error(json.error || 'No checkout URL returned');
+        }
+      } catch (err) {
+        alert('Could not start checkout. Please try again or email hello@whattodogeelong.com.au');
+        payBtn.disabled = false;
+        payBtn.textContent = 'Pay now via Stripe →';
+      }
     });
 
     document.getElementById('js-modal-close').addEventListener('click', () => {

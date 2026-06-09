@@ -146,15 +146,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   </div>
 
-  <!-- Stripe coming soon modal -->
+  <!-- Success / status modal -->
   <div class="upgrade-modal-backdrop" id="js-upgrade-modal" style="display:none">
     <div class="upgrade-modal">
       <button class="upgrade-modal__close" id="js-modal-close">×</button>
-      <div class="upgrade-modal__icon">🚀</div>
-      <h2 class="upgrade-modal__title">Online payments coming soon</h2>
-      <p class="upgrade-modal__sub">We're setting up Stripe now. In the meantime, email us and we'll get your Gold membership activated within 24 hours.</p>
-      <a href="mailto:hello@whattodogeelong.com.au?subject=Gold membership upgrade&body=Hi, I'd like to upgrade my listing to Gold. Business: " class="btn btn--gold" style="width:100%;text-align:center;margin-bottom:.75rem">Email us to upgrade →</a>
-      <p style="font-size:.78rem;color:var(--mid);text-align:center">Or call us · we'll sort it out straight away</p>
+      <div id="js-upgrade-modal-body">
+        <!-- Populated dynamically on success return -->
+      </div>
     </div>
   </div>
 
@@ -187,14 +185,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       btn.addEventListener('click', () => setPlan(btn.dataset.plan));
     });
 
-    // CTA → modal (Stripe placeholder)
-    document.getElementById('js-upgrade-cta').addEventListener('click', () => {
+    // ── Handle success / cancelled return from Stripe ──
+    const params = new URLSearchParams(location.search);
+    if (params.get('success') === '1') {
       document.getElementById('js-upgrade-modal').style.display = 'flex';
+      document.getElementById('js-upgrade-modal-body').innerHTML = `
+        <div style="text-align:center;padding:.5rem 0">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🎉</div>
+          <h2 style="margin:0 0 .5rem;font-size:1.2rem;font-weight:800">Welcome to Gold!</h2>
+          <p style="font-size:.88rem;color:var(--mid);margin:0 0 1.25rem;line-height:1.6">
+            Your membership is now active. Your listing has been upgraded — go check it out.
+          </p>
+          <a href="business-dashboard.html" class="btn btn--gold" style="width:100%;text-align:center">Go to dashboard →</a>
+        </div>`;
+    }
+
+    // ── CTA → Stripe Checkout ──────────────────────────────
+    document.getElementById('js-upgrade-cta').addEventListener('click', async () => {
+      const btn = document.getElementById('js-upgrade-cta');
+      btn.disabled = true;
+      btn.textContent = 'Redirecting to checkout…';
+
+      // Get the logged-in user's business context
+      let bizId = null, userId = null;
+      try {
+        const { data: { user } } = await window.db.auth.getUser();
+        if (user) {
+          userId = user.id;
+          const { data: biz } = await window.db
+            .from('businesses')
+            .select('id')
+            .eq('owner_id', user.id)
+            .limit(1)
+            .single();
+          if (biz) bizId = biz.id;
+        }
+      } catch (_) {}
+
+      try {
+        const res = await fetch('/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type:       currentPlan === 'monthly' ? 'gold_monthly' : 'gold_annual',
+            bizId,
+            userId,
+            successUrl: window.location.origin + '/upgrade.html',
+            cancelUrl:  window.location.origin + '/upgrade.html',
+          }),
+        });
+        const json = await res.json();
+        if (json.url) {
+          window.location.href = json.url;
+        } else {
+          throw new Error(json.error || 'No checkout URL returned');
+        }
+      } catch (err) {
+        alert('Could not start checkout. Please try again or email us at hello@whattodogeelong.com.au');
+        btn.disabled = false;
+        btn.innerHTML = `Upgrade to Gold — <span id="js-cta-price">${prices[currentPlan].cta}</span> →`;
+      }
     });
-    document.getElementById('js-modal-close').addEventListener('click', () => {
+
+    // Close modal
+    document.getElementById('js-modal-close')?.addEventListener('click', () => {
       document.getElementById('js-upgrade-modal').style.display = 'none';
     });
-    document.getElementById('js-upgrade-modal').addEventListener('click', e => {
+    document.getElementById('js-upgrade-modal')?.addEventListener('click', e => {
       if (e.target === document.getElementById('js-upgrade-modal'))
         document.getElementById('js-upgrade-modal').style.display = 'none';
     });

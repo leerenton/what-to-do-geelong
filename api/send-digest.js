@@ -115,8 +115,48 @@ function eventCard(ev) {
     </table>`;
 }
 
+// ── Fetch Gold businesses (rotated) ───────────────────────
+async function getGoldBusinesses(limit = 3) {
+  const res = await supabase(
+    `businesses?is_gold=eq.true&select=id,name,slug,type,suburb,emoji,img,description&order=name`
+  );
+  const all = res.body || [];
+  if (!all.length) return [];
+  // Rotate based on week number so different businesses feature each week
+  const weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  const offset  = weekNum % all.length;
+  const rotated = [...all.slice(offset), ...all.slice(0, offset)];
+  return rotated.slice(0, limit);
+}
+
+// ── Build Gold business card HTML ─────────────────────────
+function goldBizCard(biz) {
+  const url = `${SITE_URL}/${biz.slug}`;
+  const img = biz.img
+    ? `<img src="${biz.img}" alt="${biz.name}" width="160" height="100" style="display:block;object-fit:cover;border-radius:8px;width:160px;height:100px" />`
+    : `<div style="width:160px;height:100px;background:#fef3c7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0">${biz.emoji || '🏪'}</div>`;
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;border-radius:10px;border:1.5px solid #f59e0b;background:#fffbeb;overflow:hidden">
+      <tr><td style="padding:14px 16px">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="width:160px;vertical-align:top;padding-right:14px">${img}</td>
+            <td style="vertical-align:top">
+              <p style="margin:0 0 2px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#d97706">⭐ Gold Member · ${biz.type || 'Local Business'}</p>
+              <p style="margin:0 0 4px;font-size:15px;font-weight:800;color:#1e293b;line-height:1.3">${biz.name}</p>
+              <p style="margin:0 0 10px;font-size:12px;color:#92400e">📍 ${biz.suburb || 'Geelong'}</p>
+              ${biz.description ? `<p style="margin:0 0 12px;font-size:13px;color:#475569;line-height:1.5">${biz.description.slice(0, 100)}${biz.description.length > 100 ? '…' : ''}</p>` : ''}
+              <a href="${url}" style="display:inline-block;background:#f59e0b;color:#fff;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none">Visit listing →</a>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>`;
+}
+
 // ── Build full email HTML ──────────────────────────────────
-function buildEmail({ userName, categories, events, unsubUrl }) {
+function buildEmail({ userName, categories, events, goldBiz, unsubUrl }) {
   const greeting = userName ? `Hi ${userName.split(' ')[0]}` : 'Hey there';
   const isPersonalised = categories.length > 0;
   const intro = isPersonalised
@@ -161,6 +201,15 @@ function buildEmail({ userName, categories, events, unsubUrl }) {
         <tr><td style="background:#fff;padding:4px 32px 28px">
           ${eventCards || '<p style="color:#94a3b8;text-align:center;padding:2rem">No events found for this weekend.</p>'}
         </td></tr>
+
+        ${goldBiz && goldBiz.length ? `
+        <!-- Gold businesses -->
+        <tr><td style="background:#fffbeb;padding:24px 32px 16px;border-top:2px solid #f59e0b">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#d97706">⭐ Featured Businesses</p>
+          <p style="margin:0 0 16px;font-size:13px;color:#92400e">Geelong's Gold members — worth a visit</p>
+          ${goldBiz.map(goldBizCard).join('')}
+        </td></tr>
+        ` : ''}
 
         <!-- CTA banner -->
         <tr><td style="background:#e8f4ff;padding:24px 32px;text-align:center">
@@ -230,8 +279,9 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ message: 'No subscribers', sent: 0 });
     }
 
-    // 2. Load auth users to get display names
-    // (service role can query auth.users via the admin API)
+    // 2. Load Gold businesses once (same rotation for all recipients this week)
+    const goldBiz = await getGoldBusinesses(3);
+
     let sent = 0, errors = 0;
 
     for (const pref of prefs) {
@@ -254,9 +304,10 @@ module.exports = async function handler(req, res) {
         const unsubUrl = `${SITE_URL}/api/unsubscribe?uid=${pref.user_id}`;
 
         const html = buildEmail({
-          userName:   '',   // Could fetch from auth.users if needed
+          userName:   '',
           categories,
           events,
+          goldBiz,
           unsubUrl,
         });
 

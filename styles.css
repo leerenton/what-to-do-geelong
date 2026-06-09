@@ -2527,6 +2527,14 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .coll-card__price { font-weight: 700; font-size: .85rem; }
 .coll-card__price--free { color: var(--teal); }
 .coll-empty { text-align: center; padding: 4rem 2rem; color: var(--mid); grid-column: 1/-1; }
+.stay-coming-soon {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: var(--mid);
+}
+.stay-coming-soon .material-symbols-rounded { font-size: 3rem; color: var(--teal); display: block; margin-bottom: 1rem; }
+.stay-coming-soon h2 { font-family: var(--font-head); font-size: 1.6rem; color: var(--dark); margin: 0 0 .5rem; }
+.stay-coming-soon p { font-size: .95rem; max-width: 360px; margin: 0 auto; }
 .coll-count { font-size: .8rem; color: var(--mid); padding: .5rem var(--gutter) 0; }
 
 /* ── LISTING INQUIRY CARD ─────────────────────────────────── */
@@ -2792,8 +2800,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* Hide animation */
 .loc-nudge--hiding { opacity: 0; transform: translateY(8px); transition: opacity .3s, transform .3s; }
 
-/* Only show on mobile */
-@media (min-width: 641px) { .loc-nudge { display: none !important; } }
+/* Show on all screen sizes */
 
 /* ── DISTANCE BADGE ──────────────────────────────────────── */
 .dist-badge {

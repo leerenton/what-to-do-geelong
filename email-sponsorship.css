@@ -1,0 +1,309 @@
+/* ── EMAIL SPONSORSHIP PAGE ──────────────────────────────── */
+.espon-body {
+  background: #f5f3ef;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--dark);
+}
+.espon-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.25rem 5rem;
+}
+
+/* ── TOP BAR ─────────────────────────────────────────────── */
+.espon-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 0 1.5rem;
+}
+.espon-topbar__logo img { height: 36px; }
+.espon-topbar__back { font-size: .85rem; color: var(--mid); text-decoration: none; }
+.espon-topbar__back:hover { color: var(--dark); }
+
+/* ── HERO ────────────────────────────────────────────────── */
+.espon-hero { text-align: center; padding: 1.5rem 0 2rem; }
+.espon-hero__badge {
+  display: inline-block; background: var(--teal); color: var(--dark);
+  font-size: .78rem; font-weight: 800; border-radius: 999px;
+  padding: .3rem 1rem; letter-spacing: .04em; margin-bottom: .75rem;
+}
+.espon-hero__title {
+  font-family: var(--font-head);
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 900; color: var(--dark);
+  margin: 0 0 .6rem; line-height: 1.15;
+}
+.espon-hero__sub {
+  font-size: .95rem; color: var(--mid);
+  max-width: 520px; margin: 0 auto 1.75rem; line-height: 1.65;
+}
+.espon-hero__stats {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; flex-wrap: wrap;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 1rem 1.5rem;
+  max-width: 580px; margin: 0 auto;
+}
+.espon-hero__stat {
+  display: flex; flex-direction: column; align-items: center;
+  padding: .4rem 1.25rem; gap: .1rem;
+}
+.espon-hero__stat strong { font-family: var(--font-head); font-size: 1.25rem; font-weight: 900; color: var(--dark); }
+.espon-hero__stat span   { font-size: .72rem; color: var(--mid); }
+.espon-hero__stat-div {
+  width: 1px; height: 32px; background: var(--border);
+}
+@media (max-width: 480px) {
+  .espon-hero__stat-div { display: none; }
+  .espon-hero__stats { gap: .5rem; }
+}
+
+/* ── PRODUCTS ────────────────────────────────────────────── */
+.espon-products {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+@media (max-width: 640px) { .espon-products { grid-template-columns: 1fr; } }
+
+.espon-product {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+.espon-product__header {
+  padding: 1.25rem 1.25rem .75rem;
+  border-bottom: 1px solid var(--border);
+}
+.espon-product__day {
+  font-size: .72rem; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: .2rem;
+}
+.espon-product__name {
+  font-family: var(--font-head); font-size: 1rem; font-weight: 900;
+  color: var(--dark); margin-bottom: .4rem;
+}
+.espon-product__desc {
+  font-size: .82rem; color: var(--mid); line-height: 1.55;
+}
+.espon-product__slots {
+  padding: .75rem 1.25rem 1.25rem;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+.espon-slot {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #f8fafc; border-radius: 10px; padding: .7rem .9rem;
+  border: 1px solid var(--border);
+}
+.espon-slot--top { background: #f0fffe; border-color: var(--teal); }
+.espon-slot__label { display: flex; flex-direction: column; gap: .1rem; }
+.espon-slot__pos   { font-size: .82rem; font-weight: 700; color: var(--dark); }
+.espon-slot__hint  { font-size: .72rem; color: var(--mid); }
+.espon-slot__price { font-family: var(--font-head); font-size: 1.15rem; font-weight: 900; color: var(--dark); }
+.espon-slot__price span { font-size: .72rem; font-weight: 400; color: var(--mid); }
+
+/* ── WHAT'S INCLUDED ─────────────────────────────────────── */
+.espon-includes {
+  margin-bottom: 2.5rem;
+}
+.espon-includes__title {
+  font-family: var(--font-head); font-size: 1.2rem; font-weight: 900;
+  color: var(--dark); margin: 0 0 1.1rem;
+}
+.espon-includes__grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+}
+@media (max-width: 700px) { .espon-includes__grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 420px) { .espon-includes__grid { grid-template-columns: 1fr; } }
+
+.espon-include {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 1.1rem 1rem;
+  display: flex; flex-direction: column; gap: .4rem;
+}
+.espon-include .material-symbols-rounded { color: var(--teal); font-size: 1.4rem; }
+.espon-include strong { font-size: .88rem; color: var(--dark); }
+.espon-include p { font-size: .78rem; color: var(--mid); line-height: 1.5; margin: 0; }
+
+/* ── CALENDAR SECTION ────────────────────────────────────── */
+.espon-calendar-section { margin-bottom: 2.5rem; }
+.espon-calendar-title {
+  font-family: var(--font-head); font-size: 1.2rem; font-weight: 900;
+  color: var(--dark); margin: 0 0 .35rem;
+}
+.espon-calendar-sub {
+  font-size: .875rem; color: var(--mid); margin: 0 0 1.25rem; line-height: 1.5;
+}
+
+/* Filter tabs */
+.espon-filter-tabs {
+  display: flex; gap: .4rem; margin-bottom: 1.1rem;
+}
+.espon-filter-tab {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 999px; padding: .35rem 1rem;
+  font-size: .82rem; font-weight: 600; color: var(--mid);
+  cursor: pointer; transition: all .15s;
+}
+.espon-filter-tab.active {
+  background: var(--dark); border-color: var(--dark); color: #fff;
+}
+
+/* Loading */
+.espon-loading {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .85rem; color: var(--mid); padding: 1.5rem 0;
+}
+.espon-loading .material-symbols-rounded { animation: spin 1s linear infinite; font-size: 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Calendar grid */
+.espon-calendar {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.espon-week {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+}
+.espon-week__header {
+  padding: .85rem 1rem .7rem;
+  border-bottom: 1px solid var(--border);
+  background: #fafaf8;
+}
+.espon-week__day {
+  font-size: .7rem; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--teal);
+}
+.espon-week__date {
+  font-family: var(--font-head); font-size: .95rem; font-weight: 900;
+  color: var(--dark);
+}
+.espon-week__name {
+  font-size: .75rem; color: var(--mid); margin-top: .1rem;
+}
+.espon-week__slots {
+  padding: .75rem;
+  display: flex; flex-direction: column; gap: .5rem;
+}
+
+/* Slot buttons */
+.espon-slot-btn {
+  width: 100%; display: flex; align-items: center;
+  justify-content: space-between; gap: .5rem;
+  padding: .65rem .85rem; border-radius: 10px;
+  border: 1.5px solid var(--border);
+  cursor: pointer; transition: all .15s; text-align: left;
+  background: var(--white);
+}
+.espon-slot-btn--top { border-color: var(--teal); background: #f0fffe; }
+.espon-slot-btn--available:hover { border-color: var(--dark); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.espon-slot-btn--booked {
+  background: #f8fafc; border-color: var(--border);
+  opacity: .6; cursor: not-allowed;
+}
+.espon-slot-btn__pos   { font-size: .8rem; font-weight: 700; color: var(--dark); flex: 1; }
+.espon-slot-btn__price { font-family: var(--font-head); font-size: .95rem; font-weight: 900; color: var(--dark); }
+.espon-slot-btn__status {
+  font-size: .68rem; font-weight: 700; border-radius: 999px;
+  padding: .15rem .5rem;
+}
+.espon-slot-btn--available .espon-slot-btn__status { background: #dcfce7; color: #166534; }
+.espon-slot-btn--booked    .espon-slot-btn__status { background: #f1f5f9; color: #94a3b8; }
+
+/* Legend */
+.espon-legend {
+  display: flex; gap: .75rem; flex-wrap: wrap;
+  margin-top: .85rem;
+}
+.espon-legend__item {
+  font-size: .75rem; font-weight: 600;
+  display: flex; align-items: center; gap: .3rem;
+}
+.espon-legend__item::before {
+  content: ''; width: 10px; height: 10px; border-radius: 3px;
+}
+.espon-legend__item--available::before { background: #dcfce7; border: 1px solid #86efac; }
+.espon-legend__item--booked::before    { background: #f1f5f9; border: 1px solid #cbd5e1; }
+.espon-legend__item--top::before       { background: #f0fffe; border: 1px solid var(--teal); }
+.espon-legend__item--bottom::before    { background: var(--white); border: 1px solid var(--border); }
+
+/* ── MODAL ───────────────────────────────────────────────── */
+.espon-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15,34,64,.55); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 1rem;
+}
+.espon-modal {
+  background: var(--white); border-radius: 20px;
+  padding: 2rem 1.75rem; max-width: 480px; width: 100%;
+  position: relative; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.espon-modal__close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: none; font-size: 1.4rem;
+  color: var(--mid); cursor: pointer;
+}
+.espon-modal__title {
+  font-family: var(--font-head); font-size: 1.2rem; font-weight: 900;
+  color: var(--dark); margin: 0 0 1rem;
+}
+.espon-modal__slot {
+  background: #f8fafc; border-radius: 12px;
+  padding: 1rem 1.1rem; margin-bottom: 1.25rem;
+  display: flex; flex-direction: column; gap: .45rem;
+}
+.espon-modal__slot-row {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .875rem; color: var(--dark);
+}
+.espon-modal__slot-row .material-symbols-rounded { font-size: 1rem; color: var(--teal); }
+.espon-modal__slot-price {
+  font-family: var(--font-head); font-size: 1.5rem; font-weight: 900;
+  color: var(--dark); padding-top: .25rem;
+}
+.espon-modal__slot-price span { font-size: .8rem; font-weight: 400; color: var(--mid); }
+
+/* Form */
+.espon-form { display: flex; flex-direction: column; gap: .85rem; }
+.espon-field { display: flex; flex-direction: column; gap: .3rem; }
+.espon-label { font-size: .82rem; font-weight: 600; color: var(--dark); }
+.espon-input {
+  padding: .65rem .85rem; border: 1.5px solid var(--border);
+  border-radius: 8px; font-size: .9rem; font-family: var(--font-body);
+  color: var(--dark); background: var(--white);
+  transition: border-color .15s;
+}
+.espon-input:focus { outline: none; border-color: var(--teal); }
+textarea.espon-input { resize: vertical; }
+.espon-form__note {
+  display: flex; align-items: flex-start; gap: .4rem;
+  font-size: .78rem; color: var(--mid); line-height: 1.5;
+  background: #f8fafc; border-radius: 8px; padding: .65rem .85rem;
+}
+.espon-form__note .material-symbols-rounded { font-size: .95rem; color: var(--teal); flex-shrink: 0; margin-top: .05rem; }
+.espon-submit { width: 100%; padding: .85rem; font-size: .95rem; font-weight: 800; }
+
+/* ── FAQ ─────────────────────────────────────────────────── */
+.espon-faq { max-width: 640px; }
+.espon-faq__title {
+  font-family: var(--font-head); font-size: 1.1rem; font-weight: 900;
+  color: var(--dark); margin: 0 0 1rem;
+}
+.espon-faq__list { display: flex; flex-direction: column; gap: .5rem; }
+.espon-faq__item {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.espon-faq__item summary {
+  padding: .9rem 1.1rem; font-size: .875rem; font-weight: 600;
+  color: var(--dark); cursor: pointer; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.espon-faq__item summary::after { content: '+'; font-size: 1.1rem; color: var(--mid); }
+.espon-faq__item[open] summary::after { content: '−'; }
+.espon-faq__item p {
+  padding: 0 1.1rem 1rem; font-size: .85rem; color: var(--mid);
+  line-height: 1.6; margin: 0;
+}

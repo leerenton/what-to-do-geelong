@@ -296,3 +296,102 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
 }
 .dash-empty .material-symbols-rounded { font-size: 2.5rem; margin-bottom: .5rem; display: block; opacity: .4; }
 .dash-empty p { font-size: .88rem; }
+
+/* ── GOLD STATUS BAR ─────────────────────────────────────── */
+.dash-gold-status {
+  display: flex; align-items: center; gap: .75rem;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1.5px solid #f59e0b; border-radius: var(--radius);
+  padding: .75rem 1rem; margin-bottom: 1.25rem;
+}
+.dash-gold-status__badge {
+  background: #f59e0b; color: #fff; border-radius: 999px;
+  font-size: .75rem; font-weight: 800; padding: .25rem .75rem;
+  white-space: nowrap;
+}
+.dash-gold-status__detail {
+  display: flex; flex-direction: column; gap: .2rem; font-size: .8rem; color: #92400e;
+}
+.dash-gold-status__detail span { display: flex; align-items: center; gap: .3rem; }
+.dash-gold-status__detail .material-symbols-rounded { font-size: .9rem; }
+.dash-plan-expiry { font-size: .75rem; color: var(--mid); margin: 0; }
+
+/* ── GOLD PLAN BADGE ─────────────────────────────────────── */
+.dash-topbar__plan--gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: #fff !important;
+}
+
+/* ── STATS EXTRAS ────────────────────────────────────────── */
+.dash-stat__limit { font-size: .68rem; color: var(--mid); margin-top: .15rem; }
+.dash-stat__unread { background: var(--teal); color: var(--dark); border-radius: 999px; font-size: .65rem; font-weight: 800; padding: .1rem .4rem; margin-left: .3rem; }
+.dash-stat--alert .dash-stat__num { color: #e76f51; }
+.dash-inq-unread-pill { background: var(--teal); color: var(--dark); border-radius: 999px; font-size: .68rem; font-weight: 800; padding: .1rem .45rem; margin-left: .4rem; }
+
+/* ── PROMOTED EVENT STYLES ───────────────────────────────── */
+.dash-promoted-bar {
+  display: flex; align-items: center; gap: .5rem;
+  background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius);
+  padding: .6rem .9rem; font-size: .82rem; color: #166534; margin-bottom: 1rem;
+}
+.dash-promoted-bar .material-symbols-rounded { font-size: 1rem; }
+.dash-promoted-bar__hint { color: var(--mid); font-size: .78rem; }
+.dash-promoted-pill { background: #fef3c7; color: #92400e; border-radius: 999px; font-size: .68rem; font-weight: 700; padding: .1rem .5rem; margin-left: .4rem; }
+.dash-event-card--promoted { border-color: #f59e0b !important; background: #fffbeb; }
+.dash-promoted-active { font-size: .75rem; font-weight: 700; color: #d97706; white-space: nowrap; }
+.dash-item__promoted-pill { background: #fef3c7; color: #92400e; border-radius: 999px; font-size: .68rem; font-weight: 700; padding: .1rem .5rem; }
+
+/* ── BUTTON EXTRA SIZES ──────────────────────────────────── */
+.btn--xs { padding: .3rem .75rem !important; font-size: .75rem !important; }
+
+/* ── INQUIRIES ───────────────────────────────────────────── */
+.dash-inq-gate {
+  text-align: center; padding: 3rem 1.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: .6rem;
+}
+.dash-inq-gate__icon { font-size: 2.5rem; }
+.dash-inq-gate h3 { font-family: var(--font-head); font-size: 1.1rem; font-weight: 900; margin: 0; }
+.dash-inq-gate p { font-size: .875rem; color: var(--mid); max-width: 340px; line-height: 1.55; margin: 0 0 .5rem; }
+.dash-inq-list { display: flex; flex-direction: column; gap: .75rem; }
+.dash-inq-item {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.dash-inq-item--unread { border-color: var(--teal); background: #f0fffe; }
+.dash-inq-item__header {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .75rem;
+  margin-bottom: .4rem;
+}
+.dash-inq-item__name { font-weight: 700; font-size: .9rem; color: var(--dark); }
+.dash-inq-item__email { font-size: .8rem; color: var(--teal); }
+.dash-inq-item__date { font-size: .75rem; color: var(--mid); margin-left: auto; }
+.dash-inq-item__badge {
+  background: var(--teal); color: var(--dark); border-radius: 999px;
+  font-size: .68rem; font-weight: 800; padding: .1rem .5rem;
+}
+.dash-inq-item__msg { font-size: .85rem; color: var(--mid); line-height: 1.55; margin: 0 0 .75rem; }
+.dash-inq-item__actions { display: flex; gap: .5rem; }
+.dash-item--unread { background: #f0fffe; }
+.dash-item__unread-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--teal);
+  flex-shrink: 0; margin-left: auto; align-self: center;
+}
+
+/* ── PLAN CARD ───────────────────────────────────────────── */
+.dash-plan-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.1rem;
+}
+.dash-plan-card--gold {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #f59e0b;
+}
+.dash-plan-card__header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem;
+}
+.dash-plan-card__price { font-size: .85rem; color: var(--mid); }
+.dash-plan-features {
+  list-style: none; padding: 0; margin: .5rem 0 0;
+  display: flex; flex-direction: column; gap: .3rem;
+  font-size: .82rem; color: #166534;
+}

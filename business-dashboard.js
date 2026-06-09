@@ -1,21 +1,37 @@
 'use strict';
 
-let dashAcct, currentBiz, allBizProfiles, bizEvents, bizOffers;
+let dashAcct, currentBiz, allBizProfiles, bizEvents, bizOffers, bizInquiries;
 
-// ── MOCK STATS ────────────────────────────────────────────
-function mockStat(bizId, seed, min, max) {
-  const hash = [...bizId].reduce((a, c) => a + c.charCodeAt(0), seed);
-  return min + (hash % (max - min));
+const FREE_EVENT_LIMIT  = 3;
+const FREE_OFFER_LIMIT  = 3;
+const GOLD_PROMO_EVENTS = 3; // included promoted events per year
+
+// ── HELPERS ───────────────────────────────────────────────
+function isGold() { return !!(currentBiz.is_gold); }
+function promotedUsed() { return parseInt(currentBiz.promoted_events_used) || 0; }
+function promotedLeft() { return Math.max(0, GOLD_PROMO_EVENTS - promotedUsed()); }
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 // ── LOAD DATA FROM SUPABASE ───────────────────────────────
 async function loadBizData() {
-  const [evRes, promoRes] = await Promise.all([
+  const [evRes, promoRes, inqRes] = await Promise.all([
     db.from('events').select('*').eq('business_id', currentBiz.id).order('id'),
     db.from('promos').select('*').eq('business_id', currentBiz.id).order('id'),
+    db.from('inquiries').select('*').eq('business_id', currentBiz.id).order('created_at', { ascending: false }),
   ]);
-  bizEvents = evRes.data || [];
-  bizOffers = promoRes.data || [];
+  bizEvents    = evRes.data    || [];
+  bizOffers    = promoRes.data || [];
+  bizInquiries = inqRes.data   || [];
+
+  // Badge unread count
+  const unread = bizInquiries.filter(i => i.status === 'unread').length;
+  const badge  = document.getElementById('js-inq-badge');
+  if (badge) { badge.textContent = unread; badge.style.display = unread ? 'inline' : 'none'; }
 }
 
 async function saveBizSettings() {
@@ -26,7 +42,6 @@ async function saveBizSettings() {
     location:    currentBiz.location,
     website:     currentBiz.website,
     description: currentBiz.description,
-    plan:        currentBiz.plan,
   }).eq('id', currentBiz.id);
   return !error;
 }
@@ -36,8 +51,13 @@ function renderSwitcher() {
   document.getElementById('js-dash-emoji').textContent   = currentBiz.emoji || '🏪';
   document.getElementById('js-dash-bizname').textContent = currentBiz.name;
   const badge = document.getElementById('js-dash-plan-badge');
-  badge.textContent = currentBiz.plan === 'featured' ? '⭐ Featured' : 'Free';
-  badge.className = `dash-topbar__plan dash-topbar__plan--${currentBiz.plan}`;
+  if (isGold()) {
+    badge.textContent = '⭐ Gold';
+    badge.className = 'dash-topbar__plan dash-topbar__plan--gold';
+  } else {
+    badge.textContent = 'Free';
+    badge.className = 'dash-topbar__plan';
+  }
 
   const menu = document.getElementById('js-switcher-menu');
   menu.innerHTML = allBizProfiles.map(b => `
@@ -66,55 +86,83 @@ function renderSwitcher() {
   document.addEventListener('click', () => menu.classList.remove('open'));
 }
 
+// ── GOLD UPGRADE BANNER ───────────────────────────────────
+function goldUpgradeBanner() {
+  if (isGold()) return '';
+  return `
+    <div class="dash-upgrade-banner">
+      <div class="dash-upgrade-banner__text">
+        <h3>⭐ Upgrade to Gold</h3>
+        <p>Unlock your enquiry form, homepage rotation, 3 promoted events per year, unlimited offers, and featured placement in our weekly email to ${(3200).toLocaleString()}+ subscribers.</p>
+      </div>
+      <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--gold btn--sm">$249/yr →</a>
+    </div>
+  `;
+}
+
 // ── OVERVIEW ──────────────────────────────────────────────
 function renderOverview() {
-  const views    = mockStat(currentBiz.id, 1, 120, 980);
-  const clicks   = mockStat(currentBiz.id, 2, 18, 140);
-  const saves    = mockStat(currentBiz.id, 4, 5, 60);
+  const views     = currentBiz.view_count || 0;
+  const unread    = bizInquiries.filter(i => i.status === 'unread').length;
+  const totalInq  = bizInquiries.length;
+
+  const goldExpiry = currentBiz.gold_expires_at
+    ? `<p class="dash-plan-expiry">Renews ${fmtDate(currentBiz.gold_expires_at)}</p>` : '';
 
   return `
     <div class="dash-panel active" id="panel-overview">
-      ${currentBiz.plan === 'free' ? `
-        <div class="dash-upgrade-banner">
-          <div class="dash-upgrade-banner__text">
-            <h3>Upgrade to Featured</h3>
-            <p>Get unlimited events, a photo gallery, full inquiry details, and priority placement for $49/mo.</p>
+      ${goldUpgradeBanner()}
+
+      ${isGold() ? `
+        <div class="dash-gold-status">
+          <span class="dash-gold-status__badge">⭐ Gold Member</span>
+          <div class="dash-gold-status__detail">
+            <span><span class="material-symbols-rounded">confirmation_number</span> ${promotedLeft()} promoted event${promotedLeft() !== 1 ? 's' : ''} remaining this year</span>
+            ${goldExpiry}
           </div>
-          <a href="business-signup.html" class="btn btn--teal btn--sm">Upgrade →</a>
         </div>
       ` : ''}
 
       <div class="dash-stats">
         <div class="dash-stat">
-          <div class="dash-stat__num">${views}</div>
-          <div class="dash-stat__label">Page views</div>
-          <div class="dash-stat__trend">↑ this month</div>
-        </div>
-        <div class="dash-stat">
-          <div class="dash-stat__num">${clicks}</div>
-          <div class="dash-stat__label">Link clicks</div>
+          <div class="dash-stat__num">${views.toLocaleString()}</div>
+          <div class="dash-stat__label">Listing views</div>
         </div>
         <div class="dash-stat">
           <div class="dash-stat__num">${bizEvents.length}</div>
           <div class="dash-stat__label">Active events</div>
+          ${!isGold() ? `<div class="dash-stat__limit">${bizEvents.length}/${FREE_EVENT_LIMIT}</div>` : ''}
         </div>
         <div class="dash-stat">
-          <div class="dash-stat__num">${saves}</div>
-          <div class="dash-stat__label">Saves ⭐</div>
+          <div class="dash-stat__num">${bizOffers.length}</div>
+          <div class="dash-stat__label">Active offers</div>
+          ${!isGold() ? `<div class="dash-stat__limit">${bizOffers.length}/${FREE_OFFER_LIMIT}</div>` : ''}
+        </div>
+        <div class="dash-stat ${unread ? 'dash-stat--alert' : ''}">
+          <div class="dash-stat__num">${totalInq}</div>
+          <div class="dash-stat__label">Enquiries${unread ? ` <span class="dash-stat__unread">${unread} new</span>` : ''}</div>
         </div>
       </div>
 
       <div class="dash-section-header">
-        <div class="dash-section-title"><span class="material-symbols-rounded">event</span> Active Events</div>
+        <div class="dash-section-title"><span class="material-symbols-rounded">event</span> Recent Events</div>
         <button class="btn btn--outline btn--sm" onclick="switchTab('events')">Manage</button>
       </div>
-      ${bizEvents.length ? renderItemsMini(bizEvents.slice(0,2).map(e => ({...e, date: e.date, meta: e.time}))) : emptyState('No events yet', 'events')}
+      ${bizEvents.length ? renderItemsMini(bizEvents.slice(0,2)) : emptyState('No events yet', 'events')}
 
       <div class="dash-section-header" style="margin-top:1.25rem">
         <div class="dash-section-title"><span class="material-symbols-rounded">local_offer</span> Active Offers</div>
         <button class="btn btn--outline btn--sm" onclick="switchTab('offers')">Manage</button>
       </div>
-      ${bizOffers.length ? renderItemsMini(bizOffers.slice(0,2).map(o => ({...o, date: o.expires}))) : emptyState('No offers yet', 'offers')}
+      ${bizOffers.length ? renderItemsMini(bizOffers.slice(0,2)) : emptyState('No offers yet', 'offers')}
+
+      ${totalInq ? `
+        <div class="dash-section-header" style="margin-top:1.25rem">
+          <div class="dash-section-title"><span class="material-symbols-rounded">mail</span> Recent Enquiries ${unread ? `<span class="dash-inq-unread-pill">${unread} unread</span>` : ''}</div>
+          <button class="btn btn--outline btn--sm" onclick="switchTab('inquiries')">View all</button>
+        </div>
+        ${renderInquiryMini()}
+      ` : ''}
     </div>
   `;
 }
@@ -131,25 +179,56 @@ function renderItemsMini(items) {
         <div class="dash-item__title">${it.title}</div>
         <div class="dash-item__meta">${it.date || it.expires || ''}</div>
       </div>
+      ${it.is_promoted ? '<span class="dash-item__promoted-pill">⭐ Promoted</span>' : ''}
+    </div>
+  `).join('')}</div>`;
+}
+
+function renderInquiryMini() {
+  return `<div class="dash-item-list">${bizInquiries.slice(0,3).map(inq => `
+    <div class="dash-item ${inq.status === 'unread' ? 'dash-item--unread' : ''}">
+      <span class="dash-item__emoji">✉️</span>
+      <div class="dash-item__body">
+        <div class="dash-item__title">${inq.sender_name || inq.sender_email}</div>
+        <div class="dash-item__meta">${(inq.message || '').substring(0, 60)}${inq.message?.length > 60 ? '…' : ''}</div>
+      </div>
+      ${inq.status === 'unread' ? '<span class="dash-item__unread-dot"></span>' : ''}
     </div>
   `).join('')}</div>`;
 }
 
 // ── EVENTS TAB ────────────────────────────────────────────
 function renderEvents() {
-  const canAdd = currentBiz.plan === 'featured' || bizEvents.length < 1;
-  const atLimit = currentBiz.plan === 'free' && bizEvents.length >= 1;
+  const atLimit = !isGold() && bizEvents.length >= FREE_EVENT_LIMIT;
+  const canAdd  = !atLimit;
+  const promoted = bizEvents.filter(e => e.is_promoted).length;
 
   return `
     <div class="dash-panel active" id="panel-events">
       <div class="dash-section-header">
-        <div class="dash-section-title"><span class="material-symbols-rounded">event</span> Your Events <span class="dash-count">${bizEvents.length}</span></div>
+        <div class="dash-section-title">
+          <span class="material-symbols-rounded">event</span> Your Events
+          <span class="dash-count">${bizEvents.length}${!isGold() ? `/${FREE_EVENT_LIMIT}` : ''}</span>
+        </div>
         ${canAdd ? `<button class="btn btn--teal btn--sm" id="js-ev-open-form">+ Add event</button>` : ''}
       </div>
 
-      ${atLimit ? `<div class="dash-limit-bar">Free plan: 1 active event. <button class="gw-link" onclick="switchTab('settings')">Upgrade to Featured</button> for unlimited.</div>` : ''}
+      ${atLimit ? `
+        <div class="dash-limit-bar">
+          You've reached the free limit of ${FREE_EVENT_LIMIT} active events.
+          <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="gw-link">Upgrade to Gold</a> for unlimited events.
+        </div>
+      ` : ''}
 
-      <!-- ADD FORM (hidden by default) -->
+      ${isGold() ? `
+        <div class="dash-promoted-bar">
+          <span class="material-symbols-rounded">campaign</span>
+          <span><strong>${promotedLeft()}</strong> promoted event${promotedLeft() !== 1 ? 's' : ''} remaining this year</span>
+          ${promotedLeft() > 0 ? `<span class="dash-promoted-bar__hint">Promote an event below to feature it on the homepage and push to socials.</span>` : ''}
+        </div>
+      ` : ''}
+
+      <!-- ADD FORM -->
       ${canAdd ? `
         <div class="dash-add-card" id="js-ev-form" style="display:none">
           <div class="dash-add-card__title">New Event</div>
@@ -159,7 +238,7 @@ function renderEvents() {
             <div class="dash-row">
               <div class="dash-field"><label class="dash-label">Category</label>
                 <select class="dash-input" id="ev-cat">
-                  <option>Music</option><option>Food & Drink</option><option>Arts & Culture</option>
+                  <option>Music</option><option>Food &amp; Drink</option><option>Arts &amp; Culture</option>
                   <option>Theatre</option><option>Markets</option><option>Sport</option>
                   <option>Education</option><option>Festivals</option><option>Nightlife</option><option>Other</option>
                 </select></div>
@@ -175,7 +254,7 @@ function renderEvents() {
             <div class="dash-row">
               <div class="dash-field"><label class="dash-label">Price</label>
                 <input class="dash-input" id="ev-price" placeholder="e.g. $25 or Free" /></div>
-              <div class="dash-field"><label class="dash-label">Location</label>
+              <div class="dash-field"><label class="dash-label">Location override</label>
                 <input class="dash-input" id="ev-location" placeholder="Leave blank to use business address" /></div>
             </div>
             <div class="dash-field"><label class="dash-label">Tags</label>
@@ -193,7 +272,6 @@ function renderEvents() {
         </div>
       ` : ''}
 
-      <!-- EVENT LIST -->
       <div id="js-events-list">${renderEventItems()}</div>
     </div>
   `;
@@ -203,25 +281,35 @@ function renderEventItems() {
   if (!bizEvents.length) return `
     <div class="dash-empty">
       <span class="material-symbols-rounded">event_available</span>
-      <p>No events yet. Add your first event to get it listed on the homepage.</p>
+      <p>No events yet. Add your first event to get it listed on the site.</p>
     </div>`;
 
   return `<div class="dash-event-cards">${bizEvents.map(ev => `
-    <div class="dash-event-card" data-evid="${ev.id}">
+    <div class="dash-event-card${ev.is_promoted ? ' dash-event-card--promoted' : ''}" data-evid="${ev.id}">
       <div class="dash-event-card__left">
         <span class="dash-event-card__emoji">${ev.emoji || '📅'}</span>
         <div>
-          <div class="dash-event-card__title">${ev.title}</div>
+          <div class="dash-event-card__title">
+            ${ev.title}
+            ${ev.is_promoted ? '<span class="dash-promoted-pill">⭐ Featured</span>' : ''}
+          </div>
           <div class="dash-event-card__meta">
-            ${ev.date ? `<span><span class="material-symbols-rounded">calendar_today</span>${ev.date}</span>` : ''}
-            ${ev.time ? `<span><span class="material-symbols-rounded">schedule</span>${ev.time}</span>` : ''}
+            ${ev.date  ? `<span><span class="material-symbols-rounded">calendar_today</span>${ev.date}</span>` : ''}
+            ${ev.time  ? `<span><span class="material-symbols-rounded">schedule</span>${ev.time}</span>` : ''}
             ${ev.price ? `<span><span class="material-symbols-rounded">confirmation_number</span>${ev.price}</span>` : ''}
           </div>
           ${ev.category ? `<span class="dash-event-card__cat">${ev.category}</span>` : ''}
-          ${(() => { const tags = Array.isArray(ev.tags) ? ev.tags : (typeof ev.tags === 'string' ? ev.tags.replace(/[{}]/g,'').split(',').filter(Boolean) : []); return tags.length ? `<div class="dash-event-card__tags">${tags.map(t=>`<span class="dash-tag-pill">${t.trim()}</span>`).join('')}</div>` : ''; })()}
         </div>
       </div>
       <div class="dash-event-card__actions">
+        ${!ev.is_promoted ? `
+          ${isGold() && promotedLeft() > 0
+            ? `<button class="btn btn--gold btn--xs js-ev-promote" data-evid="${ev.id}" title="Promote this event">⭐ Promote</button>`
+            : !isGold()
+              ? `<a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}&promote=${ev.id}" class="btn btn--outline btn--xs" title="Promote via Gold or one-off $99">Promote $99</a>`
+              : ''
+          }
+        ` : `<span class="dash-promoted-active">⭐ Live</span>`}
         <button class="dash-item__btn js-ev-del" data-evid="${ev.id}" title="Delete">
           <span class="material-symbols-rounded">delete</span>
         </button>
@@ -232,19 +320,26 @@ function renderEventItems() {
 
 // ── OFFERS TAB ────────────────────────────────────────────
 function renderOffers() {
-  const canAdd = currentBiz.plan === 'featured' || bizOffers.length < 1;
-  const atLimit = currentBiz.plan === 'free' && bizOffers.length >= 1;
+  const atLimit = !isGold() && bizOffers.length >= FREE_OFFER_LIMIT;
+  const canAdd  = !atLimit;
 
   return `
     <div class="dash-panel active" id="panel-offers">
       <div class="dash-section-header">
-        <div class="dash-section-title"><span class="material-symbols-rounded">local_offer</span> Your Offers <span class="dash-count">${bizOffers.length}</span></div>
+        <div class="dash-section-title">
+          <span class="material-symbols-rounded">local_offer</span> Your Offers
+          <span class="dash-count">${bizOffers.length}${!isGold() ? `/${FREE_OFFER_LIMIT}` : ''}</span>
+        </div>
         ${canAdd ? `<button class="btn btn--teal btn--sm" id="js-of-open-form">+ Add offer</button>` : ''}
       </div>
 
-      ${atLimit ? `<div class="dash-limit-bar">Free plan: 1 active offer. <button class="gw-link" onclick="switchTab('settings')">Upgrade to Featured</button> for unlimited.</div>` : ''}
+      ${atLimit ? `
+        <div class="dash-limit-bar">
+          You've reached the free limit of ${FREE_OFFER_LIMIT} active offers.
+          <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="gw-link">Upgrade to Gold</a> for unlimited offers.
+        </div>
+      ` : ''}
 
-      <!-- ADD FORM (hidden by default) -->
       ${canAdd ? `
         <div class="dash-add-card" id="js-of-form" style="display:none">
           <div class="dash-add-card__title">New Offer</div>
@@ -272,7 +367,6 @@ function renderOffers() {
         </div>
       ` : ''}
 
-      <!-- OFFER LIST -->
       <div id="js-offers-list">${renderOfferItems()}</div>
     </div>
   `;
@@ -307,45 +401,86 @@ function renderOfferItems() {
   `).join('')}</div>`;
 }
 
-// ── GALLERY TAB ───────────────────────────────────────────
-function renderGallery() {
-  const isFeatured = currentBiz.plan === 'featured';
-  return `
-    <div class="dash-panel active" id="panel-gallery">
-      ${!isFeatured ? `
-        <div class="dash-upgrade-banner">
-          <div class="dash-upgrade-banner__text">
-            <h3>Photo gallery is a Featured feature</h3>
-            <p>Upgrade to add up to 20 photos to your listing.</p>
-          </div>
-          <a href="#" class="btn btn--teal btn--sm" onclick="switchTab('settings')">Upgrade →</a>
+// ── INQUIRIES TAB ─────────────────────────────────────────
+function renderInquiries() {
+  if (!isGold()) {
+    return `
+      <div class="dash-panel active" id="panel-inquiries">
+        <div class="dash-inq-gate">
+          <span class="dash-inq-gate__icon">📬</span>
+          <h3>Enquiries are a Gold feature</h3>
+          <p>When customers send you a message via your listing, it appears here and gets emailed to you directly.</p>
+          <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--gold">Upgrade to Gold — $249/yr →</a>
         </div>
-      ` : ''}
-      <div class="dash-section-title" style="margin-bottom:.85rem"><span class="material-symbols-rounded">photo_library</span> Photo Gallery</div>
-      <p style="font-size:.82rem;color:var(--mid);margin-bottom:.85rem">Coming soon — photo uploads via Supabase Storage.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="dash-panel active" id="panel-inquiries">
+      <div class="dash-section-header">
+        <div class="dash-section-title"><span class="material-symbols-rounded">mail</span> Enquiries <span class="dash-count">${bizInquiries.length}</span></div>
+      </div>
+
+      ${!bizInquiries.length ? `
+        <div class="dash-empty">
+          <span class="material-symbols-rounded">mark_email_unread</span>
+          <p>No enquiries yet. Customers who contact you via your listing will appear here.</p>
+        </div>
+      ` : `
+        <div class="dash-inq-list" id="js-inq-list">
+          ${bizInquiries.map(inq => `
+            <div class="dash-inq-item${inq.status === 'unread' ? ' dash-inq-item--unread' : ''}" data-inqid="${inq.id}">
+              <div class="dash-inq-item__header">
+                <span class="dash-inq-item__name">${inq.sender_name || 'Anonymous'}</span>
+                <span class="dash-inq-item__email">${inq.sender_email}</span>
+                <span class="dash-inq-item__date">${fmtDate(inq.created_at)}</span>
+                ${inq.status === 'unread' ? '<span class="dash-inq-item__badge">New</span>' : ''}
+              </div>
+              <p class="dash-inq-item__msg">${(inq.message || '').replace(/</g,'&lt;')}</p>
+              <div class="dash-inq-item__actions">
+                <a href="mailto:${inq.sender_email}?subject=Re: Your enquiry about ${encodeURIComponent(currentBiz.name)}" class="btn btn--teal btn--xs">Reply →</a>
+                ${inq.status === 'unread' ? `<button class="btn btn--outline btn--xs js-inq-read" data-inqid="${inq.id}">Mark read</button>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `}
     </div>
   `;
 }
 
-// ── INQUIRIES TAB ─────────────────────────────────────────
-function renderInquiries() {
+// ── GALLERY TAB ───────────────────────────────────────────
+function renderGallery() {
   return `
-    <div class="dash-panel active" id="panel-inquiries">
-      <div class="dash-section-title" style="margin-bottom:.85rem"><span class="material-symbols-rounded">mail</span> Inquiries</div>
-      <p style="color:var(--mid);font-size:.85rem">Inquiries submitted via your listing will appear here.</p>
+    <div class="dash-panel active" id="panel-gallery">
+      <div class="dash-section-title" style="margin-bottom:.85rem"><span class="material-symbols-rounded">photo_library</span> Photo Gallery</div>
+      ${!isGold() ? `
+        <div class="dash-upgrade-banner" style="margin-bottom:1rem">
+          <div class="dash-upgrade-banner__text">
+            <h3>Photo gallery is a Gold feature</h3>
+            <p>Upgrade to add up to 20 photos to your listing and showcase your venue.</p>
+          </div>
+          <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--gold btn--sm">Upgrade →</a>
+        </div>
+      ` : ''}
+      <p style="font-size:.82rem;color:var(--mid);margin-bottom:.85rem">Photo uploads coming soon — drop us an email at <a href="mailto:hello@whattodogeelong.com.au">hello@whattodogeelong.com.au</a> to add photos now.</p>
     </div>
   `;
 }
 
 // ── SETTINGS TAB ─────────────────────────────────────────
 function renderSettings() {
+  const planExpiry = currentBiz.gold_expires_at
+    ? `<p style="font-size:.82rem;color:var(--mid);margin-top:.25rem">Renews ${fmtDate(currentBiz.gold_expires_at)}</p>` : '';
+
   return `
     <div class="dash-panel active" id="panel-settings">
       <div class="dash-section-title" style="margin-bottom:1rem"><span class="material-symbols-rounded">store</span> Business Details</div>
       <div class="dash-settings-form">
         <div class="dash-field"><label class="dash-label">Business name</label>
           <input class="dash-input" id="set-name" value="${currentBiz.name || ''}" /></div>
-        <div class="dash-field"><label class="dash-label">Type</label>
+        <div class="dash-field"><label class="dash-label">Type / Category</label>
           <input class="dash-input" id="set-type" value="${currentBiz.type || ''}" /></div>
         <div class="dash-row">
           <div class="dash-field"><label class="dash-label">Suburb</label>
@@ -361,23 +496,32 @@ function renderSettings() {
         <span class="dash-save-msg" id="js-save-msg" style="display:none;margin-left:.75rem;color:var(--teal);font-size:.85rem">Saved ✓</span>
       </div>
 
-      <div class="dash-section-title" style="margin-top:2rem;margin-bottom:.85rem"><span class="material-symbols-rounded">credit_card</span> Plan</div>
-      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-          <strong style="font-family:var(--font-head)">${currentBiz.plan === 'featured' ? '⭐ Featured' : 'Free'} Plan</strong>
-          <span style="font-size:.85rem;color:var(--mid)">${currentBiz.plan === 'featured' ? '$49 / month' : '$0 / month'}</span>
+      <div class="dash-section-title" style="margin-top:2rem;margin-bottom:.85rem"><span class="material-symbols-rounded">workspace_premium</span> Membership</div>
+      <div class="dash-plan-card${isGold() ? ' dash-plan-card--gold' : ''}">
+        <div class="dash-plan-card__header">
+          <strong>${isGold() ? '⭐ Gold Member' : 'Free Listing'}</strong>
+          <span class="dash-plan-card__price">${isGold() ? '$249 / year' : '$0'}</span>
         </div>
-        ${currentBiz.plan === 'free' ? `
-          <p style="font-size:.82rem;color:var(--mid);margin-bottom:.75rem">Upgrade to Featured for unlimited events, photo gallery, full inquiry details, and priority placement.</p>
-          <button class="btn btn--teal btn--sm" id="js-upgrade-btn">Upgrade to Featured — $49/mo</button>
+        ${isGold() ? `
+          ${planExpiry}
+          <ul class="dash-plan-features">
+            <li>✓ Enquiry form live on your listing</li>
+            <li>✓ Homepage rotation</li>
+            <li>✓ ${GOLD_PROMO_EVENTS} promoted events/year (${promotedLeft()} remaining)</li>
+            <li>✓ Unlimited offers</li>
+            <li>✓ Featured in weekly email</li>
+          </ul>
         ` : `
-          <p style="font-size:.82rem;color:var(--mid)">Your Featured listing is active. Thank you for supporting WTDG!</p>
+          <p style="font-size:.82rem;color:var(--mid);margin:.5rem 0 1rem">Upgrade to Gold to unlock enquiries, homepage rotation, promoted events, and more.</p>
+          <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--gold">Upgrade to Gold — $249/yr</a>
+          <p style="font-size:.78rem;color:var(--mid);margin-top:.4rem">or <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}&plan=monthly" style="color:var(--teal)">$25/month</a></p>
         `}
       </div>
 
       <div class="dash-section-title" style="margin-top:2rem;margin-bottom:.85rem"><span class="material-symbols-rounded">person</span> Account</div>
       <div style="display:flex;flex-direction:column;gap:.5rem">
-        <a href="account.html" class="btn btn--outline btn--sm" style="width:fit-content">My account settings</a>
+        <p style="font-size:.82rem;color:var(--mid)">${dashAcct?.email || ''}</p>
+        <a href="account.html" class="btn btn--outline btn--sm" style="width:fit-content">Account settings</a>
         <button class="btn btn--outline btn--sm" style="width:fit-content;color:#e76f51;border-color:#e76f51" id="js-dash-logout">Log out</button>
       </div>
     </div>
@@ -396,8 +540,8 @@ window.switchTab = switchTab;
 
 function bindPanelEvents(tab) {
   if (tab === 'events') {
-    // Toggle form — reset fields on open
     const selectedTags = new Set();
+
     document.getElementById('js-ev-open-form')?.addEventListener('click', () => {
       const form = document.getElementById('js-ev-form');
       const opening = form.style.display === 'none';
@@ -412,11 +556,11 @@ function bindPanelEvents(tab) {
         document.querySelectorAll('.dash-tag-chip').forEach(c => c.classList.remove('active'));
       }
     });
+
     document.getElementById('js-ev-cancel')?.addEventListener('click', () => {
       document.getElementById('js-ev-form').style.display = 'none';
     });
 
-    // Tag chips
     document.querySelectorAll('.dash-tag-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const tag = chip.dataset.tag;
@@ -426,45 +570,42 @@ function bindPanelEvents(tab) {
     });
 
     document.getElementById('js-ev-add')?.addEventListener('click', async () => {
-      const title = document.getElementById('ev-title').value.trim();
+      const title   = document.getElementById('ev-title').value.trim();
       const rawDate = document.getElementById('ev-date').value;
-      if (!title || !rawDate) {
-        alert('Please enter an event name and date.');
-        return;
-      }
+      if (!title || !rawDate) { alert('Please enter an event name and date.'); return; }
+
       const btn = document.getElementById('js-ev-add');
       btn.disabled = true; btn.textContent = 'Saving…';
 
       const formattedDate = new Date(rawDate + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
-      const locationVal = document.getElementById('ev-location').value.trim() || currentBiz.location || currentBiz.suburb || '';
+      const locationVal   = document.getElementById('ev-location').value.trim() || currentBiz.location || currentBiz.suburb || '';
 
       const { data, error } = await db.from('events').insert({
         business_id: currentBiz.id,
         title,
-        category:   document.getElementById('ev-cat').value,
-        date:       formattedDate,
-        time:       document.getElementById('ev-time').value || '',
-        price:      document.getElementById('ev-price').value || 'Free',
-        emoji:      document.getElementById('ev-emoji').value || '📅',
-        color:      currentBiz.color || '#4ac8d0',
-        tags:       [...selectedTags],
-        location:   locationVal,
+        category:    document.getElementById('ev-cat').value,
+        date:        formattedDate,
+        time:        document.getElementById('ev-time').value || '',
+        price:       document.getElementById('ev-price').value || 'Free',
+        emoji:       document.getElementById('ev-emoji').value || '📅',
+        color:       currentBiz.color || '#4ac8d0',
+        tags:        [...selectedTags],
+        location:    locationVal,
+        is_promoted: false,
       }).select().single();
 
       btn.disabled = false; btn.textContent = 'Save event';
-
       if (error) { alert('Could not save event: ' + error.message); return; }
       bizEvents.push(data);
       document.getElementById('js-events-list').innerHTML = renderEventItems();
       document.getElementById('js-ev-form').style.display = 'none';
-      bindEventDeleteHandlers();
+      bindEventActions();
     });
 
-    bindEventDeleteHandlers();
+    bindEventActions();
   }
 
   if (tab === 'offers') {
-    // Toggle form
     document.getElementById('js-of-open-form')?.addEventListener('click', () => {
       const form = document.getElementById('js-of-form');
       form.style.display = form.style.display === 'none' ? 'block' : 'none';
@@ -476,7 +617,6 @@ function bindPanelEvents(tab) {
     document.getElementById('js-of-add')?.addEventListener('click', async () => {
       const title = document.getElementById('of-title').value.trim();
       if (!title) { alert('Please enter an offer title.'); return; }
-
       const btn = document.getElementById('js-of-add');
       btn.disabled = true; btn.textContent = 'Saving…';
 
@@ -491,7 +631,6 @@ function bindPanelEvents(tab) {
       }).select().single();
 
       btn.disabled = false; btn.textContent = 'Save offer';
-
       if (error) { alert('Could not save offer: ' + error.message); return; }
       bizOffers.push(data);
       document.getElementById('js-offers-list').innerHTML = renderOfferItems();
@@ -502,6 +641,37 @@ function bindPanelEvents(tab) {
     bindOfferDeleteHandlers();
   }
 
+  if (tab === 'inquiries') {
+    document.querySelectorAll('.js-inq-read').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const inqId = btn.dataset.inqid;
+        await db.from('inquiries').update({ status: 'read' }).eq('id', inqId);
+        const inq = bizInquiries.find(i => i.id == inqId);
+        if (inq) inq.status = 'read';
+        // Re-render just the badge and list
+        const unread = bizInquiries.filter(i => i.status === 'unread').length;
+        const badge = document.getElementById('js-inq-badge');
+        if (badge) { badge.textContent = unread; badge.style.display = unread ? 'inline' : 'none'; }
+        document.getElementById('js-inq-list').innerHTML = bizInquiries.map(inq => `
+          <div class="dash-inq-item${inq.status === 'unread' ? ' dash-inq-item--unread' : ''}" data-inqid="${inq.id}">
+            <div class="dash-inq-item__header">
+              <span class="dash-inq-item__name">${inq.sender_name || 'Anonymous'}</span>
+              <span class="dash-inq-item__email">${inq.sender_email}</span>
+              <span class="dash-inq-item__date">${fmtDate(inq.created_at)}</span>
+              ${inq.status === 'unread' ? '<span class="dash-inq-item__badge">New</span>' : ''}
+            </div>
+            <p class="dash-inq-item__msg">${(inq.message || '').replace(/</g,'&lt;')}</p>
+            <div class="dash-inq-item__actions">
+              <a href="mailto:${inq.sender_email}?subject=Re: Your enquiry about ${encodeURIComponent(currentBiz.name)}" class="btn btn--teal btn--xs">Reply →</a>
+              ${inq.status === 'unread' ? `<button class="btn btn--outline btn--xs js-inq-read" data-inqid="${inq.id}">Mark read</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+        bindPanelEvents('inquiries');
+      });
+    });
+  }
+
   if (tab === 'settings') {
     document.getElementById('js-settings-save')?.addEventListener('click', async () => {
       currentBiz.name        = document.getElementById('set-name').value.trim();
@@ -510,7 +680,6 @@ function bindPanelEvents(tab) {
       currentBiz.location    = document.getElementById('set-address').value.trim();
       currentBiz.website     = document.getElementById('set-website').value.trim();
       currentBiz.description = document.getElementById('set-desc').value.trim();
-
       const ok = await saveBizSettings();
       if (ok) {
         renderSwitcher();
@@ -519,27 +688,51 @@ function bindPanelEvents(tab) {
       }
     });
 
-    document.getElementById('js-upgrade-btn')?.addEventListener('click', async () => {
-      currentBiz.plan = 'featured';
-      await saveBizSettings();
-      renderSwitcher();
-      switchTab('settings');
+    document.getElementById('js-dash-logout')?.addEventListener('click', async () => {
+      await db.auth.signOut();
+      window.location.href = 'login.html';
     });
-
-    document.getElementById('js-dash-logout')?.addEventListener('click', logout);
   }
 }
 
-function bindEventDeleteHandlers() {
+function bindEventActions() {
+  // Delete
   document.querySelectorAll('.js-ev-del').forEach(btn => {
     btn.addEventListener('click', async () => {
+      if (!confirm('Delete this event?')) return;
       const evId = parseInt(btn.dataset.evid);
       const { error } = await db.from('events').delete().eq('id', evId);
       if (!error) {
         bizEvents = bizEvents.filter(e => e.id !== evId);
         document.getElementById('js-events-list').innerHTML = renderEventItems();
-        bindEventDeleteHandlers();
+        bindEventActions();
       }
+    });
+  });
+
+  // Promote (Gold, using included allocation)
+  document.querySelectorAll('.js-ev-promote').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Use one of your included promoted events to feature this on the homepage and push to socials?')) return;
+      const evId = parseInt(btn.dataset.evid);
+      btn.disabled = true; btn.textContent = 'Promoting…';
+
+      const { error: evErr } = await db.from('events').update({ is_promoted: true }).eq('id', evId);
+      if (evErr) { alert('Could not promote event.'); btn.disabled = false; return; }
+
+      // Increment used count
+      const newCount = promotedUsed() + 1;
+      await db.from('businesses').update({ promoted_events_used: newCount }).eq('id', currentBiz.id);
+      currentBiz.promoted_events_used = newCount;
+
+      const ev = bizEvents.find(e => e.id === evId);
+      if (ev) ev.is_promoted = true;
+      document.getElementById('js-events-list').innerHTML = renderEventItems();
+      bindEventActions();
+
+      // Refresh promoted bar count
+      const pBar = document.querySelector('.dash-promoted-bar strong');
+      if (pBar) pBar.textContent = promotedLeft();
     });
   });
 }
@@ -547,6 +740,7 @@ function bindEventDeleteHandlers() {
 function bindOfferDeleteHandlers() {
   document.querySelectorAll('.js-of-del').forEach(btn => {
     btn.addEventListener('click', async () => {
+      if (!confirm('Delete this offer?')) return;
       const ofId = btn.dataset.ofid;
       const { error } = await db.from('promos').delete().eq('id', ofId);
       if (!error) {
@@ -566,7 +760,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  dashAcct = getAccount() || { id: session.user.id, email: session.user.email, name: session.user.user_metadata?.name };
+  dashAcct = { id: session.user.id, email: session.user.email, name: session.user.user_metadata?.name };
 
   const { data: businesses, error } = await db.from('businesses')
     .select('*')
@@ -579,9 +773,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   allBizProfiles = businesses;
-  const savedId = getCurrentBizId();
-  currentBiz = allBizProfiles.find(b => b.id === savedId) || allBizProfiles[0];
-  setCurrentBizId(currentBiz.id);
+  const savedId  = localStorage.getItem('wtdg_dash_biz');
+  currentBiz     = allBizProfiles.find(b => b.id === savedId) || allBizProfiles[0];
+  localStorage.setItem('wtdg_dash_biz', currentBiz.id);
 
   await loadBizData();
 

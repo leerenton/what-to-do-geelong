@@ -1653,9 +1653,19 @@ async function initListingPage() {
     let inqHTML = '';
 
     if (!isClaimed) {
-      // ── Unclaimed: show claim CTA ──────────────────────────
+      // ── Unclaimed: blurred ghost form + claim CTA overlay ──
       inqHTML = `
         <div class="listing-inq-card listing-inq-card--locked">
+          <h3 class="listing-inq-title"><span class="material-symbols-rounded">mail</span> Send an enquiry</h3>
+          <p class="listing-inq-sub">Ask ${biz.name} a question — they'll get back to you directly.</p>
+          <div class="listing-inq-form" style="filter:blur(4px);pointer-events:none;user-select:none">
+            <div class="listing-inq-row">
+              <input type="text"  class="ob-input" placeholder="Your name" />
+              <input type="email" class="ob-input" placeholder="Your email" />
+            </div>
+            <textarea class="ob-input" rows="3" placeholder="Your message…" style="resize:vertical"></textarea>
+            <button class="btn btn--teal">Send enquiry</button>
+          </div>
           <div class="inq-claim-overlay">
             <span class="inq-claim-icon">🏪</span>
             <p class="inq-claim-title">Is this your business?</p>

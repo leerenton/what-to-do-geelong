@@ -15,7 +15,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
   <!-- Google AdSense verification -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
 </head>
@@ -68,8 +68,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
-  <!-- Filters + Grid -->
+  <!-- Happening Today -->
+  <div id="js-happening-today" hidden></div>
+
+  <!-- Calendar + Filters + Grid -->
   <div class="coll-body container">
+
+    <!-- Mini calendar -->
+    <div id="js-events-calendar" class="events-calendar-wrap"></div>
+
     <div class="coll-topbar">
       <div class="coll-filters" id="js-events-filters">
         <button class="coll-filter-pill active" data-filter="all">All</button>
@@ -81,13 +88,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button class="coll-filter-pill" data-filter="sport">Sport</button>
         <button class="coll-filter-pill" data-filter="festival">Festival</button>
       </div>
-      <div class="coll-topbar-row2"><div class="coll-search-wrap">
-        <span class="material-symbols-rounded">search</span>
-        <input class="coll-search" type="text" id="js-events-search" placeholder="Search events…" /></div><div id="js-events-loc"></div></div>
+      <div class="coll-topbar-row2">
+        <div class="coll-search-wrap">
+          <span class="material-symbols-rounded">search</span>
+          <input class="coll-search" type="text" id="js-events-search" placeholder="Search events…" />
+        </div>
+        <div id="js-events-loc"></div>
       </div>
     </div>
-    <p class="coll-count" id="js-events-count"></p>
-    <div class="coll-grid" id="js-events-root">
+
+    <div class="events-toolbar">
+      <p class="coll-count" id="js-events-count"></p>
+      <button class="past-toggle" id="js-past-toggle">Show past events</button>
+    </div>
+
+    <div id="js-events-root">
       <div class="coll-loading">
         <span class="material-symbols-rounded" style="font-size:2rem;color:#ccc">event</span>
         <p>Loading…</p>
@@ -117,6 +132,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script src="guides.js"></script>
   <script src="location.js"></script>
   <script src="view-tracker.js"></script>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

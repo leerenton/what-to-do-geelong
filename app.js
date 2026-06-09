@@ -879,6 +879,163 @@ function parseEventDate(str) {
   return d;
 }
 
+// ── EVENT URGENCY ─────────────────────────────────────────
+function getEventUrgency(ev) {
+  const d = parseEventDate(ev.date);
+  if (!d) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((d - today) / 86400000);
+  if (diff < 0)  return 'past';
+  if (diff === 0) return 'today';
+  if (diff === 1) return 'tomorrow';
+  if (diff === 2) return 'soon';
+  return null;
+}
+
+// ── EVENT GRID CARD (events page + sections) ───────────────
+function eventGridCard(ev, opts = {}) {
+  const urgency   = getEventUrgency(ev);
+  const isPast    = urgency === 'past';
+  if (isPast && !opts.showPast) return '';
+
+  const urgencyBadge = {
+    today:    `<span class="ev-urgency ev-urgency--today"><span class="ev-urgency__dot"></span>Today</span>`,
+    tomorrow: `<span class="ev-urgency ev-urgency--tomorrow">Tomorrow</span>`,
+    soon:     `<span class="ev-urgency ev-urgency--soon">In 2 days</span>`,
+    past:     `<span class="ev-urgency ev-urgency--past">Past</span>`,
+  }[urgency] || '';
+
+  const thumb = ev.img
+    ? `<div class="ev-card__img" style="background-image:url('${ev.img}')"></div>`
+    : `<div class="ev-card__img ev-card__img--emoji" style="background:${ev.color || '#e8f4ff'}22">${ev.emoji || '📅'}</div>`;
+
+  const sectionStyle = opts.accentColor ? `border-left:3px solid ${opts.accentColor}` : '';
+
+  return `
+    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}" style="${sectionStyle}">
+      ${urgencyBadge}
+      ${thumb}
+      <div class="ev-card__body">
+        <span class="ev-card__cat">${ev.category}</span>
+        <h3 class="ev-card__title">${ev.title}</h3>
+        <div class="ev-card__meta"><span class="material-symbols-rounded">location_on</span>${ev.location}</div>
+        <div class="ev-card__meta"><span class="material-symbols-rounded">schedule</span>${ev.date}${ev.time ? ' · ' + ev.time : ''}</div>
+        <div class="ev-card__foot">
+          <span class="ev-card__price${ev.price === 'Free' ? ' ev-card__price--free' : ''}">${ev.price || 'See event'}</span>
+          ${ev.tags?.length ? `<span class="ev-card__tag">${ev.tags[0]}</span>` : ''}
+        </div>
+      </div>
+    </a>`;
+}
+
+// ── HAPPENING TODAY STRIP ──────────────────────────────────
+function renderHappeningToday() {
+  const el = document.getElementById('js-happening-today');
+  if (!el) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayEvs = EVENTS.filter(ev => {
+    const d = parseEventDate(ev.date);
+    return d && d.getTime() === today.getTime();
+  });
+  if (!todayEvs.length) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `
+    <div class="happening-today">
+      <div class="container">
+        <div class="happening-today__hdr">
+          <span class="happening-today__dot"></span>
+          <h2 class="happening-today__title">Happening Today</h2>
+          <span class="happening-today__count">${todayEvs.length} event${todayEvs.length > 1 ? 's' : ''}</span>
+        </div>
+        <div class="happening-today__scroll">
+          ${todayEvs.map(ev => `
+            <a href="${evLink(ev)}" class="today-card">
+              <div class="today-card__img${ev.img ? '' : ' today-card__img--emoji'}" style="${ev.img ? `background-image:url('${ev.img}')` : `background:${ev.color || '#4ac8d0'}22`}">${ev.img ? '' : (ev.emoji || '📅')}</div>
+              <div class="today-card__body">
+                <span class="today-card__cat">${ev.category}</span>
+                <h4 class="today-card__title">${ev.title}</h4>
+                <p class="today-card__time">${ev.time || 'All day'}</p>
+                <p class="today-card__loc">${ev.location}</p>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── EVENTS MINI CALENDAR ───────────────────────────────────
+function initEventCalendar(onDateSelect) {
+  const el = document.getElementById('js-events-calendar');
+  if (!el) return;
+
+  const now = new Date();
+  let viewYear  = now.getFullYear();
+  let viewMonth = now.getMonth();
+  let selectedDate = null;
+
+  // Build a Set of "YYYY-M-D" strings that have events
+  const eventDays = new Set(EVENTS.map(ev => {
+    const d = parseEventDate(ev.date);
+    return d ? `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` : null;
+  }).filter(Boolean));
+
+  function render() {
+    const DAYS   = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    const lastDay  = new Date(viewYear, viewMonth + 1, 0);
+    // Monday-first: shift JS Sunday(0) to end
+    const startDow = (firstDay.getDay() + 6) % 7;
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    let cells = '';
+    for (let i = 0; i < startDow; i++) cells += `<div class="ecal__cell ecal__cell--empty"></div>`;
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const key     = `${viewYear}-${viewMonth}-${d}`;
+      const dt      = new Date(viewYear, viewMonth, d);
+      const isToday = dt.getTime() === today.getTime();
+      const hasSel  = selectedDate && dt.getTime() === selectedDate.getTime();
+      const hasEvs  = eventDays.has(key);
+      cells += `<button class="ecal__cell${isToday ? ' ecal__cell--today' : ''}${hasSel ? ' ecal__cell--selected' : ''}${hasEvs ? ' ecal__cell--has-events' : ''}" data-date="${viewYear}-${viewMonth + 1}-${d}">${d}${hasEvs ? '<span class="ecal__dot"></span>' : ''}</button>`;
+    }
+
+    el.innerHTML = `
+      <div class="ecal">
+        <div class="ecal__nav">
+          <button class="ecal__nav-btn" id="js-ecal-prev"><span class="material-symbols-rounded">chevron_left</span></button>
+          <span class="ecal__month">${MONTHS[viewMonth]} ${viewYear}</span>
+          <button class="ecal__nav-btn" id="js-ecal-next"><span class="material-symbols-rounded">chevron_right</span></button>
+          ${selectedDate ? `<button class="ecal__clear" id="js-ecal-clear">All dates</button>` : ''}
+        </div>
+        <div class="ecal__grid">
+          ${DAYS.map(d => `<div class="ecal__dow">${d}</div>`).join('')}
+          ${cells}
+        </div>
+      </div>`;
+
+    el.querySelector('#js-ecal-prev')?.addEventListener('click', () => {
+      viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; } render();
+    });
+    el.querySelector('#js-ecal-next')?.addEventListener('click', () => {
+      viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; } render();
+    });
+    el.querySelector('#js-ecal-clear')?.addEventListener('click', () => {
+      selectedDate = null; render(); onDateSelect(null);
+    });
+    el.querySelectorAll('.ecal__cell[data-date]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const [y, m, d] = btn.dataset.date.split('-').map(Number);
+        selectedDate = new Date(y, m - 1, d);
+        render();
+        onDateSelect(selectedDate);
+      });
+    });
+  }
+
+  render();
+}
+
 function renderUpcoming(events) {
   const list = document.getElementById('js-upcoming-list');
   if (!list) return;
@@ -2018,34 +2175,176 @@ function initEventsPage() {
   const root = document.getElementById('js-events-root');
   if (!root) return;
 
-  function renderEvents(items) {
-    root.innerHTML = items.length ? items.map(ev => {
-      const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
-      return collCard(
-        evLink(ev), ev.color || '#4ac8d0', ev.emoji || '🎟',
-        ev.img || null,
-        ev.category,
-        ev.title,
-        `📍 ${ev.location} · 🕐 ${ev.time}`,
-        ev.location,
-        ev.price !== 'Free' ? ev.price : null,
-        biz ? biz.name : null,
-        ev.lat, ev.lng,
-        String(ev.id), 'event'
-      );
-    }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your search.</p></div>`;
+  // Happening today strip
+  renderHappeningToday();
+
+  let showPast      = false;
+  let calFilterDate = null;
+
+  // ── Past events toggle ─────────────────────────────────
+  const pastToggle = document.getElementById('js-past-toggle');
+  if (pastToggle) {
+    pastToggle.addEventListener('click', () => {
+      showPast = !showPast;
+      pastToggle.textContent = showPast ? 'Hide past events' : 'Show past events';
+      pastToggle.classList.toggle('active', showPast);
+      doRender();
+    });
+  }
+
+  // ── Calendar init ──────────────────────────────────────
+  initEventCalendar(date => {
+    calFilterDate = date;
+    doRender();
+  });
+
+  function doRender() {
+    let items = [...EVENTS];
+
+    // Apply calendar date filter
+    if (calFilterDate) {
+      items = items.filter(ev => {
+        const d = parseEventDate(ev.date);
+        return d && d.toDateString() === calFilterDate.toDateString();
+      });
+    }
+
+    // Sort: upcoming first, then past
+    const today = new Date(); today.setHours(0,0,0,0);
+    items.sort((a, b) => {
+      const da = parseEventDate(a.date) || new Date(9999,0,1);
+      const db = parseEventDate(b.date) || new Date(9999,0,1);
+      const pastA = da < today, pastB = db < today;
+      if (pastA !== pastB) return pastA ? 1 : -1;
+      return da - db;
+    });
+
+    const upcoming = items.filter(ev => getEventUrgency(ev) !== 'past');
+    const past     = items.filter(ev => getEventUrgency(ev) === 'past');
+    const count    = upcoming.length + (showPast ? past.length : 0);
+
+    const countEl = document.getElementById('js-events-count');
+    if (countEl) countEl.textContent = `${count} result${count !== 1 ? 's' : ''}`;
+
+    root.innerHTML = upcoming.length || (showPast && past.length)
+      ? `<div class="ev-grid">
+          ${upcoming.map(ev => eventGridCard(ev, { showPast })).join('')}
+          ${showPast && past.length ? `
+            <div class="ev-grid__past-divider">Past events</div>
+            ${past.map(ev => eventGridCard(ev, { showPast: true })).join('')}
+          ` : ''}
+        </div>`
+      : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your search.</p></div>`;
+
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
     if (window.wtdgViews) window.wtdgViews.injectViewBadges('event');
   }
 
-  collFilter(
-    EVENTS,
-    document.getElementById('js-events-filters'),
-    document.getElementById('js-events-search'),
-    document.getElementById('js-events-count'),
-    renderEvents
-  );
+  // Wire up category filter pills
+  const filterEl = document.getElementById('js-events-filters');
+  const searchEl = document.getElementById('js-events-search');
+  let activeFilter = 'all', searchQ = '';
+  let _baseItems = EVENTS;
+
+  function applyFilters() {
+    _baseItems = EVENTS.filter(ev => {
+      const matchFilter = activeFilter === 'all' ||
+        (ev.category || '').toLowerCase().includes(activeFilter);
+      const matchSearch = !searchQ ||
+        (ev.title || '').toLowerCase().includes(searchQ) ||
+        (ev.location || '').toLowerCase().includes(searchQ) ||
+        (ev.category || '').toLowerCase().includes(searchQ);
+      return matchFilter && matchSearch;
+    });
+    // Override EVENTS reference used by doRender
+    Object.defineProperty(window, '_evPageItems', { value: _baseItems, writable: true, configurable: true });
+    doRender();
+  }
+
+  if (filterEl) {
+    filterEl.querySelectorAll('.coll-filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeFilter = pill.dataset.filter;
+        applyFilters();
+      });
+    });
+  }
+  if (searchEl) {
+    searchEl.addEventListener('input', () => { searchQ = searchEl.value.trim().toLowerCase(); applyFilters(); });
+  }
+
+  // Override doRender to respect filters
+  const _origDoRender = doRender;
+  function doRender() {
+    let items = window._evPageItems || EVENTS;
+    if (calFilterDate) {
+      items = items.filter(ev => {
+        const d = parseEventDate(ev.date);
+        return d && d.toDateString() === calFilterDate.toDateString();
+      });
+    }
+    const today = new Date(); today.setHours(0,0,0,0);
+    items = [...items].sort((a, b) => {
+      const da = parseEventDate(a.date) || new Date(9999,0,1);
+      const db = parseEventDate(b.date) || new Date(9999,0,1);
+      return (da < today ? 1 : 0) - (db < today ? 1 : 0) || da - db;
+    });
+    const upcoming = items.filter(ev => getEventUrgency(ev) !== 'past');
+    const past     = items.filter(ev => getEventUrgency(ev) === 'past');
+    const count    = upcoming.length + (showPast ? past.length : 0);
+    const countEl  = document.getElementById('js-events-count');
+    if (countEl) countEl.textContent = `${count} result${count !== 1 ? 's' : ''}`;
+    root.innerHTML = upcoming.length || (showPast && past.length)
+      ? `<div class="ev-grid">
+          ${upcoming.map(ev => eventGridCard(ev, {})).join('')}
+          ${showPast && past.length ? `
+            <div class="ev-grid__past-divider">Past events</div>
+            ${past.map(ev => eventGridCard(ev, { showPast: true })).join('')}
+          ` : ''}
+        </div>`
+      : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match.</p></div>`;
+    if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+  }
+
+  window._evPageItems = EVENTS;
+  doRender();
+
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-events-loc');
+}
+
+// ── EVENTS IN COLLECTION SECTION ──────────────────────────
+const SECTION_CATEGORIES = {
+  eat:   ['food & drink', 'markets', 'festival'],
+  drink: ['music', 'food & drink', 'nightlife', 'festival'],
+  do:    ['arts & culture', 'sport', 'theatre', 'family', 'education', 'markets', 'festival'],
+  stay:  ['festival', 'markets', 'sport'],
+};
+
+function renderSectionEvents(sectionKey) {
+  const el = document.getElementById(`js-${sectionKey}-events`);
+  if (!el) return;
+  const cats = SECTION_CATEGORIES[sectionKey] || [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const matching = EVENTS.filter(ev => {
+    const d = parseEventDate(ev.date);
+    if (!d || d < today) return false;
+    return cats.some(c => (ev.category || '').toLowerCase().includes(c));
+  }).sort((a, b) => (parseEventDate(a.date) || 0) - (parseEventDate(b.date) || 0)).slice(0, 6);
+
+  if (!matching.length) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `
+    <div class="section-events">
+      <div class="section-events__hdr">
+        <h2 class="section-events__title"><span class="material-symbols-rounded">event</span> What's On</h2>
+        <a href="events.html" class="section-events__more">All events →</a>
+      </div>
+      <div class="section-events__grid">
+        ${matching.map(ev => eventGridCard(ev, { compact: true, accentColor: ev.color || '#4ac8d0' })).join('')}
+      </div>
+    </div>`;
 }
 
 // ── EAT COLLECTION PAGE ───────────────────────────────────
@@ -2082,6 +2381,7 @@ function initEatPage() {
     renderEat
   );
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-eat-loc');
+  renderSectionEvents('eat');
 }
 
 // ── DRINK COLLECTION PAGE ─────────────────────────────────
@@ -2118,6 +2418,7 @@ function initDrinkPage() {
     renderDrink
   );
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-drink-loc');
+  renderSectionEvents('drink');
 }
 
 // ── DO / ACTIVITIES COLLECTION PAGE ───────────────────────
@@ -2154,6 +2455,7 @@ function initDoPage() {
     renderDo
   );
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-do-loc');
+  renderSectionEvents('do');
 }
 
 // ── STAY COLLECTION PAGE ──────────────────────────────────
@@ -2187,6 +2489,7 @@ function initStayPage() {
     renderStay
   );
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-stay-loc');
+  renderSectionEvents('stay');
 }
 
 // ── STAY SEE-ALL PAGE (legacy stub) ──────────────────────

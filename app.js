@@ -1875,9 +1875,15 @@ async function initListingPage() {
     setTimeout(updateDist, 2000);
   }
 
-  // ── View tracking ───────────────────────────────────────────
+  // ── View tracking + view_count increment ────────────────────
   if (window.wtdgViews) {
     window.wtdgViews.track(biz.id, 'business', biz.type);
+    // Increment view_count on businesses table (used for 100-view nudge email)
+    setTimeout(async () => {
+      try {
+        await db.rpc('increment_business_views', { biz_id: biz.id });
+      } catch (_) {}
+    }, 1000);
     // Show view count after a short delay so it doesn't block page paint
     window.wtdgViews.getCount(biz.id, 'business', '7d').then(count => {
       if (count > 0) {

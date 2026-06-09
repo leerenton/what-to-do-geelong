@@ -304,9 +304,9 @@ function renderEventItems() {
       <div class="dash-event-card__actions">
         ${!ev.is_promoted ? `
           ${isGold() && promotedLeft() > 0
-            ? `<button class="btn btn--gold btn--xs js-ev-promote" data-evid="${ev.id}" title="Promote this event">⭐ Promote</button>`
+            ? `<a href="promote-event.html?ev=${ev.id}&biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}&gold=1" class="btn btn--gold btn--xs">⭐ Promote</a>`
             : !isGold()
-              ? `<a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}&promote=${ev.id}" class="btn btn--outline btn--xs" title="Promote via Gold or one-off $99">Promote $99</a>`
+              ? `<a href="promote-event.html?ev=${ev.id}&biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--outline btn--xs" title="Promote this event">⭐ Promote</a>`
               : ''
           }
         ` : `<span class="dash-promoted-active">⭐ Live</span>`}

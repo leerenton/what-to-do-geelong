@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
+<!-- End Google Tag Manager -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Promote Your Event — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="promote-event.css" />
+</head>
+<body class="promo-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <div class="promo-wrap">
+
+    <!-- Top bar -->
+    <div class="promo-topbar">
+      <a href="index.html" class="promo-topbar__logo">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" />
+      </a>
+      <a href="business-dashboard.html" class="promo-topbar__back">← Back to dashboard</a>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="promo-step-label">
+      <span class="promo-step-num">1</span>
+      <span class="promo-step-text">CHOOSE YOUR PACKAGE</span>
+    </div>
+
+    <!-- Heading -->
+    <h1 class="promo-title">Promote your event</h1>
+    <p class="promo-sub">All packages run for the selected period across your chosen placements on What To Do Geelong.</p>
+
+    <!-- Event summary (populated by JS) -->
+    <div class="promo-event-card" id="js-promo-event" style="display:none">
+      <span class="promo-event-card__emoji" id="js-promo-emoji">📅</span>
+      <div class="promo-event-card__body">
+        <div class="promo-event-card__title" id="js-promo-title">Event name</div>
+        <div class="promo-event-card__meta" id="js-promo-meta"></div>
+      </div>
+    </div>
+
+    <!-- Gold member note -->
+    <div class="promo-gold-note" id="js-gold-note" style="display:none">
+      <span class="material-symbols-rounded">workspace_premium</span>
+      <span>As a <strong>Gold member</strong> you have <strong id="js-gold-left">0</strong> free promoted event<span id="js-gold-plural">s</span> remaining — or choose a paid package for extended reach.</span>
+      <button class="btn btn--gold btn--sm" id="js-use-gold">Use free promotion →</button>
+    </div>
+
+    <!-- Package cards -->
+    <div class="promo-grid">
+
+      <!-- BOOST -->
+      <div class="promo-card" data-plan="boost" data-price="49">
+        <div class="promo-card__inner">
+          <div class="promo-card__name">Boost</div>
+          <div class="promo-card__duration">7 days</div>
+          <div class="promo-card__price">$49</div>
+          <div class="promo-card__gst">inc. GST · one-time</div>
+          <ul class="promo-card__features">
+            <li class="on"><span class="material-symbols-rounded">check</span> Featured on Events page</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> "Featured" badge on event card</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> Priority placement in listings</li>
+            <li class="off"><span class="material-symbols-rounded">remove</span> Homepage featured strip</li>
+            <li class="off"><span class="material-symbols-rounded">remove</span> Social media post</li>
+            <li class="off"><span class="material-symbols-rounded">remove</span> Newsletter mention</li>
+          </ul>
+          <button class="promo-card__btn" data-plan="boost" data-price="49">Select Boost</button>
+        </div>
+      </div>
+
+      <!-- SPOTLIGHT -->
+      <div class="promo-card promo-card--popular" data-plan="spotlight" data-price="99">
+        <div class="promo-card__popular-badge">MOST POPULAR</div>
+        <div class="promo-card__inner">
+          <div class="promo-card__name">Spotlight</div>
+          <div class="promo-card__duration">14 days</div>
+          <div class="promo-card__price">$99</div>
+          <div class="promo-card__gst">inc. GST · one-time</div>
+          <ul class="promo-card__features">
+            <li class="on"><span class="material-symbols-rounded">check</span> Homepage featured events strip</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> Events page feature</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> "Featured" badge on event card</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> 1 dedicated Instagram &amp; Facebook post</li>
+            <li class="off"><span class="material-symbols-rounded">remove</span> Newsletter mention</li>
+            <li class="off"><span class="material-symbols-rounded">remove</span> Instagram &amp; Facebook Stories</li>
+          </ul>
+          <button class="promo-card__btn promo-card__btn--popular" data-plan="spotlight" data-price="99">Select Spotlight</button>
+        </div>
+      </div>
+
+      <!-- PREMIER -->
+      <div class="promo-card" data-plan="premier" data-price="199">
+        <div class="promo-card__inner">
+          <div class="promo-card__name">Premier</div>
+          <div class="promo-card__duration">30 days</div>
+          <div class="promo-card__price">$199</div>
+          <div class="promo-card__gst">inc. GST · one-time</div>
+          <ul class="promo-card__features">
+            <li class="on"><span class="material-symbols-rounded">check</span> Homepage hero featured placement</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> Events + relevant category pages</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> "Featured" badge across all listings</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> 3 social posts (IG, FB + Stories)</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> Newsletter feature mention</li>
+            <li class="on"><span class="material-symbols-rounded">check</span> Performance report at end of run</li>
+          </ul>
+          <button class="promo-card__btn" data-plan="premier" data-price="199">Select Premier</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Social note -->
+    <div class="promo-social-note">
+      <span>📣</span>
+      <p>Posts are created by our team and shared across <strong>Instagram &amp; Facebook</strong>. Spotlight and Premier packages include Stories. We'll contact you for any assets needed (images, logo, key message).</p>
+    </div>
+
+    <!-- Confirmation modal (shown after selection) -->
+    <div class="promo-modal-backdrop" id="js-promo-modal" style="display:none">
+      <div class="promo-modal">
+        <button class="promo-modal__close" id="js-modal-close">×</button>
+        <div class="promo-modal__icon">🎉</div>
+        <h2 class="promo-modal__title">You've selected <span id="js-modal-plan">Spotlight</span></h2>
+        <p class="promo-modal__sub">Your event will be promoted for <strong id="js-modal-days">14 days</strong> starting today.</p>
+        <div class="promo-modal__price-row">
+          <span>Total</span>
+          <strong id="js-modal-price">$99</strong>
+        </div>
+        <p class="promo-modal__note">Payment via Stripe — coming soon. In the meantime, <a href="mailto:hello@whattodogeelong.com.au?subject=Event promotion enquiry" class="promo-modal__link">email us to get started →</a></p>
+        <a href="mailto:hello@whattodogeelong.com.au?subject=Event promotion — [Package] package" id="js-modal-email-btn" class="btn btn--teal" style="width:100%;text-align:center">Get started →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    const params   = new URLSearchParams(location.search);
+    const evId     = params.get('ev');
+    const bizSlug  = params.get('biz');
+
+    const planMeta = {
+      boost:     { label: 'Boost',     days: 7,  price: '$49'  },
+      spotlight: { label: 'Spotlight', days: 14, price: '$99'  },
+      premier:   { label: 'Premier',   days: 30, price: '$199' },
+    };
+
+    // Load event details if ev param present
+    (async () => {
+      if (!evId) return;
+      const { data: ev } = await db.from('events').select('*').eq('id', evId).single();
+      if (!ev) return;
+      document.getElementById('js-promo-event').style.display = 'flex';
+      document.getElementById('js-promo-emoji').textContent   = ev.emoji || '📅';
+      document.getElementById('js-promo-title').textContent   = ev.title;
+      document.getElementById('js-promo-meta').textContent    = [ev.date, ev.time].filter(Boolean).join(' · ');
+    })();
+
+    // Show Gold free promotion option if applicable
+    (async () => {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) return;
+      const { data: biz } = await db.from('businesses').select('is_gold, promoted_events_used, slug').eq('owner_id', session.user.id).maybeSingle();
+      if (!biz?.is_gold) return;
+      const used = parseInt(biz.promoted_events_used) || 0;
+      const left = Math.max(0, 3 - used);
+      if (left < 1) return;
+
+      const note = document.getElementById('js-gold-note');
+      document.getElementById('js-gold-left').textContent   = left;
+      document.getElementById('js-gold-plural').textContent = left === 1 ? '' : 's';
+      note.style.display = 'flex';
+
+      document.getElementById('js-use-gold').addEventListener('click', async () => {
+        if (!evId) return;
+        await db.from('events').update({ is_promoted: true }).eq('id', evId);
+        await db.from('businesses').update({ promoted_events_used: used + 1 }).eq('slug', biz.slug);
+        window.location.href = 'business-dashboard.html?promoted=1';
+      });
+    })();
+
+    // Package selection → modal
+    document.querySelectorAll('.promo-card__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const plan  = btn.dataset.plan;
+        const meta  = planMeta[plan];
+        document.getElementById('js-modal-plan').textContent  = meta.label;
+        document.getElementById('js-modal-days').textContent  = meta.days + ' days';
+        document.getElementById('js-modal-price').textContent = meta.price;
+
+        const emailBtn = document.getElementById('js-modal-email-btn');
+        emailBtn.href = `mailto:hello@whattodogeelong.com.au?subject=Event promotion — ${meta.label} package${evId ? ' (Event ID: ' + evId + ')' : ''}`;
+
+        document.getElementById('js-promo-modal').style.display = 'flex';
+      });
+    });
+
+    document.getElementById('js-modal-close').addEventListener('click', () => {
+      document.getElementById('js-promo-modal').style.display = 'none';
+    });
+    document.getElementById('js-promo-modal').addEventListener('click', e => {
+      if (e.target === document.getElementById('js-promo-modal'))
+        document.getElementById('js-promo-modal').style.display = 'none';
+    });
+  </script>
+</body>
+</html>

@@ -28,6 +28,7 @@
     { "source": "/guide/:id",              "destination": "/guide.html?id=:id" },
     { "source": "/community-guides",       "destination": "/community-guides.html" },
     { "source": "/promote-event",          "destination": "/promote-event.html" },
+    { "source": "/upgrade",                "destination": "/upgrade.html" },
     { "source": "/:biz/:item",   "destination": "/event.html?b=:biz&s=:item" },
     { "source": "/:slug",        "destination": "/listing.html?s=:slug" }
   ]

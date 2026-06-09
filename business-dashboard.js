@@ -469,6 +469,264 @@ function renderGallery() {
   `;
 }
 
+// ── PROMOTE TAB — calendar helpers ────────────────────────
+let _dashCalSlots = null;
+let _dashCalFilter = 'all';
+let _dashCalPending = null; // { week, dayLabel, slot, price }
+
+async function loadDashCalSlots() {
+  const grid    = document.getElementById('js-dash-cal-grid');
+  const loading = document.getElementById('js-dash-cal-loading');
+  if (!grid) return;
+
+  try {
+    // Build 8 weeks of Tue/Thu dates from today
+    const dates = [];
+    const today = new Date();
+    for (let w = 0; w < 8; w++) {
+      for (const dayOffset of [2, 4]) { // Tuesday=2, Thursday=4
+        const d = new Date(today);
+        const diff = ((dayOffset - today.getDay() + 7) % 7) + w * 7;
+        d.setDate(today.getDate() + diff);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    }
+    const uniqueDates = [...new Set(dates)].sort().filter(d => d >= today.toISOString().split('T')[0]).slice(0, 16);
+
+    // Fetch existing bookings
+    const { data: booked } = await db
+      .from('email_sponsorships')
+      .select('send_date,slot,status')
+      .in('send_date', uniqueDates)
+      .in('status', ['pending', 'confirmed']);
+
+    const bookedSet = new Set((booked || []).map(b => `${b.send_date}:${b.slot}`));
+    _dashCalSlots = uniqueDates.map(date => {
+      const d     = new Date(date + 'T00:00:00');
+      const day   = d.getDay();
+      const label = d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+      const type  = day === 2 ? 'tuesday' : 'thursday';
+      const name  = day === 2 ? "What's Happening" : 'Your Weekend';
+      return {
+        date, label, type, name,
+        topFree:    !bookedSet.has(`${date}:top`),
+        bottomFree: !bookedSet.has(`${date}:bottom`),
+      };
+    });
+
+    loading.style.display = 'none';
+    grid.style.display    = 'grid';
+    renderDashCalGrid('all');
+  } catch (e) {
+    if (loading) loading.innerHTML = '<span style="color:var(--mid);font-size:.8rem">Could not load availability.</span>';
+  }
+}
+
+function renderDashCalGrid(filter) {
+  _dashCalFilter = filter;
+  const grid = document.getElementById('js-dash-cal-grid');
+  if (!grid || !_dashCalSlots) return;
+
+  const weeks = {};
+  _dashCalSlots
+    .filter(s => filter === 'all' || s.type === filter)
+    .forEach(s => {
+      const d   = new Date(s.date + 'T00:00:00');
+      const wk  = `Week of ${new Date(d.setDate(d.getDate() - d.getDay())).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}`;
+      if (!weeks[wk]) weeks[wk] = [];
+      weeks[wk].push(s);
+    });
+
+  grid.innerHTML = Object.entries(weeks).map(([wk, sends]) => `
+    <div class="dash-cal-week">
+      <div class="dash-cal-week__label">${wk}</div>
+      ${sends.map(s => `
+        <div class="dash-cal-send">
+          <div class="dash-cal-send__day">${s.label} · <em>${s.name}</em></div>
+          <div class="dash-cal-send__slots">
+            ${slotBtn(s, 'top')}
+            ${slotBtn(s, 'bottom')}
+          </div>
+        </div>`).join('')}
+    </div>
+  `).join('') || '<p style="color:var(--mid);font-size:.83rem;grid-column:1/-1">No sends match this filter.</p>';
+
+  // Bind slot buttons
+  grid.querySelectorAll('.dash-cal-slot-btn[data-available="true"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _dashCalPending = {
+        date:  btn.dataset.date,
+        label: btn.dataset.label,
+        slot:  btn.dataset.slot,
+        price: btn.dataset.price,
+      };
+      document.getElementById('js-dash-sponsor-summary').innerHTML =
+        `<strong>${btn.dataset.label}</strong> · ${btn.dataset.slot === 'top' ? '⭐ Top' : 'Bottom'} slot · <strong>$${btn.dataset.price}</strong>`;
+      document.getElementById('js-dash-sponsor-form').style.display = 'block';
+      document.getElementById('js-dash-sponsor-success').style.display = 'none';
+      document.getElementById('ds-msg').value = '';
+      document.getElementById('ds-url').value = currentBiz.website || '';
+      document.getElementById('js-dash-sponsor-modal').style.display = 'flex';
+
+      // Bind submit inside modal context
+      const submitBtn = document.getElementById('js-dash-sponsor-submit');
+      submitBtn.onclick = async () => {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+        try {
+          await db.from('email_sponsorships').insert({
+            send_date:     _dashCalPending.date,
+            send_type:     _dashCalPending.date ? (new Date(_dashCalPending.date + 'T00:00:00').getDay() === 2 ? 'tuesday' : 'thursday') : 'thursday',
+            slot:          _dashCalPending.slot,
+            business_name: currentBiz.name,
+            contact_name:  currentBiz.owner_name || '',
+            contact_email: currentBiz.owner_email || '',
+            message:       document.getElementById('ds-msg').value || '',
+            link_url:      document.getElementById('ds-url').value || '',
+            status:        'pending',
+          });
+
+          // Notify team
+          fetch('/api/notify-sponsorship', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              businessName: currentBiz.name,
+              sendDate: _dashCalPending.label,
+              slot: _dashCalPending.slot,
+              price: _dashCalPending.price,
+            }),
+          }).catch(() => {});
+
+          document.getElementById('js-dash-sponsor-form').style.display = 'none';
+          document.getElementById('js-dash-sponsor-success').style.display = 'block';
+
+          // Mark slot as booked in local data
+          const s = _dashCalSlots.find(x => x.date === _dashCalPending.date);
+          if (s) { if (_dashCalPending.slot === 'top') s.topFree = false; else s.bottomFree = false; }
+          renderDashCalGrid(_dashCalFilter);
+        } catch (err) {
+          alert('Could not submit booking. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Request booking →';
+        }
+      };
+    });
+  });
+}
+
+function slotBtn(s, slot) {
+  const free  = slot === 'top' ? s.topFree : s.bottomFree;
+  const price = slot === 'top' ? 49 : 29;
+  const label = slot === 'top' ? '⭐ Top $49' : 'Bottom $29';
+  if (free) {
+    return `<button class="dash-cal-slot-btn" data-available="true"
+              data-date="${s.date}" data-label="${s.label}" data-slot="${slot}" data-price="${price}"
+            >${label}</button>`;
+  }
+  return `<button class="dash-cal-slot-btn dash-cal-slot-btn--booked" disabled>${label} — Booked</button>`;
+}
+
+// ── PROMOTE TAB ───────────────────────────────────────────
+function renderPromote() {
+  return `
+    <div class="dash-panel active" id="panel-promote">
+
+      <!-- Event promotion -->
+      <div class="dash-section-header">
+        <div class="dash-section-title"><span class="material-symbols-rounded">campaign</span> Promote an Event</div>
+      </div>
+      <p style="font-size:.875rem;color:var(--mid);margin:0 0 1rem;line-height:1.55">
+        Boost an event to the homepage, events page and our social channels. Choose a package that suits your budget.
+      </p>
+      <a href="promote-event.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="dash-promo-cta-card">
+        <span class="dash-promo-cta-card__icon">🎟️</span>
+        <div>
+          <div class="dash-promo-cta-card__title">Event promotion packages</div>
+          <div class="dash-promo-cta-card__sub">Boost · Spotlight · Premier — from $49</div>
+        </div>
+        <span class="material-symbols-rounded dash-promo-cta-card__arrow">arrow_forward</span>
+      </a>
+
+      <div class="dash-section-divider"></div>
+
+      <!-- Email sponsorship -->
+      <div class="dash-section-header" style="margin-top:0">
+        <div class="dash-section-title"><span class="material-symbols-rounded">email</span> Sponsor Our Emails</div>
+      </div>
+      <p style="font-size:.875rem;color:var(--mid);margin:0 0 1rem;line-height:1.55">
+        Reach <strong>3,200+ Geelong locals</strong> in their inbox. Two sends per week — Tuesday and Thursday. Top and bottom slots available each send.
+      </p>
+
+      <!-- Slot summary cards -->
+      <div class="dash-email-slots">
+        <div class="dash-email-slot dash-email-slot--top">
+          <div class="dash-email-slot__day">Tuesday</div>
+          <div class="dash-email-slot__name">What's Happening</div>
+          <div class="dash-email-slot__prices">
+            <span class="dash-email-slot__price dash-email-slot__price--top">Top $49</span>
+            <span class="dash-email-slot__price">Bottom $29</span>
+          </div>
+        </div>
+        <div class="dash-email-slot dash-email-slot--top">
+          <div class="dash-email-slot__day">Thursday</div>
+          <div class="dash-email-slot__name">Your Weekend</div>
+          <div class="dash-email-slot__prices">
+            <span class="dash-email-slot__price dash-email-slot__price--top">Top $49</span>
+            <span class="dash-email-slot__price">Bottom $29</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inline availability calendar -->
+      <div class="dash-sponsor-cal">
+        <div class="dash-sponsor-cal__header">
+          <span class="dash-sponsor-cal__title">Available slots</span>
+          <div class="dash-sponsor-cal__tabs" id="js-dash-cal-tabs">
+            <button class="dash-sponsor-cal__tab active" data-filter="all">All</button>
+            <button class="dash-sponsor-cal__tab" data-filter="tuesday">Tue</button>
+            <button class="dash-sponsor-cal__tab" data-filter="thursday">Thu</button>
+          </div>
+        </div>
+        <div class="dash-sponsor-cal__loading" id="js-dash-cal-loading">
+          <span class="material-symbols-rounded" style="animation:spin 1s linear infinite;font-size:1rem">sync</span> Loading…
+        </div>
+        <div class="dash-sponsor-cal__grid" id="js-dash-cal-grid" style="display:none"></div>
+      </div>
+
+      <!-- Booking modal -->
+      <div class="dash-sponsor-modal-backdrop" id="js-dash-sponsor-modal" style="display:none">
+        <div class="dash-sponsor-modal">
+          <button class="dash-sponsor-modal__close" id="js-dash-sponsor-close">×</button>
+          <h3 class="dash-sponsor-modal__title">Book email slot</h3>
+          <div class="dash-sponsor-modal__summary" id="js-dash-sponsor-summary"></div>
+          <div class="dash-sponsor-modal__form" id="js-dash-sponsor-form">
+            <div class="dash-field">
+              <label class="dash-label">Your message / offer <span style="font-weight:400;color:var(--mid)">(optional)</span></label>
+              <textarea class="dash-input" id="ds-msg" rows="2" placeholder="e.g. 20% off this weekend, new menu launch…"></textarea>
+            </div>
+            <div class="dash-field">
+              <label class="dash-label">Link URL <span style="font-weight:400;color:var(--mid)">(optional)</span></label>
+              <input class="dash-input" id="ds-url" type="url" placeholder="https://yourbusiness.com.au" />
+            </div>
+            <p style="font-size:.75rem;color:var(--mid);line-height:1.5;margin:.25rem 0 .75rem">
+              <span class="material-symbols-rounded" style="font-size:.85rem;vertical-align:middle;color:var(--teal)">info</span>
+              We'll confirm and send a payment link within 24 hours. Slot held 48hrs pending payment.
+            </p>
+            <button class="btn btn--teal" id="js-dash-sponsor-submit" style="width:100%">Request booking →</button>
+          </div>
+          <div id="js-dash-sponsor-success" style="display:none;text-align:center;padding:1rem 0">
+            <div style="font-size:2rem;margin-bottom:.4rem">🎉</div>
+            <p style="font-weight:700;margin:0 0 .25rem">Booking request sent!</p>
+            <p style="font-size:.82rem;color:var(--mid)">We'll confirm within 24 hours.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
 // ── SETTINGS TAB ─────────────────────────────────────────
 function renderSettings() {
   const planExpiry = currentBiz.gold_expires_at
@@ -529,7 +787,7 @@ function renderSettings() {
 }
 
 // ── TAB SWITCHING ─────────────────────────────────────────
-const tabPanels = { overview: renderOverview, events: renderEvents, offers: renderOffers, gallery: renderGallery, inquiries: renderInquiries, settings: renderSettings };
+const tabPanels = { overview: renderOverview, events: renderEvents, offers: renderOffers, gallery: renderGallery, inquiries: renderInquiries, promote: renderPromote, settings: renderSettings };
 
 function switchTab(id) {
   document.querySelectorAll('.dash-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
@@ -670,6 +928,25 @@ function bindPanelEvents(tab) {
         bindPanelEvents('inquiries');
       });
     });
+  }
+
+  if (tab === 'promote') {
+    // Filter tabs
+    document.querySelectorAll('#js-dash-cal-tabs .dash-sponsor-cal__tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#js-dash-cal-tabs .dash-sponsor-cal__tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderDashCalGrid(btn.dataset.filter);
+      });
+    });
+
+    // Close modal
+    document.getElementById('js-dash-sponsor-close')?.addEventListener('click', () => {
+      document.getElementById('js-dash-sponsor-modal').style.display = 'none';
+    });
+
+    // Load calendar slots
+    loadDashCalSlots();
   }
 
   if (tab === 'settings') {

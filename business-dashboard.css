@@ -395,3 +395,94 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
   display: flex; flex-direction: column; gap: .3rem;
   font-size: .82rem; color: #166534;
 }
+
+/* ── PROMOTE TAB ─────────────────────────────────────────── */
+.dash-promo-cta-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1rem 1.1rem;
+  text-decoration: none; color: var(--dark);
+  transition: border-color .15s, box-shadow .15s;
+}
+.dash-promo-cta-card:hover { border-color: var(--teal); box-shadow: 0 2px 10px rgba(74,200,208,.15); }
+.dash-promo-cta-card__icon { font-size: 1.8rem; flex-shrink: 0; }
+.dash-promo-cta-card__title { font-weight: 700; font-size: .9rem; }
+.dash-promo-cta-card__sub   { font-size: .78rem; color: var(--mid); margin-top: .1rem; }
+.dash-promo-cta-card__arrow { color: var(--mid); margin-left: auto; flex-shrink: 0; }
+
+.dash-section-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+.dash-email-slots { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.25rem; }
+.dash-email-slot {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: .85rem 1rem;
+}
+.dash-email-slot__day   { font-weight: 800; font-size: .85rem; margin-bottom: .1rem; }
+.dash-email-slot__name  { font-size: .75rem; color: var(--mid); margin-bottom: .5rem; }
+.dash-email-slot__prices { display: flex; gap: .4rem; flex-wrap: wrap; }
+.dash-email-slot__price {
+  background: #f1f5f9; border-radius: 999px; font-size: .72rem;
+  font-weight: 700; padding: .2rem .55rem; color: var(--dark);
+}
+.dash-email-slot__price--top { background: #fef3c7; color: #92400e; }
+
+/* ── Inline sponsorship calendar ─── */
+.dash-sponsor-cal {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1rem;
+}
+.dash-sponsor-cal__header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem;
+}
+.dash-sponsor-cal__title { font-weight: 700; font-size: .88rem; }
+.dash-sponsor-cal__tabs  { display: flex; gap: .3rem; }
+.dash-sponsor-cal__tab {
+  background: #f1f5f9; border: none; border-radius: 999px;
+  font-size: .72rem; font-weight: 700; padding: .25rem .65rem;
+  cursor: pointer; color: var(--mid); transition: background .15s, color .15s;
+}
+.dash-sponsor-cal__tab.active { background: var(--teal); color: var(--dark); }
+.dash-sponsor-cal__loading { font-size: .8rem; color: var(--mid); display: flex; align-items: center; gap: .35rem; }
+.dash-sponsor-cal__grid { display: flex; flex-direction: column; gap: .75rem; }
+
+.dash-cal-week__label {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--mid); margin-bottom: .4rem;
+}
+.dash-cal-send { margin-bottom: .5rem; }
+.dash-cal-send__day { font-size: .8rem; font-weight: 600; margin-bottom: .3rem; }
+.dash-cal-send__day em { font-style: normal; font-weight: 400; color: var(--mid); }
+.dash-cal-send__slots { display: flex; gap: .4rem; flex-wrap: wrap; }
+.dash-cal-slot-btn {
+  background: #f0fffe; border: 1.5px solid var(--teal);
+  border-radius: 999px; font-size: .75rem; font-weight: 700;
+  padding: .3rem .8rem; cursor: pointer; color: #0f766e;
+  transition: background .15s;
+}
+.dash-cal-slot-btn:hover { background: var(--teal); color: var(--dark); }
+.dash-cal-slot-btn--booked {
+  background: #f1f5f9; border-color: var(--border);
+  color: var(--mid); cursor: not-allowed; opacity: .65;
+}
+
+/* ── Booking modal ─── */
+.dash-sponsor-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 9000; display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.dash-sponsor-modal {
+  background: var(--white); border-radius: var(--radius-xl);
+  padding: 1.5rem; width: 100%; max-width: 420px;
+  position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+.dash-sponsor-modal__close {
+  position: absolute; top: .75rem; right: .9rem;
+  background: none; border: none; font-size: 1.4rem;
+  cursor: pointer; color: var(--mid); line-height: 1;
+}
+.dash-sponsor-modal__title { font-size: 1rem; font-weight: 800; margin: 0 0 .75rem; }
+.dash-sponsor-modal__summary {
+  background: #fef3c7; border: 1px solid #f59e0b; border-radius: var(--radius);
+  font-size: .82rem; padding: .55rem .8rem; margin-bottom: .9rem; color: #92400e;
+}

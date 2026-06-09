@@ -2803,8 +2803,15 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   color: #fff; font-size: .7rem; font-weight: 700;
   border-radius: 999px; padding: .2rem .55rem;
   pointer-events: none;
+  z-index: 2;
 }
-.coll-card { position: relative; }
+/* All card types that can show a dist-badge need position:relative */
+.coll-card,
+.biz-card,
+.stay-card,
+.event-card,
+.ev-card,
+.today-card { position: relative; }
 
 /* ── View count badge on coll-cards ── */
 .view-badge {

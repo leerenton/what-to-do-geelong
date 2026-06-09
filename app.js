@@ -842,8 +842,9 @@ function renderEvents(events) {
     const thumb = ev.img
       ? `<img class="event-card__thumb-img" src="${ev.img}" alt="${ev.title}" loading="lazy" />`
       : `<div class="event-card__thumb" style="background:${ev.color||'#e8f4ff'}22">${ev.emoji||'📅'}</div>`;
+    const latAttr = (ev.lat && ev.lng) ? ` data-lat="${ev.lat}" data-lng="${ev.lng}"` : '';
     return `
-      <a href="${evLink(ev)}" class="event-card">
+      <a href="${evLink(ev)}" class="event-card"${latAttr}>
         ${thumb}
         <div class="event-card__body">
           <span class="event-card__cat">${ev.category}</span>
@@ -856,6 +857,7 @@ function renderEvents(events) {
       </a>
     `;
   }).join('');
+  if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
 }
 
 // ── RENDER UPCOMING LIST ──────────────────────────────────
@@ -910,9 +912,10 @@ function eventGridCard(ev, opts = {}) {
     : `<div class="ev-card__img ev-card__img--emoji" style="background:${ev.color || '#e8f4ff'}22">${ev.emoji || '📅'}</div>`;
 
   const sectionStyle = opts.accentColor ? `border-left:3px solid ${opts.accentColor}` : '';
+  const latAttr = (ev.lat && ev.lng) ? ` data-lat="${ev.lat}" data-lng="${ev.lng}"` : '';
 
   return `
-    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}" style="${sectionStyle}">
+    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}" style="${sectionStyle}"${latAttr}>
       ${urgencyBadge}
       ${thumb}
       <div class="ev-card__body">
@@ -1090,8 +1093,9 @@ function renderEatStrip(eatBiz) {
     if (hasEvent) badges.push('<span class="biz-badge biz-badge--event">Event</span>');
     if (hasPromo) badges.push('<span class="biz-badge biz-badge--promo">Offer</span>');
 
+    const latAttr = (biz.lat && biz.lng) ? ` data-lat="${biz.lat}" data-lng="${biz.lng}"` : '';
     return `
-      <a href="${bizLink(biz)}" class="biz-card">
+      <a href="${bizLink(biz)}" class="biz-card"${latAttr}>
         ${biz.img
           ? `<img src="${biz.img}" alt="${biz.name}" class="biz-card__img" loading="lazy" />`
           : `<div class="biz-card__img-placeholder" style="background:${biz.color}22">${biz.emoji}</div>`
@@ -1104,6 +1108,7 @@ function renderEatStrip(eatBiz) {
       </a>
     `;
   }).join('');
+  if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
 }
 
 // ── RENDER STAYS ──────────────────────────────────────────
@@ -1112,8 +1117,10 @@ function renderStays(stays) {
   if (!scroll) return;
 
   if (!stays) stays = STAYS;
-  scroll.innerHTML = stays.map(s => `
-    <a href="#" class="stay-card">
+  scroll.innerHTML = stays.map(s => {
+    const latAttr = (s.lat && s.lng) ? ` data-lat="${s.lat}" data-lng="${s.lng}"` : '';
+    return `
+    <a href="#" class="stay-card"${latAttr}>
       ${s.img
         ? `<img src="${s.img}" alt="${s.name}" class="stay-card__img" loading="lazy" />`
         : `<div class="stay-card__img-placeholder" style="background:${s.color}22">${s.emoji}</div>`
@@ -1128,7 +1135,8 @@ function renderStays(stays) {
         <button class="stay-card__book">Book Now →</button>
       </div>
     </a>
-  `).join('');
+  `;}).join('');
+  if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
 }
 
 // ── RENDER OFFERS STRIP ───────────────────────────────────

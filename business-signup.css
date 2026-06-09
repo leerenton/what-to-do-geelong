@@ -210,6 +210,12 @@
   background: none; border: none; font-family: var(--font-body); width: 100%;
 }
 
+/* Plan price note (monthly alternative) */
+.bsign-plan__price-note {
+  font-size: .75rem; color: var(--mid); margin: -.25rem 0 .75rem;
+  padding: 0 1rem;
+}
+
 /* Done screen */
 .bsign-done {
   text-align: center;

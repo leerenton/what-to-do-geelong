@@ -1080,6 +1080,71 @@ function renderUpcoming(events) {
   }).join('');
 }
 
+// ── RENDER PROMOTED EVENTS STRIP ─────────────────────────
+function renderPromotedEvents(events) {
+  const strip   = document.getElementById('js-promoted-strip');
+  const section = document.getElementById('js-promoted-section');
+  if (!strip || !section) return;
+
+  const promoted = events.filter(e => e.isPromoted || e.is_promoted);
+  if (!promoted.length) return;
+
+  section.style.display = '';
+  strip.innerHTML = promoted.map(ev => {
+    const biz     = window._allBiz?.find(b => b.id === ev.businessId);
+    const evLink  = biz ? `/${biz.slug}/${ev.slug || slugify(ev.title)}` : `/events/${ev.slug || slugify(ev.title)}`;
+    const featImg = ev.heroImg || ev.img || biz?.img || null;
+    const latAttr = (ev.lat && ev.lng) ? ` data-lat="${ev.lat}" data-lng="${ev.lng}"` : '';
+    return `
+      <a href="${evLink}" class="ev-card ev-card--promoted"${latAttr}>
+        <div class="ev-card__img${featImg ? ' ev-card__img--photo' : ''}" style="${featImg ? `background-image:url('${featImg}')` : `background:${ev.color || '#4ac8d0'}22`}">
+          ${featImg ? '' : `<span>${ev.emoji || '📅'}</span>`}
+          <span class="ev-card__promoted-badge">⭐ Featured</span>
+        </div>
+        <div class="ev-card__body">
+          <span class="ev-card__cat">${ev.category || 'Event'}</span>
+          <h3 class="ev-card__title">${ev.title}</h3>
+          <div class="ev-card__meta">
+            ${ev.date  ? `<span><span class="material-symbols-rounded">calendar_today</span>${ev.date}</span>` : ''}
+            ${ev.price ? `<span><span class="material-symbols-rounded">confirmation_number</span>${ev.price}</span>` : ''}
+          </div>
+        </div>
+      </a>`;
+  }).join('');
+  if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+}
+
+// ── RENDER GOLD BUSINESSES STRIP ─────────────────────────
+function renderGoldStrip(businesses) {
+  const strip   = document.getElementById('js-gold-strip');
+  const section = document.getElementById('js-gold-section');
+  if (!strip || !section) return;
+
+  const gold = businesses.filter(b => b.isGold || b.is_gold);
+  if (!gold.length) return;
+
+  // Rotate — show up to 8, shuffled so order varies each visit
+  const shuffled = [...gold].sort(() => Math.random() - 0.5).slice(0, 8);
+
+  section.style.display = '';
+  strip.innerHTML = shuffled.map(biz => {
+    const latAttr = (biz.lat && biz.lng) ? ` data-lat="${biz.lat}" data-lng="${biz.lng}"` : '';
+    return `
+      <a href="/${biz.slug}" class="biz-card biz-card--gold"${latAttr}>
+        <div class="biz-card__img${biz.img ? ' biz-card__img--photo' : ''}" style="${biz.img ? `background-image:url('${biz.img}')` : `background:${biz.color || '#4ac8d0'}22`}">
+          ${biz.img ? '' : `<span>${biz.emoji || '🏪'}</span>`}
+          <span class="biz-card__gold-badge">⭐</span>
+        </div>
+        <div class="biz-card__body">
+          <span class="biz-card__type">${biz.type || ''}</span>
+          <h3 class="biz-card__name">${biz.name}</h3>
+          <span class="biz-card__suburb">${biz.suburb || biz.location || 'Geelong'}</span>
+        </div>
+      </a>`;
+  }).join('');
+  if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+}
+
 // ── RENDER EAT STRIP ──────────────────────────────────────
 function renderEatStrip(eatBiz) {
   const strip = document.getElementById('js-eat-strip');
@@ -2938,9 +3003,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sortedStays    = applyHomepageSort(STAYS, 'stay');
     const sortedArticles = applyHomepageSort(ARTICLES, 'article');
 
+    // Store all businesses globally for cross-function lookups
+    window._allBiz = BUSINESSES;
+
     renderMasonryHero(sortedEvents, sortedArticles, _hpSettings, _trendingScores);
     renderFeatured(sortedEvents);
     renderEvents(sortedEvents);
+    renderPromotedEvents(sortedEvents);
+    renderGoldStrip(BUSINESSES);
     renderUpcoming(sortedEvents);
     renderEatStrip(sortedBiz);
     renderStays(sortedStays);

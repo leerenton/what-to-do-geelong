@@ -145,6 +145,86 @@ function refreshDistanceBadges() {
   });
 }
 
+// ── FLOATING LOCATION NUDGE (mobile) ─────────────────────
+// Shows a small tab in the bottom-right; expands on tap to prompt for location.
+// Dismissed permanently if user clicks "No thanks" or grants location.
+const NUDGE_DISMISSED_KEY = 'wtdg_loc_nudge_dismissed';
+
+function injectLocationNudge() {
+  // Don't show if already dismissed, location already set, or not on mobile
+  if (localStorage.getItem(NUDGE_DISMISSED_KEY)) return;
+  if (getUserLocation()) return;
+
+  const nudge = document.createElement('div');
+  nudge.className = 'loc-nudge';
+  nudge.id = 'js-loc-nudge';
+  nudge.setAttribute('aria-live', 'polite');
+  nudge.innerHTML = `
+    <button class="loc-nudge__tab" id="js-loc-nudge-tab" aria-expanded="false" aria-controls="js-loc-nudge-panel">
+      <span class="material-symbols-rounded">location_on</span>
+    </button>
+    <div class="loc-nudge__panel" id="js-loc-nudge-panel" hidden>
+      <p class="loc-nudge__title">See what's nearby</p>
+      <p class="loc-nudge__body">WTDG can show distances and sort results by how close they are to you.</p>
+      <div class="loc-nudge__actions">
+        <button class="loc-nudge__share" id="js-loc-nudge-share">
+          <span class="material-symbols-rounded">my_location</span> Share location
+        </button>
+        <button class="loc-nudge__dismiss" id="js-loc-nudge-dismiss">No thanks</button>
+      </div>
+    </div>`;
+  document.body.appendChild(nudge);
+
+  const tab   = nudge.querySelector('#js-loc-nudge-tab');
+  const panel = nudge.querySelector('#js-loc-nudge-panel');
+  const shareBtn   = nudge.querySelector('#js-loc-nudge-share');
+  const dismissBtn = nudge.querySelector('#js-loc-nudge-dismiss');
+
+  // Toggle panel open/close
+  tab.addEventListener('click', () => {
+    const open = !panel.hidden;
+    panel.hidden = open;
+    tab.setAttribute('aria-expanded', String(!open));
+    nudge.classList.toggle('loc-nudge--open', !open);
+  });
+
+  // Share location
+  shareBtn.addEventListener('click', async () => {
+    shareBtn.disabled = true;
+    shareBtn.innerHTML = `<span class="material-symbols-rounded">sync</span> Locating…`;
+    try {
+      await requestUserLocation();
+      localStorage.setItem(NUDGE_DISMISSED_KEY, '1');
+      nudge.classList.add('loc-nudge--success');
+      shareBtn.innerHTML = `<span class="material-symbols-rounded">check_circle</span> Location set!`;
+      refreshDistanceBadges();
+      setTimeout(() => nudge.remove(), 1800);
+    } catch {
+      shareBtn.disabled = false;
+      shareBtn.innerHTML = `<span class="material-symbols-rounded">location_off</span> Couldn't get location`;
+      setTimeout(() => {
+        shareBtn.innerHTML = `<span class="material-symbols-rounded">my_location</span> Share location`;
+        shareBtn.disabled = false;
+      }, 3000);
+    }
+  });
+
+  // Dismiss permanently
+  dismissBtn.addEventListener('click', () => {
+    localStorage.setItem(NUDGE_DISMISSED_KEY, '1');
+    nudge.classList.add('loc-nudge--hiding');
+    setTimeout(() => nudge.remove(), 350);
+  });
+
+  // Auto-open after a short delay to draw attention
+  setTimeout(() => {
+    panel.hidden = false;
+    tab.setAttribute('aria-expanded', 'true');
+    nudge.classList.add('loc-nudge--open');
+  }, 2000);
+}
+
+// ── EXPOSE ────────────────────────────────────────────────
 // Expose on window
 window.wtdgLocation = {
   haversineKm,
@@ -158,4 +238,5 @@ window.wtdgLocation = {
   distFromUser,
   injectLocationButton,
   refreshDistanceBadges,
+  injectLocationNudge,
 };

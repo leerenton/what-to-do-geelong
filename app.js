@@ -2804,6 +2804,9 @@ function initWhatWasGeelongPage() {
 document.addEventListener('DOMContentLoaded', async () => {
   initNav();
 
+  // Location nudge — mobile only, shown when location not yet granted
+  if (window.wtdgLocation) window.wtdgLocation.injectLocationNudge();
+
   // Try Supabase first; fall back silently to local static data if unavailable
   if (typeof loadAllData === 'function') {
     const remote = await loadAllData();

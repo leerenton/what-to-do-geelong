@@ -802,7 +802,7 @@ function renderFeatured(events) {
 
   const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
 
-  const featImg = ev.heroImg || biz?.img || null;
+  const featImg = ev.heroImg || ev.img || biz?.img || null;
 
   el.innerHTML = `
     <a href="${evLink(ev)}" class="featured-card">
@@ -817,7 +817,7 @@ function renderFeatured(events) {
           <span>📍 ${ev.location}</span>
         </div>
         <div class="featured-card__footer">
-          <span class="featured-card__price ${ev.price === 'Free' ? 'featured-card__price--free' : ''}">${ev.price}</span>
+          <span class="featured-card__price ${ev.price === 'Free' ? 'featured-card__price--free' : ''}">${(ev.price || '').replace(/[,\s]+$/, '') || 'See event'}</span>
           ${biz ? `<span class="featured-card__biz">${biz.emoji} ${biz.name}</span>` : ''}
           <span class="btn btn--teal btn--sm" style="margin-left:auto">View →</span>
         </div>

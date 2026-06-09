@@ -2642,6 +2642,72 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 .inq-claim-btn { width: auto; padding: .65rem 1.5rem; font-size: .9rem; }
 
+/* ── GOLD GATE (owner, free listing) ─────────────────────── */
+.listing-inq-card--gold-gate {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #f59e0b;
+}
+.inq-gold-gate {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: .5rem;
+}
+.inq-gold-icon { font-size: 2.2rem; line-height: 1; }
+.inq-gold-title {
+  font-family: var(--font-head); font-size: 1.15rem; font-weight: 900;
+  color: var(--dark); margin: 0;
+}
+.inq-gold-sub {
+  font-size: .875rem; color: var(--mid); max-width: 420px;
+  line-height: 1.55; margin: 0 0 .5rem;
+}
+.inq-gold-features {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem .85rem;
+  margin-bottom: .75rem;
+}
+.inq-gold-features span {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .8rem; font-weight: 600; color: #92400e;
+}
+.inq-gold-features .material-symbols-rounded { font-size: .95rem; color: #d97706; }
+.btn--gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff; font-weight: 800; border: none; border-radius: 8px;
+  padding: .75rem 1.75rem; font-size: .95rem; cursor: pointer;
+  text-decoration: none; display: inline-block;
+  box-shadow: 0 2px 8px rgba(217,119,6,.35);
+  transition: opacity .15s;
+}
+.btn--gold:hover { opacity: .9; }
+.inq-gold-note { font-size: .78rem; color: var(--mid); margin: .25rem 0 0; }
+.inq-gold-note a { color: var(--teal); }
+
+/* ── GOLD ACTIVE (owner, Gold listing) ───────────────────── */
+.listing-inq-card--gold-active {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1.5px solid #22c55e;
+  text-align: center;
+}
+.inq-gold-active { display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+.inq-gold-active-badge {
+  display: inline-block; background: #22c55e; color: #fff;
+  font-size: .75rem; font-weight: 700; border-radius: 99px;
+  padding: .2rem .75rem; letter-spacing: .03em;
+}
+.inq-gold-active-title {
+  font-family: var(--font-head); font-size: 1.05rem; font-weight: 900;
+  color: var(--dark); margin: 0;
+}
+.inq-gold-active-sub {
+  font-size: .875rem; color: var(--mid); max-width: 380px;
+  line-height: 1.5; margin: 0 0 .75rem;
+}
+
+/* ── WEBSITE ONLY (visitor, free listing) ────────────────── */
+.listing-inq-card--website {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: .1rem;
+}
+
 /* ── COLLECTION PAGE LAYOUT ADDITIONS ───────────────────── */
 .coll-hero__inner { max-width: 680px; }
 .coll-hero--stay   { background: linear-gradient(135deg, #0f172a 0%, #1e2d3d 60%, #0a1a2f 100%); }

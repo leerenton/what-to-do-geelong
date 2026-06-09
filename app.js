@@ -1636,85 +1636,148 @@ async function initListingPage() {
     `);
   }
 
-  // Inquiry form — claimed businesses only; unclaimed get a locked overlay
+  // ── Inquiry / claim section ────────────────────────────────
+  // Logic:
+  //   unclaimed              → claim CTA (everyone)
+  //   claimed + visitor      → Gold listing: live form  |  Free: website link only
+  //   claimed + owner + free → Gold gate upsell (owner only sees this)
+  //   claimed + owner + gold → "Your enquiry form is live" confirmation
   const isClaimed = !!biz.is_claimed;
-  document.getElementById('js-listing-root').insertAdjacentHTML('beforeend', `
-    <div class="container listing-body">
-      <div class="listing-inq-card${isClaimed ? '' : ' listing-inq-card--locked'}">
-        <h3 class="listing-inq-title"><span class="material-symbols-rounded">mail</span> Send an inquiry</h3>
-        <p class="listing-inq-sub">Ask ${biz.name} a question — they'll get back to you directly.</p>
-        <div class="listing-inq-form" style="${isClaimed ? '' : 'filter:blur(4px);pointer-events:none;user-select:none'}">
-          <div class="listing-inq-row">
-            <input type="text"  class="ob-input" id="inq-name"  placeholder="Your name" />
-            <input type="email" class="ob-input" id="inq-email" placeholder="Your email" />
-          </div>
-          <textarea class="ob-input" id="inq-msg" rows="3" placeholder="Your message…" style="resize:vertical"></textarea>
-          <button class="btn btn--teal" id="js-inq-send">Send inquiry</button>
-        </div>
-        <div id="js-inq-success" hidden style="color:var(--teal);font-weight:700;padding:.5rem 0">
-          ✓ Inquiry sent! ${biz.name} will be in touch.
-        </div>
-        ${!isClaimed ? `
+  const isGold    = !!biz.isGold;
+
+  // Get logged-in user async, then render the right state
+  (async () => {
+    const user      = await getSupabaseUser();
+    const isOwner   = user && biz.ownerId && user.id === biz.ownerId;
+
+    let inqHTML = '';
+
+    if (!isClaimed) {
+      // ── Unclaimed: show claim CTA ──────────────────────────
+      inqHTML = `
+        <div class="listing-inq-card listing-inq-card--locked">
           <div class="inq-claim-overlay">
             <span class="inq-claim-icon">🏪</span>
             <p class="inq-claim-title">Is this your business?</p>
-            <p class="inq-claim-sub">Claim your listing to activate the inquiry form and start receiving customer messages directly.</p>
+            <p class="inq-claim-sub">Claim your listing to start receiving customer enquiries and unlock Gold features.</p>
             <a href="business-signup.html?claim=${encodeURIComponent(biz.slug)}" class="btn btn--teal inq-claim-btn">Claim &amp; activate →</a>
           </div>
-        ` : ''}
-      </div>
-    </div>
-  `);
+        </div>`;
 
-  if (isClaimed) {
-    document.getElementById('js-inq-send')?.addEventListener('click', async () => {
-      const name  = document.getElementById('inq-name').value.trim();
-      const email = document.getElementById('inq-email').value.trim();
-      const msg   = document.getElementById('inq-msg').value.trim();
-      if (!email || !msg) {
-        alert('Please enter your email and message.');
-        return;
+    } else if (isOwner && !isGold) {
+      // ── Owner, free listing: show Gold gate upsell ─────────
+      inqHTML = `
+        <div class="listing-inq-card listing-inq-card--gold-gate">
+          <div class="inq-gold-gate">
+            <span class="inq-gold-icon">⭐</span>
+            <p class="inq-gold-title">Unlock your enquiry form</p>
+            <p class="inq-gold-sub">Your listing has no way for customers to contact you directly. Gold members get a live enquiry form, homepage rotation, promoted events and more.</p>
+            <div class="inq-gold-features">
+              <span><span class="material-symbols-rounded">mail</span> Enquiry form live on your listing</span>
+              <span><span class="material-symbols-rounded">home</span> Rotated on the homepage</span>
+              <span><span class="material-symbols-rounded">campaign</span> 3 promoted events per year</span>
+              <span><span class="material-symbols-rounded">email</span> Featured in weekly email</span>
+            </div>
+            <a href="upgrade.html?biz=${encodeURIComponent(biz.slug)}" class="btn btn--gold">Upgrade to Gold — $249/yr →</a>
+            <p class="inq-gold-note">or <a href="upgrade.html?biz=${encodeURIComponent(biz.slug)}&plan=monthly">$25/month</a></p>
+          </div>
+        </div>`;
+
+    } else if (isOwner && isGold) {
+      // ── Owner, Gold listing: confirmation state ────────────
+      inqHTML = `
+        <div class="listing-inq-card listing-inq-card--gold-active">
+          <div class="inq-gold-active">
+            <span class="inq-gold-active-badge">⭐ Gold Member</span>
+            <p class="inq-gold-active-title">Your enquiry form is live</p>
+            <p class="inq-gold-active-sub">Visitors to your listing can send you messages directly. Replies go straight to your email.</p>
+            <a href="dashboard.html" class="btn btn--outline btn--sm">View enquiries →</a>
+          </div>
+        </div>`;
+
+    } else if (isGold) {
+      // ── Visitor, Gold listing: live enquiry form ───────────
+      inqHTML = `
+        <div class="listing-inq-card">
+          <h3 class="listing-inq-title"><span class="material-symbols-rounded">mail</span> Send an enquiry</h3>
+          <p class="listing-inq-sub">Ask ${biz.name} a question — they'll get back to you directly.</p>
+          <div class="listing-inq-form">
+            <div class="listing-inq-row">
+              <input type="text"  class="ob-input" id="inq-name"  placeholder="Your name" />
+              <input type="email" class="ob-input" id="inq-email" placeholder="Your email" />
+            </div>
+            <textarea class="ob-input" id="inq-msg" rows="3" placeholder="Your message…" style="resize:vertical"></textarea>
+            <button class="btn btn--teal" id="js-inq-send">Send enquiry</button>
+          </div>
+          <div id="js-inq-success" hidden style="color:var(--teal);font-weight:700;padding:.5rem 0">
+            ✓ Enquiry sent! ${biz.name} will be in touch.
+          </div>
+        </div>`;
+
+    } else {
+      // ── Visitor, free listing: website link only ───────────
+      if (biz.website) {
+        inqHTML = `
+          <div class="listing-inq-card listing-inq-card--website">
+            <span class="material-symbols-rounded" style="font-size:1.8rem;color:var(--teal)">language</span>
+            <p class="listing-inq-sub" style="margin:.4rem 0 1rem">Visit the ${biz.name} website for bookings and enquiries.</p>
+            <a href="${biz.website}" target="_blank" rel="noopener" class="btn btn--outline">Visit website →</a>
+          </div>`;
       }
-      const btn = document.getElementById('js-inq-send');
-      btn.disabled = true;
-      btn.textContent = 'Sending…';
+      // If no website either, render nothing
+    }
 
-      // Save to Supabase inquiries table
-      try {
-        await db.from('inquiries').insert({
-          business_id:   biz.id,
-          business_name: biz.name,
-          sender_name:   name || null,
-          sender_email:  email,
-          message:       msg,
-          status:        'unread',
-          created_at:    new Date().toISOString(),
-        });
-      } catch (_) {}
+    if (inqHTML) {
+      document.getElementById('js-listing-root').insertAdjacentHTML('beforeend', `
+        <div class="container listing-body">${inqHTML}</div>
+      `);
+    }
 
-      // Email the business owner
-      try {
-        await fetch('/api/send-inquiry', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+    // Wire up send button for Gold visitor form
+    if (isGold && !isOwner) {
+      document.getElementById('js-inq-send')?.addEventListener('click', async () => {
+        const name  = document.getElementById('inq-name').value.trim();
+        const email = document.getElementById('inq-email').value.trim();
+        const msg   = document.getElementById('inq-msg').value.trim();
+        if (!email || !msg) { alert('Please enter your email and message.'); return; }
+        const btn = document.getElementById('js-inq-send');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+
+        try {
+          await db.from('inquiries').insert({
             business_id:   biz.id,
             business_name: biz.name,
-            business_slug: biz.slug,
-            owner_id:      biz.owner_id,
             sender_name:   name || null,
             sender_email:  email,
             message:       msg,
-          }),
-        });
-      } catch (_) {}
+            status:        'unread',
+            created_at:    new Date().toISOString(),
+          });
+        } catch (_) {}
 
-      if (typeof wtdgTrack === 'function') wtdgTrack('inquiry_sent', { business_name: biz.name });
+        try {
+          await fetch('/api/send-inquiry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              business_id:   biz.id,
+              business_name: biz.name,
+              business_slug: biz.slug,
+              owner_id:      biz.ownerId,
+              sender_name:   name || null,
+              sender_email:  email,
+              message:       msg,
+            }),
+          });
+        } catch (_) {}
 
-      btn.hidden = true;
-      document.getElementById('js-inq-success').hidden = false;
-    });
-  }
+        if (typeof wtdgTrack === 'function') wtdgTrack('inquiry_sent', { business_name: biz.name });
+        btn.hidden = true;
+        document.getElementById('js-inq-success').hidden = false;
+      });
+    }
+  })();
 
   // ── Opening hours toggle ────────────────────────────────────
   document.getElementById('js-hours-toggle')?.addEventListener('click', () => {

@@ -238,6 +238,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .dn-stop__meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .5rem; }
     .dn-stop__suburb { font-size: .78rem; color: var(--muted); font-weight: 600; }
     .dn-stop__rating { font-size: .78rem; color: #f59e0b; font-weight: 700; }
+    .dn-stop__walk { font-size: .75rem; color: #16a34a; font-weight: 700; background: #f0fdf4; padding: .15rem .45rem; border-radius: 2rem; }
     .dn-stop__desc { font-size: .82rem; color: var(--muted); line-height: 1.5; margin-bottom: .75rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .dn-stop__actions { display: flex; gap: .5rem; flex-wrap: wrap; }
     .dn-stop__btn {
@@ -790,6 +791,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
+    // Haversine distance in metres between two lat/lng points
+    function distanceM(lat1, lng1, lat2, lng2) {
+      const R = 6371000;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat/2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // Walking distance tiers (metres)
+    const WALK_CLOSE  = 800;   // ~10 min walk — ideal
+    const WALK_OK     = 1500;  // ~18 min — acceptable
+    const WALK_FAR    = 3000;  // ~35 min — last resort before giving up on proximity
+
+    // Score a drinks candidate relative to dinner (lower = better)
+    function walkScore(dinner, candidate) {
+      if (!dinner?.lat || !dinner?.lng || !candidate?.lat || !candidate?.lng) return 9999;
+      return distanceM(parseFloat(dinner.lat), parseFloat(dinner.lng),
+                       parseFloat(candidate.lat), parseFloat(candidate.lng));
+    }
+
+    // Pick from pool, weighting strongly toward walking distance of anchor
+    function pickNearby(pool, anchor) {
+      if (!pool.length) return null;
+      if (!anchor?.lat || !anchor?.lng) return pick(pool);
+
+      // Tier the pool — pick from the closest non-empty tier
+      const close  = pool.filter(b => walkScore(anchor, b) <= WALK_CLOSE);
+      const ok     = pool.filter(b => walkScore(anchor, b) <= WALK_OK);
+      const far    = pool.filter(b => walkScore(anchor, b) <= WALK_FAR);
+
+      const tier = close.length ? close : ok.length ? ok : far.length ? far : pool;
+      return pick(tier);
+    }
+
     function buildPlan() {
       if (!allBusinesses.length) return null;
       const cfg = VIBE_CONFIG[state.vibe];
@@ -830,15 +868,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const dinner = pick(dinnerPool);
 
       // ── Drinks pool ───────────────────────────
-      let drinksPool = allBusinesses.filter(b => {
-        if (!suburbMatch(b)) return false;
-        if (dinner && b.id === dinner.id) return false; // don't repeat
+      // Base filter: correct type + rating + not the same place
+      const drinksBase = b => {
+        if (b.id === dinner?.id) return false;
         const typeOk = cfg.drinksTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase()));
         if (!typeOk) return false;
         const rating = parseFloat(b.rating) || 0;
         if (rating < cfg.minRating - 0.2 && rating > 0) return false;
         return true;
-      });
+      };
+
+      let drinksPool = allBusinesses.filter(b => suburbMatch(b) && drinksBase(b));
 
       // Apply drinks preference
       if (state.drinks !== 'any') {
@@ -849,20 +889,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
       }
 
-      // Suburb fallback
+      // Suburb fallback if nothing found
       if (!drinksPool.length) {
-        drinksPool = allBusinesses.filter(b => {
-          if (dinner && b.id === dinner.id) return false;
-          return cfg.drinksTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase()));
-        });
+        drinksPool = allBusinesses.filter(drinksBase);
+        if (state.drinks !== 'any') {
+          const drinkTypes = DRINKS_MAP[state.drinks];
+          if (drinkTypes) {
+            const refined = drinksPool.filter(b => drinkTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase())));
+            if (refined.length) drinksPool = refined;
+          }
+        }
       }
 
-      const drinks = pick(drinksPool);
-      return { dinner, drinks };
+      // Pick drinks spot closest to dinner (walking distance preferred)
+      const drinks = pickNearby(drinksPool, dinner);
+      const dist   = (dinner && drinks) ? walkScore(dinner, drinks) : null;
+      return { dinner, drinks, distanceM: dist };
     }
 
     // ── Render results ─────────────────────────────────────────
-    function renderStop(biz, role) {
+    function walkLabel(metres) {
+      if (!metres || metres >= 9000) return null;
+      if (metres <= 800)  return `🚶 ${Math.round(metres / 80)} min walk`;
+      if (metres <= 3000) return `🚶 ${Math.round(metres / 80)} min walk`;
+      return `🚗 ${(metres / 1000).toFixed(1)} km away`;
+    }
+
+    function renderStop(biz, role, distM) {
       const img = biz.img || FALLBACK_IMG;
       const rating = biz.rating ? `⭐ ${parseFloat(biz.rating).toFixed(1)}` : '';
       const desc = biz.description ? biz.description : `${biz.name} in ${biz.suburb || 'Geelong'}.`;
@@ -870,6 +923,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const typeLabel = role === 'dinner' ? '🍽️ Dinner' : '🍸 Drinks';
       const numberLabel = role === 'dinner' ? '1' : '2';
       const stopClass = role === 'dinner' ? 'dn-stop--dinner' : 'dn-stop--drinks';
+      const walk = role === 'drinks' ? walkLabel(distM) : null;
 
       return `
         <div class="dn-stop ${stopClass}">
@@ -884,6 +938,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <div class="dn-stop__meta">
                 ${biz.suburb ? `<span class="dn-stop__suburb">${biz.suburb}</span>` : ''}
                 ${rating ? `<span class="dn-stop__rating">${rating}</span>` : ''}
+                ${walk ? `<span class="dn-stop__walk">${walk}</span>` : ''}
               </div>
               <p class="dn-stop__desc">${desc}</p>
               <div class="dn-stop__actions">
@@ -914,8 +969,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Stops
       const stopsEl = document.getElementById('dn-stops');
       stopsEl.innerHTML = '';
-      if (dinner) stopsEl.insertAdjacentHTML('beforeend', renderStop(dinner, 'dinner'));
-      if (drinks) stopsEl.insertAdjacentHTML('beforeend', renderStop(drinks, 'drinks'));
+      if (dinner) stopsEl.insertAdjacentHTML('beforeend', renderStop(dinner, 'dinner', null));
+      if (drinks) stopsEl.insertAdjacentHTML('beforeend', renderStop(drinks, 'drinks', plan.distanceM));
       if (!dinner && !drinks) {
         stopsEl.innerHTML = `<div class="dn-empty">
           <span class="material-symbols-rounded">search_off</span>

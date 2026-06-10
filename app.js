@@ -2255,41 +2255,63 @@ function initNav() {
   const links = document.querySelector('.nav__links');
   if (!hamburger || !links) return;
 
-  // Inject a close button at the top of the mobile menu
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'nav__mobile-close';
-  closeBtn.setAttribute('aria-label', 'Close menu');
-  closeBtn.innerHTML = '<span class="material-symbols-rounded">close</span>';
-  links.prepend(closeBtn);
+  // ── Backdrop ─────────────────────────────────────────────
+  const backdrop = document.createElement('div');
+  backdrop.className = 'nav__backdrop';
+  document.body.appendChild(backdrop);
+
+  // ── Drawer header (logo + close button) ──────────────────
+  const header = document.createElement('div');
+  header.className = 'nav__mobile-header';
+  header.innerHTML = `
+    <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__mobile-logo" />
+    <button class="nav__mobile-close" aria-label="Close menu">
+      <span class="material-symbols-rounded">close</span>
+    </button>`;
+  links.prepend(header);
+
+  const closeBtn = header.querySelector('.nav__mobile-close');
 
   function closeMenu() {
     links.classList.remove('nav--open');
+    backdrop.classList.remove('active');
     hamburger.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
   }
 
+  function openMenu() {
+    links.classList.add('nav--open');
+    backdrop.classList.add('active');
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
   closeBtn.addEventListener('click', closeMenu);
+  backdrop.addEventListener('click', closeMenu);
 
   hamburger.addEventListener('click', () => {
-    const isOpen = links.classList.toggle('nav--open');
-    hamburger.setAttribute('aria-expanded', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
+    links.classList.contains('nav--open') ? closeMenu() : openMenu();
   });
 
-  // Close when clicking a plain link (not a dropdown toggle)
+  // Close when navigating (plain links inside drawer)
   links.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', closeMenu);
+    a.addEventListener('click', () => {
+      // Small delay so any page transition can start first
+      setTimeout(closeMenu, 80);
+    });
   });
 
-  // Dropdown hover-intent — open immediately on mouseenter, close with a short
-  // delay on mouseleave so the menu doesn't vanish while moving diagonally.
-  const CLOSE_DELAY = 120; // ms — enough to cross the gap, not enough to feel laggy
+  // ── Hover-intent (desktop only) ───────────────────────────
+  // Skip on touch/mobile — click-based accordion handles those
+  const CLOSE_DELAY = 120;
+  const isMobile = () => window.innerWidth <= 640;
+
   document.querySelectorAll('.nav__drop').forEach(drop => {
     let closeTimer = null;
 
     const openDrop = () => {
+      if (isMobile()) return;
       clearTimeout(closeTimer);
-      // Close siblings
       document.querySelectorAll('.nav__drop').forEach(d => {
         if (d !== drop) { d.classList.remove('open'); clearTimeout(d._closeTimer); }
       });
@@ -2297,6 +2319,7 @@ function initNav() {
     };
 
     const closeDrop = () => {
+      if (isMobile()) return;
       closeTimer = setTimeout(() => drop.classList.remove('open'), CLOSE_DELAY);
       drop._closeTimer = closeTimer;
     };
@@ -2305,25 +2328,26 @@ function initNav() {
     drop.addEventListener('mouseleave', closeDrop);
   });
 
-  // Dropdown toggle — click-based fallback (mobile tap / keyboard)
+  // ── Click toggle (mobile accordion + keyboard fallback) ───
   document.querySelectorAll('.nav__drop-toggle').forEach(toggle => {
     toggle.addEventListener('click', e => {
       e.stopPropagation();
       const drop = toggle.closest('.nav__drop');
       const isOpen = drop.classList.toggle('open');
-      // Close other dropdowns
-      document.querySelectorAll('.nav__drop').forEach(d => {
-        if (d !== drop) d.classList.remove('open');
-      });
-      // Rotate chevron
-      const icon = toggle.querySelector('.material-symbols-rounded');
-      if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : '';
+      // On desktop close siblings; on mobile keep accordion independent
+      if (!isMobile()) {
+        document.querySelectorAll('.nav__drop').forEach(d => {
+          if (d !== drop) d.classList.remove('open');
+        });
+      }
     });
   });
 
-  // Close dropdown when clicking outside
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.nav__drop').forEach(d => d.classList.remove('open'));
+  // Close desktop dropdowns when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav__drop')) {
+      document.querySelectorAll('.nav__drop').forEach(d => d.classList.remove('open'));
+    }
   });
 }
 

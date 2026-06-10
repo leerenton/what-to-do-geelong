@@ -1,37 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
-<!-- End Google Tag Manager -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <base href="/" />
-  <title>Article — What To Do Geelong</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
-</head>
-<body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager -->
+#!/usr/bin/env node
+// Inject Eat, Drink, Do mega menus across all HTML pages
+const fs = require('fs');
+const path = require('path');
 
-  <header class="nav">
-    <div class="nav__inner container">
-      <a href="index.html" class="nav__logo-link">
-        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
-      </a>
-      <nav class="nav__links">
-        <div class="nav__drop nav__drop--mega">
+const HTML_DIR = __dirname;
+
+// ── Mega menu HTML blocks ────────────────────────────────────
+
+const EAT_MEGA = `<div class="nav__drop nav__drop--mega">
           <button class="nav__drop-toggle">Eat <span class="material-symbols-rounded">expand_more</span></button>
           <div class="nav__drop-menu nav__mega">
             <div class="nav__mega__left">
@@ -78,8 +54,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               </div>
             </div>
           </div>
-        </div>
-        <div class="nav__drop nav__drop--mega">
+        </div>`;
+
+const DRINK_MEGA = `<div class="nav__drop nav__drop--mega">
           <button class="nav__drop-toggle">Drink <span class="material-symbols-rounded">expand_more</span></button>
           <div class="nav__drop-menu nav__mega">
             <div class="nav__mega__left">
@@ -125,8 +102,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               </div>
             </div>
           </div>
-        </div>
-        <div class="nav__drop nav__drop--mega">
+        </div>`;
+
+const DO_MEGA = `<div class="nav__drop nav__drop--mega">
           <button class="nav__drop-toggle">Do <span class="material-symbols-rounded">expand_more</span></button>
           <div class="nav__drop-menu nav__mega">
             <div class="nav__mega__left">
@@ -176,127 +154,64 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               </div>
             </div>
           </div>
-        </div>
-        <a href="index.html#offers">Offers</a>
-        <div class="nav__drop nav__drop--mega">
-          <button class="nav__drop-toggle">Events <span class="material-symbols-rounded">expand_more</span></button>
-          <div class="nav__drop-menu nav__mega">
-            <div class="nav__mega__left">
-              <p class="nav__mega__label">Browse</p>
-              <a href="events.html" class="nav__mega__link"><span class="material-symbols-rounded">event</span> All Events</a>
-              <a href="events.html#today" class="nav__mega__link nav__mega__link--today"><span class="nav__mega__live-dot"></span> Happening Today</a>
-              <a href="events.html#tomorrow" class="nav__mega__link"><span class="material-symbols-rounded">wb_sunny</span> Tomorrow</a>
-              <a href="events.html#weekend" class="nav__mega__link"><span class="material-symbols-rounded">weekend</span> This Weekend</a>
-              <div class="nav__drop-divider" style="margin:.6rem 0"></div>
-              <a href="#" class="nav__mega__link nav__mega__link--submit"><span class="material-symbols-rounded">add_circle</span> Submit an Event</a>
-            </div>
-            <div class="nav__mega__right">
-              <p class="nav__mega__label">Major Events</p>
-              <div class="nav__mega__cards">
-                <a href="festival-of-sails.html" class="nav__mega__card">
-                  <div class="nav__mega__card-img" style="background-image:url('assets/events/festival-of-sails.jpg');background-color:#0e4a7a"></div>
-                  <div class="nav__mega__card-body">
-                    <span class="nav__mega__card-name">Festival of Sails</span>
-                    <span class="nav__mega__card-date">Jan 2026</span>
-                  </div>
-                </a>
-                <a href="cadel-evans.html" class="nav__mega__card">
-                  <div class="nav__mega__card-img" style="background-image:url('assets/events/cadel-evans.jpg');background-color:#c0392b"></div>
-                  <div class="nav__mega__card-body">
-                    <span class="nav__mega__card-name">Cadel Evans Race</span>
-                    <span class="nav__mega__card-date">Feb 2026</span>
-                  </div>
-                </a>
-                <a href="#" class="nav__mega__card">
-                  <div class="nav__mega__card-img" style="background-color:#6B2737"></div>
-                  <div class="nav__mega__card-body">
-                    <span class="nav__mega__card-name">Pako Festa</span>
-                    <span class="nav__mega__card-date">Mar 2026</span>
-                  </div>
-                </a>
-                <a href="#" class="nav__mega__card">
-                  <div class="nav__mega__card-img" style="background-color:#2c7a4b"></div>
-                  <div class="nav__mega__card-body">
-                    <span class="nav__mega__card-name">Geelong Show</span>
-                    <span class="nav__mega__card-date">Oct 2026</span>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <a href="cats.html" class="nav__cats-link"><span class="nav__cats-dot"></span> Cats</a>
-        <a href="editorial.html">Read</a>
-        <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
-      </nav>
-      <button class="nav__hamburger" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+        </div>`;
 
-  <div id="js-article-root"></div>
+// ── Process each HTML file ────────────────────────────────────
 
-  <footer class="footer">
-    <div class="container footer__grid">
+const files = fs.readdirSync(HTML_DIR)
+  .filter(f => f.endsWith('.html'))
+  .map(f => path.join(HTML_DIR, f));
 
-      <div class="footer__brand">
-        <div class="footer__logo">WHAT TO DO<br>GEELONG!</div>
-        <p class="footer__tagline">Your local guide to events, food, drink and things to do in Geelong, Victoria.</p>
-        <p class="footer__copy">© 2025 What To Do Geelong</p>
-      </div>
+let totalUpdated = 0;
 
-      <div class="footer__col">
-        <h4 class="footer__heading">Things To Do</h4>
-        <a href="do.html">Things to do in Geelong</a>
-        <a href="/do/family">Family activities Geelong</a>
-        <a href="/do/outdoors">Outdoor activities Geelong</a>
-        <a href="/do/arts">Arts &amp; culture Geelong</a>
-        <a href="/do/wellness">Day spas Geelong</a>
-        <a href="/do/sport">Sport &amp; leisure Geelong</a>
-      </div>
+for (const file of files) {
+  let html = fs.readFileSync(file, 'utf8');
+  let changed = false;
 
-      <div class="footer__col">
-        <h4 class="footer__heading">Food &amp; Drink</h4>
-        <a href="eat.html">Restaurants in Geelong</a>
-        <a href="/eat/cafes">Cafes in Geelong</a>
-        <a href="drink.html">Bars &amp; pubs Geelong</a>
-        <a href="/drink/wineries">Bellarine wineries</a>
-        <a href="/drink/breweries">Geelong breweries</a>
-        <a href="/eat/brunch">Brunch Geelong</a>
-      </div>
+  // Replace Eat link (with or without nav__active class)
+  const eatPatterns = [
+    '<a href="eat.html" class="nav__active">Eat</a>',
+    '<a href="eat.html">Eat</a>',
+  ];
+  for (const pattern of eatPatterns) {
+    if (html.includes(pattern)) {
+      html = html.replace(pattern, EAT_MEGA);
+      changed = true;
+      break;
+    }
+  }
 
-      <div class="footer__col">
-        <h4 class="footer__heading">Events</h4>
-        <a href="events.html">What's on in Geelong</a>
-        <a href="events.html#today">Events today Geelong</a>
-        <a href="events.html#weekend">This weekend Geelong</a>
-        <a href="festival-of-sails.html">Festival of Sails</a>
-        <a href="cadel-evans.html">Cadel Evans Road Race</a>
-        <a href="#">Submit an event</a>
-      </div>
+  // Replace Drink link
+  const drinkPatterns = [
+    '<a href="drink.html" class="nav__active">Drink</a>',
+    '<a href="drink.html">Drink</a>',
+  ];
+  for (const pattern of drinkPatterns) {
+    if (html.includes(pattern)) {
+      html = html.replace(pattern, DRINK_MEGA);
+      changed = true;
+      break;
+    }
+  }
 
-      <div class="footer__col">
-        <h4 class="footer__heading">Explore</h4>
-        <a href="editorial.html">Geelong travel guides</a>
-        <a href="editorial.html">Best of Geelong</a>
-        <a href="editorial.html">Bellarine Peninsula guide</a>
-        <a href="advertise.html">Advertise with us</a>
-        <a href="email-sponsorship.html">Sponsor our emails</a>
-        <a href="#">About WTDG</a>
-        <a href="#">Contact us</a>
-      </div>
+  // Replace Do link
+  const doPatterns = [
+    '<a href="do.html" class="nav__active">Do</a>',
+    '<a href="do.html">Do</a>',
+  ];
+  for (const pattern of doPatterns) {
+    if (html.includes(pattern)) {
+      html = html.replace(pattern, DO_MEGA);
+      changed = true;
+      break;
+    }
+  }
 
-    </div>
-  </footer>
+  if (changed) {
+    fs.writeFileSync(file, html, 'utf8');
+    totalUpdated++;
+    console.log(`✅ ${path.basename(file)}`);
+  }
+}
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <script src="supabase.js"></script>
-  <script src="sitemode.js?v=1"></script>
-  <script src="analytics.js?v=1"></script>
-  <script src="auth.js"></script>
-  <script src="view-tracker.js"></script>
-  <script src="app.js?v=10"></script>
-</body>
-</html>
+console.log(`\n🎉 Updated ${totalUpdated} files`);

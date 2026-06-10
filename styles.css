@@ -500,6 +500,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .nav__mega__link--today { color: var(--teal) !important; }
 .nav__mega__link--submit { color: var(--muted) !important; font-weight: 500 !important; }
 .nav__mega__link--submit:hover { color: var(--teal) !important; }
+.nav__mega__link--parks { color: var(--teal) !important; font-weight: 700 !important; }
+.nav__mega__link--parks:hover { background: #e6faf7 !important; }
 /* Live dot */
 .nav__mega__live-dot {
   width: 7px; height: 7px;

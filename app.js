@@ -2281,7 +2281,31 @@ function initNav() {
     a.addEventListener('click', closeMenu);
   });
 
-  // Dropdown toggle — click-based (works on desktop hover AND mobile tap)
+  // Dropdown hover-intent — open immediately on mouseenter, close with a short
+  // delay on mouseleave so the menu doesn't vanish while moving diagonally.
+  const CLOSE_DELAY = 120; // ms — enough to cross the gap, not enough to feel laggy
+  document.querySelectorAll('.nav__drop').forEach(drop => {
+    let closeTimer = null;
+
+    const openDrop = () => {
+      clearTimeout(closeTimer);
+      // Close siblings
+      document.querySelectorAll('.nav__drop').forEach(d => {
+        if (d !== drop) { d.classList.remove('open'); clearTimeout(d._closeTimer); }
+      });
+      drop.classList.add('open');
+    };
+
+    const closeDrop = () => {
+      closeTimer = setTimeout(() => drop.classList.remove('open'), CLOSE_DELAY);
+      drop._closeTimer = closeTimer;
+    };
+
+    drop.addEventListener('mouseenter', openDrop);
+    drop.addEventListener('mouseleave', closeDrop);
+  });
+
+  // Dropdown toggle — click-based fallback (mobile tap / keyboard)
   document.querySelectorAll('.nav__drop-toggle').forEach(toggle => {
     toggle.addEventListener('click', e => {
       e.stopPropagation();

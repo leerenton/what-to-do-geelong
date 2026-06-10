@@ -416,19 +416,21 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 
 .nav__drop-menu {
   position: absolute;
-  top: calc(100% + 10px);
+  /* Sit flush against the button — padding-top creates the visual gap
+     while keeping the hover area connected with no dead zone */
+  top: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-4px);
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   min-width: 220px;
-  padding: .4rem 0;
+  /* 10px top padding = visual breathing room without a hover gap */
+  padding: .6rem 0 .4rem;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .15s, transform .15s;
-  transform: translateX(-50%) translateY(-4px);
+  transition: opacity .18s, transform .18s;
   z-index: 300;
 }
 .nav__drop:hover .nav__drop-menu,
@@ -458,7 +460,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   transform: translateX(-50%) translateY(-4px);
   min-width: 560px;
   max-width: 640px;
-  padding: 1rem;
+  /* top padding keeps hover area connected; bottom/sides normal */
+  padding: 1.1rem 1rem 1rem;
   display: flex;
   gap: 0;
   flex-direction: row;

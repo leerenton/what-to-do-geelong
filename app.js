@@ -834,9 +834,11 @@ function renderEvents(events) {
   const featuredId = (events.find(e => e.featured) || events[0])?.id;
   const rest = events.filter(e => e.id !== featuredId);
 
+  const _prefs = getPrefs();
   scroll.innerHTML = rest.map(ev => {
-    const isFree = ev.price === 'Free';
-    const tagPills = (ev.tags || []).slice(0, 2).map(t =>
+    const isFree    = ev.price === 'Free';
+    const isMatch   = prefsMatchCard(ev, _prefs);
+    const tagPills  = (ev.tags || []).slice(0, 2).map(t =>
       `<span class="ev-tag ${t === 'Free' ? 'ev-tag--free' : ''}">${t}</span>`
     ).join('');
     const thumb = ev.img
@@ -844,10 +846,13 @@ function renderEvents(events) {
       : `<div class="event-card__thumb" style="background:${ev.color||'#e8f4ff'}22">${ev.emoji||'📅'}</div>`;
     const latAttr = (ev.lat && ev.lng) ? ` data-lat="${ev.lat}" data-lng="${ev.lng}"` : '';
     return `
-      <a href="${evLink(ev)}" class="event-card"${latAttr}>
+      <a href="${evLink(ev)}" class="event-card${isMatch ? ' event-card--match' : ''}"${latAttr}>
         ${thumb}
         <div class="event-card__body">
-          <span class="event-card__cat">${ev.category}</span>
+          <div class="ev-card__cat-row">
+            <span class="event-card__cat">${ev.category}</span>
+            ${isMatch ? `<span class="ev-card__match">✦ Your vibe</span>` : ''}
+          </div>
           <h3 class="event-card__title">${ev.title}</h3>
           <div class="event-card__meta">📍 ${ev.location}</div>
           <div class="event-card__meta">🕐 ${ev.time || 'See event'}</div>
@@ -914,12 +919,19 @@ function eventGridCard(ev, opts = {}) {
   const sectionStyle = opts.accentColor ? `border-left:3px solid ${opts.accentColor}` : '';
   const latAttr = (ev.lat && ev.lng) ? ` data-lat="${ev.lat}" data-lng="${ev.lng}"` : '';
 
+  const prefs   = getPrefs();
+  const isMatch = !isPast && prefsMatchCard(ev, prefs);
+  const matchBadge = isMatch ? `<span class="ev-card__match">✦ Your vibe</span>` : '';
+
   return `
-    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}" style="${sectionStyle}"${latAttr}>
+    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}${isMatch ? ' ev-card--match' : ''}" style="${sectionStyle}"${latAttr}>
       ${urgencyBadge}
       ${thumb}
       <div class="ev-card__body">
-        <span class="ev-card__cat">${ev.category}</span>
+        <div class="ev-card__cat-row">
+          <span class="ev-card__cat">${ev.category}</span>
+          ${matchBadge}
+        </div>
         <h3 class="ev-card__title">${ev.title}</h3>
         <div class="ev-card__meta"><span class="material-symbols-rounded">location_on</span>${ev.location}</div>
         <div class="ev-card__meta"><span class="material-symbols-rounded">schedule</span>${ev.date}${ev.time ? ' · ' + ev.time : ''}</div>
@@ -1276,6 +1288,96 @@ async function renderCommunityGuidesStrip() {
   }).join('');
 }
 
+// ── PERSONALISATION HELPERS ───────────────────────────────
+function getPrefs() {
+  try { return JSON.parse(localStorage.getItem('wtdg_prefs') || 'null') || {}; }
+  catch { return {}; }
+}
+
+// Map prefs.interests values → tags/types that appear on cards
+const PREF_TAG_MAP = {
+  music:     ['music', 'live music', 'concert', 'gig'],
+  food:      ['food & drink', 'markets', 'food', 'restaurant', 'café', 'cafe', 'brunch'],
+  arts:      ['arts & culture', 'art', 'theatre', 'gallery', 'culture'],
+  outdoors:  ['outdoors', 'nature', 'outdoor', 'adventure', 'hiking', 'family friendly', 'pet friendly'],
+  fitness:   ['fitness', 'sport', 'run', 'gym', 'wellness'],
+  family:    ['family friendly', 'all ages', 'kids', 'family', 'accessible'],
+  theatre:   ['theatre', 'arts & culture', 'comedy'],
+  markets:   ['markets', 'market'],
+  pets:      ['pet friendly'],
+  free:      ['free'],
+  nightlife: ['nightlife', 'bar', 'pub', 'cocktail'],
+  sport:     ['sport', 'fitness'],
+};
+
+// Group → auto-suggest filter on collection pages
+const GROUP_FILTER_HINT = {
+  family: { do: 'family', eat: 'café' },
+};
+
+function prefsMatchCard(ev, prefs) {
+  if (!prefs?.interests?.length) return false;
+  const haystack = [
+    ...(ev.tags || []),
+    ev.category, ev.type,
+    ev.price === 'Free' ? 'free' : null,
+  ].filter(Boolean).map(s => s.toLowerCase());
+
+  return prefs.interests.some(interest => {
+    const matchTerms = PREF_TAG_MAP[interest] || [interest];
+    return matchTerms.some(t => haystack.some(h => h.includes(t)));
+  });
+}
+
+// Interest → filter pill value on collection pages
+const INTEREST_TO_FILTER = {
+  music:     { events: 'music' },
+  food:      { eat: 'café', drink: 'bar' },
+  arts:      { do: 'art' },
+  outdoors:  { do: 'nature' },
+  fitness:   { do: 'sport' },
+  family:    { do: 'family' },
+  theatre:   { do: 'art' },
+  markets:   { events: 'markets' },
+  nightlife: { drink: 'bar' },
+  sport:     { do: 'sport' },
+};
+
+function showPrefsHint(filterEl, prefs, pageKey, onAccept) {
+  if (!filterEl || !prefs.interests?.length) return;
+
+  // Find the best suggested filter for this page from user's interests
+  let suggested = null;
+  for (const interest of prefs.interests) {
+    const map = INTEREST_TO_FILTER[interest] || {};
+    if (map[pageKey]) { suggested = map[pageKey]; break; }
+  }
+  // Group hint
+  if (!suggested && prefs.group === 'family' && pageKey === 'do') suggested = 'family';
+
+  if (!suggested) return;
+  const pill = filterEl.querySelector(`.coll-filter-pill[data-filter="${suggested}"]`);
+  if (!pill) return;
+
+  // Show a soft hint bar above the grid
+  const hintId = 'js-prefs-hint';
+  if (document.getElementById(hintId)) return;
+  const hint = document.createElement('div');
+  hint.id = hintId;
+  hint.className = 'prefs-hint';
+  hint.innerHTML = `
+    <span class="prefs-hint__icon">✦</span>
+    <span class="prefs-hint__text">Based on your preferences — showing <strong>${pill.textContent}</strong></span>
+    <button class="prefs-hint__btn" id="js-prefs-hint-apply">Apply filter</button>
+    <button class="prefs-hint__dismiss" id="js-prefs-hint-dismiss">✕</button>
+  `;
+  filterEl.closest('.coll-topbar')?.insertAdjacentElement('afterend', hint);
+  document.getElementById('js-prefs-hint-apply')?.addEventListener('click', () => {
+    hint.remove(); onAccept(suggested);
+  });
+  document.getElementById('js-prefs-hint-dismiss')?.addEventListener('click', () => hint.remove());
+}
+
 // ── WEEKEND HELPERS ───────────────────────────────────────
 function getWeekendDates(offset = 0) {
   // offset=0 → this weekend, offset=1 → next weekend
@@ -1334,6 +1436,18 @@ function initWeekendToggle(allEvents) {
     const toShow = weekendEvs.length ? weekendEvs : allEvents; // fallback to all if none match
     renderFeatured(toShow);
     renderEvents(toShow);
+  }
+
+  // Personalised section subtitle
+  const prefs = getPrefs();
+  if (prefs.interests?.length || prefs.group) {
+    const groupLabel = { family: 'families', couple: 'couples', friends: 'groups', solo: 'solo explorers' }[prefs.group] || null;
+    const interestLabels = (prefs.interests || []).slice(0, 2).map(i => i.replace('_', ' '));
+    const parts = [...(groupLabel ? [groupLabel] : []), ...interestLabels];
+    const subtitle = document.createElement('p');
+    subtitle.className = 'weekend-personalised-sub';
+    subtitle.innerHTML = `✦ Curated for <strong>${parts.join(' · ')}</strong> &nbsp;<a href="onboarding.html" style="font-size:.75rem;color:var(--teal)">edit</a>`;
+    toggleEl.insertAdjacentElement('beforebegin', subtitle);
   }
 
   // Default: this weekend
@@ -2272,17 +2386,23 @@ async function initEventPage() {
 // ── COLLECTION CARD BUILDER ───────────────────────────────
 // collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, lat, lng, itemId, itemType)
 // itemId + itemType are used for view tracking and view-count badges
-function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, lat, lng, itemId, itemType) {
+function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, lat, lng, itemId, itemType, itemTags) {
+  const prefs    = getPrefs();
+  const fakeItem = { type, category: type, tags: itemTags || [] };
+  const isMatch  = prefsMatchCard(fakeItem, prefs);
   const thumb = img
     ? `<img src="${img}" alt="${name}" class="coll-card__img" loading="lazy" />`
     : `<div class="coll-card__img-placeholder" style="background:${bg}22">${emoji}</div>`;
   const latAttr  = (lat  && lng)      ? ` data-lat="${lat}" data-lng="${lng}"` : '';
   const trackAttr = (itemId && itemType) ? ` data-id="${itemId}" data-type="${itemType}"` : '';
   return `
-    <a href="${href}" class="coll-card"${latAttr}${trackAttr}>
+    <a href="${href}" class="coll-card${isMatch ? ' coll-card--match' : ''}"${latAttr}${trackAttr}>
       ${thumb}
       <div class="coll-card__body">
-        <div class="coll-card__type">${type}</div>
+        <div class="coll-card__type-row">
+          <div class="coll-card__type">${type}</div>
+          ${isMatch ? `<span class="ev-card__match">✦ Your vibe</span>` : ''}
+        </div>
         <div class="coll-card__name">${name}</div>
         <div class="coll-card__desc">${desc || ''}</div>
         <div class="coll-card__foot">
@@ -2434,7 +2554,8 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
   let searchQ        = '';
 
   function render() {
-    const filtered = items.filter(item => {
+    const prefs = getPrefs();
+    let filtered = items.filter(item => {
       const haystack = (item.type || item.category || '').toLowerCase();
       const matchFilter = activeFilter === 'all' || haystack.includes(activeFilter);
       const matchSearch = !searchQ ||
@@ -2443,6 +2564,13 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
         (item.suburb || item.location || '').toLowerCase().includes(searchQ);
       return matchFilter && matchSearch;
     });
+    // Sort: pref-matched items first
+    if (prefs.interests?.length) {
+      filtered = [
+        ...filtered.filter(i => prefsMatchCard(i, prefs)),
+        ...filtered.filter(i => !prefsMatchCard(i, prefs)),
+      ];
+    }
     if (countEl) countEl.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
     return filtered;
   }
@@ -2471,14 +2599,19 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
 
   // Apply initial filter from URL param — activate matching pill
   if (activeFilter !== 'all' && filterEl) {
-    // Find pill that matches (may not exist if filter is 'all' or unknown)
     const matchPill = filterEl.querySelector(`.coll-filter-pill[data-filter="${activeFilter}"]`);
     if (matchPill) {
       filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.remove('active'));
       matchPill.classList.add('active');
     } else {
-      activeFilter = 'all'; // fall back if no pill found
+      activeFilter = 'all';
     }
+  }
+
+  // If no URL filter set, auto-hint from group prefs (soft suggestion — adds banner, doesn't force filter)
+  const _prefs = getPrefs();
+  if (activeFilter === 'all' && pageKey && _prefs.interests?.length) {
+    showPrefsHint(filterEl, _prefs, pageKey, (f) => { setActive(f); });
   }
 
   // Apply initial SEO meta
@@ -2737,7 +2870,7 @@ function initEatPage() {
         businessHasUpcoming(biz.id) ? 'Event' : null,
         businessHasPromo(biz.id) ? 'Offer' : null,
         biz.lat, biz.lng,
-        biz.id, 'business'
+        biz.id, 'business', biz.tags
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
@@ -2775,7 +2908,7 @@ function initDrinkPage() {
         businessHasUpcoming(biz.id) ? 'Event' : null,
         businessHasPromo(biz.id) ? 'Offer' : null,
         biz.lat, biz.lng,
-        biz.id, 'business'
+        biz.id, 'business', biz.tags
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
@@ -2813,7 +2946,7 @@ function initDoPage() {
         businessHasUpcoming(biz.id) ? 'Event' : null,
         businessHasPromo(biz.id) ? 'Offer' : null,
         biz.lat, biz.lng,
-        biz.id, 'business'
+        biz.id, 'business', biz.tags
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();

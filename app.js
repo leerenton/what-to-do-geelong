@@ -2270,6 +2270,17 @@ function initNav() {
     </button>`;
   links.prepend(header);
 
+  // ── Scrollable inner wrapper ──────────────────────────────
+  // Wrap all non-header children in a scroll container so overflow-x:hidden
+  // and overflow-y:auto live on *different* elements — iOS Safari requires this
+  const scrollWrap = document.createElement('div');
+  scrollWrap.className = 'nav__mobile-scroll';
+  // Move everything after the header into the scroll wrapper
+  while (links.children.length > 1) {
+    scrollWrap.appendChild(links.children[1]);
+  }
+  links.appendChild(scrollWrap);
+
   const closeBtn = header.querySelector('.nav__mobile-close');
 
   function closeMenu() {

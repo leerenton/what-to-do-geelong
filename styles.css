@@ -1802,17 +1802,20 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
     /* Always rendered so the slide animation works */
     display: flex !important;
     position: fixed;
-    top: 0; right: 0; bottom: 0;
+    top: 0; right: 0;
     width: min(82vw, 320px);
+    /* Use height instead of bottom so iOS doesn't clip content */
+    height: 100%;
+    height: 100dvh;
     background: #fff;
     flex-direction: column;
     align-items: stretch;
     padding: 0;
     gap: 0;
     z-index: 200;
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* Off-screen to the right */
+    /* overflow-x MUST be on a separate wrapper — setting both on the same
+       position:fixed element breaks touch-scroll in iOS Safari */
+    overflow: hidden;
     transform: translateX(110%);
     transition: transform .3s cubic-bezier(.4,0,.2,1), visibility .3s;
     visibility: hidden;
@@ -1823,7 +1826,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
     visibility: visible;
   }
 
-  /* Drawer header row (logo + close) */
+  /* Drawer header row (logo + close) — not sticky; simpler + avoids iOS bugs */
   .nav__mobile-header {
     display: flex;
     align-items: center;
@@ -1831,15 +1834,22 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
     padding: .9rem 1rem;
     border-bottom: 1px solid #f0f0f0;
     flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    background: #fff;
-    z-index: 1;
   }
   .nav__mobile-logo { height: 30px; border-radius: 4px; }
 
-  /* Top-level links */
-  .nav__links > a {
+  /* Scrollable body — separate element so overflow-x:hidden doesn't
+     interfere with the vertical scroll on iOS */
+  .nav__mobile-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Top-level links (direct children of links OR scroll wrapper) */
+  .nav__links > a,
+  .nav__mobile-scroll > a {
     display: flex !important;
     align-items: center;
     justify-content: space-between;
@@ -1852,7 +1862,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
     width: 100%;
     box-sizing: border-box;
   }
-  .nav__links > a:hover { background: #f9fafb; }
+  .nav__links > a:hover,
+  .nav__mobile-scroll > a:hover { background: #f9fafb; }
 
   /* Dropdown wrapper */
   .nav__drop { width: 100%; overflow: hidden; }

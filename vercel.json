@@ -15,6 +15,7 @@
   ],
   "rewrites": [
     { "source": "/parks",                  "destination": "/parks.html" },
+    { "source": "/date-night",             "destination": "/date-night.html" },
     { "source": "/wtdgadmin",              "destination": "/wtdgadmin.html" },
     { "source": "/wtdgadmin/dash",         "destination": "/wtdgadmin-dash.html" },
     { "source": "/wtdgadmin/users",        "destination": "/wtdgadmin-users.html" },

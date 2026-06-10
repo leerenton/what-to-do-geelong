@@ -505,6 +505,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .nav__mega__link--submit:hover { color: var(--teal) !important; }
 .nav__mega__link--parks { color: var(--teal) !important; font-weight: 700 !important; }
 .nav__mega__link--parks:hover { background: #e6faf7 !important; }
+.nav__mega__link--datenight { color: #db2777 !important; font-weight: 700 !important; }
+.nav__mega__link--datenight:hover { background: #fdf2f8 !important; }
 /* Live dot */
 .nav__mega__live-dot {
   width: 7px; height: 7px;

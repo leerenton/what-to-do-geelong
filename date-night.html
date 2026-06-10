@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
+<!-- End Google Tag Manager -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Date Night Planner — What To Do Geelong</title>
+  <meta name="description" content="Plan the perfect date night in Geelong. Tell us your vibe and we'll pick the best dinner and drinks spots for you." />
+  <meta property="og:title" content="Date Night Planner — What To Do Geelong" />
+  <meta property="og:description" content="Pick your location, choose your vibe, and let us plan your perfect Geelong date night." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://whattodogeelong.com.au/date-night" />
+  <meta property="og:image" content="https://whattodogeelong.com.au/assets/og-default.jpg" />
+  <link rel="canonical" href="https://whattodogeelong.com.au/date-night" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=10" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* ── Date Night page ────────────────────────────────── */
+    .dn-hero {
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1155 40%, #6b1f6b 70%, #c0392b 100%);
+      padding: 3.5rem 1rem 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .dn-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .dn-hero__content { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; }
+    .dn-hero__eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); margin-bottom: .5rem; }
+    .dn-hero__title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: clamp(2rem, 5vw, 3rem); color: #fff; line-height: 1.1; margin-bottom: .75rem; }
+    .dn-hero__title span { color: #f9a8d4; }
+    .dn-hero__sub { font-size: 1rem; color: rgba(255,255,255,.7); line-height: 1.55; }
+
+    /* ── Wizard wrapper ──────────────────────────────────── */
+    .dn-wizard { max-width: 680px; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+
+    /* Step indicator */
+    .dn-steps {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin-bottom: 2.5rem;
+    }
+    .dn-step {
+      display: flex; flex-direction: column; align-items: center; gap: .3rem;
+      flex: 1; position: relative;
+    }
+    .dn-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 14px; left: calc(50% + 14px);
+      width: calc(100% - 28px);
+      height: 2px;
+      background: #e5e7eb;
+      transition: background .3s;
+    }
+    .dn-step.done:not(:last-child)::after { background: var(--teal); }
+    .dn-step__dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #e5e7eb; color: #9ca3af;
+      font-size: .75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .3s, color .3s;
+      z-index: 1;
+    }
+    .dn-step.active .dn-step__dot { background: var(--teal); color: #fff; }
+    .dn-step.done .dn-step__dot { background: var(--teal); color: #fff; }
+    .dn-step__label { font-size: .68rem; font-weight: 600; color: #9ca3af; text-align: center; }
+    .dn-step.active .dn-step__label { color: var(--teal); }
+    .dn-step.done .dn-step__label { color: var(--teal); }
+
+    /* Individual step panels */
+    .dn-panel { display: none; animation: dn-fadein .25s ease; }
+    .dn-panel.active { display: block; }
+    @keyframes dn-fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .dn-section-title {
+      font-family: 'Nunito', sans-serif; font-weight: 900;
+      font-size: 1.45rem; color: var(--dark);
+      margin-bottom: .35rem;
+    }
+    .dn-section-sub { font-size: .9rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+    /* Location grid */
+    .dn-locations {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: .75rem;
+    }
+    .dn-loc-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: .4rem; padding: 1.1rem .75rem;
+      border: 2px solid var(--border); border-radius: 1rem;
+      background: var(--white); cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s;
+      text-align: center;
+    }
+    .dn-loc-btn:hover { border-color: var(--teal); background: #f0fdfa; }
+    .dn-loc-btn.selected { border-color: var(--teal); background: #f0fdfa; box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+    .dn-loc-btn__emoji { font-size: 1.6rem; line-height: 1; }
+    .dn-loc-btn__name { font-weight: 700; font-size: .85rem; color: var(--dark); }
+    .dn-loc-btn__sub { font-size: .72rem; color: var(--muted); }
+
+    /* Vibe grid */
+    .dn-vibes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .9rem;
+    }
+    .dn-vibe-btn {
+      border: 2px solid var(--border); border-radius: 1.1rem;
+      background: var(--white); cursor: pointer;
+      padding: 1.3rem 1rem 1.1rem;
+      text-align: center; transition: border-color .15s, background .15s, transform .1s;
+      position: relative; overflow: hidden;
+    }
+    .dn-vibe-btn:hover { border-color: var(--teal); transform: translateY(-2px); }
+    .dn-vibe-btn.selected { border-color: transparent; box-shadow: 0 0 0 3px rgba(13,148,136,.2); }
+    .dn-vibe-btn__emoji { font-size: 2.2rem; display: block; margin-bottom: .5rem; }
+    .dn-vibe-btn__name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1rem; color: var(--dark); display: block; margin-bottom: .25rem; }
+    .dn-vibe-btn__desc { font-size: .78rem; color: var(--muted); line-height: 1.4; display: block; }
+    /* Vibe colour overlays */
+    .dn-vibe-btn[data-vibe="romantic"] { background: linear-gradient(135deg, #fff0f6, #fff); }
+    .dn-vibe-btn[data-vibe="romantic"].selected { background: linear-gradient(135deg, #fce7f3, #fdf2f8); border-color: #db2777; }
+    .dn-vibe-btn[data-vibe="lively"] { background: linear-gradient(135deg, #fff7ed, #fff); }
+    .dn-vibe-btn[data-vibe="lively"].selected { background: linear-gradient(135deg, #fed7aa, #fff7ed); border-color: #ea580c; }
+    .dn-vibe-btn[data-vibe="fancy"] { background: linear-gradient(135deg, #f5f0ff, #fff); }
+    .dn-vibe-btn[data-vibe="fancy"].selected { background: linear-gradient(135deg, #ede9fe, #f5f3ff); border-color: #7c3aed; }
+    .dn-vibe-btn[data-vibe="relaxed"] { background: linear-gradient(135deg, #f0fdf4, #fff); }
+    .dn-vibe-btn[data-vibe="relaxed"].selected { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border-color: #16a34a; }
+
+    /* Preferences step */
+    .dn-pref-group { margin-bottom: 1.5rem; }
+    .dn-pref-label { font-weight: 700; font-size: .82rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .6rem; display: block; }
+    .dn-pills { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .dn-pill {
+      padding: .45rem .9rem; border-radius: 2rem;
+      border: 1.5px solid var(--border); background: var(--white);
+      font-size: .84rem; font-weight: 600; color: var(--dark);
+      cursor: pointer; transition: all .15s;
+    }
+    .dn-pill:hover { border-color: var(--teal); color: var(--teal); }
+    .dn-pill.selected { border-color: var(--teal); background: var(--teal); color: #fff; }
+
+    /* Generate button */
+    .dn-generate-btn {
+      width: 100%; padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, #1a0a2e, #6b1f6b, #c0392b);
+      color: #fff; border: none; border-radius: 1rem;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.1rem;
+      cursor: pointer; margin-top: 1.5rem;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: opacity .15s, transform .1s;
+      position: relative; overflow: hidden;
+    }
+    .dn-generate-btn:hover { opacity: .92; transform: translateY(-1px); }
+    .dn-generate-btn:active { transform: translateY(0); }
+    .dn-generate-btn .material-symbols-rounded { font-size: 1.3rem; }
+
+    /* Back link */
+    .dn-back {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .82rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; background: none; border: none;
+      margin-bottom: 1.25rem; padding: 0; transition: color .15s;
+    }
+    .dn-back:hover { color: var(--dark); }
+    .dn-back .material-symbols-rounded { font-size: .9rem; }
+
+    /* ── Results panel ──────────────────────────────────── */
+    .dn-result { display: none; max-width: 720px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .dn-result.active { display: block; animation: dn-fadein .3s ease; }
+
+    .dn-result-header { text-align: center; margin-bottom: 2rem; }
+    .dn-result-header__badge {
+      display: inline-block; padding: .3rem .9rem;
+      background: linear-gradient(135deg, #6b1f6b, #c0392b);
+      color: #fff; border-radius: 2rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      margin-bottom: .75rem;
+    }
+    .dn-result-header__title {
+      font-family: 'Nunito', sans-serif; font-weight: 900;
+      font-size: clamp(1.6rem, 4vw, 2.2rem); color: var(--dark); line-height: 1.15;
+      margin-bottom: .4rem;
+    }
+    .dn-result-header__sub { font-size: .9rem; color: var(--muted); }
+
+    .dn-stops { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.75rem; }
+
+    .dn-stop {
+      border: 1.5px solid var(--border); border-radius: 1.2rem;
+      overflow: hidden; background: var(--white);
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      transition: box-shadow .2s;
+    }
+    .dn-stop:hover { box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+
+    .dn-stop__header {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .75rem 1rem .6rem;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .dn-stop__number {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 800; flex-shrink: 0; color: #fff;
+    }
+    .dn-stop--dinner .dn-stop__number { background: #c0392b; }
+    .dn-stop--drinks .dn-stop__number { background: #4338ca; }
+    .dn-stop__type { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+
+    .dn-stop__body { display: flex; gap: 0; }
+    .dn-stop__img {
+      width: 130px; flex-shrink: 0;
+      background-size: cover; background-position: center;
+      background-color: #e5e7eb;
+      min-height: 130px;
+    }
+    @media (max-width: 480px) { .dn-stop__img { width: 100px; min-height: 110px; } }
+    .dn-stop__info { padding: .9rem 1rem; flex: 1; min-width: 0; }
+    .dn-stop__name {
+      font-family: 'Nunito', sans-serif; font-weight: 900;
+      font-size: 1.1rem; color: var(--dark);
+      margin-bottom: .15rem; line-height: 1.2;
+    }
+    .dn-stop__meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .5rem; }
+    .dn-stop__suburb { font-size: .78rem; color: var(--muted); font-weight: 600; }
+    .dn-stop__rating { font-size: .78rem; color: #f59e0b; font-weight: 700; }
+    .dn-stop__desc { font-size: .82rem; color: var(--muted); line-height: 1.5; margin-bottom: .75rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .dn-stop__actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .dn-stop__btn {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .35rem .75rem; border-radius: .5rem;
+      font-size: .78rem; font-weight: 700;
+      text-decoration: none; border: 1.5px solid;
+      transition: all .15s;
+    }
+    .dn-stop__btn--primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+    .dn-stop__btn--primary:hover { background: #0f766e; border-color: #0f766e; }
+    .dn-stop__btn--outline { background: transparent; color: var(--dark); border-color: var(--border); }
+    .dn-stop__btn--outline:hover { border-color: var(--teal); color: var(--teal); }
+    .dn-stop__btn .material-symbols-rounded { font-size: .85rem; }
+
+    /* Map */
+    .dn-map-wrap {
+      border-radius: 1.1rem; overflow: hidden;
+      border: 1.5px solid var(--border);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+    #dn-map { height: 220px; width: 100%; }
+
+    /* Result actions */
+    .dn-result-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .dn-shake-btn {
+      flex: 1; min-width: 180px;
+      padding: .85rem 1.25rem;
+      background: linear-gradient(135deg, #1a0a2e, #6b1f6b, #c0392b);
+      color: #fff; border: none; border-radius: .9rem;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: .95rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .4rem;
+      transition: opacity .15s;
+    }
+    .dn-shake-btn:hover { opacity: .88; }
+    .dn-shake-btn .material-symbols-rounded { font-size: 1.1rem; }
+    .dn-restart-btn {
+      padding: .85rem 1.25rem;
+      background: var(--white); border: 1.5px solid var(--border);
+      color: var(--dark); border-radius: .9rem;
+      font-weight: 700; font-size: .9rem; cursor: pointer;
+      display: flex; align-items: center; gap: .4rem;
+      transition: border-color .15s;
+    }
+    .dn-restart-btn:hover { border-color: var(--teal); color: var(--teal); }
+    .dn-restart-btn .material-symbols-rounded { font-size: 1rem; }
+
+    /* Loading state */
+    .dn-loading {
+      text-align: center; padding: 3rem 1rem;
+      display: none;
+    }
+    .dn-loading.active { display: block; }
+    .dn-loading__spinner {
+      width: 42px; height: 42px; margin: 0 auto 1rem;
+      border: 3px solid #f3f4f6;
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .dn-loading__text { font-weight: 700; color: var(--dark); margin-bottom: .3rem; }
+    .dn-loading__sub { font-size: .85rem; color: var(--muted); }
+
+    /* No results */
+    .dn-empty { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
+    .dn-empty .material-symbols-rounded { font-size: 2.5rem; display: block; margin-bottom: .75rem; }
+  </style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager -->
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo-link">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+      </a>
+      <nav class="nav__links">
+        <div class="nav__drop nav__drop--mega">
+          <button class="nav__drop-toggle">Eat <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu nav__mega">
+            <div class="nav__mega__left">
+              <p class="nav__mega__label">Browse</p>
+              <a href="eat.html" class="nav__mega__link"><span class="material-symbols-rounded">restaurant</span> All Food &amp; Drink</a>
+              <a href="eat.html?filter=caf%C3%A9" class="nav__mega__link"><span class="material-symbols-rounded">coffee</span> Cafés</a>
+              <a href="eat.html?filter=restaurant" class="nav__mega__link"><span class="material-symbols-rounded">dinner_dining</span> Restaurants</a>
+              <a href="eat.html?filter=brunch" class="nav__mega__link"><span class="material-symbols-rounded">egg_alt</span> Brunch</a>
+              <a href="eat.html?filter=bakery" class="nav__mega__link"><span class="material-symbols-rounded">bakery_dining</span> Bakeries</a>
+              <a href="eat.html?filter=asian" class="nav__mega__link"><span class="material-symbols-rounded">ramen_dining</span> Asian</a>
+              <a href="eat.html?filter=pizza" class="nav__mega__link"><span class="material-symbols-rounded">local_pizza</span> Pizza</a>
+            </div>
+            <div class="nav__mega__right">
+              <p class="nav__mega__label">Featured</p>
+              <div class="nav__mega__cards">
+                <a href="eat.html?filter=restaurant" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#0d9488"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Waterfront Dining</span>
+                    <span class="nav__mega__card-date">City &amp; Waterfront</span>
+                  </div>
+                </a>
+                <a href="eat.html?filter=caf%C3%A9" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#d97706"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Best Cafés</span>
+                    <span class="nav__mega__card-date">Coffee &amp; All-Day Dining</span>
+                  </div>
+                </a>
+                <a href="eat.html?filter=brunch" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#7c3aed"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Sunday Brunch</span>
+                    <span class="nav__mega__card-date">Weekend Favourites</span>
+                  </div>
+                </a>
+                <a href="eat.html?filter=bakery" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#e11d48"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Bakeries &amp; Sweets</span>
+                    <span class="nav__mega__card-date">Fresh &amp; Local</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav__drop nav__drop--mega">
+          <button class="nav__drop-toggle">Drink <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu nav__mega">
+            <div class="nav__mega__left">
+              <p class="nav__mega__label">Browse</p>
+              <a href="drink.html" class="nav__mega__link"><span class="material-symbols-rounded">local_bar</span> All Bars &amp; Drinks</a>
+              <a href="drink.html?filter=brewery" class="nav__mega__link"><span class="material-symbols-rounded">sports_bar</span> Breweries</a>
+              <a href="drink.html?filter=winery" class="nav__mega__link"><span class="material-symbols-rounded">wine_bar</span> Wineries &amp; Cellar Doors</a>
+              <a href="drink.html?filter=bar" class="nav__mega__link"><span class="material-symbols-rounded">nightlife</span> Bars</a>
+              <a href="drink.html?filter=pub" class="nav__mega__link"><span class="material-symbols-rounded">emoji_food_beverage</span> Pubs</a>
+              <a href="drink.html?filter=cocktail" class="nav__mega__link"><span class="material-symbols-rounded">local_cafe</span> Cocktails</a>
+            </div>
+            <div class="nav__mega__right">
+              <p class="nav__mega__label">Featured</p>
+              <div class="nav__mega__cards">
+                <a href="drink.html?filter=brewery" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#1d4ed8"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Craft Beer Trail</span>
+                    <span class="nav__mega__card-date">Geelong Breweries</span>
+                  </div>
+                </a>
+                <a href="drink.html?filter=winery" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#7c2d12"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Bellarine Wineries</span>
+                    <span class="nav__mega__card-date">Cellar Door Tastings</span>
+                  </div>
+                </a>
+                <a href="drink.html?filter=bar" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#4338ca"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Best Bars</span>
+                    <span class="nav__mega__card-date">Cocktails &amp; Good Vibes</span>
+                  </div>
+                </a>
+                <a href="drink.html?filter=pub" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#166534"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Local Pubs</span>
+                    <span class="nav__mega__card-date">Geelong Favourites</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav__drop nav__drop--mega">
+          <button class="nav__drop-toggle">Do <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu nav__mega">
+            <div class="nav__mega__left">
+              <p class="nav__mega__label">Browse</p>
+              <a href="do.html" class="nav__mega__link"><span class="material-symbols-rounded">explore</span> All Things To Do</a>
+              <a href="do.html?filter=activity" class="nav__mega__link"><span class="material-symbols-rounded">sports_tennis</span> Activities</a>
+              <a href="do.html?filter=attraction" class="nav__mega__link"><span class="material-symbols-rounded">account_balance</span> Attractions</a>
+              <a href="do.html?filter=art" class="nav__mega__link"><span class="material-symbols-rounded">palette</span> Arts &amp; Culture</a>
+              <a href="do.html?filter=adventure" class="nav__mega__link"><span class="material-symbols-rounded">hiking</span> Adventure</a>
+              <a href="do.html?filter=nature" class="nav__mega__link"><span class="material-symbols-rounded">forest</span> Nature &amp; Outdoors</a>
+              <a href="do.html?filter=wellness" class="nav__mega__link"><span class="material-symbols-rounded">spa</span> Wellness</a>
+              <a href="do.html?filter=sport" class="nav__mega__link"><span class="material-symbols-rounded">stadium</span> Sport</a>
+              <div class="nav__drop-divider" style="margin:.6rem 0"></div>
+              <a href="parks.html" class="nav__mega__link nav__mega__link--parks"><span class="material-symbols-rounded">park</span> Parks &amp; Green Spaces</a>
+            </div>
+            <div class="nav__mega__right">
+              <p class="nav__mega__label">Featured</p>
+              <div class="nav__mega__cards">
+                <a href="do.html?filter=family" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#0891b2"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Family Activities</span>
+                    <span class="nav__mega__card-date">Kids &amp; All Ages</span>
+                  </div>
+                </a>
+                <a href="parks.html" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#15803d"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Parks &amp; Green Spaces</span>
+                    <span class="nav__mega__card-date">Geelong's Great Outdoors</span>
+                  </div>
+                </a>
+                <a href="do.html?filter=art" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#7e22ce"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Arts &amp; Culture</span>
+                    <span class="nav__mega__card-date">Galleries &amp; Museums</span>
+                  </div>
+                </a>
+                <a href="do.html?filter=adventure" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#c2410c"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Adventure &amp; Outdoors</span>
+                    <span class="nav__mega__card-date">Get Active in Geelong</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#offers">Offers</a>
+        <div class="nav__drop nav__drop--mega">
+          <button class="nav__drop-toggle">Events <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu nav__mega">
+            <div class="nav__mega__left">
+              <p class="nav__mega__label">Browse</p>
+              <a href="events.html" class="nav__mega__link"><span class="material-symbols-rounded">event</span> All Events</a>
+              <a href="events.html#today" class="nav__mega__link nav__mega__link--today"><span class="nav__mega__live-dot"></span> Happening Today</a>
+              <a href="events.html#tomorrow" class="nav__mega__link"><span class="material-symbols-rounded">wb_sunny</span> Tomorrow</a>
+              <a href="events.html#weekend" class="nav__mega__link"><span class="material-symbols-rounded">weekend</span> This Weekend</a>
+              <div class="nav__drop-divider" style="margin:.6rem 0"></div>
+              <a href="#" class="nav__mega__link nav__mega__link--submit"><span class="material-symbols-rounded">add_circle</span> Submit an Event</a>
+            </div>
+            <div class="nav__mega__right">
+              <p class="nav__mega__label">Major Events</p>
+              <div class="nav__mega__cards">
+                <a href="festival-of-sails.html" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-image:url('assets/events/festival-of-sails.jpg');background-color:#0e4a7a"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Festival of Sails</span>
+                    <span class="nav__mega__card-date">Jan 2026</span>
+                  </div>
+                </a>
+                <a href="cadel-evans.html" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-image:url('assets/events/cadel-evans.jpg');background-color:#c0392b"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Cadel Evans Race</span>
+                    <span class="nav__mega__card-date">Feb 2026</span>
+                  </div>
+                </a>
+                <a href="#" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#6B2737"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Pako Festa</span>
+                    <span class="nav__mega__card-date">Mar 2026</span>
+                  </div>
+                </a>
+                <a href="#" class="nav__mega__card">
+                  <div class="nav__mega__card-img" style="background-color:#2c7a4b"></div>
+                  <div class="nav__mega__card-body">
+                    <span class="nav__mega__card-name">Geelong Show</span>
+                    <span class="nav__mega__card-date">Oct 2026</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="cats.html" class="nav__cats-link"><span class="nav__cats-dot"></span> Cats</a>
+        <a href="editorial.html">Read</a>
+        <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
+      </nav>
+      <a href="guides.html" class="itin-badge" id="js-itin-badge" hidden>
+        <span class="material-symbols-rounded">star</span> <span id="js-itin-count">0</span>
+      </a>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="dn-hero">
+    <div class="dn-hero__content">
+      <p class="dn-hero__eyebrow">✨ Geelong Date Night</p>
+      <h1 class="dn-hero__title">Plan your perfect<br><span>date night</span></h1>
+      <p class="dn-hero__sub">Tell us where you want to be and what you're feeling — we'll pick the dinner and drinks.</p>
+    </div>
+  </div>
+
+  <!-- Wizard -->
+  <div class="dn-wizard" id="js-dn-wizard">
+
+    <!-- Step indicator -->
+    <div class="dn-steps" id="js-dn-steps">
+      <div class="dn-step active" data-step="1">
+        <div class="dn-step__dot">1</div>
+        <span class="dn-step__label">Location</span>
+      </div>
+      <div class="dn-step" data-step="2">
+        <div class="dn-step__dot">2</div>
+        <span class="dn-step__label">Vibe</span>
+      </div>
+      <div class="dn-step" data-step="3">
+        <div class="dn-step__dot">3</div>
+        <span class="dn-step__label">Preferences</span>
+      </div>
+    </div>
+
+    <!-- Step 1 — Location -->
+    <div class="dn-panel active" id="dn-step-1">
+      <h2 class="dn-section-title">Where do you want to be?</h2>
+      <p class="dn-section-sub">We'll find the best spots nearby.</p>
+      <div class="dn-locations">
+        <button class="dn-loc-btn" data-suburb="Geelong CBD">
+          <span class="dn-loc-btn__emoji">🌊</span>
+          <span class="dn-loc-btn__name">City & Waterfront</span>
+          <span class="dn-loc-btn__sub">CBD & Waterfront</span>
+        </button>
+        <button class="dn-loc-btn" data-suburb="Geelong West">
+          <span class="dn-loc-btn__emoji">🏘️</span>
+          <span class="dn-loc-btn__name">Geelong West</span>
+          <span class="dn-loc-btn__sub">Pakington St strip</span>
+        </button>
+        <button class="dn-loc-btn" data-suburb="Newtown">
+          <span class="dn-loc-btn__emoji">🌿</span>
+          <span class="dn-loc-btn__name">Newtown</span>
+          <span class="dn-loc-btn__sub">Cafes & wine bars</span>
+        </button>
+        <button class="dn-loc-btn" data-suburb="Torquay">
+          <span class="dn-loc-btn__emoji">🏄</span>
+          <span class="dn-loc-btn__name">Torquay</span>
+          <span class="dn-loc-btn__sub">Surf coast vibes</span>
+        </button>
+        <button class="dn-loc-btn" data-suburb="Barwon Heads">
+          <span class="dn-loc-btn__emoji">⛵</span>
+          <span class="dn-loc-btn__name">Barwon Heads</span>
+          <span class="dn-loc-btn__sub">Coastal & relaxed</span>
+        </button>
+        <button class="dn-loc-btn" data-suburb="Bellarine">
+          <span class="dn-loc-btn__emoji">🍷</span>
+          <span class="dn-loc-btn__name">Bellarine</span>
+          <span class="dn-loc-btn__sub">Wineries & cellar doors</span>
+        </button>
+        <button class="dn-loc-btn" data-suburb="anywhere">
+          <span class="dn-loc-btn__emoji">🎲</span>
+          <span class="dn-loc-btn__name">Surprise me!</span>
+          <span class="dn-loc-btn__sub">Anywhere in Geelong</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2 — Vibe -->
+    <div class="dn-panel" id="dn-step-2">
+      <button class="dn-back" id="dn-back-1">
+        <span class="material-symbols-rounded">arrow_back_ios</span> Back
+      </button>
+      <h2 class="dn-section-title">What's the vibe tonight?</h2>
+      <p class="dn-section-sub">This shapes everything from dinner to your drinks stop.</p>
+      <div class="dn-vibes">
+        <button class="dn-vibe-btn" data-vibe="romantic">
+          <span class="dn-vibe-btn__emoji">🌹</span>
+          <span class="dn-vibe-btn__name">Romantic</span>
+          <span class="dn-vibe-btn__desc">Intimate atmosphere, great wine, candlelight kind of evening</span>
+        </button>
+        <button class="dn-vibe-btn" data-vibe="lively">
+          <span class="dn-vibe-btn__emoji">🍺</span>
+          <span class="dn-vibe-btn__name">Lively & Fun</span>
+          <span class="dn-vibe-btn__desc">Buzzy atmosphere, craft beer, good laughs and great food</span>
+        </button>
+        <button class="dn-vibe-btn" data-vibe="fancy">
+          <span class="dn-vibe-btn__emoji">✨</span>
+          <span class="dn-vibe-btn__name">Fancy & Special</span>
+          <span class="dn-vibe-btn__desc">Treat yourselves — top-rated restaurants, cocktails, the works</span>
+        </button>
+        <button class="dn-vibe-btn" data-vibe="relaxed">
+          <span class="dn-vibe-btn__emoji">😌</span>
+          <span class="dn-vibe-btn__name">Relaxed & Easy</span>
+          <span class="dn-vibe-btn__desc">Good food, no fuss — the kind of night you can wear jeans</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3 — Preferences -->
+    <div class="dn-panel" id="dn-step-3">
+      <button class="dn-back" id="dn-back-2">
+        <span class="material-symbols-rounded">arrow_back_ios</span> Back
+      </button>
+      <h2 class="dn-section-title">Any food preferences?</h2>
+      <p class="dn-section-sub">Optional — leave everything unselected to let us pick freely.</p>
+
+      <div class="dn-pref-group">
+        <span class="dn-pref-label">Dinner style</span>
+        <div class="dn-pills" id="dn-cuisine-pills">
+          <button class="dn-pill selected" data-cuisine="any">Anything goes</button>
+          <button class="dn-pill" data-cuisine="italian">Italian / Pizza</button>
+          <button class="dn-pill" data-cuisine="asian">Asian</button>
+          <button class="dn-pill" data-cuisine="seafood">Seafood</button>
+          <button class="dn-pill" data-cuisine="australian">Modern Australian</button>
+          <button class="dn-pill" data-cuisine="casual">Casual dining</button>
+        </div>
+      </div>
+
+      <div class="dn-pref-group">
+        <span class="dn-pref-label">Drinks stop vibe</span>
+        <div class="dn-pills" id="dn-drinks-pills">
+          <button class="dn-pill selected" data-drinks="any">Anything goes</button>
+          <button class="dn-pill" data-drinks="wine">Wine bar / Winery</button>
+          <button class="dn-pill" data-drinks="cocktails">Cocktail bar</button>
+          <button class="dn-pill" data-drinks="brewery">Craft brewery</button>
+          <button class="dn-pill" data-drinks="pub">Local pub</button>
+        </div>
+      </div>
+
+      <button class="dn-generate-btn" id="dn-generate-btn">
+        <span class="material-symbols-rounded">auto_awesome</span>
+        Plan our night
+      </button>
+    </div>
+
+  </div><!-- end wizard -->
+
+  <!-- Loading state -->
+  <div class="dn-loading" id="dn-loading">
+    <div class="dn-loading__spinner"></div>
+    <p class="dn-loading__text">Finding your perfect night out…</p>
+    <p class="dn-loading__sub">Scanning Geelong's best spots</p>
+  </div>
+
+  <!-- Results -->
+  <div class="dn-result" id="dn-result">
+    <div class="dn-result-header">
+      <span class="dn-result-header__badge" id="dn-result-badge">Your Date Night</span>
+      <h2 class="dn-result-header__title" id="dn-result-title">Tonight's plan is ready</h2>
+      <p class="dn-result-header__sub" id="dn-result-sub">Here's what we've lined up for you</p>
+    </div>
+
+    <div class="dn-stops" id="dn-stops">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="dn-map-wrap">
+      <div id="dn-map"></div>
+    </div>
+
+    <div class="dn-result-actions">
+      <button class="dn-shake-btn" id="dn-shake-btn">
+        <span class="material-symbols-rounded">shuffle</span>
+        Try a different combo
+      </button>
+      <button class="dn-restart-btn" id="dn-restart-btn">
+        <span class="material-symbols-rounded">restart_alt</span>
+        Start over
+      </button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (() => {
+    const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
+    const FALLBACK_IMG = 'https://duhxszqyyzrbzrhwneey.supabase.co/storage/v1/object/public/business-images/fallback.jpg';
+
+    // ── State ─────────────────────────────────────────────────
+    const state = { suburb: null, vibe: null, cuisine: 'any', drinks: 'any' };
+    let allBusinesses = [];
+    let map = null;
+    let currentDinner = null;
+    let currentDrinks = null;
+
+    // ── Vibe config ────────────────────────────────────────────
+    // Each vibe defines which types are preferred for dinner/drinks
+    // and a minimum rating threshold
+    const VIBE_CONFIG = {
+      romantic: {
+        dinnerTypes: ['Restaurant', 'Winery'],
+        drinksTypes: ['Bar', 'Winery', 'Cocktail'],
+        minRating: 4.2,
+        label: 'Romantic Evening',
+        sub: 'Intimate spots with great wine and atmosphere',
+      },
+      lively: {
+        dinnerTypes: ['Restaurant', 'Pub', 'Café'],
+        drinksTypes: ['Brewery', 'Bar', 'Pub'],
+        minRating: 4.0,
+        label: 'Lively Night Out',
+        sub: 'Buzzy spots with great food and cold drinks',
+      },
+      fancy: {
+        dinnerTypes: ['Restaurant'],
+        drinksTypes: ['Bar', 'Winery', 'Cocktail'],
+        minRating: 4.4,
+        label: 'Fancy Night Out',
+        sub: 'Top-rated restaurants and sophisticated drinks',
+      },
+      relaxed: {
+        dinnerTypes: ['Café', 'Restaurant', 'Pub'],
+        drinksTypes: ['Pub', 'Bar', 'Brewery'],
+        minRating: 3.8,
+        label: 'Relaxed Evening',
+        sub: 'Easy-going spots where you can just be yourselves',
+      },
+    };
+
+    // Cuisine → types/keywords mapping
+    const CUISINE_MAP = {
+      any: null,
+      italian: ['Restaurant'], // broad — we filter by name hint
+      asian: ['Restaurant'],
+      seafood: ['Restaurant'],
+      australian: ['Restaurant'],
+      casual: ['Café', 'Pub', 'Restaurant'],
+    };
+
+    // Drinks pref → types
+    const DRINKS_MAP = {
+      any: null,
+      wine: ['Winery', 'Bar'],
+      cocktails: ['Bar', 'Cocktail'],
+      brewery: ['Brewery'],
+      pub: ['Pub'],
+    };
+
+    // ── Fetch businesses ──────────────────────────────────────
+    async function fetchBusinesses() {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/businesses?select=id,name,type,suburb,slug,img,rating,description,lat,lng,color,emoji&limit=300`,
+          { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+        );
+        const data = await res.json();
+        if (Array.isArray(data)) allBusinesses = data;
+      } catch (e) { console.error('Fetch error', e); }
+    }
+
+    // ── Filter helpers ─────────────────────────────────────────
+    function pick(pool) {
+      if (!pool.length) return null;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function buildPlan() {
+      if (!allBusinesses.length) return null;
+      const cfg = VIBE_CONFIG[state.vibe];
+
+      // Filter by suburb (skip filter if "anywhere")
+      const suburbMatch = b =>
+        state.suburb === 'anywhere' || !b.suburb ||
+        b.suburb.toLowerCase().includes(state.suburb.toLowerCase()) ||
+        state.suburb.toLowerCase().includes(b.suburb.toLowerCase());
+
+      // ── Dinner pool ──────────────────────────
+      let dinnerPool = allBusinesses.filter(b => {
+        if (!suburbMatch(b)) return false;
+        const typeOk = cfg.dinnerTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase()));
+        if (!typeOk) return false;
+        const rating = parseFloat(b.rating) || 0;
+        if (rating < cfg.minRating && rating > 0) return false;
+        return true;
+      });
+
+      // Apply cuisine preference
+      if (state.cuisine !== 'any') {
+        const custTypes = CUISINE_MAP[state.cuisine];
+        if (custTypes) {
+          const refined = dinnerPool.filter(b => custTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase())));
+          if (refined.length) dinnerPool = refined;
+        }
+      }
+
+      // If suburb filter leaves us empty, fall back to anywhere
+      if (!dinnerPool.length) {
+        dinnerPool = allBusinesses.filter(b => {
+          const typeOk = cfg.dinnerTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase()));
+          return typeOk;
+        });
+      }
+
+      const dinner = pick(dinnerPool);
+
+      // ── Drinks pool ───────────────────────────
+      let drinksPool = allBusinesses.filter(b => {
+        if (!suburbMatch(b)) return false;
+        if (dinner && b.id === dinner.id) return false; // don't repeat
+        const typeOk = cfg.drinksTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase()));
+        if (!typeOk) return false;
+        const rating = parseFloat(b.rating) || 0;
+        if (rating < cfg.minRating - 0.2 && rating > 0) return false;
+        return true;
+      });
+
+      // Apply drinks preference
+      if (state.drinks !== 'any') {
+        const drinkTypes = DRINKS_MAP[state.drinks];
+        if (drinkTypes) {
+          const refined = drinksPool.filter(b => drinkTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase())));
+          if (refined.length) drinksPool = refined;
+        }
+      }
+
+      // Suburb fallback
+      if (!drinksPool.length) {
+        drinksPool = allBusinesses.filter(b => {
+          if (dinner && b.id === dinner.id) return false;
+          return cfg.drinksTypes.some(t => b.type && b.type.toLowerCase().includes(t.toLowerCase()));
+        });
+      }
+
+      const drinks = pick(drinksPool);
+      return { dinner, drinks };
+    }
+
+    // ── Render results ─────────────────────────────────────────
+    function renderStop(biz, role) {
+      const img = biz.img || FALLBACK_IMG;
+      const rating = biz.rating ? `⭐ ${parseFloat(biz.rating).toFixed(1)}` : '';
+      const desc = biz.description ? biz.description : `${biz.name} in ${biz.suburb || 'Geelong'}.`;
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(biz.name + ' ' + (biz.suburb || 'Geelong'))}`;
+      const typeLabel = role === 'dinner' ? '🍽️ Dinner' : '🍸 Drinks';
+      const numberLabel = role === 'dinner' ? '1' : '2';
+      const stopClass = role === 'dinner' ? 'dn-stop--dinner' : 'dn-stop--drinks';
+
+      return `
+        <div class="dn-stop ${stopClass}">
+          <div class="dn-stop__header">
+            <div class="dn-stop__number">${numberLabel}</div>
+            <span class="dn-stop__type">${typeLabel}</span>
+          </div>
+          <div class="dn-stop__body">
+            <div class="dn-stop__img" style="background-image:url('${img}'); background-color:${biz.color || '#e5e7eb'}"></div>
+            <div class="dn-stop__info">
+              <div class="dn-stop__name">${biz.emoji || ''} ${biz.name}</div>
+              <div class="dn-stop__meta">
+                ${biz.suburb ? `<span class="dn-stop__suburb">${biz.suburb}</span>` : ''}
+                ${rating ? `<span class="dn-stop__rating">${rating}</span>` : ''}
+              </div>
+              <p class="dn-stop__desc">${desc}</p>
+              <div class="dn-stop__actions">
+                <a href="/${biz.slug}" class="dn-stop__btn dn-stop__btn--primary">
+                  <span class="material-symbols-rounded">storefront</span> View listing
+                </a>
+                <a href="${mapsUrl}" target="_blank" rel="noopener" class="dn-stop__btn dn-stop__btn--outline">
+                  <span class="material-symbols-rounded">directions</span> Directions
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function showResults(plan) {
+      const { dinner, drinks } = plan;
+      const cfg = VIBE_CONFIG[state.vibe];
+
+      // Header
+      document.getElementById('dn-result-badge').textContent = cfg.label;
+      document.getElementById('dn-result-title').textContent =
+        state.suburb && state.suburb !== 'anywhere'
+          ? `Your night out in ${state.suburb}`
+          : 'Your Geelong date night';
+      document.getElementById('dn-result-sub').textContent = cfg.sub;
+
+      // Stops
+      const stopsEl = document.getElementById('dn-stops');
+      stopsEl.innerHTML = '';
+      if (dinner) stopsEl.insertAdjacentHTML('beforeend', renderStop(dinner, 'dinner'));
+      if (drinks) stopsEl.insertAdjacentHTML('beforeend', renderStop(drinks, 'drinks'));
+      if (!dinner && !drinks) {
+        stopsEl.innerHTML = `<div class="dn-empty">
+          <span class="material-symbols-rounded">search_off</span>
+          <p>We couldn't find enough spots matching your criteria. Try a different suburb or vibe!</p>
+        </div>`;
+      }
+
+      // Map
+      renderMap(dinner, drinks);
+
+      // Show result panel
+      document.getElementById('dn-wizard').style.display = 'none';
+      document.getElementById('dn-loading').classList.remove('active');
+      document.getElementById('dn-result').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderMap(dinner, drinks) {
+      const points = [dinner, drinks].filter(Boolean).filter(b => b.lat && b.lng);
+      if (!points.length) {
+        document.querySelector('.dn-map-wrap').style.display = 'none';
+        return;
+      }
+      document.querySelector('.dn-map-wrap').style.display = '';
+
+      if (map) { map.remove(); map = null; }
+
+      map = L.map('dn-map', { zoomControl: true, scrollWheelZoom: false });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO',
+        maxZoom: 19,
+      }).addTo(map);
+
+      const colours = { dinner: '#c0392b', drinks: '#4338ca' };
+      const roles   = { dinner, drinks };
+      const markers = [];
+
+      for (const [role, biz] of Object.entries(roles)) {
+        if (!biz || !biz.lat || !biz.lng) continue;
+        const colour = colours[role];
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="
+            width:34px;height:34px;border-radius:50%;
+            background:${colour};border:3px solid #fff;
+            box-shadow:0 2px 8px rgba(0,0,0,.3);
+            display:flex;align-items:center;justify-content:center;
+            font-size:16px;line-height:1;
+          ">${role === 'dinner' ? '🍽️' : '🍸'}</div>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+        });
+        const m = L.marker([parseFloat(biz.lat), parseFloat(biz.lng)], { icon }).addTo(map);
+        m.bindPopup(`<strong>${biz.name}</strong><br>${biz.suburb || ''}`);
+        markers.push(m);
+      }
+
+      if (markers.length === 1) {
+        map.setView(markers[0].getLatLng(), 15);
+      } else {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.25));
+      }
+    }
+
+    // ── Step navigation ────────────────────────────────────────
+    function goToStep(n) {
+      document.querySelectorAll('.dn-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(`dn-step-${n}`).classList.add('active');
+      document.querySelectorAll('.dn-step').forEach(s => {
+        const sn = parseInt(s.dataset.step);
+        s.classList.toggle('active', sn === n);
+        s.classList.toggle('done', sn < n);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── Event listeners ────────────────────────────────────────
+
+    // Location
+    document.querySelectorAll('.dn-loc-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.dn-loc-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        state.suburb = btn.dataset.suburb;
+        setTimeout(() => goToStep(2), 180);
+      });
+    });
+
+    // Back buttons
+    document.getElementById('dn-back-1').addEventListener('click', () => goToStep(1));
+    document.getElementById('dn-back-2').addEventListener('click', () => goToStep(2));
+
+    // Vibe
+    document.querySelectorAll('.dn-vibe-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.dn-vibe-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        state.vibe = btn.dataset.vibe;
+        setTimeout(() => goToStep(3), 180);
+      });
+    });
+
+    // Cuisine pills — single select, "anything goes" deselects others
+    document.querySelectorAll('#dn-cuisine-pills .dn-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#dn-cuisine-pills .dn-pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        state.cuisine = pill.dataset.cuisine;
+      });
+    });
+
+    // Drinks pills
+    document.querySelectorAll('#dn-drinks-pills .dn-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#dn-drinks-pills .dn-pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        state.drinks = pill.dataset.drinks;
+      });
+    });
+
+    // Generate
+    document.getElementById('dn-generate-btn').addEventListener('click', async () => {
+      if (!state.vibe) { alert('Please choose a vibe first!'); return; }
+      document.getElementById('dn-wizard').style.display = 'none';
+      document.getElementById('dn-loading').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (!allBusinesses.length) await fetchBusinesses();
+
+      // Small delay for the loading animation to feel intentional
+      await new Promise(r => setTimeout(r, 800));
+
+      const plan = buildPlan();
+      currentDinner = plan?.dinner || null;
+      currentDrinks = plan?.drinks || null;
+
+      if (!plan || (!plan.dinner && !plan.drinks)) {
+        document.getElementById('dn-loading').classList.remove('active');
+        document.getElementById('dn-wizard').style.display = '';
+        alert('Not enough listings matched your criteria. Try a different suburb or vibe.');
+        return;
+      }
+      showResults(plan);
+    });
+
+    // Shake (reshuffle same criteria)
+    document.getElementById('dn-shake-btn').addEventListener('click', async () => {
+      document.getElementById('dn-result').classList.remove('active');
+      document.getElementById('dn-loading').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      await new Promise(r => setTimeout(r, 600));
+      const plan = buildPlan();
+      if (plan) {
+        currentDinner = plan.dinner;
+        currentDrinks = plan.drinks;
+        showResults(plan);
+      }
+    });
+
+    // Restart
+    document.getElementById('dn-restart-btn').addEventListener('click', () => {
+      document.getElementById('dn-result').classList.remove('active');
+      document.getElementById('dn-wizard').style.display = '';
+      state.suburb = null; state.vibe = null; state.cuisine = 'any'; state.drinks = 'any';
+      document.querySelectorAll('.dn-loc-btn, .dn-vibe-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.dn-pill').forEach(p => {
+        p.classList.toggle('selected', p.dataset.cuisine === 'any' || p.dataset.drinks === 'any');
+      });
+      goToStep(1);
+    });
+
+    // ── Pre-fetch data in background ─────────────────────────
+    fetchBusinesses();
+
+  })();
+  </script>
+</body>
+</html>

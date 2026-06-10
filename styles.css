@@ -369,8 +369,9 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   font-weight: 600;
 }
 .nav__links a:not(.btn):not(.nav__cats-link):hover { color: var(--teal); }
-/* Close button only shows inside mobile overlay */
+/* Close button + header only show inside mobile drawer */
 .nav__mobile-close { display: none; }
+.nav__mobile-header { display: none; }
 
 /* Cats nav link */
 .nav__cats-link {
@@ -2006,6 +2007,12 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 
   /* Hamburger stays visible */
   .nav__hamburger { display: flex; }
+
+  /* Account button — collapse to icon-only on mobile */
+  .nav__acct-name,
+  .nav__acct-chevron { display: none !important; }
+  .nav__acct-btn { padding: .3rem !important; border-radius: 50% !important; }
+  .nav__login-btn { padding: .3rem .65rem !important; font-size: .75rem !important; }
 
   .featured-card { flex-direction: column; min-height: unset; }
   .featured-card__img { width: 100%; height: 120px; }

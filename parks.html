@@ -402,31 +402,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       gardens:    ['garden', 'botanic', 'eastern park', 'rose'],
     };
 
-    // Unsplash images by park ID (overrides DB img for variety)
-    const PARK_IMAGES = {
-      'eastern-beach-reserve-geelong':        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
-      'balyang-sanctuary-newtown':            'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800&q=80',
-      'buckley-falls-park-highton':           'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=800&q=80',
-      'eastern-park-east-geelong':            'https://images.unsplash.com/photo-1585320806297-9794b3e4abb5?w=800&q=80',
-      'steampacket-gardens-geelong':          'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800&q=80',
-      'warralily-conservation-area-armstrong-creek': 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80',
-      'ocean-grove-nature-reserve-geelong':   'https://images.unsplash.com/photo-1509233725247-49e657c54213?w=800&q=80',
-      'buckley-falls-lookout-geelong':        'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=800&q=80',
-      'wangim-walk-geelong':                  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
-      'friends-of-geelong-botanic-gardens-east-geelong': 'https://images.unsplash.com/photo-1585320806297-9794b3e4abb5?w=800&q=80',
-      'you-yangs-regional-park':              'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
-      'geelong-botanic-gardens':              'https://images.unsplash.com/photo-1585320806297-9794b3e4abb5?w=800&q=80',
-      'rippleside-park-geelong':              'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80',
-      'serendip-sanctuary-lara':              'https://images.unsplash.com/photo-1514984879728-be0aff75a6e8?w=800&q=80',
-      'queens-park-geelong':                  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
-      'point-lonsdale-lighthouse-reserve':    'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80',
-      'barwon-heads-bluff-reserve':           'https://images.unsplash.com/photo-1509233725247-49e657c54213?w=800&q=80',
-      'thomson-reservoir-park':               'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80',
-      'limeburners-point-reserve':            'https://images.unsplash.com/photo-1504208434309-cb69f4fe52b0?w=800&q=80',
-      'griggs-creek-reserve-curlewis':        'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80',
-      'moorabool-river-reserve-batesford':    'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=800&q=80',
-      'kevin-hoffman-walk-lara':              'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80',
-    };
+    const FALLBACK_IMG = 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80';
 
     let allParks = [];
     let filteredParks = [];
@@ -459,7 +435,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         .filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; })
         .map(p => ({
           ...p,
-          img: PARK_IMAGES[p.id] || p.img || `https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80`,
+          img: p.img || FALLBACK_IMG,
           emoji: p.emoji || '🌿',
         }));
 

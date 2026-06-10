@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
+<!-- End Google Tag Manager -->
+  <base href="/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parks &amp; Green Spaces — What To Do Geelong</title>
+  <meta name="description" content="Discover the best parks, nature reserves and outdoor spaces in Geelong and the Bellarine Peninsula. Interactive map, directions, and local tips." />
+  <link rel="canonical" href="https://whattodogeelong.com.au/parks" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <!-- Leaflet map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="styles.css?v=9" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
+
+  <style>
+    /* ── Parks page specific styles ── */
+    .parks-hero {
+      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 45%, #40916c 100%);
+      padding: 3.5rem 1rem 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .parks-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1400&q=60') center/cover no-repeat;
+      opacity: 0.18;
+    }
+    .parks-hero__inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+    .parks-hero__eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #95d5b2; margin-bottom: .5rem; }
+    .parks-hero__title { font-family: 'Nunito', sans-serif; font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 900; color: #fff; margin: 0 0 .75rem; line-height: 1.1; }
+    .parks-hero__sub { color: #d8f3dc; font-size: 1.05rem; margin: 0 auto 1.5rem; max-width: 480px; }
+
+    /* ── Randomiser card ── */
+    .parks-randomiser {
+      background: #fff;
+      border-radius: 1.25rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,.14);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      max-width: 560px;
+      margin: 0 auto;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      border: none;
+      width: calc(100% - 2rem);
+    }
+    .parks-randomiser:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,.18); }
+    .parks-randomiser__img {
+      width: 72px; height: 72px; border-radius: .75rem; object-fit: cover; flex-shrink: 0;
+      transition: opacity .3s;
+    }
+    .parks-randomiser__body { flex: 1; min-width: 0; }
+    .parks-randomiser__label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #40916c; margin-bottom: .2rem; }
+    .parks-randomiser__name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.1rem; color: #1b4332; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .parks-randomiser__loc { font-size: .82rem; color: #666; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .parks-randomiser__btn {
+      background: #40916c; color: #fff; border: none; border-radius: .75rem;
+      padding: .6rem 1rem; font-size: .82rem; font-weight: 700; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0; transition: background .15s;
+      display: flex; align-items: center; gap: .3rem;
+    }
+    .parks-randomiser__btn:hover { background: #2d6a4f; }
+
+    /* ── Map section ── */
+    .parks-map-section { background: #f8fdf9; }
+    .parks-map-wrap {
+      position: relative;
+      height: 480px;
+    }
+    @media (max-width: 600px) { .parks-map-wrap { height: 58vw; min-height: 280px; } }
+    #parks-map { width: 100%; height: 100%; }
+
+    /* Map locate button */
+    .parks-locate-btn {
+      position: absolute; bottom: 1rem; right: 1rem; z-index: 1000;
+      background: #fff; border: 2px solid #40916c; color: #40916c;
+      border-radius: .75rem; padding: .55rem .9rem; font-size: .82rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: .4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12); transition: background .15s, color .15s;
+    }
+    .parks-locate-btn:hover { background: #40916c; color: #fff; }
+    .parks-locate-btn .material-symbols-rounded { font-size: 1.1rem; }
+
+    /* ── Park detail panel (slides up from bottom on mobile, right on desktop) ── */
+    .park-panel {
+      position: fixed;
+      z-index: 2000;
+      background: #fff;
+      box-shadow: 0 -4px 32px rgba(0,0,0,.18);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto;
+    }
+    /* Mobile: bottom sheet */
+    @media (max-width: 768px) {
+      .park-panel {
+        bottom: 0; left: 0; right: 0;
+        border-radius: 1.25rem 1.25rem 0 0;
+        max-height: 80vh;
+        transform: translateY(100%);
+      }
+      .park-panel--open { transform: translateY(0); }
+    }
+    /* Desktop: right side panel */
+    @media (min-width: 769px) {
+      .park-panel {
+        top: 0; right: 0; bottom: 0;
+        width: 380px;
+        transform: translateX(100%);
+        box-shadow: -4px 0 32px rgba(0,0,0,.12);
+      }
+      .park-panel--open { transform: translateX(0); }
+    }
+    .park-panel__img {
+      width: 100%; height: 200px; object-fit: cover; display: block;
+      border-radius: 1.25rem 1.25rem 0 0;
+    }
+    @media (min-width: 769px) { .park-panel__img { height: 220px; border-radius: 0; } }
+    .park-panel__body { padding: 1.25rem 1.25rem 2rem; }
+    .park-panel__close {
+      position: absolute; top: .75rem; right: .75rem;
+      background: rgba(0,0,0,.45); color: #fff; border: none; border-radius: 50%;
+      width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1rem; z-index: 10;
+    }
+    .park-panel__emoji { font-size: 1.6rem; margin-bottom: .4rem; }
+    .park-panel__name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.4rem; color: #1b4332; margin: 0 0 .25rem; }
+    .park-panel__suburb { font-size: .82rem; color: #888; margin-bottom: .75rem; }
+    .park-panel__desc { font-size: .92rem; color: #444; line-height: 1.6; margin-bottom: 1.1rem; }
+    .park-panel__actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .park-panel__btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .55rem 1rem; border-radius: .65rem; font-size: .85rem; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer; transition: opacity .15s;
+    }
+    .park-panel__btn:hover { opacity: .85; }
+    .park-panel__btn--primary { background: #40916c; color: #fff; }
+    .park-panel__btn--directions { background: #e9f5ee; color: #2d6a4f; }
+    .park-panel__btn--secondary { background: #f3f4f6; color: #333; }
+    .park-panel__dist { font-size: .78rem; color: #40916c; font-weight: 600; margin-bottom: .75rem; }
+
+    /* ── Filter strip ── */
+    .parks-filters {
+      padding: 1rem 1rem .25rem;
+      display: flex; gap: .5rem; overflow-x: auto; scrollbar-width: none;
+    }
+    .parks-filters::-webkit-scrollbar { display: none; }
+    .parks-filter-pill {
+      background: #e9f5ee; color: #2d6a4f; border: none; border-radius: 2rem;
+      padding: .45rem .9rem; font-size: .82rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap; transition: background .15s, color .15s; flex-shrink: 0;
+    }
+    .parks-filter-pill.active,
+    .parks-filter-pill:hover { background: #40916c; color: #fff; }
+
+    /* ── Park cards grid ── */
+    .parks-body { padding: 1.5rem 1rem 3rem; max-width: 1100px; margin: 0 auto; }
+    .parks-section-title {
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.4rem;
+      color: #1b4332; margin: 0 0 1rem;
+    }
+    .parks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .park-card {
+      background: #fff; border-radius: 1.1rem; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+      border: 2px solid transparent;
+      text-decoration: none; color: inherit; display: block;
+    }
+    .park-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .park-card--active { border-color: #40916c; box-shadow: 0 0 0 3px rgba(64,145,108,.15); }
+    .park-card__img { width: 100%; height: 175px; object-fit: cover; display: block; }
+    .park-card__body { padding: .9rem 1rem 1rem; }
+    .park-card__emoji { font-size: 1.1rem; margin-bottom: .3rem; }
+    .park-card__name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; color: #1b4332; margin-bottom: .2rem; }
+    .park-card__suburb { font-size: .78rem; color: #888; margin-bottom: .4rem; }
+    .park-card__desc { font-size: .82rem; color: #555; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .park-card__map-link { display: inline-flex; align-items: center; gap: .25rem; margin-top: .6rem; font-size: .78rem; color: #40916c; font-weight: 600; }
+
+    /* Custom Leaflet marker */
+    .park-marker {
+      background: #40916c; color: #fff; border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg); width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      border: 2px solid #fff;
+      transition: transform .15s, background .15s;
+    }
+    .park-marker--active { background: #1b4332; transform: rotate(-45deg) scale(1.2); }
+    .park-marker-inner { transform: rotate(45deg); }
+
+    /* User location marker */
+    .user-location-dot {
+      width: 16px; height: 16px; background: #2563eb; border-radius: 50%;
+      border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(37,99,235,.25);
+    }
+
+    /* Overlay backdrop for mobile panel */
+    .park-panel-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 1999;
+      background: rgba(0,0,0,.35);
+    }
+    .park-panel-backdrop--show { display: block; }
+  </style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <header class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo-link">
+        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+      </a>
+      <nav class="nav__links">
+        <a href="eat.html">Eat</a>
+        <a href="do.html">Do</a>
+        <a href="index.html#offers">Offers</a>
+        <div class="nav__drop nav__drop--mega">
+          <button class="nav__drop-toggle">Events <span class="material-symbols-rounded">expand_more</span></button>
+          <div class="nav__drop-menu nav__mega">
+            <div class="nav__mega__left">
+              <p class="nav__mega__label">Browse</p>
+              <a href="events.html" class="nav__mega__link"><span class="material-symbols-rounded">event</span> All Events</a>
+              <a href="events.html#today" class="nav__mega__link nav__mega__link--today"><span class="nav__mega__live-dot"></span> Happening Today</a>
+              <a href="events.html#tomorrow" class="nav__mega__link"><span class="material-symbols-rounded">wb_sunny</span> Tomorrow</a>
+              <a href="events.html#weekend" class="nav__mega__link"><span class="material-symbols-rounded">weekend</span> This Weekend</a>
+            </div>
+          </div>
+        </div>
+        <a href="cats.html" class="nav__cats-link"><span class="nav__cats-dot"></span> Cats</a>
+        <a href="editorial.html">Read</a>
+        <a href="onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
+      </nav>
+      <a href="guides.html" class="itin-badge" id="js-itin-badge" hidden>
+        <span class="material-symbols-rounded">star</span> <span id="js-itin-count">0</span>
+      </a>
+      <button class="nav__hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero + Randomiser -->
+  <div class="parks-hero">
+    <div class="parks-hero__inner">
+      <p class="parks-hero__eyebrow">🌿 Geelong & surrounds</p>
+      <h1 class="parks-hero__title">Parks &amp; Green Spaces</h1>
+      <p class="parks-hero__sub">From waterfront reserves to wild bushland — explore the best outdoor spaces in Geelong, the Bellarine, and the Surf Coast.</p>
+
+      <!-- Randomiser -->
+      <button class="parks-randomiser" id="js-parks-randomiser" aria-label="Suggest a random park">
+        <img class="parks-randomiser__img" id="js-rand-img" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&q=70" alt="" />
+        <div class="parks-randomiser__body">
+          <p class="parks-randomiser__label">🎲 Explore somewhere new</p>
+          <p class="parks-randomiser__name" id="js-rand-name">Loading parks…</p>
+          <p class="parks-randomiser__loc" id="js-rand-loc">Tap to discover</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
+          <span class="parks-randomiser__btn" id="js-rand-btn">
+            <span class="material-symbols-rounded" style="font-size:1rem">shuffle</span> New one
+          </span>
+          <span class="parks-randomiser__btn" id="js-rand-view" style="background:#1b4332">
+            <span class="material-symbols-rounded" style="font-size:1rem">map</span> Show me
+          </span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter pills -->
+  <div class="parks-map-section">
+    <div class="parks-filters" id="js-parks-filters">
+      <button class="parks-filter-pill active" data-filter="all">All parks</button>
+      <button class="parks-filter-pill" data-filter="waterfront">Waterfront</button>
+      <button class="parks-filter-pill" data-filter="bushland">Bushland &amp; Trails</button>
+      <button class="parks-filter-pill" data-filter="wildlife">Wildlife</button>
+      <button class="parks-filter-pill" data-filter="coastal">Coastal</button>
+      <button class="parks-filter-pill" data-filter="family">Family</button>
+      <button class="parks-filter-pill" data-filter="gardens">Gardens</button>
+    </div>
+
+    <!-- Map -->
+    <div class="parks-map-wrap">
+      <div id="parks-map"></div>
+      <button class="parks-locate-btn" id="js-parks-locate">
+        <span class="material-symbols-rounded">my_location</span> Near me
+      </button>
+    </div>
+  </div>
+
+  <!-- Park cards -->
+  <div class="parks-body">
+    <h2 class="parks-section-title" id="js-parks-count">Loading parks…</h2>
+    <div class="parks-grid" id="js-parks-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- Park detail panel -->
+  <div class="park-panel-backdrop" id="js-park-backdrop"></div>
+  <div class="park-panel" id="js-park-panel" aria-hidden="true">
+    <button class="park-panel__close" id="js-park-panel-close" aria-label="Close">✕</button>
+    <img class="park-panel__img" id="js-panel-img" src="" alt="" />
+    <div class="park-panel__body">
+      <div class="park-panel__emoji" id="js-panel-emoji"></div>
+      <h2 class="park-panel__name" id="js-panel-name"></h2>
+      <p class="park-panel__suburb" id="js-panel-suburb"></p>
+      <p class="park-panel__dist" id="js-panel-dist" hidden></p>
+      <p class="park-panel__desc" id="js-panel-desc"></p>
+      <div class="park-panel__actions" id="js-panel-actions"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <div class="footer__logo">WHAT TO DO<br>GEELONG!</div>
+        <p class="footer__tagline">Your local guide to events, food, drink and things to do in Geelong, Victoria.</p>
+        <p class="footer__copy">© 2025 What To Do Geelong</p>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Things To Do</h4>
+        <a href="do.html">Things to do in Geelong</a>
+        <a href="/do/family">Family activities Geelong</a>
+        <a href="parks.html">Parks &amp; green spaces</a>
+        <a href="/do/arts">Arts &amp; culture Geelong</a>
+        <a href="/do/wellness">Day spas Geelong</a>
+        <a href="/do/sport">Sport &amp; leisure Geelong</a>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Food &amp; Drink</h4>
+        <a href="eat.html">Restaurants in Geelong</a>
+        <a href="/eat/cafes">Cafes in Geelong</a>
+        <a href="drink.html">Bars &amp; pubs Geelong</a>
+        <a href="/drink/wineries">Bellarine wineries</a>
+        <a href="/drink/breweries">Geelong breweries</a>
+        <a href="/eat/brunch">Brunch Geelong</a>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Events</h4>
+        <a href="events.html">What's on in Geelong</a>
+        <a href="events.html#today">Events today Geelong</a>
+        <a href="events.html#weekend">This weekend Geelong</a>
+        <a href="festival-of-sails.html">Festival of Sails</a>
+        <a href="cadel-evans.html">Cadel Evans Road Race</a>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Explore</h4>
+        <a href="editorial.html">Geelong travel guides</a>
+        <a href="editorial.html">Best of Geelong</a>
+        <a href="advertise.html">Advertise with us</a>
+        <a href="email-sponsorship.html">Sponsor our emails</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="sitemode.js?v=1"></script>
+  <script src="analytics.js?v=1"></script>
+  <script src="icons.js"></script>
+  <script src="auth.js"></script>
+  <script src="guides.js"></script>
+  <script src="location.js"></script>
+  <script src="view-tracker.js"></script>
+  <script src="app.js?v=10"></script>
+
+  <script>
+  /* ── Parks Page ── */
+  (function () {
+
+    // Park filter keywords (for client-side pill filtering)
+    const FILTER_MAP = {
+      waterfront: ['waterfront', 'foreshore', 'bay', 'rippleside', 'eastern beach', 'steampacket', 'limeburners', 'barwon heads'],
+      bushland:   ['barwon', 'buckley', 'trail', 'walk', 'river', 'valley', 'moorabool', 'kevin hoffman', 'queens park', 'you yangs'],
+      wildlife:   ['wildlife', 'sanctuary', 'serendip', 'balyang', 'kangaroo', 'bird'],
+      coastal:    ['coastal', 'point lonsdale', 'ocean grove', 'barwon heads', 'surf', 'cliffton', 'beach'],
+      family:     ['playground', 'family', 'fairy park', 'rippleside', 'eastern beach', 'botanic', 'bbq', 'barbecue'],
+      gardens:    ['garden', 'botanic', 'eastern park', 'rose'],
+    };
+
+    // Unsplash images by park ID (overrides DB img for variety)
+    const PARK_IMAGES = {
+      'eastern-beach-reserve-geelong':        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+      'balyang-sanctuary-newtown':            'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800&q=80',
+      'buckley-falls-park-highton':           'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=800&q=80',
+      'eastern-park-east-geelong':            'https://images.unsplash.com/photo-1585320806297-9794b3e4abb5?w=800&q=80',
+      'steampacket-gardens-geelong':          'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800&q=80',
+      'warralily-conservation-area-armstrong-creek': 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80',
+      'ocean-grove-nature-reserve-geelong':   'https://images.unsplash.com/photo-1509233725247-49e657c54213?w=800&q=80',
+      'buckley-falls-lookout-geelong':        'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=800&q=80',
+      'wangim-walk-geelong':                  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
+      'friends-of-geelong-botanic-gardens-east-geelong': 'https://images.unsplash.com/photo-1585320806297-9794b3e4abb5?w=800&q=80',
+      'you-yangs-regional-park':              'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+      'geelong-botanic-gardens':              'https://images.unsplash.com/photo-1585320806297-9794b3e4abb5?w=800&q=80',
+      'rippleside-park-geelong':              'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80',
+      'serendip-sanctuary-lara':              'https://images.unsplash.com/photo-1514984879728-be0aff75a6e8?w=800&q=80',
+      'queens-park-geelong':                  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
+      'point-lonsdale-lighthouse-reserve':    'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80',
+      'barwon-heads-bluff-reserve':           'https://images.unsplash.com/photo-1509233725247-49e657c54213?w=800&q=80',
+      'thomson-reservoir-park':               'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80',
+      'limeburners-point-reserve':            'https://images.unsplash.com/photo-1504208434309-cb69f4fe52b0?w=800&q=80',
+      'griggs-creek-reserve-curlewis':        'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80',
+      'moorabool-river-reserve-batesford':    'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=800&q=80',
+      'kevin-hoffman-walk-lara':              'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80',
+    };
+
+    let allParks = [];
+    let filteredParks = [];
+    let map, userMarker, userLatLng;
+    let markers = {}; // id → leaflet marker
+    let activeId = null;
+
+    // ── Fetch parks ─────────────────────────────────────────
+    async function loadParks() {
+      const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
+
+      // Get Parks & Nature + key Attraction parks
+      const [natRes, attrRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/businesses?select=id,name,type,slug,location,suburb,lat,lng,img,description,emoji,color&type=eq.Parks+%26+Nature`, {
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+        }),
+        fetch(`${SUPABASE_URL}/rest/v1/businesses?select=id,name,type,slug,location,suburb,lat,lng,img,description,emoji,color&id=in.(eastern-beach-reserve-geelong,balyang-sanctuary-newtown,steampacket-gardens-geelong,buckley-falls-lookout-geelong,wangim-walk-geelong,friends-of-geelong-botanic-gardens-east-geelong,eastern-park-east-geelong)`, {
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+        })
+      ]);
+
+      const [nat, attr] = await Promise.all([natRes.json(), attrRes.json()]);
+      const combined = [...(Array.isArray(nat) ? nat : []), ...(Array.isArray(attr) ? attr : [])];
+
+      // Deduplicate by id, override images, filter out nullish lat/lng
+      const seen = new Set();
+      allParks = combined
+        .filter(p => p.lat && p.lng)
+        .filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; })
+        .map(p => ({
+          ...p,
+          img: PARK_IMAGES[p.id] || p.img || `https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80`,
+          emoji: p.emoji || '🌿',
+        }));
+
+      filteredParks = [...allParks];
+      initMap();
+      renderGrid();
+      initRandomiser();
+    }
+
+    // ── Map ──────────────────────────────────────────────────
+    function initMap() {
+      map = L.map('parks-map', {
+        center: [-38.148, 144.36],
+        zoom: 11,
+        zoomControl: true,
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO',
+        maxZoom: 19,
+      }).addTo(map);
+
+      addMarkers(allParks);
+    }
+
+    function parkIcon(park, active) {
+      const bg = active ? '#1b4332' : (park.color || '#40916c');
+      return L.divIcon({
+        html: `<div class="park-marker${active ? ' park-marker--active' : ''}" style="background:${bg}"><span class="park-marker-inner">${park.emoji || '🌿'}</span></div>`,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -34],
+      });
+    }
+
+    function addMarkers(parks) {
+      // Remove old markers
+      Object.values(markers).forEach(m => map.removeLayer(m));
+      markers = {};
+
+      parks.forEach(park => {
+        const m = L.marker([park.lat, park.lng], { icon: parkIcon(park, false) })
+          .addTo(map)
+          .on('click', () => openPanel(park.id));
+        markers[park.id] = m;
+      });
+    }
+
+    // ── Panel ────────────────────────────────────────────────
+    function openPanel(id) {
+      const park = allParks.find(p => p.id === id);
+      if (!park) return;
+
+      // Update active card + marker
+      if (activeId) {
+        document.querySelectorAll('.park-card').forEach(c => c.classList.remove('park-card--active'));
+        const oldM = markers[activeId];
+        const oldP = allParks.find(p => p.id === activeId);
+        if (oldM && oldP) oldM.setIcon(parkIcon(oldP, false));
+      }
+      activeId = id;
+      const card = document.querySelector(`[data-park-id="${id}"]`);
+      if (card) {
+        card.classList.add('park-card--active');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      if (markers[id]) markers[id].setIcon(parkIcon(park, true));
+
+      // Pan map
+      map.flyTo([park.lat, park.lng], Math.max(map.getZoom(), 13), { duration: .8 });
+
+      // Populate panel
+      document.getElementById('js-panel-img').src = park.img;
+      document.getElementById('js-panel-img').alt = park.name;
+      document.getElementById('js-panel-emoji').textContent = park.emoji || '🌿';
+      document.getElementById('js-panel-name').textContent = park.name;
+      document.getElementById('js-panel-suburb').textContent = park.suburb || park.location || '';
+      document.getElementById('js-panel-desc').textContent = park.description || 'A great outdoor space in the Geelong region.';
+
+      // Distance
+      const distEl = document.getElementById('js-panel-dist');
+      if (userLatLng) {
+        const d = getDistKm(userLatLng[0], userLatLng[1], park.lat, park.lng);
+        distEl.textContent = `📍 ${d < 1 ? Math.round(d * 1000) + 'm away' : d.toFixed(1) + 'km from you'}`;
+        distEl.hidden = false;
+      } else {
+        distEl.hidden = true;
+      }
+
+      // Actions
+      const actionsEl = document.getElementById('js-panel-actions');
+      const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${park.lat},${park.lng}`;
+      actionsEl.innerHTML = `
+        <a href="/listing/${park.slug}" class="park-panel__btn park-panel__btn--primary">
+          <span class="material-symbols-rounded" style="font-size:1rem">info</span> View listing
+        </a>
+        <a href="${gmapsUrl}" target="_blank" rel="noopener" class="park-panel__btn park-panel__btn--directions">
+          <span class="material-symbols-rounded" style="font-size:1rem">directions</span> Directions
+        </a>
+      `;
+
+      // Open panel
+      document.getElementById('js-park-panel').classList.add('park-panel--open');
+      document.getElementById('js-park-backdrop').classList.add('park-panel-backdrop--show');
+    }
+
+    function closePanel() {
+      document.getElementById('js-park-panel').classList.remove('park-panel--open');
+      document.getElementById('js-park-backdrop').classList.remove('park-panel-backdrop--show');
+      if (activeId) {
+        document.querySelectorAll('.park-card').forEach(c => c.classList.remove('park-card--active'));
+        const oldP = allParks.find(p => p.id === activeId);
+        if (markers[activeId] && oldP) markers[activeId].setIcon(parkIcon(oldP, false));
+        activeId = null;
+      }
+    }
+
+    document.getElementById('js-park-panel-close').addEventListener('click', closePanel);
+    document.getElementById('js-park-backdrop').addEventListener('click', closePanel);
+
+    // ── Grid ─────────────────────────────────────────────────
+    function renderGrid() {
+      const grid = document.getElementById('js-parks-grid');
+      const countEl = document.getElementById('js-parks-count');
+      countEl.textContent = `${filteredParks.length} park${filteredParks.length !== 1 ? 's' : ''} to explore`;
+
+      if (!filteredParks.length) {
+        grid.innerHTML = '<p style="color:#888;grid-column:1/-1">No parks match that filter — try another.</p>';
+        return;
+      }
+
+      grid.innerHTML = filteredParks.map(p => `
+        <div class="park-card" data-park-id="${p.id}" tabindex="0" role="button" aria-label="View ${p.name}">
+          <img class="park-card__img" src="${p.img}" alt="${p.name}" loading="lazy" />
+          <div class="park-card__body">
+            <div class="park-card__emoji">${p.emoji}</div>
+            <div class="park-card__name">${p.name}</div>
+            <div class="park-card__suburb">${p.suburb || ''}</div>
+            <div class="park-card__desc">${p.description || ''}</div>
+            <span class="park-card__map-link">
+              <span class="material-symbols-rounded" style="font-size:.9rem">map</span> Show on map
+            </span>
+          </div>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.park-card').forEach(card => {
+        card.addEventListener('click', () => openPanel(card.dataset.parkId));
+        card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openPanel(card.dataset.parkId); });
+      });
+    }
+
+    // ── Filter pills ─────────────────────────────────────────
+    document.getElementById('js-parks-filters').addEventListener('click', e => {
+      const pill = e.target.closest('.parks-filter-pill');
+      if (!pill) return;
+      document.querySelectorAll('.parks-filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const filter = pill.dataset.filter;
+
+      if (filter === 'all') {
+        filteredParks = [...allParks];
+      } else {
+        const keywords = FILTER_MAP[filter] || [];
+        filteredParks = allParks.filter(p => {
+          const haystack = `${p.name} ${p.description || ''} ${p.suburb || ''}`.toLowerCase();
+          return keywords.some(kw => haystack.includes(kw));
+        });
+      }
+
+      addMarkers(filteredParks);
+      renderGrid();
+      closePanel();
+    });
+
+    // ── Geolocation ──────────────────────────────────────────
+    document.getElementById('js-parks-locate').addEventListener('click', () => {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos => {
+        userLatLng = [pos.coords.latitude, pos.coords.longitude];
+
+        // Add user dot
+        if (userMarker) map.removeLayer(userMarker);
+        userMarker = L.marker(userLatLng, {
+          icon: L.divIcon({ html: '<div class="user-location-dot"></div>', className: '', iconSize: [16,16], iconAnchor: [8,8] })
+        }).addTo(map);
+
+        map.flyTo(userLatLng, 12, { duration: 1 });
+
+        // Sort grid by distance
+        filteredParks.sort((a, b) =>
+          getDistKm(userLatLng[0], userLatLng[1], a.lat, a.lng) -
+          getDistKm(userLatLng[0], userLatLng[1], b.lat, b.lng)
+        );
+        renderGrid();
+      }, () => alert('Could not get your location — please check your browser permissions.'));
+    });
+
+    // ── Randomiser ───────────────────────────────────────────
+    let randIdx = -1;
+    function initRandomiser() {
+      showRandom();
+      document.getElementById('js-parks-randomiser').addEventListener('click', e => {
+        if (e.target.closest('#js-rand-view') || e.target.closest('#js-rand-btn')) return;
+        showRandom();
+      });
+      document.getElementById('js-rand-btn').addEventListener('click', e => { e.stopPropagation(); showRandom(); });
+      document.getElementById('js-rand-view').addEventListener('click', e => {
+        e.stopPropagation();
+        const park = allParks[randIdx];
+        if (park) openPanel(park.id);
+        // Scroll map into view
+        document.getElementById('parks-map').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    function showRandom() {
+      if (!allParks.length) return;
+      let next;
+      do { next = Math.floor(Math.random() * allParks.length); } while (next === randIdx && allParks.length > 1);
+      randIdx = next;
+      const park = allParks[randIdx];
+      const imgEl = document.getElementById('js-rand-img');
+      imgEl.style.opacity = '0';
+      setTimeout(() => {
+        imgEl.src = park.img;
+        imgEl.style.opacity = '1';
+      }, 150);
+      document.getElementById('js-rand-name').textContent = park.name;
+      document.getElementById('js-rand-loc').textContent = park.suburb || park.location || 'Geelong region';
+    }
+
+    // ── Haversine distance ───────────────────────────────────
+    function getDistKm(lat1, lng1, lat2, lng2) {
+      const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // ── Init ─────────────────────────────────────────────────
+    loadParks();
+
+  })();
+  </script>
+</body>
+</html>

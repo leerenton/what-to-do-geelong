@@ -4,7 +4,7 @@
 
 // ── BUSINESSES ────────────────────────────────────────────
 let BUSINESSES = [
-  // ── CAFES ──────────────────────────────────────────────
+  // ── CAFES ─────────────────────────────────────────────
   {
     id: 'pistol-pete',
     slug: 'pistol-petes-coffee-geelong-west',
@@ -508,137 +508,225 @@ let PROMOS = [
 let ARTICLES = [
   {
     id: 'top-5-cafes',
-    slug: 'top-5-cafes-geelong',
+    slug: 'best-cafes-geelong',
     type: 'guide',
-    title: 'Top 5 Cafes in Geelong You Need to Visit',
-    excerpt: 'From specialty single-origin pour-overs to legendary all-day brunch, Geelong\'s cafe scene has levelled up — here are our five favourites.',
+    title: 'The Best Cafes in Geelong',
+    excerpt: 'From a Japanese cat café on the waterfront to a specialty roaster in the Botanic Gardens — Geelong\'s café scene is quietly one of regional Victoria\'s best.',
     heroImg: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80',
     publishedAt: '2026-06-02',
     author: 'WTDG Editorial',
-    businessIds: ['pistol-pete', 'eastern-beach'],
+    businessIds: [
+      'cat-themed-japanese-cafe-neko-geelong-geelong',
+      'funk-by-botanical-brew-geelong-west',
+      'southamerica-coffee-co-geelong',
+      'wym-geelong-botanic-gardens-east-geelong',
+      'native-circles-geelong',
+    ],
     eventIds: [],
     tags: ['food', 'cafes', 'guide'],
-    content: `<p>Geelong's coffee culture has quietly become one of the best in regional Victoria. Whether you're after a meticulously crafted single-origin pour-over or a sun-soaked brunch with bay views, the city delivers. Here are five cafes we keep returning to.</p><h2>1. Pistol Pete's Coffee</h2><p>The benchmark for specialty espresso on Pakington Street. Pete's rotating seasonal menu showcases beans from acclaimed roasters. The all-day brunch menu is equally considered — smashed avo gets a Thai chilli makeover, and the house granola with seasonal fruit is quietly legendary.</p><p><strong>Find it:</strong> Pakington St, Geelong West · <strong>Best for:</strong> Serious coffee nerds and brunch with friends</p><h2>2. Eastern Beach Kiosk</h2><p>There's nowhere in Geelong better for a morning flat white in hand, feet on the grass, watching the bay. Unpretentious, friendly, and exactly right for a lazy weekend morning.</p><p><strong>Find it:</strong> Eastern Beach Reserve · <strong>Best for:</strong> Takeaway coffee and views</p><h2>3. Moose Cafe</h2><p>A local institution on Little Malop Street — wood panels, sourdough you could eat daily, and staff who remember your order. Busy on weekends, worth the wait.</p><h2>4. Baba Ganoush</h2><p>Not just your neighbourhood cafe — Baba's does a full Middle-Eastern inspired brunch that's become something of a Geelong cult. The shakshuka with house-made flatbread is exceptional.</p><h2>5. The Shed</h2><p>Tucked into a laneway off Ryrie Street, this is Geelong's best-kept secret. Natural light, exposed brick, locally roasted beans. Go early on a Saturday.</p>`,
+    content: `<p>Geelong's café scene has grown into something genuinely worth seeking out. Independent, character-filled spaces are scattered across the CBD, Geelong West, and out to the waterfront — here are five that stand out.</p>
+
+<h2>1. Neko Geelong — CBD Waterfront</h2>
+<p>A Japanese-themed cat café right in the heart of Geelong — friendly resident cats, matcha lattes, Japanese-inspired food, and a vibe unlike anything else in the region. A genuine experience as much as a café. Book ahead online as spots fill quickly, especially on weekends.</p>
+<p><a href="/cat-themed-japanese-cafe-neko-geelong-geelong">View listing →</a></p>
+
+<h2>2. Funk by Botanical Brew — Geelong West</h2>
+<p>Kombucha, cold brew, and an all-day menu built around wholefoods and seasonal produce — Funk has carved out a loyal following in Geelong West. The space is relaxed and bright, and the food genuinely holds up beyond the health-café category. Great for a long brunch.</p>
+<p><a href="/funk-by-botanical-brew-geelong-west">View listing →</a></p>
+
+<h2>3. SouthAmerica Coffee Co — CBD</h2>
+<p>Latin-inspired specialty coffee café in the Geelong CBD. Single-origin beans, excellent espresso, and a food menu that goes its own direction — empanadas alongside the smashed avo. A welcome point of difference in the city centre.</p>
+<p><a href="/southamerica-coffee-co-geelong">View listing →</a></p>
+
+<h2>4. WYM | Geelong Botanic Gardens — East Geelong</h2>
+<p>Tucked inside the grounds of the Geelong Botanic Gardens, WYM is one of the most quietly pleasant café settings in the city. Good coffee, simple food, and access to one of the best public gardens in regional Victoria — make a morning of it.</p>
+<p><a href="/wym-geelong-botanic-gardens-east-geelong">View listing →</a></p>
+
+<h2>5. Native Circles — CBD</h2>
+<p>A café with an Indigenous-Australian lens — native ingredients woven into the menu, from wattleseed lattes to lemon myrtle baked goods. An interesting and distinctive offering that reflects a side of Geelong culture not often seen in a café context.</p>
+<p><a href="/native-circles-geelong">View listing →</a></p>`,
+  },
+  {
+    id: 'top-5-breweries',
+    slug: 'best-breweries-geelong',
+    type: 'guide',
+    title: 'The Best Breweries in Geelong',
+    excerpt: 'Geelong and the Bellarine Peninsula have become one of Victoria\'s best craft beer destinations. Here are five breweries worth the visit.',
+    heroImg: 'https://images.unsplash.com/photo-1559839914-17aae19cec71?w=1200&q=80',
+    publishedAt: '2026-06-05',
+    author: 'WTDG Editorial',
+    businessIds: [
+      'bellarine-brewing-company-south-geelong',
+      'great-ocean-road-brewing-south-geelong',
+      'white-rabbit-brewery-barrel-hall-geelong-geelong',
+      'blackmans-brewery-geelong-grovedale',
+      'mt-pleasant-rd-brewers-taproom-bar-belmont',
+    ],
+    eventIds: [],
+    tags: ['drink', 'breweries', 'guide'],
+    content: `<p>Geelong's craft beer scene has grown steadily over the past decade. From established names on the waterfront to newer suburban taprooms, there's a genuine brewery trail to explore — here are five to start with.</p>
+
+<h2>1. Bellarine Brewing Company — South Geelong</h2>
+<p>A Geelong staple and one of the region's most well-regarded breweries. Bellarine Brewing produces a broad, well-made range — easy-drinking lagers to hoppy IPAs — and the taproom is a great spot to settle in for an afternoon. Regularly updated seasonal releases keep things interesting.</p>
+<p><a href="/bellarine-brewing-company-south-geelong">View listing →</a></p>
+
+<h2>2. Great Ocean Road Brewing — South Geelong</h2>
+<p>Named for one of the world's great coastal drives that begins just down the road, Great Ocean Road Brewing brings serious craft credentials to the Geelong scene. Their hazy and session ales have built a strong local following, and the taproom is one of the more relaxed drinking spaces in the city.</p>
+<p><a href="/great-ocean-road-brewing-south-geelong">View listing →</a></p>
+
+<h2>3. White Rabbit Brewery & Barrel Hall — Geelong</h2>
+<p>The iconic White Rabbit Brewery is now at home in Geelong — the Barrel Hall is a remarkable space, with rows of wooden barrels ageing mixed-fermentation ales in a beautifully converted industrial building. Come for the White Ale, stay to explore the barrel-aged range. One of the best brewery experiences in Victoria.</p>
+<p><a href="/white-rabbit-brewery-barrel-hall-geelong-geelong">View listing →</a></p>
+
+<h2>4. Blackmans Brewery — Grovedale</h2>
+<p>Blackmans started in Torquay and has been a fixture of the Geelong craft beer scene for years. The Grovedale venue offers the full range in a spacious taproom with a great beer garden. The Pale Ale and Hazy IPA are crowd favourites; the seasonal and limited releases are worth keeping an eye on.</p>
+<p><a href="/blackmans-brewery-geelong-grovedale">View listing →</a></p>
+
+<h2>5. Mt Pleasant Rd Brewers Taproom + Bar — Belmont</h2>
+<p>A neighbourhood taproom in Belmont that punches well above its size. Small-batch brewing with a focus on quality and variety — the kind of local you want in your suburb. Friendly staff, rotating taps, and a genuinely welcoming atmosphere.</p>
+<p><a href="/mt-pleasant-rd-brewers-taproom-bar-belmont">View listing →</a></p>`,
+  },
+  {
+    id: 'top-5-wineries',
+    slug: 'best-bellarine-wineries',
+    type: 'guide',
+    title: 'The Best Wineries on the Bellarine Peninsula',
+    excerpt: 'Pinot Noir, Chardonnay, and sweeping bay views — the Bellarine Peninsula is one of Victoria\'s most exciting cool-climate wine regions.',
+    heroImg: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1200&q=80',
+    publishedAt: '2026-05-28',
+    author: 'WTDG Editorial',
+    businessIds: [
+      'oakdene-vineyards-cellar-door-wallington',
+      'scotchmans-hill-winery-drysdale',
+      'terindah-estate-bellarine',
+      'bellarine-estate-bellarine',
+      'kilgour-wines-bellarine',
+    ],
+    eventIds: [],
+    tags: ['drink', 'wineries', 'bellarine', 'guide'],
+    content: `<p>The Bellarine Peninsula wine region produces cool-climate Pinot Noir and Chardonnay that regularly rival the Yarra Valley and Mornington Peninsula. A 30-minute drive from Geelong CBD opens up a full day of cellar doors, long lunches, and bay views. Here are five to build your visit around.</p>
+
+<h2>1. Oakdene Vineyards — Wallington</h2>
+<p>One of the Bellarine's most celebrated estates. Oakdene produces elegant, terroir-driven wines — the Chardonnay and Pinot Noir are consistently excellent — and the cellar door restaurant is one of the best long-lunch destinations in the region. Book well ahead for weekend dining.</p>
+<p><a href="/oakdene-vineyards-cellar-door-wallington">View listing →</a></p>
+
+<h2>2. Scotchmans Hill Winery — Drysdale</h2>
+<p>A pioneer of the Geelong wine region, established in 1982. Scotchmans Hill makes benchmark Bellarine Pinot Noir and Chardonnay, and the cellar door sits on a beautiful elevated site with views over Swan Bay. The Swan Bay range offers excellent value; the reserve tier wines are among the best in the region.</p>
+<p><a href="/scotchmans-hill-winery-drysdale">View listing →</a></p>
+
+<h2>3. Terindah Estate — Bellarine</h2>
+<p>Perched on a ridge with some of the most dramatic bay views on the peninsula, Terindah Estate combines well-made estate wines with a stunning cellar door setting. The Chardonnay and rosé are popular choices on a sunny afternoon. Check ahead on weekends as the venue is a popular event and wedding space.</p>
+<p><a href="/terindah-estate-bellarine">View listing →</a></p>
+
+<h2>4. Bellarine Estate — Bellarine</h2>
+<p>A relaxed, family-friendly cellar door in the heart of the Bellarine. Bellarine Estate keeps things approachable — the wines are easy-drinking and well-priced, and the property is a lovely place to spend a couple of hours. Good option if you're bringing the whole group and want somewhere laid-back.</p>
+<p><a href="/bellarine-estate-bellarine">View listing →</a></p>
+
+<h2>5. Kilgour Wines — Bellarine</h2>
+<p>A boutique producer making small-batch wines from estate-grown fruit on the Bellarine. The range is tight and focused — this is a winery that knows what it does well and does it carefully. A quieter, more intimate cellar door experience compared to the bigger estates.</p>
+<p><a href="/kilgour-wines-bellarine">View listing →</a></p>`,
+  },
+  {
+    id: 'top-5-parks',
+    slug: 'best-parks-outdoor-spaces-geelong',
+    type: 'guide',
+    title: 'Geelong\'s Best Parks and Outdoor Spaces',
+    excerpt: 'Eastern Beach, Balyang Sanctuary, Buckley Falls and more — the green spaces that make Geelong one of Victoria\'s most liveable cities.',
+    heroImg: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1200&q=80',
+    publishedAt: '2026-05-20',
+    author: 'WTDG Editorial',
+    businessIds: [
+      'eastern-beach-reserve-geelong',
+      'balyang-sanctuary-newtown',
+      'buckley-falls-park-highton',
+      'eastern-park-east-geelong',
+      'steampacket-gardens-geelong',
+    ],
+    eventIds: [],
+    tags: ['outdoors', 'parks', 'nature', 'guide'],
+    content: `<p>Geelong is unusually well-served with accessible green space — parks, reserves, and waterfront gardens spread right across the city. Here are five of the best, whether you're after a morning walk, a family afternoon, or somewhere to watch the sunset.</p>
+
+<h2>1. Eastern Beach Reserve — Geelong Waterfront</h2>
+<p>The city's most-loved public space. The 1931 art deco swimming enclosure, grassy foreshore, waterfront promenade, and iconic bollard sculptures make Eastern Beach the natural starting point for any Geelong visit. Walk east to the Botanic Gardens or west toward Steampacket Gardens — it's all good.</p>
+<p><a href="/eastern-beach-reserve-geelong">View listing →</a></p>
+
+<h2>2. Balyang Sanctuary — Newtown</h2>
+<p>A hidden gem on the banks of the Barwon River in Newtown. Balyang is a small wildlife sanctuary with free-roaming peacocks, waterfowl, and beautiful river walks. It's the kind of place Geelong locals have known about for years and visitors consistently discover and love. Free entry, dogs on lead welcome.</p>
+<p><a href="/balyang-sanctuary-newtown">View listing →</a></p>
+
+<h2>3. Buckley Falls Park — Highton</h2>
+<p>Follows the Barwon River through one of Geelong's most scenic natural corridors. The falls themselves are a dramatic sight after rain, and the surrounding park offers excellent walking tracks through native bush. A genuine slice of natural Geelong just minutes from the CBD.</p>
+<p><a href="/buckley-falls-park-highton">View listing →</a></p>
+
+<h2>4. Eastern Park — East Geelong</h2>
+<p>Adjacent to the Botanic Gardens and one of Geelong's oldest parklands. Eastern Park is a broad, relaxed space — perfect for a picnic, a morning run, or just sitting in the sun. The rose garden and heritage plantings are worth a slow walk through.</p>
+<p><a href="/eastern-park-east-geelong">View listing →</a></p>
+
+<h2>5. Steampacket Gardens — Geelong Waterfront</h2>
+<p>A beautifully maintained waterfront park right in the heart of Geelong. Steampacket Gardens hosts many of the city's major outdoor events — concerts, markets, festivals — but on an ordinary day it's simply a great place to sit by the water. The lawns slope gently toward Corio Bay; bring a rug and a bottle of something cold.</p>
+<p><a href="/steampacket-gardens-geelong">View listing →</a></p>`,
   },
   {
     id: 'waterfront-guide',
     slug: 'geelong-waterfront-guide',
     type: 'guide',
     title: 'The Ultimate Geelong Waterfront Guide',
-    excerpt: 'Stretching 6km from Rippleside to St Helens, the Geelong waterfront is the city\'s beating heart. Here\'s everything you need to know.',
+    excerpt: 'Stretching from Rippleside to St Helens, the Geelong waterfront is the city\'s beating heart — here\'s how to do it from dawn to after dark.',
     heroImg: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
     publishedAt: '2026-05-28',
     author: 'WTDG Editorial',
-    businessIds: ['eastern-beach', 'the-wharf'],
-    eventIds: [1, 2],
+    businessIds: [
+      'eastern-beach-reserve-geelong',
+      'steampacket-gardens-geelong',
+      'little-creatures-brewery-geelong-geelong',
+      'geelong-waterfront-geelong',
+    ],
+    eventIds: [],
     tags: ['waterfront', 'guide', 'outdoors'],
-    content: `<p>Geelong's waterfront is one of the most enjoyable urban waterfronts in Victoria — and most visitors only scratch the surface. Here's how to do it properly, from dawn to after dark.</p><h2>Morning: Eastern Beach</h2><p>Start at Eastern Beach Reserve, where the 1930s swimming enclosure and art deco change rooms create one of the prettiest beach settings in regional Victoria. Grab a coffee from the Eastern Beach Kiosk and watch the bay wake up.</p><h2>Midday: Cunningham Pier</h2><p>Walk north along the promenade to Cunningham Pier, home to the Wharf Shed Café — fresh local seafood, craft beer on tap, and sweeping views across Corio Bay. The pier itself is one of the oldest surviving timber piers in Victoria.</p><h2>Afternoon: Little Creatures & The Boom</h2><p>Continue to the Yarra Street Pier precinct, where Little Creatures Geelong has established itself as one of the best brewery venues in the state. Order the Rogers' and sit outside as the afternoon light turns gold.</p><h2>Evening: Sunset at St Helens</h2><p>The western end of the waterfront offers uninterrupted views of the Bellarine Peninsula at sunset. Pack a bottle of wine and find a spot on the grass. This is what Geelong is for.</p>`,
+    content: `<p>Geelong's waterfront is one of the most enjoyable urban waterfronts in Victoria — and most visitors only scratch the surface. Here's how to do it properly, from morning coffee to sunset.</p>
+
+<h2>Morning: Eastern Beach</h2>
+<p>Start at <a href="/eastern-beach-reserve-geelong">Eastern Beach Reserve</a>, where the 1930s art deco swimming enclosure creates one of the prettiest beach settings in regional Victoria. Watch the bay wake up, take a swim if the weather's right, and walk the promenade east toward the Botanic Gardens.</p>
+
+<h2>Midday: Steampacket Gardens & the Pier</h2>
+<p>Head toward <a href="/steampacket-gardens-geelong">Steampacket Gardens</a> and the Cunningham Pier precinct. This stretch of the waterfront has restaurants, cafes, and some of the best water views in the city — grab lunch here and watch the ferry traffic on the bay.</p>
+
+<h2>Afternoon: Little Creatures</h2>
+<p>Walk or ride north to Yarra Street Pier, home to <a href="/little-creatures-brewery-geelong-geelong">Little Creatures Brewery</a> — one of the best brewery settings in the state. The copper brewing tanks, wood-fired pizza, and waterfront terrace make it an easy place to spend an afternoon.</p>
+
+<h2>Evening: Sunset at the Western Waterfront</h2>
+<p>The western end of the <a href="/geelong-waterfront-geelong">Geelong Waterfront</a> faces directly into the sunset over the Bellarine Peninsula. Find a spot on the grass, watch the light change across Corio Bay, and consider that there are far worse ways to spend an evening.</p>`,
   },
   {
     id: 'weekend-itinerary',
     slug: 'perfect-48-hours-in-geelong',
     type: 'guide',
     title: 'The Perfect 48 Hours in Geelong',
-    excerpt: 'First time visiting? Here\'s our definitive two-day itinerary — markets, brunch, bay views, live music, and a day trip to the Surf Coast.',
+    excerpt: 'First time visiting? Our two-day itinerary covers the waterfront, a Bellarine winery, Geelong\'s best galleries, and a morning on the Surf Coast.',
     heroImg: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&q=80',
     publishedAt: '2026-06-01',
     author: 'WTDG Editorial',
-    businessIds: ['pistol-pete', 'eastern-beach', 'the-wharf', 'boom-gallery'],
-    eventIds: [1, 2, 3],
+    businessIds: [
+      'eastern-beach-reserve-geelong',
+      'little-creatures-brewery-geelong-geelong',
+      'geelong-gallery-geelong',
+      'oakdene-vineyards-cellar-door-wallington',
+    ],
+    eventIds: [],
     tags: ['guide', 'itinerary', 'weekend'],
-    content: `<p>Geelong is two hours from Melbourne by train and has more than earned its status as a destination in its own right. Here's how to spend 48 hours doing it justice.</p><h2>Saturday Morning</h2><p>Start with coffee at Pistol Pete's on Pakington Street, then walk down to the Geelong Farmers Market at Johnstone Park. Load up on local produce, street food, and the best sourdough in the region — the market is the social heart of Geelong on a Sunday morning.</p><h2>Saturday Afternoon</h2><p>Walk or ride the waterfront from Eastern Beach to Cunningham Pier. Stop at the Wharf Shed for lunch — local seafood, bay views, cold beer. Head to Boom Gallery in Newtown in the afternoon to see what regional Australian contemporary art looks like at its best.</p><h2>Saturday Evening</h2><p>Catch whatever's on at Jazz on the Waterfront or check the GPAC program for a show. Dinner on Pakington Street — try Tulip for modern Australian or The Fishwife for something more relaxed.</p><h2>Sunday</h2><p>Day trip to the Surf Coast. It's 30 minutes to Torquay and 45 to Lorne. The Great Ocean Road starts here — even a short drive is worth it for the views. The Bellarine Peninsula wine region is equally accessible: Oakdene Vineyard does a great long lunch.</p>`,
-  },
-  {
-    id: 'pistol-pete-expansion',
-    slug: 'pistol-petes-coffee-opens-cbd-flagship-geelong',
-    type: 'news',
-    title: 'Pistol Pete\'s Opens a CBD Flagship on Malop Street',
-    excerpt: 'Geelong West\'s beloved specialty coffee institution has expanded to the CBD with a larger all-day venue and a dedicated events room.',
-    heroImg: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1200&q=80',
-    publishedAt: '2026-06-04',
-    author: 'Business News',
-    businessIds: ['pistol-pete'],
-    eventIds: [],
-    tags: ['news', 'food', 'business'],
-    content: `<p>Pistol Pete's Coffee — the specialty espresso bar that's been a fixture of Pakington Street in Geelong West for the past seven years — has opened a second location in the Geelong CBD, taking over a heritage shopfront on Malop Street.</p><p>The new space seats 40 inside with a street-side terrace, plus a dedicated events room the team will use for cupping sessions, latte art competitions, and live music evenings.</p><blockquote>"We've always been a Geelong West business and that doesn't change — the original is still our home," said founder Pete Andreou. "But we've had so many people from the CBD side asking us to open closer to them, and this space was too good to pass up."</blockquote><p>The CBD menu mirrors the Geelong West original, with an expanded brunch offering developed with local produce from the Geelong Farmers Market. Open from 7am daily.</p>`,
-  },
-  {
-    id: 'gpac-2026-season',
-    slug: 'gpac-2026-season-geelong-performing-arts',
-    type: 'news',
-    title: 'GPAC Announces a Big 2026 Season — Including Two Australian Premieres',
-    excerpt: 'The Geelong Performing Arts Centre has unveiled its 2026 program, featuring two Australian premiere productions and a major new commission.',
-    heroImg: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=1200&q=80',
-    publishedAt: '2026-06-03',
-    author: 'Business News',
-    businessIds: ['gpac'],
-    eventIds: [7],
-    tags: ['news', 'arts', 'theatre'],
-    content: `<p>Geelong Performing Arts Centre has released its 2026 season program — the most ambitious in the venue's history. The year kicks off with an Australian premiere of a critically acclaimed West End drama, followed by a season spanning contemporary theatre, opera, dance, and comedy.</p><p>"We wanted to put Geelong audiences in the same position as Melbourne and Sydney audiences when it comes to access to the best new work from the UK and Europe," said Artistic Director Sarah Chen.</p><p>The headline event is a commissioned work from Geelong-born composer Marcus Webb, whose immersive piece <em>Waterline</em> will transform the GPAC main stage into an audio-visual environment exploring the city's relationship with Corio Bay. World premiere at GPAC in August before a national tour. Subscriptions on sale now.</p>`,
-  },
-  {
-    id: 'foreshore-history',
-    slug: 'geelong-foreshore-history-city-and-bay',
-    type: 'history',
-    title: 'The Geelong Foreshore: A City\'s Relationship With Its Bay',
-    excerpt: 'For most of its European history, Geelong\'s waterfront was industrial — a working port, not a promenade. The transformation took decades.',
-    heroImg: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
-    beforeImg: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80',
-    afterImg: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
-    publishedAt: '2026-05-20',
-    author: 'What Was Geelong',
-    businessIds: ['eastern-beach', 'the-wharf'],
-    eventIds: [],
-    tags: ['history', 'waterfront', 'heritage'],
-    content: `<p>Today's Geelong waterfront — six kilometres from Rippleside to St Helens — is one of the most popular public spaces in regional Victoria. On a summer weekend, thousands walk, cycle, swim, and dine along its length. It's hard to imagine it any other way.</p><p>But for most of Geelong's European history, the waterfront was industrial. The bay was the engine of the city's economy: wool and wheat went out, goods and immigrants came in. The waterfront meant wharves, warehouses, and the constant movement of ships.</p><h2>Eastern Beach: A Rare Exception</h2><p>The Eastern Beach swimming enclosure, built in 1931, was one of the earliest deliberate investments in the waterfront as a leisure space. The art deco change rooms and circular enclosure were a statement of civic ambition — a gift to the public at the height of the Depression. They remain today, essentially unchanged, among the best examples of interwar public architecture in Victoria.</p><h2>The Shift</h2><p>The shift from working port to public promenade happened gradually across the second half of the 20th century, as port facilities consolidated and the city began to think differently about its relationship with the water. The Cunningham Pier redevelopment in the 1990s was a turning point, replacing derelict infrastructure with restaurants and public space. The Waterfront Geelong project in the 2000s completed the transformation — a waterfront that now belongs to everyone.</p>`,
-  },
-  {
-    id: 'geelong-jail-history',
-    slug: 'old-geelong-jail-bluestone-heritage',
-    type: 'history',
-    title: 'The Old Geelong Jail: From Bluestone Prison to Heritage Icon',
-    excerpt: 'Built in the 1850s from local bluestone, the Old Geelong Jail is one of the finest examples of colonial penal architecture in Australia.',
-    heroImg: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=1200&q=80',
-    beforeImg: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=800&q=80',
-    afterImg: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&q=80',
-    publishedAt: '2026-05-10',
-    author: 'What Was Geelong',
-    businessIds: [],
-    eventIds: [],
-    tags: ['history', 'heritage', 'architecture'],
-    content: `<p>When the Old Geelong Jail opened in 1853, it was designed to impose. The bluestone walls — quarried locally from the Barwon River — were three feet thick, the cell blocks arranged in a radial panopticon design that allowed a single guard to watch multiple wings simultaneously. It was architecture as a statement of power.</p><p>Over the following century, the jail housed some of Victoria's most notorious criminals, as well as hundreds of ordinary people whose offences ranged from murder to debt. Conditions were harsh; the accounts of those who served time here, particularly in the early colonial period, are often brutal.</p><h2>Closure and Transformation</h2><p>The jail closed as an operational prison in the 1990s, sitting dormant for years — too expensive to maintain, too historically significant to demolish. Its eventual transformation into a heritage tourism site preserved the building's integrity while giving it new purpose.</p><p>What's remarkable is how much the building still communicates its original intent. The bluestone is heavy and cold. The doors are very thick. The cells are very small. Whatever visitor layers have been added, the place still feels like what it was.</p>`,
-  },
-  {
-    id: 'paper-mill-history',
-    slug: 'geelong-paper-mill-fyansford-history',
-    type: 'history',
-    title: 'The Paper Mill: Geelong\'s Industrial Heart',
-    excerpt: 'For over a century, the Australian Paper Mills at Fyansford was one of Geelong\'s largest employers. Its transformation tells the story of a city changing its economic identity.',
-    heroImg: 'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=1200&q=80',
-    beforeImg: 'https://images.unsplash.com/photo-1574400434939-8ee53b0f80d5?w=800&q=80',
-    afterImg: 'https://images.unsplash.com/photo-1544510808-91bc950c2398?w=800&q=80',
-    publishedAt: '2026-04-30',
-    author: 'What Was Geelong',
-    businessIds: [],
-    eventIds: [],
-    tags: ['history', 'industry', 'heritage'],
-    content: `<p>The Australian Paper Mills at Fyansford — established in 1876 on the banks of the Barwon River — was for decades one of the dominant features of Geelong's industrial geography. At its peak, the mill employed hundreds of workers and produced paper for newspapers across Victoria and New South Wales. The smell of the mill — a particular sulphurous, industrial musk — was part of the sensory experience of living in Geelong.</p><p>The mill's closure in 1996 left a gap — physical, economic, and psychological. The site covered over 40 hectares and included dozens of heritage-listed structures.</p><h2>What Came Next</h2><p>The Fyansford site has been subject to various redevelopment proposals over the years, with portions incorporated into residential and commercial development. Some original bluestone and brick structures have been retained and adapted. For many older Geelong residents, the mill represents something more than a building — it's a marker of a particular version of Geelong that no longer exists. The Barwon River heritage walk passes the old site; several structures are still visible from the bank.</p>`,
-  },
-  {
-    id: 'the-gretchen',
-    slug: 'the-gretchen-hotel-geelong-history',
-    type: 'history',
-    title: 'The Gretchen: Geelong\'s Most Storied Corner Hotel',
-    excerpt: 'Built in 1854, the Gretchen Hotel is one of the oldest surviving hotel buildings in Geelong — and it has had many lives.',
-    heroImg: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80',
-    beforeImg: 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&q=80',
-    afterImg: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80',
-    publishedAt: '2026-05-15',
-    author: 'What Was Geelong',
-    businessIds: [],
-    eventIds: [],
-    tags: ['history', 'heritage', 'pubs'],
-    content: `<p>Corner hotels are a particular feature of Australian colonial streetscapes — two-storey brick buildings on prominent intersections, bar on the ground floor, accommodation above, designed to catch trade from every direction. Geelong has many. None has more stories than the Gretchen.</p><p>The building at the corner of Moorabool and Malop Streets has operated under a succession of names since it was first licensed in 1854, but Geelong locals have known it as the Gretchen for most of living memory. It's been a workers' pub, a live music venue, a backpackers' hostel, and more than once has looked genuinely close to closure.</p><h2>The Music Years</h2><p>In the 1980s and 1990s, the Gretchen's front bar was one of the most important venues on the Geelong live music circuit. A generation of local bands — and several that went on to larger things nationally — played on the small stage in the corner. The walls of the back bar still carry some of the old gig posters.</p><h2>The Architecture</h2><p>The building is a handsome example of Victorian commercial architecture — bluestone base, brick upper floor, original cast-iron verandah on both street frontages. The interior retains its pressed tin ceilings in the main bar. Heritage-listed since the 1980s, it's been protected from the aggressive renovations that stripped character from comparable buildings elsewhere. The building itself remains magnificent.</p>`,
+    content: `<p>Geelong is 75 minutes from Melbourne by train and has more than earned its status as a destination in its own right. Here's how to spend 48 hours well.</p>
+
+<h2>Saturday Morning</h2>
+<p>Start at <a href="/eastern-beach-reserve-geelong">Eastern Beach Reserve</a> — take a morning swim in the art deco enclosure if conditions allow, then walk the promenade toward the CBD. Grab breakfast or coffee along the waterfront before heading into town.</p>
+
+<h2>Saturday Afternoon</h2>
+<p>Visit the <a href="/geelong-gallery-geelong">Geelong Gallery</a> — the permanent collection includes significant works of Australian art and there's almost always a strong temporary exhibition. Then head to Yarra Street Pier for an afternoon session at <a href="/little-creatures-brewery-geelong-geelong">Little Creatures Brewery</a>.</p>
+
+<h2>Saturday Evening</h2>
+<p>Dinner in the CBD or on Pakington Street in Geelong West — check the WTDG eat listings for what's current. Check the Geelong Arts Centre program for evening shows.</p>
+
+<h2>Sunday: Bellarine Day Trip</h2>
+<p>Drive out to the Bellarine Peninsula — 30 minutes from the CBD. <a href="/oakdene-vineyards-cellar-door-wallington">Oakdene Vineyards</a> is one of the best long-lunch destinations in the region; book ahead. On the way back, stop at one of the Bellarine's smaller cellar doors or drive down to Queenscliff for a look at the bay from the other side.</p>`,
   },
 ];
 

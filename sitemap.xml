@@ -35,7 +35,17 @@
   <url><loc>https://whattodogeelong.com.au/do/wellness</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://whattodogeelong.com.au/do/family</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
 
-  <!-- Editorial -->
+  <!-- Editorial / Read section -->
+  <url><loc>https://whattodogeelong.com.au/read/best-cafes-geelong</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/read/best-breweries-geelong</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/read/best-bellarine-wineries</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/read/best-parks-outdoor-spaces-geelong</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/read/geelong-waterfront-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/read/perfect-48-hours-in-geelong</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+
+  <url><loc>https://whattodogeelong.com.au/parks</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- Other pages -->
   <url><loc>https://whattodogeelong.com.au/advertise</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://whattodogeelong.com.au/community-guides</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
 

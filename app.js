@@ -2296,16 +2296,138 @@ function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, l
     </a>`;
 }
 
-function collFilter(items, filterEl, searchEl, countEl, renderFn) {
-  let activeFilter = 'all';
-  let searchQ = '';
+// ── FILTER ALIASES ────────────────────────────────────────
+// Maps URL param values → pill data-filter values
+// Handles accents, plurals, legacy slugs, and clean-URL slugs
+const FILTER_ALIASES = {
+  // eat
+  'cafe': 'café', 'cafes': 'café', 'coffee': 'café',
+  'restaurants': 'restaurant',
+  'bars': 'bar',
+  'bakeries': 'bakery',
+  'brunch': 'brunch',
+  'asian': 'asian',
+  // drink
+  'breweries': 'brewery', 'brewery': 'brewery',
+  'wineries': 'winery', 'winery': 'winery',
+  'pubs': 'pub',
+  'cocktails': 'cocktail',
+  // do
+  'activities': 'activity',
+  'attractions': 'attraction',
+  'arts': 'art', 'culture': 'art',
+  'outdoors': 'nature', 'outdoor': 'nature',
+  'sport': 'sport', 'sports': 'sport',
+  'adventure': 'adventure',
+  'family': 'family',
+  'wellness': 'wellness', 'spas': 'wellness', 'spa': 'wellness',
+};
+
+function normaliseFilter(raw) {
+  if (!raw || raw === 'all') return 'all';
+  const lower = raw.toLowerCase().trim();
+  return FILTER_ALIASES[lower] || lower;
+}
+
+// ── SEO META PER FILTER ───────────────────────────────────
+const FILTER_SEO = {
+  'eat': {
+    all:        { title: 'Where to Eat in Geelong | What To Do Geelong', desc: 'The best restaurants, cafes, bakeries and bars in Geelong. Browse our curated guide to eating out in Geelong.' },
+    'café':     { title: 'Best Cafes in Geelong | What To Do Geelong', desc: 'Find the best cafes in Geelong for great coffee, brunch and all-day dining. Local favourites and hidden gems.' },
+    brunch:     { title: 'Best Brunch in Geelong | What To Do Geelong', desc: 'The top spots for brunch in Geelong — from big breakfast to eggs benny and weekend specials.' },
+    restaurant: { title: 'Best Restaurants in Geelong | What To Do Geelong', desc: 'Geelong\'s best restaurants for dinner and lunch. Fine dining to casual, all locally reviewed.' },
+    bar:        { title: 'Best Bars in Geelong | What To Do Geelong', desc: 'Top bars in Geelong for a great drink. Cocktail bars, wine bars, and great pub vibes.' },
+    bakery:     { title: 'Best Bakeries in Geelong | What To Do Geelong', desc: 'Fresh bread, pastries and coffee — the best bakeries in Geelong.' },
+    pizza:      { title: 'Best Pizza in Geelong | What To Do Geelong', desc: 'Wood-fired, sourdough, and classic — the best pizza restaurants in Geelong.' },
+    asian:      { title: 'Best Asian Restaurants Geelong | What To Do Geelong', desc: 'Japanese, Thai, Chinese, Korean and more — the best Asian restaurants in Geelong.' },
+  },
+  'drink': {
+    all:      { title: 'Bars, Pubs & Breweries in Geelong | What To Do Geelong', desc: 'Your guide to drinking in Geelong — bars, pubs, breweries, wineries and more.' },
+    brewery:  { title: 'Geelong Breweries | What To Do Geelong', desc: 'The best craft breweries in Geelong and the Bellarine Peninsula. Local beers, tasting paddles and brewery tours.' },
+    winery:   { title: 'Bellarine Peninsula Wineries | What To Do Geelong', desc: 'Discover the best wineries on the Bellarine Peninsula near Geelong. Cellar doors, tastings and vineyard dining.' },
+    bar:      { title: 'Best Bars in Geelong | What To Do Geelong', desc: 'Cocktail bars, wine bars and great evenings out in Geelong.' },
+    pub:      { title: 'Best Pubs in Geelong | What To Do Geelong', desc: 'The best pubs in Geelong for a cold beer, parma and Sunday session.' },
+    cocktail: { title: 'Best Cocktail Bars Geelong | What To Do Geelong', desc: 'Geelong\'s best cocktail bars — from low-key to late night.' },
+  },
+  'do': {
+    all:        { title: 'Things to Do in Geelong | What To Do Geelong', desc: 'The best things to do in Geelong and the Surf Coast. Activities, attractions, arts and outdoor adventures.' },
+    activity:   { title: 'Activities in Geelong | What To Do Geelong', desc: 'Fun activities in Geelong for all ages — indoors and outdoors.' },
+    attraction: { title: 'Geelong Attractions | What To Do Geelong', desc: 'Top tourist attractions in Geelong. Waterfront, galleries, museums and day-trip destinations.' },
+    adventure:  { title: 'Adventure Activities Geelong | What To Do Geelong', desc: 'Adventure and outdoor activities in and around Geelong — surfing, kayaking, climbing and more.' },
+    art:        { title: 'Arts & Culture Geelong | What To Do Geelong', desc: 'Geelong\'s arts and culture scene — galleries, theatres, live music venues and cultural landmarks.' },
+    sport:      { title: 'Sport & Leisure in Geelong | What To Do Geelong', desc: 'Sporting activities and spectator sport in Geelong. Gyms, pools, golf and the Cats.' },
+    nature:     { title: 'Outdoor Activities Geelong | What To Do Geelong', desc: 'Nature and outdoor activities near Geelong — walks, parks, beaches and the You Yangs.' },
+    wellness:   { title: 'Day Spas & Wellness in Geelong | What To Do Geelong', desc: 'Day spas, wellness retreats and relaxation in Geelong. Massages, yoga and health studios.' },
+    family:     { title: 'Family Activities in Geelong | What To Do Geelong', desc: 'The best family-friendly activities in Geelong for kids and adults. Fun for all ages.' },
+  },
+  'stay': {
+    all: { title: 'Where to Stay in Geelong | What To Do Geelong', desc: 'Find the best accommodation in Geelong — hotels, holiday rentals, boutique stays and B&Bs.' },
+  },
+};
+
+const SITE_URL = 'https://whattodogeelong.com.au';
+
+// ── CLEAN URL MAP ─────────────────────────────────────────
+// Maps page+filter → clean canonical path
+const CLEAN_URL_MAP = {
+  'eat-café':       '/eat/cafes',
+  'eat-brunch':     '/eat/brunch',
+  'eat-restaurant': '/eat/restaurants',
+  'eat-bar':        '/eat/bars',
+  'eat-bakery':     '/eat/bakeries',
+  'eat-pizza':      '/eat/pizza',
+  'eat-asian':      '/eat/asian',
+  'drink-brewery':  '/drink/breweries',
+  'drink-winery':   '/drink/wineries',
+  'drink-bar':      '/drink/bars',
+  'drink-pub':      '/drink/pubs',
+  'drink-cocktail': '/drink/cocktails',
+  'do-activity':    '/do/activities',
+  'do-attraction':  '/do/attractions',
+  'do-adventure':   '/do/adventure',
+  'do-art':         '/do/arts',
+  'do-sport':       '/do/sport',
+  'do-nature':      '/do/outdoors',
+  'do-wellness':    '/do/wellness',
+  'do-family':      '/do/family',
+};
+
+function applyFilterSEO(page, filter) {
+  const pageMeta  = FILTER_SEO[page] || {};
+  const meta      = pageMeta[filter] || pageMeta['all'] || null;
+  if (!meta) return;
+
+  document.title = meta.title;
+  const setMeta = (sel, attr, val) => {
+    let el = document.querySelector(sel);
+    if (!el) { el = document.createElement('meta'); document.head.appendChild(el); }
+    el.setAttribute(attr, val);
+  };
+  setMeta('meta[name="description"]',        'content', meta.desc);
+  setMeta('meta[property="og:title"]',       'content', meta.title);
+  setMeta('meta[property="og:description"]', 'content', meta.desc);
+
+  // Canonical — prefer clean URL
+  const cleanPath = filter === 'all' ? `/${page}` : (CLEAN_URL_MAP[`${page}-${filter}`] || `/${page}?filter=${encodeURIComponent(filter)}`);
+  const canonical = `${SITE_URL}${cleanPath}`;
+  let linkEl = document.querySelector('link[rel="canonical"]');
+  if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
+  linkEl.href = canonical;
+  setMeta('meta[property="og:url"]', 'content', canonical);
+}
+
+function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
+  // Normalise ?filter= param from URL (also handles clean-URL rewrites that pass ?filter=)
+  const urlParam     = new URLSearchParams(window.location.search).get('filter');
+  let activeFilter   = normaliseFilter(urlParam) || 'all';
+  let searchQ        = '';
 
   function render() {
     const filtered = items.filter(item => {
-      const matchFilter = activeFilter === 'all' ||
-        (item.type || item.category || '').toLowerCase().includes(activeFilter);
+      const haystack = (item.type || item.category || '').toLowerCase();
+      const matchFilter = activeFilter === 'all' || haystack.includes(activeFilter);
       const matchSearch = !searchQ ||
-        (item.name || item.title || '').toLowerCase().includes(searchQ) ||
+        (item.name  || item.title || '').toLowerCase().includes(searchQ) ||
         (item.description || item.subtitle || '').toLowerCase().includes(searchQ) ||
         (item.suburb || item.location || '').toLowerCase().includes(searchQ);
       return matchFilter && matchSearch;
@@ -2314,14 +2436,46 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn) {
     return filtered;
   }
 
+  function setActive(filter) {
+    activeFilter = filter;
+
+    // Update pill active state
+    if (filterEl) {
+      filterEl.querySelectorAll('.coll-filter-pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.filter === filter);
+      });
+    }
+
+    // Push clean URL to history (no page reload)
+    if (pageKey) {
+      const cleanPath = filter === 'all'
+        ? `/${pageKey}`
+        : (CLEAN_URL_MAP[`${pageKey}-${filter}`] || `/${pageKey}?filter=${encodeURIComponent(filter)}`);
+      history.pushState({ filter }, '', cleanPath);
+      applyFilterSEO(pageKey, filter);
+    }
+
+    renderFn(render());
+  }
+
+  // Apply initial filter from URL param — activate matching pill
+  if (activeFilter !== 'all' && filterEl) {
+    // Find pill that matches (may not exist if filter is 'all' or unknown)
+    const matchPill = filterEl.querySelector(`.coll-filter-pill[data-filter="${activeFilter}"]`);
+    if (matchPill) {
+      filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.remove('active'));
+      matchPill.classList.add('active');
+    } else {
+      activeFilter = 'all'; // fall back if no pill found
+    }
+  }
+
+  // Apply initial SEO meta
+  if (pageKey) applyFilterSEO(pageKey, activeFilter);
+
   if (filterEl) {
     filterEl.querySelectorAll('.coll-filter-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        activeFilter = pill.dataset.filter;
-        renderFn(render());
-      });
+      pill.addEventListener('click', () => setActive(pill.dataset.filter));
     });
   }
   if (searchEl) {
@@ -2330,6 +2484,18 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn) {
       renderFn(render());
     });
   }
+
+  // Handle browser back/forward
+  window.addEventListener('popstate', e => {
+    const f = normaliseFilter(new URLSearchParams(window.location.search).get('filter')) || 'all';
+    activeFilter = f;
+    if (filterEl) {
+      filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.toggle('active', p.dataset.filter === f));
+    }
+    if (pageKey) applyFilterSEO(pageKey, f);
+    renderFn(render());
+  });
+
   renderFn(render());
 }
 
@@ -2572,7 +2738,8 @@ function initEatPage() {
     document.getElementById('js-eat-filters'),
     document.getElementById('js-eat-search'),
     document.getElementById('js-eat-count'),
-    renderEat
+    renderEat,
+    'eat'
   );
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-eat-loc');
   renderSectionEvents('eat');
@@ -2609,7 +2776,8 @@ function initDrinkPage() {
     document.getElementById('js-drink-filters'),
     document.getElementById('js-drink-search'),
     document.getElementById('js-drink-count'),
-    renderDrink
+    renderDrink,
+    'drink'
   );
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-drink-loc');
   renderSectionEvents('drink');
@@ -2646,7 +2814,8 @@ function initDoPage() {
     document.getElementById('js-do-filters'),
     document.getElementById('js-do-search'),
     document.getElementById('js-do-count'),
-    renderDo
+    renderDo,
+    'do'
   );
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-do-loc');
   renderSectionEvents('do');

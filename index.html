@@ -176,55 +176,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="container">
       <div class="section-header">
         <h2 class="section-title"><span class="material-symbols-rounded">weekend</span> This Weekend</h2>
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span class="date-pill" id="js-weekend-label">7–8 Jun</span>
-          <button class="filter-btn" id="js-filter-toggle">
-            <span class="material-symbols-rounded">tune</span> Filter
-            <span class="filter-btn__count" id="js-filter-count" hidden>0</span>
-          </button>
-        </div>
-      </div>
-      <div class="chip-row" id="js-chip-row">
-        <button class="chip chip--active" data-cat="All">All</button>
-        <button class="chip" data-cat="Music">Music</button>
-        <button class="chip" data-cat="Food & Drink">Food & Drink</button>
-        <button class="chip" data-cat="Arts & Culture">Arts & Culture</button>
-        <button class="chip" data-cat="Theatre">Theatre</button>
-        <button class="chip" data-cat="Markets">Markets</button>
-        <button class="chip" data-cat="Sport">Sport</button>
-        <button class="chip" data-cat="Education">Education</button>
-        <button class="chip" data-cat="Nightlife">Nightlife</button>
-        <button class="chip" data-cat="Festivals">Festivals</button>
+        <span class="date-pill" id="js-weekend-label">Sat–Sun</span>
       </div>
 
-      <!-- FILTER PANEL -->
-      <div class="filter-panel" id="js-filter-panel" hidden>
-        <div class="filter-panel__inner">
-          <div class="filter-group">
-            <span class="filter-group__label">Price</span>
-            <div class="filter-group__chips">
-              <button class="filter-chip" data-tag="Free">Free</button>
-              <button class="filter-chip" data-tag="Under $20">Under $20</button>
-              <button class="filter-chip" data-tag="Under $50">Under $50</button>
-            </div>
-          </div>
-          <div class="filter-group">
-            <span class="filter-group__label">Vibe</span>
-            <div class="filter-group__chips">
-              <button class="filter-chip" data-tag="Family Friendly">Family Friendly</button>
-              <button class="filter-chip" data-tag="Outdoors">Outdoors</button>
-              <button class="filter-chip" data-tag="All Ages">All Ages</button>
-              <button class="filter-chip" data-tag="Accessible">Accessible</button>
-              <button class="filter-chip" data-tag="Pet Friendly">Pet Friendly</button>
-              <button class="filter-chip" data-tag="Bookings Required">Bookings Required</button>
-            </div>
-          </div>
-          <button class="filter-clear" id="js-filter-clear" hidden>Clear all filters</button>
-        </div>
+      <!-- Weekend toggle -->
+      <div class="weekend-toggle" id="js-weekend-toggle">
+        <button class="weekend-toggle__btn weekend-toggle__btn--active" data-week="this" id="js-week-this">This weekend</button>
+        <a class="weekend-toggle__btn" id="js-week-next" href="events.html">Next weekend →</a>
       </div>
 
       <div id="js-featured-event"></div>
       <div class="event-scroll" id="js-event-scroll"></div>
+      <div class="weekend-see-all" id="js-weekend-see-all">
+        <a class="btn btn--outline" id="js-weekend-see-all-link" href="events.html">See all this weekend →</a>
+      </div>
     </div>
   </section>
 
@@ -232,12 +197,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="container">
     <div class="planner-card">
       <h3 class="planner-card__title">Planning a trip to Geelong?</h3>
-      <p class="planner-card__sub">Tell us when you're coming and we'll line up events, eats, and a place to stay.</p>
+      <p class="planner-card__sub">Tell us when you're visiting and we'll show you everything happening.</p>
       <div class="planner-card__fields">
-        <input type="date" id="dp-from-2" class="planner-input" />
-        <input type="date" id="dp-to-2" class="planner-input" />
+        <div class="planner-card__field">
+          <label class="planner-card__label">From</label>
+          <input type="date" id="dp-from-2" class="planner-input" />
+        </div>
+        <div class="planner-card__field">
+          <label class="planner-card__label">To</label>
+          <input type="date" id="dp-to-2" class="planner-input" />
+        </div>
       </div>
-      <button class="btn btn--teal btn--full">Show My Geelong Weekend</button>
+      <button class="btn btn--teal btn--full" id="js-planner-go">Show me what's on →</button>
     </div>
   </div>
 

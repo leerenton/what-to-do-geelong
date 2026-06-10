@@ -973,6 +973,40 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   color-scheme: dark;
 }
 .planner-input:focus { outline: none; border-color: var(--teal); }
+.planner-card__field { display: flex; flex-direction: column; gap: .3rem; flex: 1; min-width: 130px; }
+.planner-card__label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.45); }
+
+/* ── WEEKEND TOGGLE ──────────────────────────────────────── */
+.weekend-toggle {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.1rem;
+}
+.weekend-toggle__btn {
+  padding: .5rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: .85rem;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--mid);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color .15s, color .15s, background .15s;
+  white-space: nowrap;
+}
+.weekend-toggle__btn:hover { border-color: var(--teal); color: var(--teal-d); }
+.weekend-toggle__btn--active {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: var(--white);
+}
+
+/* ── WEEKEND SEE ALL ─────────────────────────────────────── */
+.weekend-see-all {
+  margin-top: 1rem;
+  text-align: center;
+}
 
 /* ── WHERE TO EAT — BIZ SCROLL ──────────────────────────── */
 .biz-scroll {

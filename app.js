@@ -925,7 +925,7 @@ function eventGridCard(ev, opts = {}) {
         <div class="ev-card__meta"><span class="material-symbols-rounded">schedule</span>${ev.date}${ev.time ? ' · ' + ev.time : ''}</div>
         <div class="ev-card__foot">
           <span class="ev-card__price${ev.price === 'Free' ? ' ev-card__price--free' : ''}">${ev.price || 'See event'}</span>
-          ${ev.tags?.length ? `<span class="ev-card__tag">${ev.tags[0]}</span>` : ''}
+          ${ev.tags?.length ? ev.tags.slice(0, 2).map(t => `<span class="ev-card__tag">${t}</span>`).join('') : ''}
         </div>
       </div>
     </a>`;
@@ -1276,84 +1276,73 @@ async function renderCommunityGuidesStrip() {
   }).join('');
 }
 
-// ── CHIP FILTERS ──────────────────────────────────────────
-function initChips() {
-  const chipRow = document.getElementById('js-chip-row');
-  const filterToggle = document.getElementById('js-filter-toggle');
-  const filterPanel = document.getElementById('js-filter-panel');
-  const filterCount = document.getElementById('js-filter-count');
-  const filterClear = document.getElementById('js-filter-clear');
-  if (!chipRow) return;
+// ── WEEKEND HELPERS ───────────────────────────────────────
+function getWeekendDates(offset = 0) {
+  // offset=0 → this weekend, offset=1 → next weekend
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = today.getDay(); // 0=Sun,1=Mon...6=Sat
+  // Days until next Saturday (if today is Sat, that's 0; Sun, that's 6)
+  const daysToSat = ((6 - dow + 7) % 7) || 7;
+  const sat = new Date(today); sat.setDate(today.getDate() + daysToSat + offset * 7);
+  const sun = new Date(sat);   sun.setDate(sat.getDate() + 1);
+  return { sat, sun };
+}
 
-  let activeCat = 'All';
-  const activeTags = new Set();
+function filterToWeekend(events, { sat, sun }) {
+  return events.filter(ev => {
+    const d = parseEventDate(ev.date);
+    if (!d) return false;
+    const t = d.getTime();
+    return t === sat.getTime() || t === sun.getTime();
+  });
+}
 
-  function applyFilters() {
-    let filtered = EVENTS;
-    if (activeCat !== 'All') {
-      filtered = filtered.filter(e => e.category === activeCat);
+function fmtWeekendLabel(sat, sun) {
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${sat.getDate()}–${sun.getDate()} ${MONTHS[sun.getMonth()]}`;
+}
+
+// ── WEEKEND TOGGLE ────────────────────────────────────────
+function initWeekendToggle(allEvents) {
+  const toggleEl  = document.getElementById('js-weekend-toggle');
+  const labelEl   = document.getElementById('js-weekend-label');
+  const nextBtn   = document.getElementById('js-week-next');
+  const seeAllEl  = document.getElementById('js-weekend-see-all-link');
+  if (!toggleEl) return;
+
+  function showWeekend(offset) {
+    const { sat, sun } = getWeekendDates(offset);
+    const label = fmtWeekendLabel(sat, sun);
+    if (labelEl) labelEl.textContent = label;
+
+    // Update "Next weekend →" link to events page with date filter
+    const isoSat = sat.toISOString().split('T')[0];
+    const isoSun = sun.toISOString().split('T')[0];
+    if (nextBtn && offset === 0) {
+      const { sat: ns, sun: nu } = getWeekendDates(1);
+      nextBtn.href = `events.html?from=${ns.toISOString().split('T')[0]}&to=${nu.toISOString().split('T')[0]}`;
     }
-    activeTags.forEach(tag => {
-      filtered = filtered.filter(e => e.tags && e.tags.includes(tag));
-    });
-    renderFeatured(filtered);
-    renderEvents(filtered);
 
-    // Update filter button badge
-    if (filterCount) {
-      const n = activeTags.size;
-      filterCount.textContent = n;
-      filterCount.hidden = n === 0;
-      filterToggle && filterToggle.classList.toggle('filter-btn--active', n > 0);
+    // See-all link
+    if (seeAllEl) {
+      seeAllEl.href = `events.html?from=${isoSat}&to=${isoSun}`;
+      seeAllEl.textContent = offset === 0 ? 'See all this weekend →' : 'See full next weekend →';
     }
-    if (filterClear) filterClear.hidden = activeTags.size === 0;
+
+    // Filter and render events
+    const weekendEvs = filterToWeekend(allEvents, { sat, sun });
+    const toShow = weekendEvs.length ? weekendEvs : allEvents; // fallback to all if none match
+    renderFeatured(toShow);
+    renderEvents(toShow);
   }
 
-  // Category chips
-  chipRow.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      chipRow.querySelectorAll('.chip').forEach(c => c.classList.remove('chip--active'));
-      chip.classList.add('chip--active');
-      activeCat = chip.dataset.cat || 'All';
-      applyFilters();
-    });
-  });
+  // Default: this weekend
+  showWeekend(0);
 
-  // Filter panel toggle
-  if (filterToggle && filterPanel) {
-    filterToggle.addEventListener('click', e => {
-      e.stopPropagation();
-      const open = filterPanel.classList.toggle('filter-panel--open');
-      filterPanel.hidden = !open;
-    });
-    document.addEventListener('click', e => {
-      if (filterPanel && !filterPanel.contains(e.target) && e.target !== filterToggle) {
-        filterPanel.classList.remove('filter-panel--open');
-        filterPanel.hidden = true;
-      }
-    });
-  }
-
-  // Tag chips inside filter panel
-  document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const tag = chip.dataset.tag;
-      if (activeTags.has(tag)) {
-        activeTags.delete(tag);
-        chip.classList.remove('filter-chip--active');
-      } else {
-        activeTags.add(tag);
-        chip.classList.add('filter-chip--active');
-      }
-      applyFilters();
-    });
-  });
-
-  // Clear filters
-  filterClear && filterClear.addEventListener('click', () => {
-    activeTags.clear();
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('filter-chip--active'));
-    applyFilters();
+  // This weekend btn (no-op link, just for styling)
+  document.getElementById('js-week-this')?.addEventListener('click', () => {
+    document.getElementById('js-week-this').classList.add('weekend-toggle__btn--active');
+    showWeekend(0);
   });
 }
 
@@ -1398,6 +1387,27 @@ function initPersonaliseCTAs() {
       e.preventDefault();
       window.location.href = 'onboarding.html';
     });
+  });
+}
+
+// ── PLANNER CARD ─────────────────────────────────────────
+function initPlannerCard() {
+  const fromEl = document.getElementById('dp-from-2');
+  const toEl   = document.getElementById('dp-to-2');
+  const goBtn  = document.getElementById('js-planner-go');
+  if (!goBtn || !fromEl || !toEl) return;
+
+  // Pre-fill with this weekend
+  const { sat, sun } = getWeekendDates(0);
+  fromEl.valueAsDate = sat;
+  toEl.valueAsDate   = sun;
+
+  goBtn.addEventListener('click', () => {
+    const from = fromEl.value;
+    const to   = toEl.value;
+    if (!from) { fromEl.focus(); return; }
+    const toParam = to ? `&to=${to}` : '';
+    window.location.href = `events.html?from=${from}${toParam}`;
   });
 }
 
@@ -2460,8 +2470,40 @@ function initEventsPage() {
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
   }
 
-  window._evPageItems = EVENTS;
-  doRender();
+  // ── URL date params: ?from=YYYY-MM-DD&to=YYYY-MM-DD or ?weekend=next ──
+  (function applyUrlDateFilter() {
+    const p    = new URLSearchParams(window.location.search);
+    const from = p.get('from');
+    const to   = p.get('to');
+    if (!from) return;
+
+    const fromDate = new Date(from + 'T00:00:00');
+    const toDate   = to ? new Date(to + 'T00:00:00') : fromDate;
+
+    // Show a date range banner
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const label  = fromDate.toDateString() === toDate.toDateString()
+      ? `${fromDate.getDate()} ${MONTHS[fromDate.getMonth()]}`
+      : `${fromDate.getDate()}–${toDate.getDate()} ${MONTHS[toDate.getMonth()]}`;
+
+    const bannerEl = document.getElementById('js-events-date-banner');
+    if (bannerEl) {
+      bannerEl.innerHTML = `<span class="date-pill" style="font-size:.85rem">📅 ${label}</span> <button class="gw-link" id="js-events-clear-date" style="font-size:.8rem">Clear</button>`;
+      bannerEl.hidden = false;
+      document.getElementById('js-events-clear-date')?.addEventListener('click', () => {
+        bannerEl.hidden = true;
+        window._evPageItems = EVENTS;
+        doRender();
+        history.replaceState(null, '', window.location.pathname);
+      });
+    }
+
+    window._evPageItems = EVENTS.filter(ev => {
+      const d = parseEventDate(ev.date);
+      return d && d >= fromDate && d <= toDate;
+    });
+    doRender();
+  })();
 
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-events-loc');
 }
@@ -3013,8 +3055,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window._allBiz = BUSINESSES;
 
     renderMasonryHero(sortedEvents, sortedArticles, _hpSettings, _trendingScores);
-    renderFeatured(sortedEvents);
-    renderEvents(sortedEvents);
     renderPromotedEvents(sortedEvents);
     renderGoldStrip(BUSINESSES);
     renderUpcoming(sortedEvents);
@@ -3022,8 +3062,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderStays(sortedStays);
     renderOffers();
     renderCommunityGuidesStrip();
-    initChips();
+    initWeekendToggle(sortedEvents);
     initDateBar();
+    initPlannerCard();
     initPersonaliseCTAs();
     initRotatingBanner();
     updateItinBadge();

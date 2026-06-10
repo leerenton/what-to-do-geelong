@@ -2066,6 +2066,51 @@ async function initListingPage() {
     }
   })();
 
+  // ── Related businesses ──────────────────────────────────────
+  (async () => {
+    try {
+      const SUPABASE_KEY = 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
+      const res = await fetch(
+        `https://duhxszqyyzrbzrhwneey.supabase.co/rest/v1/businesses?select=id,name,type,slug,suburb,img,emoji,color,rating&type=eq.${encodeURIComponent(biz.type)}&id=neq.${encodeURIComponent(biz.id)}&limit=8`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      const related = await res.json();
+      if (!Array.isArray(related) || !related.length) return;
+
+      // Shuffle and take 4
+      const picks = related.sort(() => Math.random() - 0.5).slice(0, 4);
+
+      const html = `
+        <div class="container listing-body">
+          <div class="listing-related">
+            <h2 class="listing-related__title">
+              <span class="material-symbols-rounded">storefront</span>
+              More ${biz.type} in Geelong
+            </h2>
+            <div class="listing-related__grid">
+              ${picks.map(r => {
+                const img = r.img || '';
+                const initial = (r.name || '?')[0].toUpperCase();
+                const rating = r.rating ? `<span class="listing-related__rating">★ ${r.rating}</span>` : '';
+                return `
+                  <a href="/${r.slug}" class="listing-related__card">
+                    <div class="listing-related__img" style="${img ? `background-image:url('${img}')` : `background:${r.color || '#e5e7eb'}`}">
+                      ${!img ? `<span style="font-size:1.8rem">${r.emoji || initial}</span>` : ''}
+                    </div>
+                    <div class="listing-related__body">
+                      <div class="listing-related__name">${r.name}</div>
+                      <div class="listing-related__sub">${r.suburb || 'Geelong'}${rating}</div>
+                    </div>
+                  </a>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('js-listing-root').insertAdjacentHTML('beforeend', html);
+    } catch (_) {}
+  })();
+
   // ── Opening hours toggle ────────────────────────────────────
   document.getElementById('js-hours-toggle')?.addEventListener('click', () => {
     const list = document.getElementById('js-hours-list');

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://whattodogeelong.com.au/sitemap.xml

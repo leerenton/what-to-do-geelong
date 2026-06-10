@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Core pages -->
+  <url><loc>https://whattodogeelong.com.au/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://whattodogeelong.com.au/events</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://whattodogeelong.com.au/eat</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/drink</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/stay</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
+  <!-- Eat filters -->
+  <url><loc>https://whattodogeelong.com.au/eat/cafes</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/eat/restaurants</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/eat/brunch</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/eat/bars</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/eat/bakeries</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://whattodogeelong.com.au/eat/pizza</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://whattodogeelong.com.au/eat/asian</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+  <!-- Drink filters -->
+  <url><loc>https://whattodogeelong.com.au/drink/breweries</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/drink/wineries</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/drink/bars</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/drink/pubs</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/drink/cocktails</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+  <!-- Do filters -->
+  <url><loc>https://whattodogeelong.com.au/do/activities</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do/attractions</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do/adventure</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do/arts</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do/sport</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do/outdoors</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do/wellness</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://whattodogeelong.com.au/do/family</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
+  <!-- Editorial -->
+  <url><loc>https://whattodogeelong.com.au/advertise</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://whattodogeelong.com.au/community-guides</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+</urlset>

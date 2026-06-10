@@ -2417,9 +2417,20 @@ function applyFilterSEO(page, filter) {
 }
 
 function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
-  // Normalise ?filter= param from URL (also handles clean-URL rewrites that pass ?filter=)
-  const urlParam     = new URLSearchParams(window.location.search).get('filter');
-  let activeFilter   = normaliseFilter(urlParam) || 'all';
+  // Read filter from URL — check pathname slug first (/drink/breweries),
+  // then fall back to ?filter= query param (legacy links / direct navigation)
+  function filterFromUrl() {
+    const parts = window.location.pathname.replace(/\/$/, '').split('/').filter(Boolean);
+    // e.g. ['drink', 'breweries'] → slug = 'breweries'
+    if (parts.length >= 2) {
+      const slug = normaliseFilter(parts[parts.length - 1]);
+      if (slug && slug !== 'all') return slug;
+    }
+    const qp = new URLSearchParams(window.location.search).get('filter');
+    return normaliseFilter(qp) || 'all';
+  }
+
+  let activeFilter = filterFromUrl();
   let searchQ        = '';
 
   function render() {
@@ -2487,7 +2498,7 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
 
   // Handle browser back/forward
   window.addEventListener('popstate', e => {
-    const f = normaliseFilter(new URLSearchParams(window.location.search).get('filter')) || 'all';
+    const f = filterFromUrl();
     activeFilter = f;
     if (filterEl) {
       filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.toggle('active', p.dataset.filter === f));

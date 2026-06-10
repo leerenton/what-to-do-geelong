@@ -530,7 +530,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const actionsEl = document.getElementById('js-panel-actions');
       const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${park.lat},${park.lng}`;
       actionsEl.innerHTML = `
-        <a href="/listing/${park.slug}" class="park-panel__btn park-panel__btn--primary">
+        <a href="/${park.slug}" class="park-panel__btn park-panel__btn--primary">
           <span class="material-symbols-rounded" style="font-size:1rem">info</span> View listing
         </a>
         <a href="${gmapsUrl}" target="_blank" rel="noopener" class="park-panel__btn park-panel__btn--directions">

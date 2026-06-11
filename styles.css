@@ -3527,6 +3527,14 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   padding: 0;
 }
 .events-cal-row .coll-topbar { flex: 1; min-width: 0; padding-top: 0; }
+/* Inside the cal-row the filter bar must not sticky-escape the flex container
+   or inherit the full page-gutter padding */
+.events-cal-row .coll-filters {
+  position: relative !important;
+  top: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
 
 @media (max-width: 640px) {
   .events-cal-row { flex-direction: column; gap: 0; padding-top: 0; }

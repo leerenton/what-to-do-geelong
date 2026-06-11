@@ -1067,15 +1067,21 @@ function renderHappeningToday() {
     </div>`;
 }
 
-// ── EVENTS MINI CALENDAR ───────────────────────────────────
-function initEventCalendar(onDateSelect) {
+// ── EVENTS MINI CALENDAR (range picker) ───────────────────
+function initEventCalendar(onRangeSelect) {
   const el = document.getElementById('js-events-calendar');
   if (!el) return;
 
   const now = new Date();
   let viewYear  = now.getFullYear();
   let viewMonth = now.getMonth();
-  let selectedDate = null;
+  let rangeStart = null;  // Date | null
+  let rangeEnd   = null;  // Date | null  — null while picking end
+  let pickingEnd = false; // true = waiting for second tap
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAYS = ['Mo','Tu','We','Th','Fr','Sa','Su'];
 
   // Build a Set of "YYYY-M-D" strings that have events
   const eventDays = new Set(EVENTS.map(ev => {
@@ -1083,38 +1089,69 @@ function initEventCalendar(onDateSelect) {
     return d ? `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` : null;
   }).filter(Boolean));
 
+  function rangeLabel() {
+    if (!rangeStart) return null;
+    const sM = MONTHS_SHORT[rangeStart.getMonth()];
+    if (!rangeEnd || rangeEnd.getTime() === rangeStart.getTime())
+      return `${rangeStart.getDate()} ${sM}`;
+    const eM = MONTHS_SHORT[rangeEnd.getMonth()];
+    return sM === eM
+      ? `${rangeStart.getDate()}–${rangeEnd.getDate()} ${sM}`
+      : `${rangeStart.getDate()} ${sM} – ${rangeEnd.getDate()} ${eM}`;
+  }
+
+  function fireCallback() {
+    if (!rangeStart) { onRangeSelect(null); return; }
+    const end = rangeEnd || rangeStart;
+    onRangeSelect({ start: rangeStart, end });
+  }
+
   function render() {
-    const DAYS   = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const firstDay = new Date(viewYear, viewMonth, 1);
     const lastDay  = new Date(viewYear, viewMonth + 1, 0);
-    // Monday-first: shift JS Sunday(0) to end
     const startDow = (firstDay.getDay() + 6) % 7;
     const today = new Date(); today.setHours(0,0,0,0);
+
+    const startMs = rangeStart ? rangeStart.getTime() : null;
+    const endMs   = rangeEnd   ? rangeEnd.getTime()   : startMs; // treat single as zero-width range
 
     let cells = '';
     for (let i = 0; i < startDow; i++) cells += `<div class="ecal__cell ecal__cell--empty"></div>`;
     for (let d = 1; d <= lastDay.getDate(); d++) {
-      const key     = `${viewYear}-${viewMonth}-${d}`;
-      const dt      = new Date(viewYear, viewMonth, d);
-      const isToday = dt.getTime() === today.getTime();
-      const hasSel  = selectedDate && dt.getTime() === selectedDate.getTime();
-      const hasEvs  = eventDays.has(key);
-      cells += `<button class="ecal__cell${isToday ? ' ecal__cell--today' : ''}${hasSel ? ' ecal__cell--selected' : ''}${hasEvs ? ' ecal__cell--has-events' : ''}" data-date="${viewYear}-${viewMonth + 1}-${d}">${d}${hasEvs ? '<span class="ecal__dot"></span>' : ''}</button>`;
+      const key  = `${viewYear}-${viewMonth}-${d}`;
+      const dt   = new Date(viewYear, viewMonth, d);
+      const ms   = dt.getTime();
+      const isToday   = ms === today.getTime();
+      const isStart   = startMs !== null && ms === startMs;
+      const isEnd     = endMs   !== null && ms === endMs && rangeEnd !== null;
+      const inRange   = startMs !== null && endMs !== null && ms > startMs && ms < endMs;
+      const hasEvs    = eventDays.has(key);
+
+      let cls = 'ecal__cell';
+      if (isStart && isEnd)  cls += ' ecal__cell--range-start ecal__cell--range-end ecal__cell--single';
+      else if (isStart)      cls += ' ecal__cell--range-start';
+      else if (isEnd)        cls += ' ecal__cell--range-end';
+      else if (inRange)      cls += ' ecal__cell--in-range';
+      else if (isToday)      cls += ' ecal__cell--today';
+      if (hasEvs)            cls += ' ecal__cell--has-events';
+
+      cells += `<button class="${cls}" data-date="${viewYear}-${viewMonth + 1}-${d}">${d}${hasEvs ? '<span class="ecal__dot"></span>' : ''}</button>`;
     }
 
+    const label = rangeLabel();
     el.innerHTML = `
       <div class="ecal">
         <div class="ecal__nav">
           <button class="ecal__nav-btn" id="js-ecal-prev"><span class="material-symbols-rounded">chevron_left</span></button>
           <span class="ecal__month">${MONTHS[viewMonth]} ${viewYear}</span>
           <button class="ecal__nav-btn" id="js-ecal-next"><span class="material-symbols-rounded">chevron_right</span></button>
-          ${selectedDate ? `<button class="ecal__clear" id="js-ecal-clear">All dates</button>` : ''}
+          ${label ? `<button class="ecal__clear" id="js-ecal-clear">Clear</button>` : ''}
         </div>
         <div class="ecal__grid">
           ${DAYS.map(d => `<div class="ecal__dow">${d}</div>`).join('')}
           ${cells}
         </div>
+        ${pickingEnd ? '<p class="ecal__hint">Tap an end date</p>' : ''}
       </div>`;
 
     el.querySelector('#js-ecal-prev')?.addEventListener('click', () => {
@@ -1124,14 +1161,32 @@ function initEventCalendar(onDateSelect) {
       viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; } render();
     });
     el.querySelector('#js-ecal-clear')?.addEventListener('click', () => {
-      selectedDate = null; render(); onDateSelect(null);
+      rangeStart = null; rangeEnd = null; pickingEnd = false;
+      render(); onRangeSelect(null);
     });
     el.querySelectorAll('.ecal__cell[data-date]').forEach(btn => {
       btn.addEventListener('click', () => {
         const [y, m, d] = btn.dataset.date.split('-').map(Number);
-        selectedDate = new Date(y, m - 1, d);
+        const clicked = new Date(y, m - 1, d);
+        clicked.setHours(0,0,0,0);
+
+        if (!pickingEnd) {
+          // First tap — set start, wait for end
+          rangeStart = clicked;
+          rangeEnd   = null;
+          pickingEnd = true;
+        } else {
+          // Second tap — set end (swap if before start)
+          if (clicked.getTime() < rangeStart.getTime()) {
+            rangeEnd   = rangeStart;
+            rangeStart = clicked;
+          } else {
+            rangeEnd = clicked;
+          }
+          pickingEnd = false;
+        }
         render();
-        onDateSelect(selectedDate);
+        fireCallback();
       });
     });
   }
@@ -2836,7 +2891,7 @@ function initEventsPage() {
   renderHappeningToday();
 
   let showPast      = false;
-  let calFilterDate = null;
+  let calFilterRange = null; // { start: Date, end: Date } | null
 
   // ── Past events toggle ─────────────────────────────────
   const pastToggle = document.getElementById('js-past-toggle');
@@ -2850,19 +2905,21 @@ function initEventsPage() {
   }
 
   // ── Calendar init ──────────────────────────────────────
-  initEventCalendar(date => {
-    calFilterDate = date;
+  initEventCalendar(range => {
+    calFilterRange = range; // { start, end } or null
     doRender();
   });
 
   function doRender() {
     let items = [...EVENTS];
 
-    // Apply calendar date filter
-    if (calFilterDate) {
+    // Apply calendar range filter
+    if (calFilterRange) {
+      const { start, end } = calFilterRange;
+      const endDay = new Date(end); endDay.setHours(23,59,59,999);
       items = items.filter(ev => {
         const d = parseEventDate(ev.date);
-        return d && d.toDateString() === calFilterDate.toDateString();
+        return d && d >= start && d <= endDay;
       });
     }
 
@@ -2936,10 +2993,12 @@ function initEventsPage() {
   const _origDoRender = doRender;
   function doRender() {
     let items = window._evPageItems || EVENTS;
-    if (calFilterDate) {
+    if (calFilterRange) {
+      const { start, end } = calFilterRange;
+      const endDay = new Date(end); endDay.setHours(23,59,59,999);
       items = items.filter(ev => {
         const d = parseEventDate(ev.date);
-        return d && d.toDateString() === calFilterDate.toDateString();
+        return d && d >= start && d <= endDay;
       });
     }
     const today = new Date(); today.setHours(0,0,0,0);

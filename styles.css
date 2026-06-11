@@ -3540,7 +3540,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   /* Drop the flex wrapper entirely on mobile — block stacking avoids
      flex children with overflow-x:auto stretching the parent wider than viewport */
   .events-cal-row { display: block; padding-top: 0; }
-  .events-cal-row .events-calendar-wrap { width: 100%; }
+  .events-cal-row .events-calendar-wrap { width: 100%; margin-bottom: .85rem; }
   .events-cal-row .coll-topbar { width: 100%; }
 }
 
@@ -3583,7 +3583,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   -webkit-tap-highlight-color: transparent;
 }
 /* Only apply hover bg to plain unspecial cells */
-.ecal__cell:hover:not(.ecal__cell--empty):not(.ecal__cell--today):not(.ecal__cell--selected) {
+.ecal__cell:hover:not(.ecal__cell--empty):not(.ecal__cell--today):not(.ecal__cell--selected):not(.ecal__cell--range-start):not(.ecal__cell--range-end):not(.ecal__cell--in-range) {
   background: var(--cream);
 }
 .ecal__cell--empty { cursor: default; pointer-events: none; }
@@ -3592,12 +3592,33 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .ecal__cell--selected { background: var(--dark); color: #fff; font-weight: 800; }
 .ecal__cell--selected:hover { background: #2d2d2d; }
 .ecal__cell--has-events { font-weight: 800; }
+/* ── Range selection styles ─────────────────────────────── */
+.ecal__cell--range-start,
+.ecal__cell--range-end {
+  background: var(--teal); color: #fff; font-weight: 800;
+}
+.ecal__cell--range-start:not(.ecal__cell--single) { border-radius: 7px 0 0 7px; }
+.ecal__cell--range-end:not(.ecal__cell--single)   { border-radius: 0 7px 7px 0; }
+.ecal__cell--single                               { border-radius: 7px; }
+.ecal__cell--in-range {
+  background: color-mix(in srgb, var(--teal) 18%, transparent);
+  border-radius: 0; color: var(--dark);
+}
+.ecal__cell--range-start:hover,
+.ecal__cell--range-end:hover { background: var(--teal-d); }
+/* Hint text shown while waiting for end-date tap */
+.ecal__hint {
+  text-align: center; font-size: .72rem; color: var(--mid);
+  margin: .5rem 0 0; font-style: italic;
+}
 .ecal__dot {
   width: 4px; height: 4px; border-radius: 50%; background: var(--teal);
   position: absolute; bottom: 3px;
 }
 .ecal__cell--today .ecal__dot { background: rgba(255,255,255,.7); }
 .ecal__cell--selected .ecal__dot { background: rgba(255,255,255,.6); }
+.ecal__cell--range-start .ecal__dot,
+.ecal__cell--range-end .ecal__dot { background: rgba(255,255,255,.7); }
 
 /* ── Events toolbar (count + past toggle) ──────────────── */
 .events-toolbar {

@@ -1218,17 +1218,33 @@ function renderUpcoming(events) {
   const list = document.getElementById('js-upcoming-list');
   if (!list) return;
 
-  // Use passed events (possibly trending-sorted) or fall back to EVENTS global
   const source = events || EVENTS;
   const now    = new Date();
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // Parse dates, filter to upcoming or ongoing, sort chronologically
-  const parsed = source
+  // Default to this weekend (Sat + Sun); fall back to next 7 days if no weekend events
+  const day     = now.getDay(); // 0=Sun,6=Sat
+  const daysToSat = (6 - day + 7) % 7 || 7; // days until next Saturday (at least 1)
+  const sat = new Date(now); sat.setDate(now.getDate() + daysToSat); sat.setHours(0,0,0,0);
+  const sun = new Date(sat); sun.setDate(sat.getDate() + 1); sun.setHours(23,59,59,999);
+
+  // If today IS Saturday or Sunday, treat current weekend
+  const isSat = day === 6, isSun = day === 0;
+  const weekendStart = isSun
+    ? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+    : sat;
+  const weekendEnd = isSat
+    ? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59)
+    : sun;
+
+  const allUpcoming = source
     .map(ev => ({ ev, d: parseEventDate(ev.date) }))
-    .filter(({ d }) => d && d >= new Date(now - 864e5)) // allow events that started today
-    .sort((a, b) => a.d - b.d)
-    .slice(0, 6); // show up to 6
+    .filter(({ d }) => d && d >= new Date(now.setHours(0,0,0,0)))
+    .sort((a, b) => a.d - b.d);
+
+  // Try weekend first; fall back to next 7 days
+  let parsed = allUpcoming.filter(({ d }) => d >= weekendStart && d <= weekendEnd).slice(0, 6);
+  if (!parsed.length) parsed = allUpcoming.slice(0, 6);
 
   if (!parsed.length) {
     list.innerHTML = '<p style="color:#999;padding:.5rem 0;font-size:.9rem">No upcoming events found.</p>';
@@ -2926,14 +2942,47 @@ function initEventsPage() {
 
   // ── Calendar init ──────────────────────────────────────
   initEventCalendar(range => {
-    calFilterRange = range; // { start, end } or null
+    calFilterRange = range;
     doRender();
   });
 
+  // ── Category filter pills + search ─────────────────────
+  const filterEl = document.getElementById('js-events-filters');
+  const searchEl = document.getElementById('js-events-search');
+  let activeFilter = 'all', searchQ = '';
+
+  if (filterEl) {
+    filterEl.querySelectorAll('.coll-filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeFilter = pill.dataset.filter;
+        doRender();
+      });
+    });
+  }
+  if (searchEl) {
+    searchEl.addEventListener('input', () => { searchQ = searchEl.value.trim().toLowerCase(); doRender(); });
+  }
+
+  // ── Single unified doRender — always reads fresh from EVENTS ──
+  // Category filter, date range filter, and search all applied here
+  // so they compose correctly regardless of the order they're changed.
   function doRender() {
     let items = [...EVENTS];
 
-    // Apply calendar range filter
+    // 1. Category + search filter
+    if (activeFilter !== 'all' || searchQ) {
+      items = items.filter(ev => {
+        const matchCat = activeFilter === 'all' ||
+          (ev.category || '').toLowerCase().includes(activeFilter);
+        const matchQ = !searchQ || [ev.title, ev.location, ev.category]
+          .some(f => (f || '').toLowerCase().includes(searchQ));
+        return matchCat && matchQ;
+      });
+    }
+
+    // 2. Calendar range filter
     if (calFilterRange) {
       const { start, end } = calFilterRange;
       const endDay = new Date(end); endDay.setHours(23,59,59,999);
@@ -2943,7 +2992,7 @@ function initEventsPage() {
       });
     }
 
-    // Sort: upcoming first, then past
+    // 3. Sort — upcoming first, past at bottom
     const today = new Date(); today.setHours(0,0,0,0);
     items.sort((a, b) => {
       const da = parseEventDate(a.date) || new Date(9999,0,1);
@@ -2962,89 +3011,19 @@ function initEventsPage() {
 
     root.innerHTML = upcoming.length || (showPast && past.length)
       ? `<div class="ev-grid">
-          ${upcoming.map(ev => eventGridCard(ev, { showPast })).join('')}
-          ${showPast && past.length ? `
-            <div class="ev-grid__past-divider">Past events</div>
-            ${past.map(ev => eventGridCard(ev, { showPast: true })).join('')}
-          ` : ''}
-        </div>`
-      : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your search.</p></div>`;
-
-    if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
-    if (window.wtdgViews) window.wtdgViews.injectViewBadges('event');
-  }
-
-  // Wire up category filter pills
-  const filterEl = document.getElementById('js-events-filters');
-  const searchEl = document.getElementById('js-events-search');
-  let activeFilter = 'all', searchQ = '';
-  let _baseItems = EVENTS;
-
-  function applyFilters() {
-    _baseItems = EVENTS.filter(ev => {
-      const matchFilter = activeFilter === 'all' ||
-        (ev.category || '').toLowerCase().includes(activeFilter);
-      const matchSearch = !searchQ ||
-        (ev.title || '').toLowerCase().includes(searchQ) ||
-        (ev.location || '').toLowerCase().includes(searchQ) ||
-        (ev.category || '').toLowerCase().includes(searchQ);
-      return matchFilter && matchSearch;
-    });
-    // Override EVENTS reference used by doRender
-    Object.defineProperty(window, '_evPageItems', { value: _baseItems, writable: true, configurable: true });
-    doRender();
-  }
-
-  if (filterEl) {
-    filterEl.querySelectorAll('.coll-filter-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        filterEl.querySelectorAll('.coll-filter-pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        activeFilter = pill.dataset.filter;
-        applyFilters();
-      });
-    });
-  }
-  if (searchEl) {
-    searchEl.addEventListener('input', () => { searchQ = searchEl.value.trim().toLowerCase(); applyFilters(); });
-  }
-
-  // Override doRender to respect filters
-  const _origDoRender = doRender;
-  function doRender() {
-    let items = window._evPageItems || EVENTS;
-    if (calFilterRange) {
-      const { start, end } = calFilterRange;
-      const endDay = new Date(end); endDay.setHours(23,59,59,999);
-      items = items.filter(ev => {
-        const d = parseEventDate(ev.date);
-        return d && d >= start && d <= endDay;
-      });
-    }
-    const today = new Date(); today.setHours(0,0,0,0);
-    items = [...items].sort((a, b) => {
-      const da = parseEventDate(a.date) || new Date(9999,0,1);
-      const db = parseEventDate(b.date) || new Date(9999,0,1);
-      return (da < today ? 1 : 0) - (db < today ? 1 : 0) || da - db;
-    });
-    const upcoming = items.filter(ev => getEventUrgency(ev) !== 'past');
-    const past     = items.filter(ev => getEventUrgency(ev) === 'past');
-    const count    = upcoming.length + (showPast ? past.length : 0);
-    const countEl  = document.getElementById('js-events-count');
-    if (countEl) countEl.textContent = `${count} result${count !== 1 ? 's' : ''}`;
-    root.innerHTML = upcoming.length || (showPast && past.length)
-      ? `<div class="ev-grid">
           ${upcoming.map(ev => eventGridCard(ev, {})).join('')}
           ${showPast && past.length ? `
             <div class="ev-grid__past-divider">Past events</div>
             ${past.map(ev => eventGridCard(ev, { showPast: true })).join('')}
           ` : ''}
         </div>`
-      : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match.</p></div>`;
+      : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your filters.</p></div>`;
+
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+    if (window.wtdgViews) window.wtdgViews.injectViewBadges('event');
   }
 
-  // ── URL date params: ?from=YYYY-MM-DD&to=YYYY-MM-DD or ?weekend=next ──
+  // ── URL date params: ?from=YYYY-MM-DD&to=YYYY-MM-DD ────
   (function applyUrlDateFilter() {
     const p    = new URLSearchParams(window.location.search);
     const from = p.get('from');
@@ -3053,8 +3032,11 @@ function initEventsPage() {
 
     const fromDate = new Date(from + 'T00:00:00');
     const toDate   = to ? new Date(to + 'T00:00:00') : fromDate;
+    toDate.setHours(23,59,59,999);
 
-    // Show a date range banner
+    // Feed into calFilterRange so doRender picks it up
+    calFilterRange = { start: fromDate, end: toDate };
+
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const label  = fromDate.toDateString() === toDate.toDateString()
       ? `${fromDate.getDate()} ${MONTHS[fromDate.getMonth()]}`
@@ -3066,20 +3048,17 @@ function initEventsPage() {
       bannerEl.hidden = false;
       document.getElementById('js-events-clear-date')?.addEventListener('click', () => {
         bannerEl.hidden = true;
-        window._evPageItems = EVENTS;
+        calFilterRange = null;
         doRender();
         history.replaceState(null, '', window.location.pathname);
       });
     }
-
-    window._evPageItems = EVENTS.filter(ev => {
-      const d = parseEventDate(ev.date);
-      return d && d >= fromDate && d <= toDate;
-    });
-    doRender();
   })();
 
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-events-loc');
+
+  // ── Initial render ──────────────────────────────────────
+  doRender();
 }
 
 // ── EVENTS IN COLLECTION SECTION ──────────────────────────

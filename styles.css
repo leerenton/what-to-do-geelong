@@ -3537,8 +3537,11 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 
 @media (max-width: 640px) {
-  .events-cal-row { flex-direction: column; gap: 0; padding-top: 0; }
+  /* Drop the flex wrapper entirely on mobile — block stacking avoids
+     flex children with overflow-x:auto stretching the parent wider than viewport */
+  .events-cal-row { display: block; padding-top: 0; }
   .events-cal-row .events-calendar-wrap { width: 100%; }
+  .events-cal-row .coll-topbar { width: 100%; }
 }
 
 /* ── Events mini calendar ──────────────────────────────── */

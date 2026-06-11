@@ -881,37 +881,60 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
   section.style.display = 'block';
 }
 
+// IDs of the 2 weekend featured events — used by renderUpcoming to exclude them
+let _weekendFeaturedIds = [];
+
 function renderFeatured(events) {
   const el = document.getElementById('js-featured-event');
   if (!el) return;
 
-  const ev = events.find(e => e.featured) || events[0];
-  if (!ev) { el.innerHTML = ''; return; }
+  // Pick up to 2 featured events (prefer flagged featured, otherwise first 2)
+  const featured = events.filter(e => e.featured);
+  const picks = featured.length >= 2
+    ? featured.slice(0, 2)
+    : [...featured, ...events.filter(e => !e.featured)].slice(0, 2);
 
-  const biz = ev.businessId ? getBusinessById(ev.businessId) : null;
+  if (!picks.length) { el.innerHTML = ''; _weekendFeaturedIds = []; return; }
 
-  const featImg = ev.heroImg || ev.img || biz?.img || null;
+  _weekendFeaturedIds = picks.map(e => e.id);
 
-  el.innerHTML = `
-    <a href="${evLink(ev)}" class="featured-card">
-      <div class="featured-card__img${featImg ? ' featured-card__img--photo' : ''}" style="${featImg ? `background-image:url('${featImg}')` : `background:${ev.color}22`}">${featImg ? '' : ev.emoji}</div>
-      <div class="featured-card__body">
-        <span class="featured-card__badge">⭐ Featured</span>
-        <span class="featured-card__cat">${ev.category}</span>
-        <h3 class="featured-card__title">${ev.title}</h3>
-        <div class="featured-card__meta">
-          <span>📅 ${ev.date}</span>
-          <span>🕐 ${ev.time}</span>
-          <span>📍 ${ev.location}</span>
+  function featCard(ev) {
+    const biz     = ev.businessId ? getBusinessById(ev.businessId) : null;
+    const featImg = ev.heroImg || ev.img || biz?.img || null;
+    const brand   = ev.source ? ({ 'afl-cats': { bg: '#001F5B', accent: '#C49A2B', logo: '🏉' }, 'nbl-united': { bg: '#002B5C', accent: '#63B3ED', logo: '🏀' } })[ev.source] : null;
+
+    const imgEl = brand
+      ? `<div class="featured-card__img featured-card__img--sport" style="background:${brand.bg}">
+           <span style="font-size:2.8rem">${brand.logo}</span>
+         </div>`
+      : featImg
+        ? `<div class="featured-card__img featured-card__img--photo" style="background-image:url('${featImg}')"></div>`
+        : `<div class="featured-card__img" style="background:${ev.color}22">${ev.emoji}</div>`;
+
+    const borderStyle = brand ? `border-top:3px solid ${brand.accent}` : '';
+
+    return `
+      <a href="${evLink(ev)}" class="featured-card" style="${borderStyle}">
+        ${imgEl}
+        <div class="featured-card__body">
+          <span class="featured-card__cat">${ev.category}</span>
+          <h3 class="featured-card__title">${ev.title}</h3>
+          <div class="featured-card__meta">
+            <span>📅 ${ev.date}</span>
+            ${ev.time ? `<span>🕐 ${ev.time}</span>` : ''}
+            <span>📍 ${ev.location}</span>
+          </div>
+          <div class="featured-card__footer">
+            <span class="featured-card__price ${ev.price === 'Free' ? 'featured-card__price--free' : ''}">${(ev.price || '').replace(/[,\s]+$/, '') || 'See event'}</span>
+            <span class="btn btn--teal btn--sm" style="margin-left:auto">View →</span>
+          </div>
         </div>
-        <div class="featured-card__footer">
-          <span class="featured-card__price ${ev.price === 'Free' ? 'featured-card__price--free' : ''}">${(ev.price || '').replace(/[,\s]+$/, '') || 'See event'}</span>
-          ${biz ? `<span class="featured-card__biz">${biz.emoji} ${biz.name}</span>` : ''}
-          <span class="btn btn--teal btn--sm" style="margin-left:auto">View →</span>
-        </div>
-      </div>
-    </a>
-  `;
+      </a>`;
+  }
+
+  el.innerHTML = picks.length === 1
+    ? featCard(picks[0])
+    : `<div class="featured-pair">${picks.map(featCard).join('')}</div>`;
 }
 
 // ── RENDER EVENT SCROLL STRIP ─────────────────────────────
@@ -1221,32 +1244,18 @@ function renderUpcoming(events) {
   if (!list) return;
 
   const source = events || EVENTS;
-  const now    = new Date();
+  const now    = new Date(); now.setHours(0,0,0,0);
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // Default to this weekend (Sat + Sun); fall back to next 7 days if no weekend events
-  const day     = now.getDay(); // 0=Sun,6=Sat
-  const daysToSat = (6 - day + 7) % 7 || 7; // days until next Saturday (at least 1)
-  const sat = new Date(now); sat.setDate(now.getDate() + daysToSat); sat.setHours(0,0,0,0);
-  const sun = new Date(sat); sun.setDate(sat.getDate() + 1); sun.setHours(23,59,59,999);
+  // Exclude the 2 weekend featured events already shown above
+  const excludeIds = new Set(_weekendFeaturedIds.map(String));
 
-  // If today IS Saturday or Sunday, treat current weekend
-  const isSat = day === 6, isSun = day === 0;
-  const weekendStart = isSun
-    ? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
-    : sat;
-  const weekendEnd = isSat
-    ? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59)
-    : sun;
-
-  const allUpcoming = source
+  // All upcoming events, sorted chronologically, excluding the featured pair
+  const parsed = source
     .map(ev => ({ ev, d: parseEventDate(ev.date) }))
-    .filter(({ d }) => d && d >= new Date(now.setHours(0,0,0,0)))
-    .sort((a, b) => a.d - b.d);
-
-  // Try weekend first; fall back to next 7 days
-  let parsed = allUpcoming.filter(({ d }) => d >= weekendStart && d <= weekendEnd).slice(0, 6);
-  if (!parsed.length) parsed = allUpcoming.slice(0, 6);
+    .filter(({ ev, d }) => d && d >= now && !excludeIds.has(String(ev.id)))
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 5);
 
   if (!parsed.length) {
     list.innerHTML = '<p style="color:#999;padding:.5rem 0;font-size:.9rem">No upcoming events found.</p>';
@@ -1615,8 +1624,9 @@ function initWeekendToggle(allEvents) {
     // Filter and render events
     const weekendEvs = filterToWeekend(allEvents, { sat, sun });
     const toShow = weekendEvs.length ? weekendEvs : allEvents; // fallback to all if none match
-    renderFeatured(toShow);
+    renderFeatured(toShow);   // sets _weekendFeaturedIds
     renderEvents(toShow);
+    renderUpcoming(allEvents); // re-render upcoming excluding the new featured pair
   }
 
   // Personalised section subtitle
@@ -3615,7 +3625,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMasonryHero(sortedEvents, sortedArticles, _hpSettings, _trendingScores);
     renderPromotedEvents(sortedEvents);
     renderGoldStrip(BUSINESSES);
-    renderUpcoming(sortedEvents);
     renderEatStrip(sortedBiz);
     renderStays(sortedStays);
     renderOffers();

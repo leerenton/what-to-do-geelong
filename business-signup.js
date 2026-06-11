@@ -180,48 +180,111 @@ document.querySelectorAll('.bsign-plan').forEach(plan => {
   });
 });
 
-document.getElementById('js-s3-next').addEventListener('click', () => {
-  const acct = getAccount();
-  if (acct) {
-    document.getElementById('bc-name').value  = acct.name || '';
-    document.getElementById('bc-email').value = acct.email || '';
-  }
+// ── SCREEN 3 → 4: Check auth state ───────────────────────
+document.getElementById('js-s3-next').addEventListener('click', async () => {
   bsignGoto('bs-s4');
+
+  const timeout = new Promise(r => setTimeout(() => r(null), 3000));
+  const session = await Promise.race([
+    db.auth.getSession().then(r => r.data?.session ?? null),
+    timeout,
+  ]);
+
+  if (session?.user) {
+    // Already logged in — skip the form, show account card
+    const user = session.user;
+    const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email;
+    document.getElementById('bs-s4-loggedin').style.display = 'block';
+    document.getElementById('bs-s4-loggedout').style.display = 'none';
+    document.getElementById('js-s4-account-card').innerHTML = `
+      <div style="display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;background:var(--teal-pale,#e8f9f9);border-radius:12px;border:1.5px solid var(--teal)">
+        <span style="font-size:1.8rem">👤</span>
+        <div>
+          <div style="font-weight:700;font-size:.95rem">${name}</div>
+          <div style="font-size:.82rem;color:var(--mid)">${user.email}</div>
+        </div>
+      </div>`;
+    // Sign out link
+    document.getElementById('js-s4-signout')?.addEventListener('click', async e => {
+      e.preventDefault();
+      await db.auth.signOut();
+      document.getElementById('bs-s4-loggedin').style.display = 'none';
+      document.getElementById('bs-s4-loggedout').style.display = 'block';
+    });
+  } else {
+    // Not logged in — show login/signup form
+    document.getElementById('bs-s4-loggedin').style.display = 'none';
+    document.getElementById('bs-s4-loggedout').style.display = 'block';
+  }
+});
+
+// Auth mode toggle (new account ↔ login)
+document.getElementById('js-auth-toggle')?.addEventListener('click', e => {
+  const tab = e.target.closest('.bsign-auth-tab');
+  if (!tab) return;
+  const mode = tab.dataset.mode;
+  document.querySelectorAll('.bsign-auth-tab').forEach(t => t.classList.toggle('active', t === tab));
+  document.getElementById('bs-s4-signup-form').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('bs-s4-login-form').style.display  = mode === 'login'  ? 'block' : 'none';
 });
 
 // ── SCREEN 4: Submit ──────────────────────────────────────
 document.getElementById('js-s4-next').addEventListener('click', async () => {
-  const contactName  = document.getElementById('bc-name').value.trim();
-  const contactEmail = document.getElementById('bc-email').value.trim();
-  if (!contactName || !contactEmail) {
-    alert('Please enter your name and email.');
+  const btn   = document.getElementById('js-s4-next');
+  const errEl = document.getElementById('js-s4-error');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  if (errEl) errEl.style.display = 'none';
+
+  // Determine current auth state
+  const timeout = new Promise(r => setTimeout(() => r(null), 3000));
+  const session = await Promise.race([
+    db.auth.getSession().then(r => r.data?.session ?? null),
+    timeout,
+  ]);
+
+  let userId = session?.user?.id || null;
+
+  // If not logged in, sign up or log in first
+  if (!userId) {
+    const isLogin = document.getElementById('bs-s4-login-form')?.style.display !== 'none';
+
+    if (isLogin) {
+      const email    = document.getElementById('bc-login-email').value.trim();
+      const password = document.getElementById('bc-login-password').value;
+      if (!email || !password) {
+        showS4Error('Please enter your email and password.');
+        return;
+      }
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+      if (error) { showS4Error(error.message); return; }
+      userId = data.user?.id;
+    } else {
+      const name     = document.getElementById('bc-name').value.trim();
+      const email    = document.getElementById('bc-email').value.trim();
+      const password = document.getElementById('bc-password').value;
+      if (!name || !email || !password) {
+        showS4Error('Please fill in your name, email, and password.');
+        return;
+      }
+      if (password.length < 8) {
+        showS4Error('Password must be at least 8 characters.');
+        return;
+      }
+      const { data, error } = await db.auth.signUp({ email, password, options: { data: { full_name: name } } });
+      if (error) { showS4Error(error.message); return; }
+      userId = data.user?.id;
+    }
+  }
+
+  if (!userId) {
+    showS4Error('Could not authenticate. Please try again.');
     return;
   }
 
-  const btn = document.getElementById('js-s4-next');
-  const errEl = document.getElementById('js-s4-error');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  if (errEl) errEl.style.display = 'none';
-
-  // Get session with timeout to avoid hanging on stale tokens
-  let userId = null;
-  try {
-    const timeout = new Promise(r => setTimeout(() => r(null), 3000));
-    const session = await Promise.race([
-      db.auth.getSession().then(r => r.data?.session ?? null),
-      timeout,
-    ]);
-    userId = session?.user?.id || null;
-  } catch (_) {}
-
-  if (!userId) {
-    const msg = 'You need to be logged in to claim or create a business. Please log in first.';
+  function showS4Error(msg) {
     if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
     else alert(msg);
-    btn.disabled = false;
-    btn.textContent = 'Submit';
-    return;
+    btn.disabled = false; btn.textContent = 'Submit listing →';
   }
 
   let bizId, error;
@@ -299,17 +362,4 @@ document.getElementById('js-bsign-back').addEventListener('click', () => {
 });
 
 // ── INIT ─────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const timeout = new Promise(r => setTimeout(() => r(null), 3000));
-    const session = await Promise.race([
-      db.auth.getSession().then(r => r.data?.session ?? null),
-      timeout,
-    ]);
-    if (!session) {
-      window.location.href = 'login.html?next=business-signup.html';
-    }
-  } catch (_) {
-    window.location.href = 'login.html?next=business-signup.html';
-  }
-});
+// No forced redirect — auth is handled at step 4

@@ -161,32 +161,66 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button class="bsign-next" id="js-s3-next">Continue →</button>
     </div>
 
-    <!-- SCREEN 4: Contact person -->
+    <!-- SCREEN 4: Account / Contact -->
     <div class="bsign-screen" id="bs-s4">
       <div class="bsign-step-label">Step 4 of 5</div>
-      <h1 class="bsign-title">Your contact details</h1>
-      <p class="bsign-sub">We'll use these to confirm your listing and send account updates.</p>
-      <div class="bsign-form">
-        <div class="bsign-field">
-          <label class="bsign-label" for="bc-name">Your name *</label>
-          <input class="bsign-input" type="text" id="bc-name" placeholder="First and last name" />
-        </div>
-        <div class="bsign-field">
-          <label class="bsign-label" for="bc-email">Email address *</label>
-          <input class="bsign-input" type="email" id="bc-email" placeholder="you@yourbusiness.com.au" />
-        </div>
-        <div class="bsign-field">
-          <label class="bsign-label" for="bc-role">Your role</label>
-          <select class="bsign-input" id="bc-role">
-            <option value="">Select your role…</option>
-            <option value="Owner">Owner</option>
-            <option value="Manager">Manager</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+
+      <!-- Logged-in state (shown by JS) -->
+      <div id="bs-s4-loggedin" style="display:none">
+        <h1 class="bsign-title">You're all set 👋</h1>
+        <p class="bsign-sub">We'll submit the listing under your account.</p>
+        <div class="bsign-logged-in-card" id="js-s4-account-card"></div>
+        <button class="bsign-next" id="js-s4-next">Submit listing →</button>
+        <p style="font-size:.8rem;color:var(--mid);margin-top:.75rem;text-align:center">
+          Not you? <a href="#" id="js-s4-signout" style="color:var(--teal)">Sign out</a>
+        </p>
       </div>
-      <button class="bsign-next" id="js-s4-next">Submit listing →</button>
+
+      <!-- Logged-out state (shown by JS) -->
+      <div id="bs-s4-loggedout" style="display:none">
+        <h1 class="bsign-title">Create your account</h1>
+        <p class="bsign-sub">You'll use this to manage your listing, events, and offers.</p>
+
+        <!-- Toggle: login vs signup -->
+        <div class="bsign-auth-toggle" id="js-auth-toggle">
+          <button class="bsign-auth-tab active" data-mode="signup">New account</button>
+          <button class="bsign-auth-tab" data-mode="login">I have an account</button>
+        </div>
+
+        <!-- Signup fields -->
+        <div class="bsign-form" id="bs-s4-signup-form">
+          <div class="bsign-field">
+            <label class="bsign-label" for="bc-name">Your name *</label>
+            <input class="bsign-input" type="text" id="bc-name" placeholder="First and last name" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="bc-email">Email address *</label>
+            <input class="bsign-input" type="email" id="bc-email" placeholder="you@yourbusiness.com.au" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="bc-password">Password *</label>
+            <input class="bsign-input" type="password" id="bc-password" placeholder="Min 8 characters" />
+          </div>
+        </div>
+
+        <!-- Login fields -->
+        <div class="bsign-form" id="bs-s4-login-form" style="display:none">
+          <div class="bsign-field">
+            <label class="bsign-label" for="bc-login-email">Email address *</label>
+            <input class="bsign-input" type="email" id="bc-login-email" placeholder="you@yourbusiness.com.au" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="bc-login-password">Password *</label>
+            <input class="bsign-input" type="password" id="bc-login-password" placeholder="Your password" />
+          </div>
+          <p style="font-size:.8rem;margin-top:.25rem">
+            <a href="login.html?forgot=1" style="color:var(--teal)">Forgot password?</a>
+          </p>
+        </div>
+
+        <div id="js-s4-error" class="bsign-error" style="display:none"></div>
+        <button class="bsign-next" id="js-s4-next">Submit listing →</button>
+      </div>
       <p id="js-s4-error" style="display:none;color:#ef4444;font-size:.85rem;margin-top:.75rem;line-height:1.5"></p>
     </div>
 

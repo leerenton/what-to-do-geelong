@@ -198,15 +198,17 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
     // Claim an existing business — update owner_id
     bizId = bsState.claimedBiz.id;
     const { error: upErr } = await db.from('businesses').update({
-      owner_id:   userId,
-      is_claimed: true,
-      plan:        bsState.plan,
-      name:        bsState.details.name,
-      suburb:      bsState.details.suburb,
-      location:    bsState.details.address,
-      website:     bsState.details.website,
-      description: bsState.details.description,
-      type:        bsState.type || bsState.claimedBiz.type,
+      owner_id:    userId,
+      is_claimed:  true,
+      status:      'pending',
+      plan:         bsState.plan,
+      name:         bsState.details.name,
+      suburb:       bsState.details.suburb,
+      location:     bsState.details.address,
+      website:      bsState.details.website,
+      description:  bsState.details.description,
+      type:         bsState.type || bsState.claimedBiz.type,
+      claim_notes:  bsState.details.claimNotes || null,
     }).eq('id', bizId);
     error = upErr;
   } else {
@@ -216,6 +218,7 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
       id:          bizId,
       owner_id:    userId,
       is_claimed:  true,
+      status:      'pending',
       plan:        bsState.plan,
       name:        bsState.details.name,
       type:        bsState.type || 'Business',

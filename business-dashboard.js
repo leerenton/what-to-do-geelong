@@ -17,6 +17,47 @@ function fmtDate(iso) {
   return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+// ── IMAGE UPLOAD HELPER ───────────────────────────────────
+// Uploads a file to Supabase Storage (business-media bucket)
+// Returns the public URL or null on error.
+async function uploadImage(file, pathPrefix, statusEl) {
+  const BUCKET = 'business-media';
+  const MAX_MB = 5;
+  if (!file) return null;
+  if (file.size > MAX_MB * 1024 * 1024) {
+    if (statusEl) { statusEl.textContent = `File too large (max ${MAX_MB}MB)`; statusEl.style.color = 'var(--error,#dc2626)'; }
+    return null;
+  }
+  const ext  = file.name.split('.').pop().toLowerCase();
+  const path = `${pathPrefix}/${Date.now()}.${ext}`;
+  if (statusEl) { statusEl.textContent = 'Uploading…'; statusEl.style.color = 'var(--mid)'; }
+  const { error } = await db.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
+  if (error) {
+    if (statusEl) { statusEl.textContent = 'Upload failed: ' + error.message; statusEl.style.color = 'var(--error,#dc2626)'; }
+    return null;
+  }
+  const { data } = db.storage.from(BUCKET).getPublicUrl(path);
+  if (statusEl) { statusEl.textContent = '✓ Uploaded'; statusEl.style.color = 'var(--success,#16a34a)'; }
+  return data.publicUrl;
+}
+
+// Wire a file input to preview + upload, storing result in a hidden input
+function bindImageUpload(fileInputId, previewId, statusId, hiddenInputId, pathPrefix) {
+  const fileEl   = document.getElementById(fileInputId);
+  const preview  = document.getElementById(previewId);
+  const statusEl = document.getElementById(statusId);
+  const hiddenEl = document.getElementById(hiddenInputId);
+  if (!fileEl) return;
+  fileEl.addEventListener('change', async () => {
+    const file = fileEl.files[0];
+    if (!file) return;
+    // Show local preview immediately
+    if (preview) { preview.src = URL.createObjectURL(file); preview.style.display = 'block'; }
+    const url = await uploadImage(file, pathPrefix, statusEl);
+    if (url && hiddenEl) hiddenEl.value = url;
+  });
+}
+
 // ── LOAD DATA FROM SUPABASE ───────────────────────────────
 async function loadBizData() {
   const [evRes, promoRes, inqRes] = await Promise.all([
@@ -264,6 +305,16 @@ function renderEvents() {
                 ).join('')}
               </div>
             </div>
+            <div class="dash-field">
+              <label class="dash-label">Event image <span style="font-weight:400;color:var(--mid)">(optional, max 5MB)</span></label>
+              <div class="dash-upload-row">
+                <label class="dash-upload-btn" for="ev-img-file">📷 Upload photo</label>
+                <input type="file" id="ev-img-file" accept="image/*" style="display:none" />
+                <span class="dash-upload-status" id="ev-img-status"></span>
+              </div>
+              <img id="ev-img-preview" style="display:none;max-height:100px;border-radius:8px;margin-top:.5rem" alt="" />
+              <input type="hidden" id="ev-img-url" />
+            </div>
             <div class="dash-form-btns">
               <button class="btn btn--teal btn--sm" id="js-ev-add">Save event</button>
               <button class="btn btn--outline btn--sm" id="js-ev-cancel">Cancel</button>
@@ -359,6 +410,16 @@ function renderOffers() {
             </div>
             <div class="dash-field"><label class="dash-label">Expires / When valid</label>
               <input class="dash-input" id="of-expires" placeholder="e.g. Every Friday · Ends 30 Jun · Ongoing" /></div>
+            <div class="dash-field">
+              <label class="dash-label">Offer image <span style="font-weight:400;color:var(--mid)">(optional)</span></label>
+              <div class="dash-upload-row">
+                <label class="dash-upload-btn" for="of-img-file">📷 Upload photo</label>
+                <input type="file" id="of-img-file" accept="image/*" style="display:none" />
+                <span class="dash-upload-status" id="of-img-status"></span>
+              </div>
+              <img id="of-img-preview" style="display:none;max-height:80px;border-radius:8px;margin-top:.5rem" alt="" />
+              <input type="hidden" id="of-img-url" />
+            </div>
             <div class="dash-form-btns">
               <button class="btn btn--teal btn--sm" id="js-of-add">Save offer</button>
               <button class="btn btn--outline btn--sm" id="js-of-cancel">Cancel</button>
@@ -452,19 +513,34 @@ function renderInquiries() {
 
 // ── GALLERY TAB ───────────────────────────────────────────
 function renderGallery() {
+  const currentImg = currentBiz.img || '';
   return `
     <div class="dash-panel active" id="panel-gallery">
-      <div class="dash-section-title" style="margin-bottom:.85rem"><span class="material-symbols-rounded">photo_library</span> Photo Gallery</div>
+      <div class="dash-section-title" style="margin-bottom:.85rem"><span class="material-symbols-rounded">photo_library</span> Photos</div>
+
+      <div class="dash-add-card" style="margin-bottom:1.25rem">
+        <div class="dash-add-card__title">Cover photo</div>
+        <p style="font-size:.82rem;color:var(--mid);margin-bottom:.85rem">This image appears on your listing card and at the top of your business page.</p>
+        ${currentImg ? `<img src="${currentImg}" style="max-height:140px;border-radius:10px;margin-bottom:.85rem;object-fit:cover" alt="Current cover" />` : ''}
+        <div class="dash-upload-row">
+          <label class="dash-upload-btn" for="cover-img-file">📷 ${currentImg ? 'Replace photo' : 'Upload cover photo'}</label>
+          <input type="file" id="cover-img-file" accept="image/*" style="display:none" />
+          <span class="dash-upload-status" id="cover-img-status"></span>
+        </div>
+        <img id="cover-img-preview" style="display:none;max-height:120px;border-radius:8px;margin-top:.75rem" alt="" />
+      </div>
+
       ${!isGold() ? `
-        <div class="dash-upgrade-banner" style="margin-bottom:1rem">
+        <div class="dash-upgrade-banner">
           <div class="dash-upgrade-banner__text">
-            <h3>Photo gallery is a Gold feature</h3>
-            <p>Upgrade to add up to 20 photos to your listing and showcase your venue.</p>
+            <h3>Gallery is a Gold feature</h3>
+            <p>Upgrade to add up to 20 photos and a full photo gallery to your listing.</p>
           </div>
           <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--gold btn--sm">Upgrade →</a>
         </div>
-      ` : ''}
-      <p style="font-size:.82rem;color:var(--mid);margin-bottom:.85rem">Photo uploads coming soon — drop us an email at <a href="mailto:hello@whattodogeelong.com.au">hello@whattodogeelong.com.au</a> to add photos now.</p>
+      ` : `
+        <div style="color:var(--mid);font-size:.85rem;margin-top:.5rem">Gallery (multiple photos) — coming soon for Gold members.</div>
+      `}
     </div>
   `;
 }
@@ -804,6 +880,8 @@ window.switchTab = switchTab;
 function bindPanelEvents(tab) {
   if (tab === 'events') {
     const selectedTags = new Set();
+    // Wire image upload for event form
+    bindImageUpload('ev-img-file', 'ev-img-preview', 'ev-img-status', 'ev-img-url', `biz/${currentBiz.id}/events`);
 
     document.getElementById('js-ev-open-form')?.addEventListener('click', () => {
       const form = document.getElementById('js-ev-form');
@@ -843,6 +921,7 @@ function bindPanelEvents(tab) {
       const formattedDate = new Date(rawDate + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
       const locationVal   = document.getElementById('ev-location').value.trim() || currentBiz.location || currentBiz.suburb || '';
 
+      const evImgUrl = document.getElementById('ev-img-url')?.value || null;
       const { data, error } = await db.from('events').insert({
         business_id: currentBiz.id,
         title,
@@ -854,7 +933,9 @@ function bindPanelEvents(tab) {
         color:       currentBiz.color || '#4ac8d0',
         tags:        [...selectedTags],
         location:    locationVal,
+        img:         evImgUrl,
         is_promoted: false,
+        status:      'pending',
       }).select().single();
 
       btn.disabled = false; btn.textContent = 'Save event';
@@ -863,6 +944,12 @@ function bindPanelEvents(tab) {
       document.getElementById('js-events-list').innerHTML = renderEventItems();
       document.getElementById('js-ev-form').style.display = 'none';
       bindEventActions();
+      // Notify user it's pending review
+      const notice = document.createElement('div');
+      notice.style.cssText = 'background:#fef9c3;border:1.5px solid #fde047;border-radius:10px;padding:.85rem 1rem;font-size:.85rem;margin-top:.75rem;color:#713f12';
+      notice.textContent = '⏳ Your event has been submitted and is pending review. It will appear on the site once approved.';
+      document.getElementById('js-events-list').prepend(notice);
+      setTimeout(() => notice.remove(), 8000);
     });
 
     bindEventActions();
@@ -877,12 +964,16 @@ function bindPanelEvents(tab) {
       document.getElementById('js-of-form').style.display = 'none';
     });
 
+    // Wire image upload for offer form
+    bindImageUpload('of-img-file', 'of-img-preview', 'of-img-status', 'of-img-url', `biz/${currentBiz.id}/promos`);
+
     document.getElementById('js-of-add')?.addEventListener('click', async () => {
       const title = document.getElementById('of-title').value.trim();
       if (!title) { alert('Please enter an offer title.'); return; }
       const btn = document.getElementById('js-of-add');
       btn.disabled = true; btn.textContent = 'Saving…';
 
+      const ofImgUrl = document.getElementById('of-img-url')?.value || null;
       const { data, error } = await db.from('promos').insert({
         id:          'p-' + Date.now().toString(36),
         business_id: currentBiz.id,
@@ -891,6 +982,8 @@ function bindPanelEvents(tab) {
         expires:     document.getElementById('of-expires').value || 'Ongoing',
         emoji:       document.getElementById('of-emoji').value || '🎉',
         tag:         document.getElementById('of-tag').value || 'Offer',
+        img:         ofImgUrl,
+        status:      'pending',
       }).select().single();
 
       btn.disabled = false; btn.textContent = 'Save offer';
@@ -902,6 +995,29 @@ function bindPanelEvents(tab) {
     });
 
     bindOfferDeleteHandlers();
+  }
+
+  if (tab === 'gallery') {
+    // Cover photo upload — saves directly to the businesses table
+    const fileEl   = document.getElementById('cover-img-file');
+    const statusEl = document.getElementById('cover-img-status');
+    if (fileEl) {
+      fileEl.addEventListener('change', async () => {
+        const file = fileEl.files[0];
+        if (!file) return;
+        // Local preview
+        const preview = document.getElementById('cover-img-preview');
+        if (preview) { preview.src = URL.createObjectURL(file); preview.style.display = 'block'; }
+        // Upload
+        const url = await uploadImage(file, `biz/${currentBiz.id}/cover`, statusEl);
+        if (!url) return;
+        // Persist to business record
+        const { error } = await db.from('businesses').update({ img: url }).eq('id', currentBiz.id);
+        if (error) { if (statusEl) { statusEl.textContent = 'Saved upload but failed to update listing: ' + error.message; statusEl.style.color = 'var(--error,#dc2626)'; } return; }
+        currentBiz.img = url;
+        if (statusEl) { statusEl.textContent = '✓ Cover photo updated'; statusEl.style.color = 'var(--success,#16a34a)'; }
+      });
+    }
   }
 
   if (tab === 'inquiries') {

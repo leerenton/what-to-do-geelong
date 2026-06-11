@@ -486,3 +486,19 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
   background: #fef3c7; border: 1px solid #f59e0b; border-radius: var(--radius);
   font-size: .82rem; padding: .55rem .8rem; margin-bottom: .9rem; color: #92400e;
 }
+
+/* ── Image upload UI ─────────────────────────────────── */
+.dash-upload-row {
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+}
+.dash-upload-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .45rem 1rem; border-radius: 8px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  font-size: .82rem; font-weight: 600; color: var(--dark);
+  cursor: pointer; transition: background .15s;
+}
+.dash-upload-btn:hover { background: var(--border); }
+.dash-upload-status {
+  font-size: .78rem; font-weight: 600;
+}

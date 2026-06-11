@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Approvals — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wtdgadmin.css?v=2" />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    .apv-tabs { display:flex; gap:.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .apv-tab  { padding:.45rem 1.1rem; border-radius:2rem; border:1.5px solid var(--adm-border);
+                background:transparent; color:var(--adm-mid); font:600 .82rem/1 'DM Sans',sans-serif;
+                cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:.4rem; }
+    .apv-tab.active { background:var(--adm-accent); border-color:var(--adm-accent); color:#fff; }
+    .apv-tab__count { background:rgba(255,255,255,.25); border-radius:1rem; padding:.1rem .45rem; font-size:.75rem; }
+    .apv-tab:not(.active) .apv-tab__count { background:var(--adm-border); color:var(--adm-text); }
+
+    .apv-queue { display:flex; flex-direction:column; gap:1rem; }
+    .apv-card  { background:var(--adm-surface); border:1.5px solid var(--adm-border); border-radius:12px;
+                 padding:1.1rem 1.25rem; display:grid; gap:.65rem; }
+    .apv-card--rejected { opacity:.55; }
+    .apv-card__top { display:flex; align-items:flex-start; gap:1rem; }
+    .apv-card__thumb { width:56px; height:56px; border-radius:8px; object-fit:cover;
+                       background:var(--adm-hover); display:flex; align-items:center; justify-content:center;
+                       font-size:1.6rem; flex-shrink:0; overflow:hidden; }
+    .apv-card__thumb img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
+    .apv-card__info { flex:1; min-width:0; }
+    .apv-card__type { font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+                      color:var(--adm-mid); margin-bottom:.2rem; }
+    .apv-card__title { font-size:1rem; font-weight:700; color:var(--adm-text); margin:0 0 .2rem; }
+    .apv-card__meta  { font-size:.8rem; color:var(--adm-mid); display:flex; flex-wrap:wrap; gap:.5rem; }
+    .apv-card__note  { font-size:.82rem; color:var(--adm-text); background:var(--adm-hover);
+                       border-radius:8px; padding:.6rem .8rem; font-style:italic; }
+    .apv-card__img   { max-height:160px; border-radius:8px; object-fit:cover; width:100%; }
+    .apv-card__actions { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.25rem; }
+
+    .apv-btn         { padding:.45rem 1.1rem; border-radius:8px; border:none; font:600 .82rem/1 'DM Sans',sans-serif;
+                       cursor:pointer; transition:all .15s; }
+    .apv-btn--approve{ background:#16a34a; color:#fff; }
+    .apv-btn--approve:hover { background:#15803d; }
+    .apv-btn--reject { background:var(--adm-hover); color:var(--adm-red); border:1.5px solid var(--adm-red); }
+    .apv-btn--reject:hover { background:#fee2e2; }
+    .apv-btn--view   { background:transparent; color:var(--adm-accent); border:1.5px solid var(--adm-accent); }
+    .apv-btn--view:hover { background:var(--adm-accent); color:#fff; }
+    .apv-btn:disabled { opacity:.4; cursor:default; }
+
+    .apv-status-pill { padding:.2rem .6rem; border-radius:1rem; font-size:.72rem; font-weight:700; }
+    .apv-status-pill--approved { background:#dcfce7; color:#16a34a; }
+    .apv-status-pill--rejected { background:#fee2e2; color:#dc2626; }
+    .apv-status-pill--pending  { background:#fef9c3; color:#b45309; }
+
+    .apv-empty { text-align:center; padding:3rem 1rem; color:var(--adm-mid); }
+    .apv-empty__icon { font-size:2.5rem; margin-bottom:.75rem; }
+    .apv-empty__title{ font-weight:700; font-size:1.05rem; color:var(--adm-text); margin-bottom:.25rem; }
+
+    .apv-loading { text-align:center; padding:2rem; color:var(--adm-mid); font-size:.9rem; }
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <div class="adm-main">
+    <header class="adm-topbar">
+      <div class="adm-topbar__left">
+        <button class="adm-menu-btn" id="js-adm-menu">☰</button>
+        <h1 class="adm-topbar__title" id="js-adm-page-title">Approvals</h1>
+      </div>
+    </header>
+
+    <div class="adm-content">
+      <div class="apv-tabs" id="js-apv-tabs">
+        <button class="apv-tab active" data-tab="all">All pending <span class="apv-tab__count" id="cnt-all">…</span></button>
+        <button class="apv-tab" data-tab="businesses">Businesses <span class="apv-tab__count" id="cnt-businesses">0</span></button>
+        <button class="apv-tab" data-tab="events">Events <span class="apv-tab__count" id="cnt-events">0</span></button>
+        <button class="apv-tab" data-tab="promos">Offers <span class="apv-tab__count" id="cnt-promos">0</span></button>
+        <button class="apv-tab" data-tab="history">History</button>
+      </div>
+
+      <div id="js-apv-queue" class="apv-queue">
+        <div class="apv-loading">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="wtdgadmin.js"></script>
+<script src="wtdgadmin-shell.js"></script>
+<script>
+'use strict';
+
+let _allBiz = [], _allEvents = [], _allPromos = [];
+let _activeTab = 'all';
+
+async function loadQueue() {
+  const [bizRes, evRes, promoRes] = await Promise.all([
+    db.from('businesses').select('id,name,type,suburb,emoji,img,status,claim_notes,created_at,owner_id')
+      .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
+    db.from('events').select('id,title,category,date,location,img,status,business_id,created_at')
+      .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
+    db.from('promos').select('id,title,description,emoji,status,business_id,created_at')
+      .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
+  ]);
+
+  _allBiz    = bizRes.data   || [];
+  _allEvents = evRes.data    || [];
+  _allPromos = promoRes.data || [];
+
+  const pendBiz   = _allBiz.filter(r => r.status === 'pending').length;
+  const pendEv    = _allEvents.filter(r => r.status === 'pending').length;
+  const pendPromo = _allPromos.filter(r => r.status === 'pending').length;
+  const totalPend = pendBiz + pendEv + pendPromo;
+
+  document.getElementById('cnt-all').textContent        = totalPend;
+  document.getElementById('cnt-businesses').textContent = pendBiz;
+  document.getElementById('cnt-events').textContent     = pendEv;
+  document.getElementById('cnt-promos').textContent     = pendPromo;
+
+  // Update sidebar badge
+  const badge = document.getElementById('js-adm-pending-badge');
+  if (badge) { badge.textContent = totalPend; badge.style.display = totalPend > 0 ? 'inline-flex' : 'none'; }
+
+  renderQueue();
+}
+
+function renderQueue() {
+  const container = document.getElementById('js-apv-queue');
+  const showHistory = _activeTab === 'history';
+
+  let bizItems   = _allBiz.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
+  let evItems    = _allEvents.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
+  let promoItems = _allPromos.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
+
+  if (_activeTab === 'businesses') { evItems = []; promoItems = []; }
+  if (_activeTab === 'events')     { bizItems = []; promoItems = []; }
+  if (_activeTab === 'promos')     { bizItems = []; evItems = []; }
+
+  const cards = [
+    ...bizItems.map(r => renderBizCard(r)),
+    ...evItems.map(r => renderEventCard(r)),
+    ...promoItems.map(r => renderPromoCard(r)),
+  ];
+
+  if (!cards.length) {
+    container.innerHTML = `
+      <div class="apv-empty">
+        <div class="apv-empty__icon">${showHistory ? '📋' : '✅'}</div>
+        <div class="apv-empty__title">${showHistory ? 'No history yet' : 'All clear!'}</div>
+        <p>${showHistory ? 'Approved and rejected items will appear here.' : 'Nothing pending review — you\'re up to date.'}</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = cards.join('');
+  bindActions();
+}
+
+function statusPill(status) {
+  return `<span class="apv-status-pill apv-status-pill--${status}">${status}</span>`;
+}
+
+function renderBizCard(biz) {
+  const thumb = biz.img
+    ? `<div class="apv-card__thumb"><img src="${biz.img}" alt="" /></div>`
+    : `<div class="apv-card__thumb">${biz.emoji || '🏪'}</div>`;
+  const isHistory = biz.status !== 'pending';
+  return `
+    <div class="apv-card ${isHistory ? 'apv-card--history' : ''}" data-type="biz" data-id="${biz.id}">
+      <div class="apv-card__top">
+        ${thumb}
+        <div class="apv-card__info">
+          <div class="apv-card__type">Business ${biz.owner_id ? '· Claim' : '· New listing'} ${isHistory ? statusPill(biz.status) : ''}</div>
+          <div class="apv-card__title">${biz.name}</div>
+          <div class="apv-card__meta">
+            <span>📍 ${biz.suburb || ''}</span>
+            <span>🏷 ${biz.type || 'Unknown'}</span>
+            <span>🕐 ${new Date(biz.created_at).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'})}</span>
+          </div>
+        </div>
+      </div>
+      ${biz.claim_notes ? `<div class="apv-card__note">💬 "${biz.claim_notes}"</div>` : ''}
+      ${!isHistory ? `
+      <div class="apv-card__actions">
+        <button class="apv-btn apv-btn--approve" data-action="approve" data-type="biz" data-id="${biz.id}">✓ Approve</button>
+        <button class="apv-btn apv-btn--reject"  data-action="reject"  data-type="biz" data-id="${biz.id}">✕ Reject</button>
+        <a href="wtdgadmin-businesses.html" class="apv-btn apv-btn--view">View listing →</a>
+      </div>` : ''}
+    </div>`;
+}
+
+function renderEventCard(ev) {
+  const isHistory = ev.status !== 'pending';
+  return `
+    <div class="apv-card" data-type="event" data-id="${ev.id}">
+      <div class="apv-card__top">
+        <div class="apv-card__thumb">📅</div>
+        <div class="apv-card__info">
+          <div class="apv-card__type">Event ${isHistory ? statusPill(ev.status) : ''}</div>
+          <div class="apv-card__title">${ev.title}</div>
+          <div class="apv-card__meta">
+            <span>📍 ${ev.location || ''}</span>
+            <span>📅 ${ev.date || ''}</span>
+            <span>🏷 ${ev.category || ''}</span>
+            <span>🕐 Submitted ${new Date(ev.created_at).toLocaleDateString('en-AU', {day:'numeric',month:'short'})}</span>
+          </div>
+        </div>
+      </div>
+      ${ev.img ? `<img class="apv-card__img" src="${ev.img}" alt="" />` : ''}
+      ${!isHistory ? `
+      <div class="apv-card__actions">
+        <button class="apv-btn apv-btn--approve" data-action="approve" data-type="event" data-id="${ev.id}">✓ Approve</button>
+        <button class="apv-btn apv-btn--reject"  data-action="reject"  data-type="event" data-id="${ev.id}">✕ Reject</button>
+      </div>` : ''}
+    </div>`;
+}
+
+function renderPromoCard(promo) {
+  const isHistory = promo.status !== 'pending';
+  return `
+    <div class="apv-card" data-type="promo" data-id="${promo.id}">
+      <div class="apv-card__top">
+        <div class="apv-card__thumb">${promo.emoji || '🎉'}</div>
+        <div class="apv-card__info">
+          <div class="apv-card__type">Offer / Promo ${isHistory ? statusPill(promo.status) : ''}</div>
+          <div class="apv-card__title">${promo.title}</div>
+          <div class="apv-card__meta">
+            <span>${promo.description || ''}</span>
+            <span>🕐 Submitted ${new Date(promo.created_at).toLocaleDateString('en-AU', {day:'numeric',month:'short'})}</span>
+          </div>
+        </div>
+      </div>
+      ${!isHistory ? `
+      <div class="apv-card__actions">
+        <button class="apv-btn apv-btn--approve" data-action="approve" data-type="promo" data-id="${promo.id}">✓ Approve</button>
+        <button class="apv-btn apv-btn--reject"  data-action="reject"  data-type="promo" data-id="${promo.id}">✕ Reject</button>
+      </div>` : ''}
+    </div>`;
+}
+
+function bindActions() {
+  document.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const { action, type, id } = btn.dataset;
+      const newStatus = action === 'approve' ? 'approved' : 'rejected';
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      let err;
+      if (type === 'biz')   ({ error: err } = await db.from('businesses').update({ status: newStatus }).eq('id', id));
+      if (type === 'event') ({ error: err } = await db.from('events').update({ status: newStatus }).eq('id', id));
+      if (type === 'promo') ({ error: err } = await db.from('promos').update({ status: newStatus }).eq('id', id));
+
+      if (err) { alert('Error: ' + err.message); btn.disabled = false; btn.textContent = action === 'approve' ? '✓ Approve' : '✕ Reject'; return; }
+      await loadQueue();
+    });
+  });
+}
+
+// Tab switching
+document.getElementById('js-apv-tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.apv-tab');
+  if (!tab) return;
+  _activeTab = tab.dataset.tab;
+  document.querySelectorAll('.apv-tab').forEach(t => t.classList.toggle('active', t === tab));
+  renderQueue();
+});
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  initAdminShell('Approvals');
+  loadQueue();
+});
+</script>
+</body>
+</html>

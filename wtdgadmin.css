@@ -314,3 +314,14 @@ body.adm-body {
   white-space: nowrap; transition: border-color .15s;
 }
 .adm-upload-btn:hover { border-color: var(--adm-teal); color: var(--adm-teal); }
+
+/* ── Approvals pending badge ─────────────────────────── */
+.adm-nav__badge {
+  margin-left: auto;
+  background: #dc2626; color: #fff;
+  border-radius: 1rem; padding: .1rem .5rem;
+  font-size: .7rem; font-weight: 700;
+  min-width: 18px; text-align: center;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-nav__item--approvals { position: relative; }

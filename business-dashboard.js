@@ -127,6 +127,20 @@ function renderSwitcher() {
   document.addEventListener('click', () => menu.classList.remove('open'));
 }
 
+// ── PENDING APPROVAL BANNER ───────────────────────────────
+function pendingBanner() {
+  if (currentBiz.status !== 'pending') return '';
+  return `
+    <div class="dash-pending-banner">
+      <div class="dash-pending-banner__icon">⏳</div>
+      <div class="dash-pending-banner__body">
+        <div class="dash-pending-banner__title">Pending approval</div>
+        <div class="dash-pending-banner__sub">Your listing is under review and won't appear publicly until approved. We typically approve within 24 hours. You can still set up your events and offers in the meantime.</div>
+      </div>
+    </div>
+  `;
+}
+
 // ── GOLD UPGRADE BANNER ───────────────────────────────────
 function goldUpgradeBanner() {
   if (isGold()) return '';
@@ -152,6 +166,7 @@ function renderOverview() {
 
   return `
     <div class="dash-panel active" id="panel-overview">
+      ${pendingBanner()}
       ${goldUpgradeBanner()}
 
       ${isGold() ? `

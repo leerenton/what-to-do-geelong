@@ -502,3 +502,27 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
 .dash-upload-status {
   font-size: .78rem; font-weight: 600;
 }
+
+/* ── Pending approval banner ─────────────────────────── */
+.dash-pending-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #fefce8;
+  border: 1.5px solid #fde047;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.25rem;
+}
+.dash-pending-banner__icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1; }
+.dash-pending-banner__title {
+  font-weight: 800;
+  font-size: .92rem;
+  color: #713f12;
+  margin-bottom: .2rem;
+}
+.dash-pending-banner__sub {
+  font-size: .82rem;
+  color: #92400e;
+  line-height: 1.5;
+}

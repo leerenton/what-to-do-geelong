@@ -98,6 +98,8 @@ let _allBiz = [], _allEvents = [], _allPromos = [];
 let _activeTab = 'all';
 
 async function loadQueue() {
+  const container = document.getElementById('js-apv-queue');
+  try {
   const [bizRes, evRes, promoRes] = await Promise.all([
     db.from('businesses').select('id,name,type,suburb,emoji,img,status,claim_notes,created_at,owner_id')
       .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
@@ -106,6 +108,8 @@ async function loadQueue() {
     db.from('promos').select('id,title,description,emoji,status,business_id,created_at')
       .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
   ]);
+
+  if (bizRes.error) throw bizRes.error;
 
   _allBiz    = bizRes.data   || [];
   _allEvents = evRes.data    || [];
@@ -126,6 +130,14 @@ async function loadQueue() {
   if (badge) { badge.textContent = totalPend; badge.style.display = totalPend > 0 ? 'inline-flex' : 'none'; }
 
   renderQueue();
+  } catch(e) {
+    container.innerHTML = `<div class="apv-empty">
+      <div class="apv-empty__icon">⚠️</div>
+      <div class="apv-empty__title">Could not load queue</div>
+      <p style="font-size:.85rem;color:var(--adm-mid)">${e.message}</p>
+      <p style="font-size:.8rem;color:var(--adm-mid);margin-top:.5rem">If you haven't run <strong>migration_approvals.sql</strong> yet, run it in the Supabase SQL editor and refresh.</p>
+    </div>`;
+  }
 }
 
 function renderQueue() {

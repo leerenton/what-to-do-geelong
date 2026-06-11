@@ -73,14 +73,16 @@
       bizRows.forEach(b => { _bizCredits[b.id] = b.credit_balance || 0; });
 
       // Default to URL param biz, localStorage biz, or first row
-      const urlBiz   = new URLSearchParams(window.location.search).get('biz');
-      const lsBiz    = localStorage.getItem('wtdg_dash_biz');
-      const preferred = bizRows.find(b => b.id === urlBiz) ||
-                        bizRows.find(b => b.id === lsBiz)  ||
-                        bizRows[0];
+      const urlBiz    = new URLSearchParams(window.location.search).get('biz');
+      const lsBiz     = localStorage.getItem('wtdg_dash_biz');
+      const preferred  = bizRows.find(b => b.id === urlBiz) ||
+                         bizRows.find(b => b.id === lsBiz)  ||
+                         bizRows[0];
 
       _bizId   = preferred.id;
       _credits = preferred.credit_balance || 0;
+
+      console.log('[promote] bizId:', _bizId, '| credits:', _credits, '| all biz:', bizRows.map(b => `${b.id}=${b.credit_balance}`));
 
       // Load events + offers for all businesses owned by user
       const bizIds = bizRows.map(b => b.id);
@@ -214,17 +216,27 @@
   });
 
   // ── Step 2 → 3 ────────────────────────────────────────
-  document.getElementById('js-s2-next').addEventListener('click', () => {
+  document.getElementById('js-s2-next').addEventListener('click', async () => {
     if (!_selectedPkg) return;
     _step = 3;
     setProgress(75);
 
     // Populate payment screen
-    document.getElementById('js-s3-item-label').textContent = _selectedItem.name;
-    document.getElementById('js-s3-pkg-label').textContent  = cap(_selectedPkg) + ` · ${PKG_PRICE[_selectedPkg]}`;
+    document.getElementById('js-s3-item-label').textContent  = _selectedItem.name;
+    document.getElementById('js-s3-pkg-label').textContent   = cap(_selectedPkg) + ` · ${PKG_PRICE[_selectedPkg]}`;
     document.getElementById('js-pay-card-amount').textContent = PKG_PRICE[_selectedPkg] + ' AUD';
 
-    const cost = CREDIT_COST[_selectedPkg];
+    // Fresh credit lookup — don't rely on cached value
+    try {
+      const { data: bizRow } = await db
+        .from('businesses')
+        .select('id, credit_balance')
+        .eq('id', _bizId)
+        .single();
+      _credits = bizRow?.credit_balance || 0;
+    } catch (e) { _credits = 0; }
+
+    const cost    = CREDIT_COST[_selectedPkg];
     const credOpt = document.getElementById('js-pay-credits');
 
     if (_credits >= cost) {

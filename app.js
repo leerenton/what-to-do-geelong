@@ -1786,18 +1786,25 @@ async function initListingPage() {
 
   let biz = slugParam ? getBusinessBySlug(slugParam) : idParam ? getBusinessById(idParam) : null;
 
-  // Fallback: fetch from Supabase by slug or id if not in local data
+  // Fallback: fetch from Supabase by slug, id, or name-derived slug
   if (!biz && typeof db !== 'undefined') {
-    let q = db.from('businesses').select('*');
-    if (slugParam) q = q.eq('slug', slugParam);
-    else if (idParam) q = q.eq('id', idParam);
-    else q = null;
-    if (q) {
-      const { data } = await q.single();
-      if (data) {
-        biz = data;
-        if (biz.business_id) biz.businessId = biz.business_id;
-      }
+    let data = null;
+    if (idParam) {
+      ({ data } = await db.from('businesses').select('*').eq('id', idParam).single());
+    }
+    if (!data && slugParam) {
+      // Try exact slug match first
+      ({ data } = await db.from('businesses').select('*').eq('slug', slugParam).single());
+    }
+    if (!data && slugParam) {
+      // Try matching name: slug "test-cafe-geelong" → name ilike "test cafe%"
+      const nameHint = slugParam.replace(/-/g, ' ').replace(/\s+(geelong|cbd|north|south|east|west|newtown|belmont|torquay|lara|leopold|drysdale|barwon heads)$/i, '').trim();
+      const { data: rows } = await db.from('businesses').select('*').ilike('name', `${nameHint}%`).limit(1);
+      data = rows?.[0] || null;
+    }
+    if (data) {
+      biz = data;
+      if (biz.business_id) biz.businessId = biz.business_id;
     }
   }
 

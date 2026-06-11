@@ -1,5 +1,12 @@
 'use strict';
 
+function bsSlugify(str) {
+  return str.toLowerCase().trim()
+    .replace(/[àáâãäå]/g,'a').replace(/[èéêë]/g,'e').replace(/[ìíîï]/g,'i')
+    .replace(/[òóôõö]/g,'o').replace(/[ùúûü]/g,'u').replace(/[ñ]/g,'n')
+    .replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-');
+}
+
 // ── STATE ─────────────────────────────────────────────────
 const bsState = {
   mode: null,
@@ -292,10 +299,12 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
   if (bsState.mode === 'claim' && bsState.claimedBiz) {
     // Claim an existing business — update owner_id
     bizId = bsState.claimedBiz.id;
+    const claimSlug = bsSlugify(`${bsState.details.name}-${bsState.details.suburb || 'geelong'}`);
     const { error: upErr } = await db.from('businesses').update({
       owner_id:    userId,
       is_claimed:  true,
       status:      'pending',
+      slug:         claimSlug,
       plan:         bsState.plan,
       name:         bsState.details.name,
       suburb:       bsState.details.suburb,
@@ -311,11 +320,13 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
   } else {
     // Create a new business
     bizId = 'biz-' + Date.now().toString(36);
+    const newSlug = bsSlugify(`${bsState.details.name}-${bsState.details.suburb || 'geelong'}`);
     const { error: insErr } = await db.from('businesses').insert({
       id:          bizId,
       owner_id:    userId,
       is_claimed:  true,
       status:      'pending',
+      slug:        newSlug,
       plan:        bsState.plan,
       name:        bsState.details.name,
       type:        bsState.type || 'Business',

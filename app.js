@@ -1569,29 +1569,36 @@ function showPrefsHint(filterEl, prefs, pageKey, onAccept) {
 }
 
 // ── WEEKEND HELPERS ───────────────────────────────────────
-function getWeekendDates(offset = 0) {
-  // offset=0 → this weekend, offset=1 → next weekend
-  const today = new Date(); today.setHours(0,0,0,0);
-  const dow = today.getDay(); // 0=Sun,1=Mon...6=Sat
-  // Days until next Saturday (if today is Sat, that's 0; Sun, that's 6)
-  const daysToSat = ((6 - dow + 7) % 7) || 7;
-  const sat = new Date(today); sat.setDate(today.getDate() + daysToSat + offset * 7);
-  const sun = new Date(sat);   sun.setDate(sat.getDate() + 1);
-  return { sat, sun };
+// Format a local Date as YYYY-MM-DD (avoids toISOString UTC shift)
+function localISODate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function filterToWeekend(events, { sat, sun }) {
+function getWeekendDates(offset = 0) {
+  // offset=0 → this weekend, offset=1 → next weekend
+  // Weekend = Fri–Sun
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = today.getDay(); // 0=Sun,1=Mon...6=Sat
+  // Days until next Friday
+  const daysToFri = ((5 - dow + 7) % 7) || 7;
+  const fri = new Date(today); fri.setDate(today.getDate() + daysToFri + offset * 7);
+  const sat = new Date(fri);   sat.setDate(fri.getDate() + 1);
+  const sun = new Date(fri);   sun.setDate(fri.getDate() + 2);
+  return { fri, sat, sun };
+}
+
+function filterToWeekend(events, { fri, sat, sun }) {
   return events.filter(ev => {
     const d = parseEventDate(ev.date);
     if (!d) return false;
     const t = d.getTime();
-    return t === sat.getTime() || t === sun.getTime();
+    return t === fri.getTime() || t === sat.getTime() || t === sun.getTime();
   });
 }
 
-function fmtWeekendLabel(sat, sun) {
+function fmtWeekendLabel(fri, sun) {
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${sat.getDate()}–${sun.getDate()} ${MONTHS[sun.getMonth()]}`;
+  return `${fri.getDate()}–${sun.getDate()} ${MONTHS[sun.getMonth()]}`;
 }
 
 // ── WEEKEND TOGGLE ────────────────────────────────────────
@@ -1603,27 +1610,25 @@ function initWeekendToggle(allEvents) {
   if (!toggleEl) return;
 
   function showWeekend(offset) {
-    const { sat, sun } = getWeekendDates(offset);
-    const label = fmtWeekendLabel(sat, sun);
+    const { fri, sat, sun } = getWeekendDates(offset);
+    const label = fmtWeekendLabel(fri, sun);
     if (labelEl) labelEl.textContent = label;
 
-    // Update "Next weekend →" link to events page with date filter
-    const isoSat = sat.toISOString().split('T')[0];
-    const isoSun = sun.toISOString().split('T')[0];
+    // "Next weekend →" link
     if (nextBtn && offset === 0) {
-      const { sat: ns, sun: nu } = getWeekendDates(1);
-      nextBtn.href = `events.html?from=${ns.toISOString().split('T')[0]}&to=${nu.toISOString().split('T')[0]}`;
+      const { fri: nf, sun: nu } = getWeekendDates(1);
+      nextBtn.href = `events.html?from=${localISODate(nf)}&to=${localISODate(nu)}`;
     }
 
     // See-all link
     if (seeAllEl) {
-      seeAllEl.href = `events.html?from=${isoSat}&to=${isoSun}`;
+      seeAllEl.href = `events.html?from=${localISODate(fri)}&to=${localISODate(sun)}`;
       seeAllEl.textContent = offset === 0 ? 'See all this weekend →' : 'See full next weekend →';
     }
 
     // Filter and render events
-    const weekendEvs = filterToWeekend(allEvents, { sat, sun });
-    const toShow = weekendEvs.length ? weekendEvs : allEvents; // fallback to all if none match
+    const weekendEvs = filterToWeekend(allEvents, { fri, sat, sun });
+    const toShow = weekendEvs.length ? weekendEvs : allEvents;
     renderFeatured(toShow);   // sets _weekendFeaturedIds
     renderEvents(toShow);
     renderUpcoming(allEvents); // re-render upcoming excluding the new featured pair

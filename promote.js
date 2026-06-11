@@ -82,7 +82,6 @@
       _bizId   = preferred.id;
       _credits = preferred.credit_balance || 0;
 
-      console.log('[promote] bizId:', _bizId, '| credits:', _credits, '| all biz:', bizRows.map(b => `${b.id}=${b.credit_balance}`));
 
       // Load events + offers for all businesses owned by user
       const bizIds = bizRows.map(b => b.id);

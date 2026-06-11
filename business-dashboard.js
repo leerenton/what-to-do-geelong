@@ -115,8 +115,8 @@ function renderSwitcher() {
 
   menu.querySelectorAll('[data-biz]').forEach(btn => {
     btn.addEventListener('click', () => {
-      setCurrentBizId(btn.dataset.biz);
-      window.location.reload();
+      localStorage.setItem('wtdg_dash_biz', btn.dataset.biz);
+      window.location.href = `business-dashboard.html?biz=${btn.dataset.biz}`;
     });
   });
 
@@ -1190,7 +1190,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   allBizProfiles = businesses;
-  const savedId  = localStorage.getItem('wtdg_dash_biz');
+  // Priority: URL param (from signup redirect) → localStorage → first in list
+  const urlBizId = new URLSearchParams(window.location.search).get('biz');
+  const savedId  = urlBizId || localStorage.getItem('wtdg_dash_biz');
   currentBiz     = allBizProfiles.find(b => b.id === savedId) || allBizProfiles[0];
   localStorage.setItem('wtdg_dash_biz', currentBiz.id);
 

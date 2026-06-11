@@ -343,7 +343,11 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
     return;
   }
 
-  setCurrentBizId(bizId);
+  // Save new bizId so dashboard opens on it directly
+  localStorage.setItem('wtdg_dash_biz', bizId);
+  // Update the dashboard link to include the biz param
+  const dashLink = document.querySelector('a[href="business-dashboard.html"]');
+  if (dashLink) dashLink.href = `business-dashboard.html?biz=${bizId}`;
 
   document.getElementById('js-bsign-done-sub').textContent =
     `${bsState.details.name} is now live on What To Do Geelong${bsState.plan === 'featured' ? ' as a Featured listing' : ''}. Head to your dashboard to add events, offers, and photos.`;

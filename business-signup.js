@@ -139,12 +139,11 @@ function initPlacesAutocomplete() {
     document.getElementById('bd-lat').value = place.geometry.location.lat();
     document.getElementById('bd-lng').value = place.geometry.location.lng();
 
-    // Auto-fill suburb from address components if blank
+    // Auto-populate suburb from address components
     const suburbEl = document.getElementById('bd-suburb');
-    if (!suburbEl.value.trim()) {
-      const locality = place.address_components?.find(c => c.types.includes('locality'));
-      if (locality) suburbEl.value = locality.long_name;
-    }
+    const locality = place.address_components?.find(c => c.types.includes('locality'))
+                  || place.address_components?.find(c => c.types.includes('sublocality'));
+    if (locality) suburbEl.value = locality.long_name;
 
     // Use the formatted address as the display value
     input.value = place.formatted_address || input.value;
@@ -154,10 +153,9 @@ window.initPlacesAutocomplete = initPlacesAutocomplete;
 
 document.getElementById('js-s2-next').addEventListener('click', () => {
   const name = document.getElementById('bd-name').value.trim();
-  const suburb = document.getElementById('bd-suburb').value.trim();
   const desc = document.getElementById('bd-desc').value.trim();
-  if (!name || !suburb || !desc) {
-    alert('Please fill in business name, suburb, and description.');
+  if (!name || !desc) {
+    alert('Please fill in your business name and description.');
     return;
   }
   bsState.details = {

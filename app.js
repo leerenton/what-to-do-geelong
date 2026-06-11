@@ -1629,9 +1629,8 @@ function initWeekendToggle(allEvents) {
     // Filter and render events
     const weekendEvs = filterToWeekend(allEvents, { fri, sat, sun });
     const toShow = weekendEvs.length ? weekendEvs : allEvents;
-    renderFeatured(toShow);   // sets _weekendFeaturedIds
-    renderEvents(toShow);
-    renderUpcoming(allEvents); // re-render upcoming excluding the new featured pair
+    renderFeatured(toShow);    // sets _weekendFeaturedIds
+    renderUpcoming(allEvents); // upcoming excludes the featured pair
   }
 
   // Personalised section subtitle

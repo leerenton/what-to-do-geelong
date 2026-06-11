@@ -1786,12 +1786,18 @@ async function initListingPage() {
 
   let biz = slugParam ? getBusinessBySlug(slugParam) : idParam ? getBusinessById(idParam) : null;
 
-  // Fallback: fetch from Supabase by slug if not in local data
-  if (!biz && slugParam && typeof db !== 'undefined') {
-    const { data } = await db.from('businesses').select('*').eq('slug', slugParam).single();
-    if (data) {
-      biz = data;
-      if (biz.business_id) biz.businessId = biz.business_id;
+  // Fallback: fetch from Supabase by slug or id if not in local data
+  if (!biz && typeof db !== 'undefined') {
+    let q = db.from('businesses').select('*');
+    if (slugParam) q = q.eq('slug', slugParam);
+    else if (idParam) q = q.eq('id', idParam);
+    else q = null;
+    if (q) {
+      const { data } = await q.single();
+      if (data) {
+        biz = data;
+        if (biz.business_id) biz.businessId = biz.business_id;
+      }
     }
   }
 
@@ -1799,6 +1805,22 @@ async function initListingPage() {
     document.getElementById('js-listing-root').innerHTML =
       '<p style="padding:2rem">Business not found. <a href="index.html">Go home</a></p>';
     return;
+  }
+
+  // Show pending notice to the owner
+  if (biz.status === 'pending') {
+    const session = await db.auth.getSession();
+    const userId = session?.data?.session?.user?.id;
+    if (userId !== biz.owner_id) {
+      document.getElementById('js-listing-root').innerHTML =
+        '<p style="padding:2rem">This listing is not yet published. <a href="index.html">Go home</a></p>';
+      return;
+    }
+    // Owner can preview — prepend a notice
+    const notice = document.createElement('div');
+    notice.style.cssText = 'background:#fef9c3;border-bottom:2px solid #fde047;padding:.75rem 1.25rem;font-size:.85rem;color:#713f12;text-align:center';
+    notice.innerHTML = '⏳ <strong>Preview only</strong> — this listing is pending approval and is not visible to the public yet.';
+    document.body.prepend(notice);
   }
 
   const bizSlug  = biz.slug || slugify(biz.name + '-' + (biz.suburb || ''));

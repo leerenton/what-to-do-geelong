@@ -168,6 +168,9 @@ function renderOverview() {
     <div class="dash-panel active" id="panel-overview">
       ${pendingBanner()}
       ${goldUpgradeBanner()}
+      <div style="margin-bottom:1rem">
+        <a href="listing.html?id=${encodeURIComponent(currentBiz.id)}" target="_blank" class="btn btn--outline btn--sm">👁 Preview your listing →</a>
+      </div>
 
       ${isGold() ? `
         <div class="dash-gold-status">

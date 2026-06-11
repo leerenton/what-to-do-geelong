@@ -988,6 +988,12 @@ function getEventUrgency(ev) {
 }
 
 // ── EVENT GRID CARD (events page + sections) ───────────────
+// Sport source → branding map
+const SPORT_BRANDS = {
+  'afl-cats':   { label: 'Geelong Cats',   bg: '#001F5B', text: '#fff',    accent: '#C49A2B', logo: '🏉' },
+  'nbl-united': { label: 'Geelong United', bg: '#002B5C', text: '#fff',    accent: '#63B3ED', logo: '🏀' },
+};
+
 function eventGridCard(ev, opts = {}) {
   const urgency   = getEventUrgency(ev);
   const isPast    = urgency === 'past';
@@ -1000,32 +1006,46 @@ function eventGridCard(ev, opts = {}) {
     past:     `<span class="ev-urgency ev-urgency--past">Past</span>`,
   }[urgency] || '';
 
-  const thumb = ev.img
-    ? `<div class="ev-card__img" style="background-image:url('${ev.img}')"></div>`
-    : `<div class="ev-card__img ev-card__img--emoji" style="background:${ev.color || '#e8f4ff'}22">${ev.emoji || '📅'}</div>`;
+  const brand = ev.source ? SPORT_BRANDS[ev.source] : null;
 
-  const sectionStyle = opts.accentColor ? `border-left:3px solid ${opts.accentColor}` : '';
+  const thumb = brand
+    ? `<div class="ev-card__img ev-card__img--sport" style="background:${brand.bg}">
+         <span class="ev-card__sport-logo">${brand.logo}</span>
+         <span class="ev-card__sport-label" style="color:${brand.accent}">${brand.label}</span>
+       </div>`
+    : ev.img
+      ? `<div class="ev-card__img" style="background-image:url('${ev.img}')"></div>`
+      : `<div class="ev-card__img ev-card__img--emoji" style="background:${ev.color || '#e8f4ff'}22">${ev.emoji || '📅'}</div>`;
+
+  const cardStyle = brand
+    ? `border-top:3px solid ${brand.accent}`
+    : opts.accentColor ? `border-left:3px solid ${opts.accentColor}` : '';
   const latAttr = (ev.lat && ev.lng) ? ` data-lat="${ev.lat}" data-lng="${ev.lng}"` : '';
 
   const prefs   = getPrefs();
   const isMatch = !isPast && prefsMatchCard(ev, prefs);
   const matchBadge = isMatch ? `<span class="ev-card__match">✦ Your vibe</span>` : '';
 
+  const homeTag = brand && ev.tags?.includes('Home Game')
+    ? `<span class="ev-card__tag ev-card__tag--home">🏠 Home</span>`
+    : '';
+
   return `
-    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}${isMatch ? ' ev-card--match' : ''}" style="${sectionStyle}"${latAttr}>
+    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}${isMatch ? ' ev-card--match' : ''}${brand ? ' ev-card--sport' : ''}" style="${cardStyle}"${latAttr}>
       ${urgencyBadge}
       ${thumb}
       <div class="ev-card__body">
         <div class="ev-card__cat-row">
           <span class="ev-card__cat">${ev.category}</span>
           ${matchBadge}
+          ${homeTag}
         </div>
         <h3 class="ev-card__title">${ev.title}</h3>
         <div class="ev-card__meta"><span class="material-symbols-rounded">location_on</span>${ev.location}</div>
         <div class="ev-card__meta"><span class="material-symbols-rounded">schedule</span>${ev.date}${ev.time ? ' · ' + ev.time : ''}</div>
         <div class="ev-card__foot">
           <span class="ev-card__price${ev.price === 'Free' ? ' ev-card__price--free' : ''}">${ev.price || 'See event'}</span>
-          ${ev.tags?.length ? ev.tags.slice(0, 2).map(t => `<span class="ev-card__tag">${t}</span>`).join('') : ''}
+          ${!brand && ev.tags?.length ? ev.tags.slice(0, 2).map(t => `<span class="ev-card__tag">${t}</span>`).join('') : ''}
         </div>
       </div>
     </a>`;

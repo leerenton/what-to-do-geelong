@@ -958,6 +958,8 @@ function renderEvents(events) {
 // Handles: "Sun 15 Jun", "Sat 28 – Sun 29 Jun", "Daily Jun 14–22", "Daily until Jul 6"
 function parseEventDate(str) {
   if (!str || str.toLowerCase().startsWith('daily') && !str.match(/\d/)) return null;
+  // Strip leading day-of-week prefix e.g. "Fri 12 Jun" → "12 Jun"
+  str = str.replace(/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+/i, '');
   const MONTHS = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
   // Find first "day month" pair, e.g. "15 Jun" or "Jun 14"
   const m = str.match(/(\d{1,2})\s+([A-Za-z]{3})|([A-Za-z]{3})\s+(\d{1,2})/);

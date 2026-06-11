@@ -28,10 +28,10 @@ function camelize(data) {
 async function loadAllData() {
   try {
     const [bizRes, evRes, stayRes, promoRes, artRes] = await Promise.all([
-      db.from('businesses').select('*').order('name'),
-      db.from('events').select('*').order('id'),
+      db.from('businesses').select('*').or('status.eq.approved,status.is.null').order('name'),
+      db.from('events').select('*').or('status.eq.approved,status.is.null').order('id'),
       db.from('stays').select('*').order('id'),
-      db.from('promos').select('*').order('id'),
+      db.from('promos').select('*').or('status.eq.approved,status.is.null').order('id'),
       db.from('articles').select('*').order('published_at', { ascending: false }),
     ]);
 

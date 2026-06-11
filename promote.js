@@ -7,11 +7,12 @@
 (async function () {
   // ── State ─────────────────────────────────────────────
   let _step        = 1;
-  let _selectedItem = null;  // { id, type, name, meta }
+  let _selectedItem = null;  // { id, type, name, bizId }
   let _selectedPkg  = null;  // 'boost' | 'spotlight' | 'premier'
   let _payMethod    = 'card'; // 'card' | 'credits'
   let _bizId        = null;
   let _credits      = 0;
+  let _bizCredits   = {};     // map of bizId → credit_balance
 
   const CREDIT_COST = { boost: 1, spotlight: 2, premier: 4 };
   const PKG_PRICE   = { boost: '$49', spotlight: '$99', premier: '$199' };
@@ -68,41 +69,45 @@
         return;
       }
 
-      _bizId   = bizRows[0].id;
-      _credits = bizRows[0].credit_balance || 0;
+      // Store credits per biz
+      bizRows.forEach(b => { _bizCredits[b.id] = b.credit_balance || 0; });
 
-      // Show credit bar on step 2 if any credits
-      if (_credits > 0) {
-        const bar = document.getElementById('js-promo-credit-bar');
-        bar.style.display = '';
-        document.getElementById('js-credit-count').textContent   = _credits;
-        document.getElementById('js-credit-plural').textContent  = _credits !== 1 ? 's' : '';
-      }
+      // Default to URL param biz, localStorage biz, or first row
+      const urlBiz   = new URLSearchParams(window.location.search).get('biz');
+      const lsBiz    = localStorage.getItem('wtdg_dash_biz');
+      const preferred = bizRows.find(b => b.id === urlBiz) ||
+                        bizRows.find(b => b.id === lsBiz)  ||
+                        bizRows[0];
+
+      _bizId   = preferred.id;
+      _credits = preferred.credit_balance || 0;
+
+      // Load events + offers for all businesses owned by user
+      const bizIds = bizRows.map(b => b.id);
 
       // Events
       const { data: evRows } = await db
         .from('events')
-        .select('id, name, img, date')
-        .eq('business_id', _bizId)
+        .select('id, name, img, date, business_id')
+        .in('business_id', bizIds)
         .order('id', { ascending: false });
 
       // Offers / promos
       const { data: promoRows } = await db
         .from('promos')
-        .select('id, title, img, discount')
-        .eq('business_id', _bizId)
+        .select('id, title, img, discount, business_id')
+        .in('business_id', bizIds)
         .order('id', { ascending: false });
 
       loading.style.display  = 'none';
       sections.style.display = '';
 
       // Render business listings
-      const bizSection = document.getElementById('js-promo-biz-section');
-      const bizItems   = document.getElementById('js-promo-biz-items');
+      const bizItems = document.getElementById('js-promo-biz-items');
       bizRows.forEach(b => {
         bizItems.appendChild(makeItemCard({
           id: b.id, type: 'business', name: b.name,
-          img: b.img, meta: 'Business listing',
+          img: b.img, meta: 'Business listing', bizId: b.id,
         }));
       });
 
@@ -114,6 +119,7 @@
           cont.appendChild(makeItemCard({
             id: e.id, type: 'event', name: e.name,
             img: e.img, meta: e.date ? `Event · ${e.date}` : 'Event',
+            bizId: e.business_id,
           }));
         });
       }
@@ -126,6 +132,7 @@
           cont.appendChild(makeItemCard({
             id: p.id, type: 'offer', name: p.title || 'Untitled offer',
             img: p.img, meta: p.discount || 'Offer',
+            bizId: p.business_id,
           }));
         });
       }
@@ -140,12 +147,13 @@
     }
   }
 
-  function makeItemCard({ id, type, name, img, meta }) {
+  function makeItemCard({ id, type, name, img, meta, bizId }) {
     const div = document.createElement('div');
     div.className = 'promo-item';
-    div.dataset.id   = id;
-    div.dataset.type = type;
-    div.dataset.name = name;
+    div.dataset.id    = id;
+    div.dataset.type  = type;
+    div.dataset.name  = name;
+    div.dataset.bizId = bizId || '';
 
     const thumb = img
       ? `<img class="promo-item__thumb" src="${img}" alt="" />`
@@ -163,8 +171,20 @@
     div.addEventListener('click', () => {
       document.querySelectorAll('.promo-item').forEach(i => i.classList.remove('selected'));
       div.classList.add('selected');
-      _selectedItem = { id, type, name };
+      // Update active biz + credits based on the selected item
+      _bizId   = bizId || _bizId;
+      _credits = _bizCredits[_bizId] || 0;
+      _selectedItem = { id, type, name, bizId: _bizId };
       document.getElementById('js-s1-next').disabled = false;
+      // Update credit bar visibility
+      const bar = document.getElementById('js-promo-credit-bar');
+      if (_credits > 0) {
+        bar.style.display = '';
+        document.getElementById('js-credit-count').textContent  = _credits;
+        document.getElementById('js-credit-plural').textContent = _credits !== 1 ? 's' : '';
+      } else {
+        bar.style.display = 'none';
+      }
     });
 
     return div;

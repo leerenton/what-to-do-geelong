@@ -160,7 +160,7 @@ document.getElementById('js-s2-next').addEventListener('click', () => {
   }
   bsState.details = {
     name,
-    suburb,
+    suburb:  document.getElementById('bd-suburb').value.trim(),
     address: document.getElementById('bd-address').value.trim(),
     lat:     parseFloat(document.getElementById('bd-lat').value) || null,
     lng:     parseFloat(document.getElementById('bd-lng').value) || null,

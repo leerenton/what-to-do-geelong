@@ -24,6 +24,7 @@ create table if not exists businesses (
 -- ── EVENTS ────────────────────────────────────────────────────
 create table if not exists events (
   id          serial primary key,
+  slug        text,                    -- for deduplication in sync scripts
   business_id text references businesses(id) on delete set null,
   title       text not null,
   category    text,
@@ -34,7 +35,14 @@ create table if not exists events (
   price       text,
   emoji       text,
   color       text,
+  description text,
+  url         text,                    -- link to tickets / event page
+  img         text,
+  lat         double precision,
+  lng         double precision,
+  source      text,                    -- 'afl-cats' | 'nbl-united' | 'gpac' | 'eventbrite' etc.
   featured    boolean default false,
+  is_promoted boolean default false,
   created_at  timestamptz default now()
 );
 

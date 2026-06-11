@@ -103,7 +103,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="bsign-field">
           <label class="bsign-label" for="bd-address">Street address</label>
-          <input class="bsign-input" type="text" id="bd-address" placeholder="123 Main St, Geelong VIC 3220" />
+          <input class="bsign-input" type="text" id="bd-address" placeholder="Start typing your address…" autocomplete="off" />
+          <input type="hidden" id="bd-lat" />
+          <input type="hidden" id="bd-lng" />
         </div>
         <div class="bsign-field">
           <label class="bsign-label" for="bd-website">Website</label>
@@ -212,5 +214,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script src="auth.js"></script>
   <script src="app.js"></script>
   <script src="business-signup.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHUrQ0uu0j0VDjigRhxoS44h-9Y4p1PZY&libraries=places&callback=initPlacesAutocomplete" async defer></script>
 </body>
 </html>

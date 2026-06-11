@@ -120,6 +120,38 @@ document.querySelectorAll('.bsign-type-chip').forEach(chip => {
   });
 });
 
+// ── Google Places Autocomplete ────────────────────────────
+function initPlacesAutocomplete() {
+  const input = document.getElementById('bd-address');
+  if (!input || !window.google?.maps?.places) return;
+
+  const ac = new google.maps.places.Autocomplete(input, {
+    componentRestrictions: { country: 'au' },
+    fields: ['formatted_address', 'geometry', 'address_components'],
+    types: ['establishment', 'geocode'],
+  });
+
+  ac.addListener('place_changed', () => {
+    const place = ac.getPlace();
+    if (!place.geometry) return;
+
+    // Store lat/lng in hidden fields
+    document.getElementById('bd-lat').value = place.geometry.location.lat();
+    document.getElementById('bd-lng').value = place.geometry.location.lng();
+
+    // Auto-fill suburb from address components if blank
+    const suburbEl = document.getElementById('bd-suburb');
+    if (!suburbEl.value.trim()) {
+      const locality = place.address_components?.find(c => c.types.includes('locality'));
+      if (locality) suburbEl.value = locality.long_name;
+    }
+
+    // Use the formatted address as the display value
+    input.value = place.formatted_address || input.value;
+  });
+}
+window.initPlacesAutocomplete = initPlacesAutocomplete;
+
 document.getElementById('js-s2-next').addEventListener('click', () => {
   const name = document.getElementById('bd-name').value.trim();
   const suburb = document.getElementById('bd-suburb').value.trim();
@@ -132,7 +164,9 @@ document.getElementById('js-s2-next').addEventListener('click', () => {
     name,
     suburb,
     address: document.getElementById('bd-address').value.trim(),
-    phone: document.getElementById('bd-phone').value.trim(),
+    lat:     parseFloat(document.getElementById('bd-lat').value) || null,
+    lng:     parseFloat(document.getElementById('bd-lng').value) || null,
+    phone:   document.getElementById('bd-phone').value.trim(),
     website: document.getElementById('bd-website').value.trim(),
     description: desc,
   };
@@ -205,6 +239,8 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
       name:         bsState.details.name,
       suburb:       bsState.details.suburb,
       location:     bsState.details.address,
+      lat:          bsState.details.lat,
+      lng:          bsState.details.lng,
       website:      bsState.details.website,
       description:  bsState.details.description,
       type:         bsState.type || bsState.claimedBiz.type,
@@ -224,6 +260,8 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
       type:        bsState.type || 'Business',
       suburb:      bsState.details.suburb,
       location:    bsState.details.address,
+      lat:         bsState.details.lat,
+      lng:         bsState.details.lng,
       website:     bsState.details.website,
       description: bsState.details.description,
       emoji:       '🏪',

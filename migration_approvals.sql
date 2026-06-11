@@ -23,6 +23,11 @@ ALTER TABLE promos
 ALTER TABLE businesses
   ADD COLUMN IF NOT EXISTS claim_notes text;
 
+-- Add lat/lng to businesses for map pin and distance features
+ALTER TABLE businesses
+  ADD COLUMN IF NOT EXISTS lat double precision,
+  ADD COLUMN IF NOT EXISTS lng double precision;
+
 -- Index for fast pending-queue queries
 CREATE INDEX IF NOT EXISTS businesses_status_idx ON businesses (status);
 CREATE INDEX IF NOT EXISTS events_status_idx     ON events     (status);

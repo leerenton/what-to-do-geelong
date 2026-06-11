@@ -1892,7 +1892,7 @@ async function initListingPage() {
           ${biz.website ? `
             <a href="https://${biz.website}" target="_blank" rel="noopener" class="linfo-row">
               <span class="material-symbols-rounded">language</span>
-              <span>${biz.website.replace(/^https?:\/\//, '')}</span>
+              <span>Visit website</span>
             </a>` : ''}
         </div>` : ''}
       </aside>

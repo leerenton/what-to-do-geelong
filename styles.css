@@ -3513,53 +3513,80 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .today-card__loc  { font-size: .72rem; color: rgba(255,255,255,.4); margin: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ── Events page: calendar + filters layout ─────────────── */
+/* On desktop: calendar sits left, filters/toolbar right */
+.events-cal-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-top: .75rem;
+}
+.events-cal-row .events-calendar-wrap {
+  flex-shrink: 0;
+  width: 272px;
+  padding: 0;
+}
+.events-cal-row .coll-topbar { flex: 1; min-width: 0; padding-top: 0; }
+
+@media (max-width: 640px) {
+  .events-cal-row { flex-direction: column; gap: 0; padding-top: 0; }
+  .events-cal-row .events-calendar-wrap { width: 100%; }
+}
+
 /* ── Events mini calendar ──────────────────────────────── */
 .events-calendar-wrap { padding: 1rem 0 .25rem; }
-.ecal { background: #fff; border: 1.5px solid var(--border); border-radius: 14px; padding: 1rem; }
+.ecal { background: #fff; border: 1.5px solid var(--border); border-radius: 14px; padding: .85rem; }
 .ecal__nav {
   display: flex; align-items: center; gap: .5rem;
-  margin-bottom: .75rem;
+  margin-bottom: .65rem;
 }
 .ecal__nav-btn {
   background: none; border: 1.5px solid var(--border); border-radius: 8px;
-  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: var(--dark); flex-shrink: 0;
   transition: border-color .15s;
 }
 .ecal__nav-btn:hover { border-color: var(--teal); color: var(--teal); }
-.ecal__nav-btn .material-symbols-rounded { font-size: 1.1rem; }
-.ecal__month { font-family: var(--font-head); font-size: .95rem; font-weight: 800; flex: 1; text-align: center; }
+.ecal__nav-btn .material-symbols-rounded { font-size: 1rem; }
+.ecal__month { font-family: var(--font-head); font-size: .9rem; font-weight: 800; flex: 1; text-align: center; }
 .ecal__clear {
   background: var(--teal); color: var(--dark); border: none; border-radius: 99px;
-  padding: .2rem .65rem; font-size: .72rem; font-weight: 700; cursor: pointer;
+  padding: .2rem .65rem; font-size: .7rem; font-weight: 700; cursor: pointer;
   font-family: inherit;
 }
 .ecal__grid {
   display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
 }
 .ecal__dow {
-  text-align: center; font-size: .65rem; font-weight: 700; color: var(--mid);
-  padding: .2rem 0; letter-spacing: .04em; text-transform: uppercase;
+  text-align: center; font-size: .62rem; font-weight: 700; color: var(--mid);
+  padding: .15rem 0; letter-spacing: .04em; text-transform: uppercase;
 }
 .ecal__cell {
   position: relative; aspect-ratio: 1;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: .78rem; font-weight: 600; color: var(--dark);
-  border-radius: 8px; cursor: pointer; background: none; border: none;
-  transition: background .12s;
+  font-size: .76rem; font-weight: 600; color: var(--dark);
+  border-radius: 7px; cursor: pointer; background: none; border: none;
+  transition: background .12s, color .12s;
   font-family: inherit;
+  /* Prevent mobile tap highlight flash */
+  -webkit-tap-highlight-color: transparent;
 }
-.ecal__cell:hover:not(.ecal__cell--empty) { background: var(--bg); }
-.ecal__cell--empty { cursor: default; }
-.ecal__cell--today { background: var(--teal); color: var(--dark); font-weight: 900; }
-.ecal__cell--selected { background: var(--dark); color: #fff; }
+/* Only apply hover bg to plain unspecial cells */
+.ecal__cell:hover:not(.ecal__cell--empty):not(.ecal__cell--today):not(.ecal__cell--selected) {
+  background: var(--cream);
+}
+.ecal__cell--empty { cursor: default; pointer-events: none; }
+.ecal__cell--today { background: var(--teal); color: #fff; font-weight: 900; }
+.ecal__cell--today:hover { background: var(--teal-d); }
+.ecal__cell--selected { background: var(--dark); color: #fff; font-weight: 800; }
+.ecal__cell--selected:hover { background: #2d2d2d; }
 .ecal__cell--has-events { font-weight: 800; }
 .ecal__dot {
   width: 4px; height: 4px; border-radius: 50%; background: var(--teal);
   position: absolute; bottom: 3px;
 }
-.ecal__cell--today .ecal__dot { background: var(--dark); }
-.ecal__cell--selected .ecal__dot { background: #fff; }
+.ecal__cell--today .ecal__dot { background: rgba(255,255,255,.7); }
+.ecal__cell--selected .ecal__dot { background: rgba(255,255,255,.6); }
 
 /* ── Events toolbar (count + past toggle) ──────────────── */
 .events-toolbar {

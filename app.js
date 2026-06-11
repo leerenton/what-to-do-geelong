@@ -1113,16 +1113,16 @@ function renderHappeningToday() {
 }
 
 // ── EVENTS MINI CALENDAR (range picker) ───────────────────
-function initEventCalendar(onRangeSelect) {
+function initEventCalendar(onRangeSelect, initialRange = null) {
   const el = document.getElementById('js-events-calendar');
   if (!el) return;
 
   const now = new Date();
-  let viewYear  = now.getFullYear();
-  let viewMonth = now.getMonth();
-  let rangeStart = null;  // Date | null
-  let rangeEnd   = null;  // Date | null  — null while picking end
-  let pickingEnd = false; // true = waiting for second tap
+  let viewYear  = initialRange ? initialRange.start.getFullYear() : now.getFullYear();
+  let viewMonth = initialRange ? initialRange.start.getMonth()    : now.getMonth();
+  let rangeStart = initialRange ? initialRange.start : null;
+  let rangeEnd   = initialRange ? initialRange.end   : null;
+  let pickingEnd = false;
 
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -2952,11 +2952,21 @@ function initEventsPage() {
     });
   }
 
-  // ── Calendar init ──────────────────────────────────────
+  // ── Parse URL date params early so calendar can pre-select ──
+  const _urlP    = new URLSearchParams(window.location.search);
+  const _urlFrom = _urlP.get('from');
+  const _urlTo   = _urlP.get('to');
+  if (_urlFrom) {
+    const fromDate = new Date(_urlFrom + 'T00:00:00');
+    const toDate   = _urlTo ? new Date(_urlTo + 'T00:00:00') : new Date(fromDate);
+    calFilterRange = { start: fromDate, end: toDate };
+  }
+
+  // ── Calendar init — pass initial range so it pre-selects visually ──
   initEventCalendar(range => {
     calFilterRange = range;
     doRender();
-  });
+  }, calFilterRange);
 
   // ── Category filter pills + search ─────────────────────
   const filterEl = document.getElementById('js-events-filters');
@@ -3035,24 +3045,13 @@ function initEventsPage() {
     if (window.wtdgViews) window.wtdgViews.injectViewBadges('event');
   }
 
-  // ── URL date params: ?from=YYYY-MM-DD&to=YYYY-MM-DD ────
-  (function applyUrlDateFilter() {
-    const p    = new URLSearchParams(window.location.search);
-    const from = p.get('from');
-    const to   = p.get('to');
-    if (!from) return;
-
-    const fromDate = new Date(from + 'T00:00:00');
-    const toDate   = to ? new Date(to + 'T00:00:00') : fromDate;
-    toDate.setHours(23,59,59,999);
-
-    // Feed into calFilterRange so doRender picks it up
-    calFilterRange = { start: fromDate, end: toDate };
-
+  // ── URL date banner (range already set above) ──────────
+  if (_urlFrom && calFilterRange) {
+    const { start, end } = calFilterRange;
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const label  = fromDate.toDateString() === toDate.toDateString()
-      ? `${fromDate.getDate()} ${MONTHS[fromDate.getMonth()]}`
-      : `${fromDate.getDate()}–${toDate.getDate()} ${MONTHS[toDate.getMonth()]}`;
+    const label  = start.toDateString() === end.toDateString()
+      ? `${start.getDate()} ${MONTHS[start.getMonth()]}`
+      : `${start.getDate()}–${end.getDate()} ${MONTHS[end.getMonth()]}`;
 
     const bannerEl = document.getElementById('js-events-date-banner');
     if (bannerEl) {
@@ -3065,7 +3064,7 @@ function initEventsPage() {
         history.replaceState(null, '', window.location.pathname);
       });
     }
-  })();
+  }
 
   if (window.wtdgLocation) window.wtdgLocation.injectLocationButton('js-events-loc');
 

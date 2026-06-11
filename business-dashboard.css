@@ -412,6 +412,32 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
 
 .dash-section-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
 
+/* Credit badge on promote tab */
+.dash-credit-badge {
+  display: flex; align-items: center; gap: .55rem;
+  background: #fef9c3; border: 1.5px solid #fde047;
+  border-radius: .75rem; padding: .7rem 1rem;
+  font: 500 .88rem/1.4 'DM Sans', sans-serif;
+  color: #854d0e; margin-bottom: 1.25rem;
+}
+.dash-credit-badge .material-symbols-rounded { color: #ca8a04; font-size: 1.1rem; }
+.dash-credit-hint {
+  margin-left: auto; font-size: .78rem; color: #a16207;
+}
+
+/* Promotion rows */
+.dash-promo-row {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .65rem .85rem;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #e5e7eb);
+  border-radius: .65rem; margin-bottom: .5rem;
+}
+.dash-promo-row__icon { font-size: 1.3rem; flex-shrink: 0; }
+.dash-promo-row__body { flex: 1; min-width: 0; }
+.dash-promo-row__title { font: 600 .88rem/1.3 'DM Sans', sans-serif; color: var(--dark); }
+.dash-promo-row__meta  { font: 400 .78rem/1.3 'DM Sans', sans-serif; color: var(--mid); }
+
 .dash-email-slots { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.25rem; }
 .dash-email-slot {
   background: var(--white); border: 1.5px solid var(--border);

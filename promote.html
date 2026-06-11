@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
+<!-- End Google Tag Manager -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Promote — What To Do Geelong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="promote.css" />
+</head>
+<body class="promo-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager -->
+
+  <div class="promo-wrap">
+
+    <div class="promo-topbar">
+      <a href="index.html" class="promo-logo"><img src="assets/logo.jpg" alt="What To Do Geelong" /></a>
+      <button class="promo-back" id="js-promo-back" style="display:none">← Back</button>
+    </div>
+
+    <div class="promo-progress"><div class="promo-progress__fill" id="js-promo-progress" style="width:25%"></div></div>
+
+    <!-- STEP 1: Select what to promote -->
+    <div class="promo-screen active" id="ps-s1">
+      <div class="promo-step-label">Step 1 of 4</div>
+      <h1 class="promo-title">What would you like to promote?</h1>
+      <p class="promo-sub">Select the listing, event, offer, or article you want to boost.</p>
+
+      <div id="js-promo-auth-gate" style="display:none">
+        <p class="promo-sub" style="color:#dc2626">Please <a href="login.html" style="color:var(--teal)">log in</a> to promote your content.</p>
+      </div>
+
+      <div id="js-promo-item-list">
+        <div class="promo-loading" id="js-promo-loading">Loading your content…</div>
+
+        <div id="js-promo-sections" style="display:none">
+          <!-- Business -->
+          <div class="promo-section" id="js-promo-biz-section">
+            <div class="promo-section__label">Your business listing</div>
+            <div class="promo-items" id="js-promo-biz-items"></div>
+          </div>
+
+          <!-- Events -->
+          <div class="promo-section" id="js-promo-events-section" style="display:none">
+            <div class="promo-section__label">Events</div>
+            <div class="promo-items" id="js-promo-event-items"></div>
+          </div>
+
+          <!-- Offers -->
+          <div class="promo-section" id="js-promo-offers-section" style="display:none">
+            <div class="promo-section__label">Offers</div>
+            <div class="promo-items" id="js-promo-offer-items"></div>
+          </div>
+
+          <!-- Articles -->
+          <div class="promo-section" id="js-promo-articles-section" style="display:none">
+            <div class="promo-section__label">Articles</div>
+            <div class="promo-items" id="js-promo-article-items"></div>
+          </div>
+        </div>
+
+        <div id="js-promo-empty" style="display:none" class="promo-empty">
+          <span class="material-symbols-rounded">campaign</span>
+          <p>You don't have any content to promote yet.</p>
+          <a href="business-dashboard.html" class="btn btn--teal">Go to dashboard →</a>
+        </div>
+      </div>
+
+      <button class="promo-next" id="js-s1-next" disabled>Continue →</button>
+    </div>
+
+    <!-- STEP 2: Select package -->
+    <div class="promo-screen" id="ps-s2">
+      <div class="promo-step-label">Step 2 of 4</div>
+      <h1 class="promo-title">Choose a promotion package</h1>
+      <p class="promo-sub" id="js-s2-sub">Promoting: <strong id="js-s2-item-label">—</strong></p>
+
+      <!-- Credit balance notice (shown for Gold members) -->
+      <div class="promo-credit-bar" id="js-promo-credit-bar" style="display:none">
+        <span class="material-symbols-rounded">stars</span>
+        <span>You have <strong id="js-credit-count">0</strong> credit<span id="js-credit-plural">s</span> available — you can use them instead of paying.</span>
+      </div>
+
+      <div class="promo-pkg-grid">
+        <!-- Boost -->
+        <div class="promo-pkg" id="js-pkg-boost" data-pkg="boost">
+          <div class="promo-pkg__header">
+            <span class="promo-pkg__name">Boost</span>
+            <span class="promo-pkg__price">$49</span>
+            <div class="promo-pkg__radio"></div>
+          </div>
+          <div class="promo-pkg__duration">7 days</div>
+          <div class="promo-pkg__features">
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Featured in category page</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> "Promoted" badge on listing</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Social media mention</div>
+          </div>
+          <div class="promo-pkg__credit-note">Or use <strong>1 credit</strong></div>
+        </div>
+
+        <!-- Spotlight -->
+        <div class="promo-pkg promo-pkg--featured" id="js-pkg-spotlight" data-pkg="spotlight">
+          <div class="promo-pkg__badge">⭐ Popular</div>
+          <div class="promo-pkg__header">
+            <span class="promo-pkg__name">Spotlight</span>
+            <span class="promo-pkg__price">$99</span>
+            <div class="promo-pkg__radio"></div>
+          </div>
+          <div class="promo-pkg__duration">14 days</div>
+          <div class="promo-pkg__features">
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Everything in Boost</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Homepage placement</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Weekly email feature</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Newsletter callout</div>
+          </div>
+          <div class="promo-pkg__credit-note">Or use <strong>2 credits</strong></div>
+        </div>
+
+        <!-- Premier -->
+        <div class="promo-pkg" id="js-pkg-premier" data-pkg="premier">
+          <div class="promo-pkg__header">
+            <span class="promo-pkg__name">Premier</span>
+            <span class="promo-pkg__price">$199</span>
+            <div class="promo-pkg__radio"></div>
+          </div>
+          <div class="promo-pkg__duration">30 days</div>
+          <div class="promo-pkg__features">
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Everything in Spotlight</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Banner takeover (3 days)</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Dedicated email blast</div>
+            <div class="promo-pkg__feat"><span class="material-symbols-rounded">check</span> Priority placement</div>
+          </div>
+          <div class="promo-pkg__credit-note">Or use <strong>4 credits</strong></div>
+        </div>
+      </div>
+
+      <button class="promo-next" id="js-s2-next" disabled>Continue →</button>
+    </div>
+
+    <!-- STEP 3: Payment method -->
+    <div class="promo-screen" id="ps-s3">
+      <div class="promo-step-label">Step 3 of 4</div>
+      <h1 class="promo-title">How would you like to pay?</h1>
+      <p class="promo-sub">Promoting <strong id="js-s3-item-label">—</strong> with <strong id="js-s3-pkg-label">—</strong></p>
+
+      <div class="promo-pay-opts" id="js-promo-pay-opts">
+        <!-- Card option always shown -->
+        <div class="promo-pay-opt selected" id="js-pay-card" data-pay="card">
+          <div class="promo-pay-opt__icon">💳</div>
+          <div class="promo-pay-opt__body">
+            <div class="promo-pay-opt__title">Pay by card</div>
+            <div class="promo-pay-opt__sub" id="js-pay-card-amount">—</div>
+          </div>
+          <div class="promo-pay-opt__radio promo-pay-opt__radio--checked"></div>
+        </div>
+
+        <!-- Credits option shown only when enough credits -->
+        <div class="promo-pay-opt" id="js-pay-credits" data-pay="credits" style="display:none">
+          <div class="promo-pay-opt__icon">⭐</div>
+          <div class="promo-pay-opt__body">
+            <div class="promo-pay-opt__title">Use credits</div>
+            <div class="promo-pay-opt__sub" id="js-pay-credits-label">—</div>
+          </div>
+          <div class="promo-pay-opt__radio"></div>
+        </div>
+      </div>
+
+      <div id="js-s3-error" style="display:none;color:#dc2626;font-size:.85rem;margin-top:.75rem;text-align:center"></div>
+
+      <button class="promo-next" id="js-s3-next">Review &amp; confirm →</button>
+    </div>
+
+    <!-- STEP 4: Confirm -->
+    <div class="promo-screen" id="ps-s4">
+      <div class="promo-step-label">Step 4 of 4</div>
+      <h1 class="promo-title">Review your promotion</h1>
+      <p class="promo-sub">Please check the details below before confirming.</p>
+
+      <div class="promo-summary" id="js-promo-summary">
+        <div class="promo-summary__row"><span>Promoting</span><strong id="js-sum-item">—</strong></div>
+        <div class="promo-summary__row"><span>Package</span><strong id="js-sum-pkg">—</strong></div>
+        <div class="promo-summary__row"><span>Duration</span><strong id="js-sum-duration">—</strong></div>
+        <div class="promo-summary__row"><span>Payment</span><strong id="js-sum-pay">—</strong></div>
+        <div class="promo-summary__row promo-summary__total"><span>Total</span><strong id="js-sum-total">—</strong></div>
+      </div>
+
+      <p class="promo-note">
+        <span class="material-symbols-rounded">info</span>
+        Your promotion will go live once our team approves it (usually within a few hours).
+      </p>
+
+      <div id="js-s4-error" style="display:none;color:#dc2626;font-size:.85rem;margin-top:.75rem;text-align:center"></div>
+      <button class="promo-next promo-next--confirm" id="js-s4-confirm">
+        <span id="js-s4-confirm-label">Confirm &amp; pay →</span>
+      </button>
+    </div>
+
+    <!-- DONE -->
+    <div class="promo-screen" id="ps-done">
+      <div class="promo-done">
+        <div class="promo-done__icon">🚀</div>
+        <h1 class="promo-done__title">Promotion submitted!</h1>
+        <p class="promo-done__sub" id="js-done-sub">Your promotion is under review. You'll see it go live in your dashboard once approved.</p>
+        <a href="business-dashboard.html" class="btn btn--teal btn--lg" style="margin-top:.5rem">Back to dashboard →</a>
+        <a href="promote.html" class="btn btn--outline" style="margin-top:.5rem">Promote something else</a>
+      </div>
+    </div>
+
+  </div><!-- /promo-wrap -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="analytics.js?v=1"></script>
+  <script src="auth.js"></script>
+  <script src="promote.js"></script>
+</body>
+</html>

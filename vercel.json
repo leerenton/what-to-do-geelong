@@ -59,6 +59,7 @@
     { "source": "/guide/:id",              "destination": "/guide.html?id=:id" },
     { "source": "/community-guides",       "destination": "/community-guides.html" },
     { "source": "/promote-event",          "destination": "/promote-event.html" },
+    { "source": "/promote",               "destination": "/promote.html" },
     { "source": "/upgrade",                "destination": "/upgrade.html" },
     { "source": "/email-sponsorship",      "destination": "/email-sponsorship.html" },
     { "source": "/api/stripe-webhook",     "destination": "/api/stripe-webhook.js" },

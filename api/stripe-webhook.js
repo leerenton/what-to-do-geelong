@@ -109,17 +109,49 @@ function stripeGet(path) {
   });
 }
 
+// ── Supabase POST helper (for inserts) ───────────────────
+function sbPost(table, data) {
+  const body = JSON.stringify(data);
+  const url  = new URL(SUPABASE_URL);
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: url.hostname, port: 443,
+      path: `/rest/v1/${table}`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'Prefer': 'return=minimal',
+      },
+    }, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => resolve({ status: res.statusCode, body: d }));
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+const PACKAGE_DAYS = { boost: 7, spotlight: 14, premier: 30 };
+const PROMO_TYPES  = new Set(['boost','spotlight','premier','event_boost','event_spotlight','event_premier']);
+
 // ── Event handlers ────────────────────────────────────────
 
 async function handleCheckoutComplete(session) {
-  const meta   = session.metadata || {};
-  const type   = meta.type || '';
-  const bizId  = meta.biz_id;
-  const evId   = meta.event_id;
+  const meta     = session.metadata || {};
+  const type     = meta.type     || '';
+  const bizId    = meta.biz_id;
+  const userId   = meta.user_id;
+  const itemType = meta.item_type || (meta.event_id ? 'event' : null);
+  const itemId   = meta.item_id   || meta.event_id;
 
-  console.log('checkout.session.completed', { type, bizId, evId });
+  console.log('checkout.session.completed', { type, bizId, itemType, itemId });
 
-  // Gold subscription purchased
+  // ── Gold subscription purchased ───────────────────────
   if (type === 'gold_annual' || type === 'gold_monthly') {
     if (!bizId) { console.warn('No biz_id in metadata'); return; }
 
@@ -127,36 +159,76 @@ async function handleCheckoutComplete(session) {
     if (type === 'gold_annual') expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     else expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-    // Store Stripe customer + subscription IDs for future portal access
-    const stripeCustomerId    = session.customer;
-    const stripeSubscriptionId = session.subscription;
+    const credits = type === 'gold_annual' ? 14 : 1;
 
     await sbPatch('businesses', `id=eq.${encodeURIComponent(bizId)}`, {
-      is_gold:                 true,
-      gold_expires_at:         expiresAt.toISOString(),
-      stripe_customer_id:      stripeCustomerId,
-      stripe_subscription_id:  stripeSubscriptionId,
+      is_gold:                true,
+      gold_expires_at:        expiresAt.toISOString(),
+      stripe_customer_id:     session.customer,
+      stripe_subscription_id: session.subscription,
+      credit_balance:         credits, // raw set on first purchase; renew uses increment below
     });
-    console.log(`✅ Gold activated for biz ${bizId}`);
+
+    // Log credits to ledger
+    await sbPost('credit_ledger', {
+      business_id: bizId,
+      amount:      credits,
+      reason:      type === 'gold_annual' ? 'gold_annual_signup' : 'gold_monthly_signup',
+      ref_id:      session.id,
+    });
+
+    console.log(`✅ Gold activated for biz ${bizId}, ${credits} credits granted`);
   }
 
-  // One-off promoted event purchased
-  if (type === 'event_boost' || type === 'event_spotlight' || type === 'event_premier') {
-    const daysMap = { event_boost: 7, event_spotlight: 14, event_premier: 30 };
-    const days    = daysMap[type];
+  // ── Promotion purchased (boost / spotlight / premier) ─
+  const baseType = type.replace('event_', ''); // normalise legacy 'event_boost' → 'boost'
+  if (PROMO_TYPES.has(type) && bizId) {
+    const days      = PACKAGE_DAYS[baseType] || 7;
+    const startsAt  = new Date();
+    const endsAt    = new Date();
+    endsAt.setDate(endsAt.getDate() + days);
 
-    if (!evId) { console.warn('No event_id in metadata'); return; }
+    const amountTotal = session.amount_total || 0; // cents
 
-    const promotedUntil = new Date();
-    promotedUntil.setDate(promotedUntil.getDate() + days);
-
-    await sbPatch('events', `id=eq.${encodeURIComponent(evId)}`, {
-      is_promoted:     true,
-      promoted_until:  promotedUntil.toISOString(),
-      promoted_package: type.replace('event_', ''), // 'boost' | 'spotlight' | 'premier'
+    await sbPost('promotions', {
+      business_id:       bizId,
+      item_type:         itemType || 'event',
+      item_id:           String(itemId || ''),
+      package:           baseType,
+      status:            'pending',
+      starts_at:         startsAt.toISOString(),
+      ends_at:           endsAt.toISOString(),
+      paid_amount:       amountTotal,
+      credits_used:      0,
+      stripe_session_id: session.id,
     });
-    console.log(`✅ Event ${evId} promoted (${type}) until ${promotedUntil.toDateString()}`);
+
+    console.log(`✅ Promotion created (${baseType}) for ${itemType} ${itemId} — pending approval`);
   }
+}
+
+// Called when a Gold subscription renews (invoice.payment_succeeded for subscription)
+async function handleInvoicePaid(invoice) {
+  // Only handle subscription renewals (not the initial signup — that's checkout.session.completed)
+  if (!invoice.subscription || invoice.billing_reason !== 'subscription_cycle') return;
+
+  // Find the business by subscription id
+  const res = await sbGet('businesses', `stripe_subscription_id=eq.${encodeURIComponent(invoice.subscription)}&select=id,credit_balance`);
+  const rows = res.body;
+  if (!rows || !rows.length) { console.warn('No biz for subscription', invoice.subscription); return; }
+  const biz = rows[0];
+
+  const newBalance = (biz.credit_balance || 0) + 1;
+  await sbPatch('businesses', `id=eq.${encodeURIComponent(biz.id)}`, {
+    credit_balance: newBalance,
+  });
+  await sbPost('credit_ledger', {
+    business_id: biz.id,
+    amount:      1,
+    reason:      'gold_monthly_renew',
+    ref_id:      invoice.id,
+  });
+  console.log(`✅ 1 credit granted to biz ${biz.id} on subscription renewal`);
 }
 
 async function handleSubscriptionDeleted(subscription) {
@@ -207,6 +279,9 @@ module.exports = async function handler(req, res) {
     switch (event.type) {
       case 'checkout.session.completed':
         await handleCheckoutComplete(event.data.object);
+        break;
+      case 'invoice.payment_succeeded':
+        await handleInvoicePaid(event.data.object);
         break;
       case 'customer.subscription.deleted':
         await handleSubscriptionDeleted(event.data.object);

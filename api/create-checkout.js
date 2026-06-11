@@ -1,22 +1,25 @@
 // ── WTDG Stripe Checkout Session Creator ─────────────────
 // POST /api/create-checkout
-// Body: { type, bizId, eventId, userId, successUrl, cancelUrl }
+// Body: { type, bizId, userId, itemType, itemId, successUrl, cancelUrl }
 //
 // type values:
 //   'gold_annual'    → Gold membership $249/yr
 //   'gold_monthly'   → Gold membership $25/mo
-//   'event_boost'    → Promoted event Boost $49
-//   'event_spotlight'→ Promoted event Spotlight $99
-//   'event_premier'  → Promoted event Premier $199
+//   'boost'          → Promotion Boost $49  (7 days)
+//   'spotlight'      → Promotion Spotlight $99 (14 days)
+//   'premier'        → Promotion Premier $199 (30 days)
+//   (legacy: 'event_boost' | 'event_spotlight' | 'event_premier' still supported)
+//
+// For promotion types also pass: itemType, itemId
 //
 // Environment variables required:
-//   STRIPE_SECRET_KEY       — sk_test_... or sk_live_...
+//   STRIPE_SECRET_KEY
 //   STRIPE_PRICE_GOLD_ANNUAL
 //   STRIPE_PRICE_GOLD_MONTHLY
 //   STRIPE_PRICE_BOOST
 //   STRIPE_PRICE_SPOTLIGHT
 //   STRIPE_PRICE_PREMIER
-//   SITE_URL                — https://whattodogeelong.com.au
+//   SITE_URL
 
 const https = require('https');
 
@@ -26,11 +29,16 @@ const SITE_URL   = process.env.SITE_URL || 'https://whattodogeelong.com.au';
 const PRICE_IDS = {
   gold_annual:     process.env.STRIPE_PRICE_GOLD_ANNUAL,
   gold_monthly:    process.env.STRIPE_PRICE_GOLD_MONTHLY,
+  boost:           process.env.STRIPE_PRICE_BOOST,
+  spotlight:       process.env.STRIPE_PRICE_SPOTLIGHT,
+  premier:         process.env.STRIPE_PRICE_PREMIER,
+  // Legacy aliases
   event_boost:     process.env.STRIPE_PRICE_BOOST,
   event_spotlight: process.env.STRIPE_PRICE_SPOTLIGHT,
   event_premier:   process.env.STRIPE_PRICE_PREMIER,
 };
 
+const PROMOTION_TYPES    = new Set(['boost','spotlight','premier','event_boost','event_spotlight','event_premier']);
 const SUBSCRIPTION_TYPES = new Set(['gold_annual', 'gold_monthly']);
 
 function stripePost(path, params) {
@@ -75,22 +83,23 @@ module.exports = async function handler(req, res) {
   let data;
   try { data = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON' }); }
 
-  const { type, bizId, eventId, userId } = data;
+  const { type, bizId, eventId, userId, itemType, itemId } = data;
 
   if (!type || !PRICE_IDS[type]) {
     return res.status(400).json({ error: `Unknown checkout type: ${type}` });
   }
 
-  const priceId       = PRICE_IDS[type];
+  const priceId        = PRICE_IDS[type];
   const isSubscription = SUBSCRIPTION_TYPES.has(type);
+  const isPromotion    = PROMOTION_TYPES.has(type);
 
   // Build success / cancel URLs with context
-  const successBase = data.successUrl || `${SITE_URL}/upgrade.html`;
-  const cancelBase  = data.cancelUrl  || `${SITE_URL}/upgrade.html`;
+  const successBase = data.successUrl || `${SITE_URL}/business-dashboard.html`;
+  const cancelBase  = data.cancelUrl  || `${SITE_URL}/promote.html`;
   const successUrl  = `${successBase}${successBase.includes('?') ? '&' : '?'}success=1&type=${type}`;
   const cancelUrl   = `${cancelBase}${cancelBase.includes('?') ? '&' : '?'}cancelled=1`;
 
-  // Stripe Checkout params (using URLSearchParams-compatible flat format)
+  // Stripe Checkout params
   const params = {
     'payment_method_types[0]': 'card',
     'line_items[0][price]':    priceId,
@@ -102,9 +111,11 @@ module.exports = async function handler(req, res) {
   };
 
   // Embed context in metadata so webhook can act on it
-  if (bizId)   params['metadata[biz_id]']   = bizId;
-  if (eventId) params['metadata[event_id]'] = eventId;
-  if (userId)  params['metadata[user_id]']  = userId;
+  if (bizId)    params['metadata[biz_id]']    = bizId;
+  if (eventId)  params['metadata[event_id]']  = eventId;  // legacy
+  if (userId)   params['metadata[user_id]']   = userId;
+  if (itemType) params['metadata[item_type]'] = itemType;
+  if (itemId)   params['metadata[item_id]']   = itemId;
   params['metadata[type]'] = type;
 
   // For subscriptions, also store metadata on subscription_data

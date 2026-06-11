@@ -78,6 +78,7 @@
         <button class="apv-tab" data-tab="businesses">Businesses <span class="apv-tab__count" id="cnt-businesses">0</span></button>
         <button class="apv-tab" data-tab="events">Events <span class="apv-tab__count" id="cnt-events">0</span></button>
         <button class="apv-tab" data-tab="promos">Offers <span class="apv-tab__count" id="cnt-promos">0</span></button>
+        <button class="apv-tab" data-tab="promotions">Promotions <span class="apv-tab__count" id="cnt-promotions">0</span></button>
         <button class="apv-tab" data-tab="history">History</button>
       </div>
 
@@ -95,36 +96,41 @@
 <script>
 'use strict';
 
-let _allBiz = [], _allEvents = [], _allPromos = [];
+let _allBiz = [], _allEvents = [], _allPromos = [], _allPromotions = [];
 let _activeTab = 'all';
 
 async function loadQueue() {
   const container = document.getElementById('js-apv-queue');
   try {
-  const [bizRes, evRes, promoRes] = await Promise.all([
+  const [bizRes, evRes, promoRes, promotionsRes] = await Promise.all([
     db.from('businesses').select('id,name,type,suburb,emoji,img,status,claim_notes,created_at,owner_id')
       .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
     db.from('events').select('id,title,category,date,location,img,status,business_id,created_at')
       .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
     db.from('promos').select('id,title,description,emoji,status,business_id,created_at')
       .in('status', ['pending','approved','rejected']).order('created_at', { ascending: false }).limit(200),
+    db.from('promotions').select('id,business_id,item_type,item_id,package,status,paid_amount,credits_used,starts_at,ends_at,created_at')
+      .in('status', ['pending','approved','live','completed','rejected']).order('created_at', { ascending: false }).limit(200),
   ]);
 
   if (bizRes.error) throw bizRes.error;
 
-  _allBiz    = bizRes.data   || [];
-  _allEvents = evRes.data    || [];
-  _allPromos = promoRes.data || [];
+  _allBiz        = bizRes.data        || [];
+  _allEvents     = evRes.data         || [];
+  _allPromos     = promoRes.data      || [];
+  _allPromotions = promotionsRes.data || [];
 
-  const pendBiz   = _allBiz.filter(r => r.status === 'pending').length;
-  const pendEv    = _allEvents.filter(r => r.status === 'pending').length;
-  const pendPromo = _allPromos.filter(r => r.status === 'pending').length;
-  const totalPend = pendBiz + pendEv + pendPromo;
+  const pendBiz        = _allBiz.filter(r => r.status === 'pending').length;
+  const pendEv         = _allEvents.filter(r => r.status === 'pending').length;
+  const pendPromo      = _allPromos.filter(r => r.status === 'pending').length;
+  const pendPromotions = _allPromotions.filter(r => r.status === 'pending').length;
+  const totalPend      = pendBiz + pendEv + pendPromo + pendPromotions;
 
   document.getElementById('cnt-all').textContent        = totalPend;
   document.getElementById('cnt-businesses').textContent = pendBiz;
   document.getElementById('cnt-events').textContent     = pendEv;
   document.getElementById('cnt-promos').textContent     = pendPromo;
+  document.getElementById('cnt-promotions').textContent = pendPromotions;
 
   // Update sidebar badge
   const badge = document.getElementById('js-adm-pending-badge');
@@ -145,18 +151,21 @@ function renderQueue() {
   const container = document.getElementById('js-apv-queue');
   const showHistory = _activeTab === 'history';
 
-  let bizItems   = _allBiz.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
-  let evItems    = _allEvents.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
-  let promoItems = _allPromos.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
+  let bizItems        = _allBiz.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
+  let evItems         = _allEvents.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
+  let promoItems      = _allPromos.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
+  let promotionItems  = _allPromotions.filter(r => showHistory ? r.status !== 'pending' : r.status === 'pending');
 
-  if (_activeTab === 'businesses') { evItems = []; promoItems = []; }
-  if (_activeTab === 'events')     { bizItems = []; promoItems = []; }
-  if (_activeTab === 'promos')     { bizItems = []; evItems = []; }
+  if (_activeTab === 'businesses') { evItems = []; promoItems = []; promotionItems = []; }
+  if (_activeTab === 'events')     { bizItems = []; promoItems = []; promotionItems = []; }
+  if (_activeTab === 'promos')     { bizItems = []; evItems = []; promotionItems = []; }
+  if (_activeTab === 'promotions') { bizItems = []; evItems = []; promoItems = []; }
 
   const cards = [
     ...bizItems.map(r => renderBizCard(r)),
     ...evItems.map(r => renderEventCard(r)),
     ...promoItems.map(r => renderPromoCard(r)),
+    ...promotionItems.map(r => renderPromotionCard(r)),
   ];
 
   if (!cards.length) {
@@ -255,6 +264,37 @@ function renderPromoCard(promo) {
     </div>`;
 }
 
+function renderPromotionCard(promo) {
+  const isHistory = promo.status !== 'pending';
+  const pkgLabel  = promo.package ? (promo.package[0].toUpperCase() + promo.package.slice(1)) : '—';
+  const typeLabel = promo.item_type || '—';
+  const paid      = promo.paid_amount ? `$${(promo.paid_amount/100).toFixed(2)}` : '';
+  const credits   = promo.credits_used ? `${promo.credits_used} credit${promo.credits_used !== 1 ? 's' : ''}` : '';
+  const payLabel  = paid || credits || '—';
+  const emoji     = { business:'🏢', event:'📅', offer:'🎁', article:'📰' }[promo.item_type] || '📣';
+  return `
+    <div class="apv-card" data-type="promotion" data-id="${promo.id}">
+      <div class="apv-card__top">
+        <div class="apv-card__thumb">${emoji}</div>
+        <div class="apv-card__info">
+          <div class="apv-card__type">Promotion · ${pkgLabel} ${isHistory ? statusPill(promo.status) : statusPill('pending')}</div>
+          <div class="apv-card__title">${pkgLabel} · ${typeLabel}</div>
+          <div class="apv-card__meta">
+            <span>🆔 ${promo.item_id || '—'}</span>
+            <span>💳 ${payLabel}</span>
+            ${promo.ends_at ? `<span>📅 Until ${new Date(promo.ends_at).toLocaleDateString('en-AU', {day:'numeric',month:'short'})}</span>` : ''}
+            <span>🕐 ${new Date(promo.created_at).toLocaleDateString('en-AU', {day:'numeric',month:'short'})}</span>
+          </div>
+        </div>
+      </div>
+      ${!isHistory ? `
+      <div class="apv-card__actions">
+        <button class="apv-btn apv-btn--approve" data-action="approve" data-type="promotion" data-id="${promo.id}">✓ Approve &amp; go live</button>
+        <button class="apv-btn apv-btn--reject"  data-action="reject"  data-type="promotion" data-id="${promo.id}">✕ Reject</button>
+      </div>` : ''}
+    </div>`;
+}
+
 function bindActions() {
   document.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -263,9 +303,16 @@ function bindActions() {
       btn.disabled = true; btn.textContent = 'Saving…';
 
       let err;
-      if (type === 'biz')   ({ error: err } = await db.from('businesses').update({ status: newStatus }).eq('id', id));
-      if (type === 'event') ({ error: err } = await db.from('events').update({ status: newStatus }).eq('id', id));
-      if (type === 'promo') ({ error: err } = await db.from('promos').update({ status: newStatus }).eq('id', id));
+      if (type === 'biz')       ({ error: err } = await db.from('businesses').update({ status: newStatus }).eq('id', id));
+      if (type === 'event')     ({ error: err } = await db.from('events').update({ status: newStatus }).eq('id', id));
+      if (type === 'promo')     ({ error: err } = await db.from('promos').update({ status: newStatus }).eq('id', id));
+      if (type === 'promotion') {
+        // Approving a promotion sets it 'live'; starts_at = now if not set
+        const updateData = action === 'approve'
+          ? { status: 'live', starts_at: new Date().toISOString() }
+          : { status: 'rejected' };
+        ({ error: err } = await db.from('promotions').update(updateData).eq('id', id));
+      }
 
       if (err) { alert('Error: ' + err.message); btn.disabled = false; btn.textContent = action === 'approve' ? '✓ Approve' : '✕ Reject'; return; }
       await loadQueue();

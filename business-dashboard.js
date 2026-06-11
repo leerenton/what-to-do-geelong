@@ -723,24 +723,41 @@ function slotBtn(s, slot) {
 
 // ── PROMOTE TAB ───────────────────────────────────────────
 function renderPromote() {
+  const credits      = currentBiz.credit_balance || 0;
+  const creditBadge  = isGold()
+    ? `<div class="dash-credit-badge">
+        <span class="material-symbols-rounded">stars</span>
+        <span><strong>${credits}</strong> promotion credit${credits !== 1 ? 's' : ''} available</span>
+        ${credits > 0 ? `<span class="dash-credit-hint">Redeem on the promote page</span>` : ''}
+       </div>`
+    : '';
+
   return `
     <div class="dash-panel active" id="panel-promote">
 
-      <!-- Event promotion -->
+      ${creditBadge}
+
+      <!-- Unified promote CTA -->
       <div class="dash-section-header">
-        <div class="dash-section-title"><span class="material-symbols-rounded">campaign</span> Promote an Event</div>
+        <div class="dash-section-title"><span class="material-symbols-rounded">campaign</span> Promote Your Business</div>
       </div>
       <p style="font-size:.875rem;color:var(--mid);margin:0 0 1rem;line-height:1.55">
-        Boost an event to the homepage, events page and our social channels. Choose a package that suits your budget.
+        Boost your listing, events, offers or articles across the homepage, events page and our social channels. Choose a package below — pay by card or use your credits.
       </p>
-      <a href="promote-event.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="dash-promo-cta-card">
-        <span class="dash-promo-cta-card__icon">🎟️</span>
+      <a href="promote.html?biz=${encodeURIComponent(currentBiz.id)}" class="dash-promo-cta-card">
+        <span class="dash-promo-cta-card__icon">🚀</span>
         <div>
-          <div class="dash-promo-cta-card__title">Event promotion packages</div>
-          <div class="dash-promo-cta-card__sub">Boost · Spotlight · Premier — from $49</div>
+          <div class="dash-promo-cta-card__title">Promote anything →</div>
+          <div class="dash-promo-cta-card__sub">Boost · Spotlight · Premier — from $49 or use credits</div>
         </div>
         <span class="material-symbols-rounded dash-promo-cta-card__arrow">arrow_forward</span>
       </a>
+
+      <!-- Active promotions -->
+      <div class="dash-section-header" style="margin-top:1.75rem">
+        <div class="dash-section-title"><span class="material-symbols-rounded">trending_up</span> Active &amp; Pending Promotions</div>
+      </div>
+      <div id="js-active-promotions"><div style="font-size:.85rem;color:var(--mid)">Loading…</div></div>
 
       <div class="dash-section-divider"></div>
 
@@ -1070,7 +1087,10 @@ function bindPanelEvents(tab) {
   }
 
   if (tab === 'promote') {
-    // Filter tabs
+    // Load active/pending promotions list
+    loadActivePromotions();
+
+    // Email sponsorship calendar (still present in the panel)
     document.querySelectorAll('#js-dash-cal-tabs .dash-sponsor-cal__tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('#js-dash-cal-tabs .dash-sponsor-cal__tab').forEach(b => b.classList.remove('active'));
@@ -1078,13 +1098,9 @@ function bindPanelEvents(tab) {
         renderDashCalGrid(btn.dataset.filter);
       });
     });
-
-    // Close modal
     document.getElementById('js-dash-sponsor-close')?.addEventListener('click', () => {
       document.getElementById('js-dash-sponsor-modal').style.display = 'none';
     });
-
-    // Load calendar slots
     loadDashCalSlots();
   }
 
@@ -1170,6 +1186,49 @@ function bindEventActions() {
       if (pBar) pBar.textContent = promotedLeft();
     });
   });
+}
+
+async function loadActivePromotions() {
+  const container = document.getElementById('js-active-promotions');
+  if (!container) return;
+  try {
+    const { data, error } = await db
+      .from('promotions')
+      .select('*')
+      .eq('business_id', currentBiz.id)
+      .in('status', ['pending','approved','live'])
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      container.innerHTML = `<p style="font-size:.85rem;color:var(--mid)">No active promotions yet. Use the button above to create one.</p>`;
+      return;
+    }
+
+    const statusColor = { pending: '#b45309', approved: '#0d9488', live: '#16a34a' };
+    const statusBg    = { pending: '#fef9c3', approved: '#ccfbf1', live: '#dcfce7' };
+
+    container.innerHTML = data.map(p => {
+      const col  = statusColor[p.status] || '#64748b';
+      const bg   = statusBg[p.status]   || '#f1f5f9';
+      const pkg  = p.package ? p.package[0].toUpperCase() + p.package.slice(1) : '—';
+      const type = p.item_type ? p.item_type[0].toUpperCase() + p.item_type.slice(1) : '—';
+      const paid = p.paid_amount ? `$${(p.paid_amount/100).toFixed(0)} AUD` : p.credits_used ? `${p.credits_used} credit${p.credits_used !== 1 ? 's' : ''}` : '—';
+      const ends = p.ends_at ? `Ends ${new Date(p.ends_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' })}` : '';
+      return `<div class="dash-promo-row">
+        <div class="dash-promo-row__icon">${{ business:'🏢', event:'📅', offer:'🎁', article:'📰' }[p.item_type] || '📣'}</div>
+        <div class="dash-promo-row__body">
+          <div class="dash-promo-row__title">${pkg} · ${type}</div>
+          <div class="dash-promo-row__meta">${paid}${ends ? ' · ' + ends : ''}</div>
+        </div>
+        <span style="background:${bg};color:${col};font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:1rem">${p.status}</span>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    container.innerHTML = `<p style="font-size:.82rem;color:var(--mid)">Could not load promotions.</p>`;
+  }
 }
 
 function bindOfferDeleteHandlers() {

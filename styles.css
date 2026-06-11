@@ -372,6 +372,12 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* Close button + header only show inside mobile drawer */
 .nav__mobile-close { display: none; }
 .nav__mobile-header { display: none; }
+/* On desktop, the scroll wrapper is transparent to flex layout */
+.nav__mobile-scroll {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
 
 /* Cats nav link */
 .nav__cats-link {

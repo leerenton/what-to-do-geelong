@@ -120,21 +120,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h1 class="bsign-title">Choose your plan</h1>
       <p class="bsign-sub">Start free and upgrade anytime. No lock-in contracts.</p>
 
+      <!-- Billing toggle — only relevant when Gold is selected -->
+      <div class="bsign-billing-toggle" id="js-billing-toggle">
+        <button class="bsign-billing-btn active" data-billing="annual">Annual <span class="bsign-billing-save">Save 17%</span></button>
+        <button class="bsign-billing-btn" data-billing="monthly">Monthly</button>
+      </div>
+
       <div class="bsign-plan-grid">
         <div class="bsign-plan" id="js-plan-free" data-plan="free">
           <div class="bsign-plan__header">
             <span class="bsign-plan__name">Free</span>
-            <span class="bsign-plan__price">$0 <span>/ year</span></span>
+            <span class="bsign-plan__price">$0 <span>/ mo</span></span>
             <div class="bsign-plan__radio"></div>
           </div>
           <div class="bsign-plan__features">
-            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Basic listing on WTDG</div>
-            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 active events</div>
-            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 active offers</div>
-            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Enquiry form on listing</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Listed on WTDG</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 events</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 offers</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Enquiry form</div>
             <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Homepage rotation</div>
             <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Promoted events</div>
-            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Featured in weekly email</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Weekly email feature</div>
           </div>
         </div>
 
@@ -142,15 +148,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="bsign-plan__badge">⭐ Recommended</div>
           <div class="bsign-plan__header">
             <span class="bsign-plan__name">Gold</span>
-            <span class="bsign-plan__price">$249 <span>/ year</span></span>
-            <div class="bsign-plan__radio"></div>
+            <span class="bsign-plan__price" id="js-gold-price">$20.75 <span>/ mo</span></span>
+            <div class="bsign-plan__radio bsign-plan__radio--checked"></div>
           </div>
-          <div class="bsign-plan__price-note">or $25/month · save 17% annually</div>
+          <div class="bsign-plan__price-note" id="js-gold-note">Billed $249/yr · cancel anytime</div>
           <div class="bsign-plan__features">
             <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Everything in Free</div>
-            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Live enquiry form on your listing</div>
-            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Rotated on the homepage</div>
-            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> 3 promoted events per year included</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Live enquiry form</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Homepage rotation</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> 3 promoted events / year</div>
             <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Unlimited offers</div>
             <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Featured in weekly email</div>
             <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> ⭐ Gold badge on listing</div>
@@ -158,6 +164,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
 
+      <div id="js-s3-error" style="display:none;color:#dc2626;font-size:.85rem;margin-top:.75rem;text-align:center"></div>
       <button class="bsign-next" id="js-s3-next">Continue →</button>
     </div>
 

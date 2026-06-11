@@ -250,3 +250,40 @@
   color: var(--dark, #1a1a2e);
   box-shadow: 0 1px 4px rgba(0,0,0,.1);
 }
+
+/* ── Billing toggle ──────────────────────────────────── */
+.bsign-billing-toggle {
+  display: flex;
+  background: var(--bg, #f4f5f7);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 1.1rem;
+  width: fit-content;
+  margin-inline: auto;
+}
+.bsign-billing-btn {
+  padding: .45rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  font: 600 .82rem/1 'DM Sans', sans-serif;
+  cursor: pointer;
+  background: transparent;
+  color: var(--mid, #888);
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.bsign-billing-btn.active {
+  background: #fff;
+  color: var(--dark, #1a1a2e);
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+}
+.bsign-billing-save {
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: .7rem;
+  font-weight: 700;
+  padding: .15rem .4rem;
+  border-radius: 4px;
+}

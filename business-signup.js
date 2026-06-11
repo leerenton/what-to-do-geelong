@@ -179,11 +179,38 @@ document.getElementById('js-s2-next').addEventListener('click', () => {
 });
 
 // ── SCREEN 3: Plan ────────────────────────────────────────
+// ── SCREEN 3: Plan selection + billing toggle ─────────────
+let _billing = 'annual'; // 'annual' | 'monthly'
+
+const BILLING_CONFIG = {
+  annual:  { display: '$20.75', per: '/ mo', note: 'Billed $249/yr · cancel anytime',  stripeType: 'gold_annual' },
+  monthly: { display: '$25',    per: '/ mo', note: 'Billed monthly · cancel anytime',  stripeType: 'gold_monthly' },
+};
+
+function updateGoldPrice() {
+  const cfg = BILLING_CONFIG[_billing];
+  const priceEl = document.getElementById('js-gold-price');
+  const noteEl  = document.getElementById('js-gold-note');
+  if (priceEl) priceEl.innerHTML = `${cfg.display} <span>${cfg.per}</span>`;
+  if (noteEl)  noteEl.textContent = cfg.note;
+}
+
+document.getElementById('js-billing-toggle')?.addEventListener('click', e => {
+  const btn = e.target.closest('.bsign-billing-btn');
+  if (!btn) return;
+  _billing = btn.dataset.billing;
+  document.querySelectorAll('.bsign-billing-btn').forEach(b => b.classList.toggle('active', b === btn));
+  updateGoldPrice();
+});
+
 document.querySelectorAll('.bsign-plan').forEach(plan => {
   plan.addEventListener('click', () => {
     document.querySelectorAll('.bsign-plan').forEach(p => p.classList.remove('selected'));
     plan.classList.add('selected');
     bsState.plan = plan.dataset.plan;
+    // Show/hide billing toggle based on plan
+    const toggle = document.getElementById('js-billing-toggle');
+    if (toggle) toggle.style.opacity = bsState.plan === 'gold' ? '1' : '0.4';
   });
 });
 
@@ -356,12 +383,43 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
 
   // Save new bizId so dashboard opens on it directly
   localStorage.setItem('wtdg_dash_biz', bizId);
-  // Update the dashboard link to include the biz param
+
+  // If Gold selected, redirect to Stripe checkout
+  if (bsState.plan === 'gold') {
+    btn.textContent = 'Redirecting to checkout…';
+    try {
+      const stripeType = BILLING_CONFIG[_billing]?.stripeType || 'gold_annual';
+      const session = await db.auth.getSession();
+      const userId  = session?.data?.session?.user?.id;
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type:       stripeType,
+          bizId,
+          userId,
+          successUrl: `${location.origin}/business-dashboard.html?biz=${bizId}&gold=1`,
+          cancelUrl:  `${location.origin}/business-signup.html`,
+        }),
+      });
+      const json = await res.json();
+      if (json.url) { window.location.href = json.url; return; }
+      throw new Error(json.error || 'No checkout URL');
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Submit listing →';
+      const errEl = document.getElementById('js-s4-error');
+      if (errEl) { errEl.textContent = 'Could not start checkout: ' + err.message; errEl.style.display = 'block'; }
+      return;
+    }
+  }
+
+  // Free plan — go straight to success screen
   const dashLink = document.querySelector('a[href="business-dashboard.html"]');
   if (dashLink) dashLink.href = `business-dashboard.html?biz=${bizId}`;
 
   document.getElementById('js-bsign-done-sub').textContent =
-    `${bsState.details.name} is now live on What To Do Geelong${bsState.plan === 'featured' ? ' as a Featured listing' : ''}. Head to your dashboard to add events, offers, and photos.`;
+    `${bsState.details.name} has been submitted for review. Head to your dashboard to start setting up events, offers, and photos.`;
 
   bsignGoto('bs-s5');
 });

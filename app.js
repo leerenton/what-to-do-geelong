@@ -3691,7 +3691,7 @@ function initWhatWasGeelongPage() {
 
 // ── INIT ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  initNav();
+  // initNav() is now handled by nav.js so it works on all pages, not just app.js pages
 
   // Location nudge — mobile only, shown when location not yet granted
   if (window.wtdgLocation) window.wtdgLocation.injectLocationNudge();

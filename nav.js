@@ -193,13 +193,147 @@
     </div>
   </header>`;
 
-  // ── INJECT ────────────────────────────────────────────────
-  // Replaces <div id="js-nav-root"> if present, otherwise
-  // prepends to <body> so pages without the placeholder still work.
+  const FOOTER_HTML = `
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <div class="footer__logo">WHAT TO DO<br>GEELONG!</div>
+        <p class="footer__tagline">Your local guide to events, food, drink and things to do in Geelong, Victoria.</p>
+        <p class="footer__copy">© 2025 What To Do Geelong</p>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Things To Do</h4>
+        <a href="do.html">Things to do in Geelong</a>
+        <a href="do.html?filter=family">Family activities Geelong</a>
+        <a href="do.html?filter=nature">Outdoor activities Geelong</a>
+        <a href="do.html?filter=art">Arts &amp; culture Geelong</a>
+        <a href="do.html?filter=wellness">Day spas Geelong</a>
+        <a href="do.html?filter=sport">Sport &amp; leisure Geelong</a>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Food &amp; Drink</h4>
+        <a href="eat.html">Restaurants in Geelong</a>
+        <a href="eat.html?filter=caf%C3%A9">Cafes in Geelong</a>
+        <a href="drink.html">Bars &amp; pubs Geelong</a>
+        <a href="drink.html?filter=winery">Bellarine wineries</a>
+        <a href="drink.html?filter=brewery">Geelong breweries</a>
+        <a href="eat.html?filter=brunch">Brunch Geelong</a>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Events</h4>
+        <a href="events.html">What's on in Geelong</a>
+        <a href="events.html#today">Events today Geelong</a>
+        <a href="events.html#weekend">This weekend Geelong</a>
+        <a href="festival-of-sails.html">Festival of Sails</a>
+        <a href="cadel-evans.html">Cadel Evans Road Race</a>
+        <a href="#">Submit an event</a>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Explore</h4>
+        <a href="editorial.html">Geelong travel guides</a>
+        <a href="editorial.html">Best of Geelong</a>
+        <a href="editorial.html">Bellarine Peninsula guide</a>
+        <a href="advertise.html">Advertise with us</a>
+        <a href="email-sponsorship.html">Sponsor our emails</a>
+        <a href="#">About WTDG</a>
+        <a href="#">Contact us</a>
+      </div>
+    </div>
+  </footer>`;
+
+  // ── INJECT NAV ────────────────────────────────────────────
   const root = document.getElementById('js-nav-root');
-  if (root) {
-    root.outerHTML = NAV_HTML;
-  } else {
-    document.body.insertAdjacentHTML('afterbegin', NAV_HTML);
+  if (root) root.outerHTML = NAV_HTML;
+  else document.body.insertAdjacentHTML('afterbegin', NAV_HTML);
+
+  // ── INJECT FOOTER ─────────────────────────────────────────
+  const footerRoot = document.getElementById('js-footer-root');
+  if (footerRoot) footerRoot.outerHTML = FOOTER_HTML;
+
+  // ── NAV BEHAVIOUR ─────────────────────────────────────────
+  // Self-contained so it works on pages that don't load app.js
+  function initNav() {
+    const hamburger = document.querySelector('.nav__hamburger');
+    const links     = document.querySelector('.nav__links');
+    if (!hamburger || !links) return;
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'nav__backdrop';
+    document.body.appendChild(backdrop);
+
+    const header = document.createElement('div');
+    header.className = 'nav__mobile-header';
+    header.innerHTML = `
+      <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__mobile-logo" />
+      <button class="nav__mobile-close" aria-label="Close menu">
+        <span class="material-symbols-rounded">close</span>
+      </button>`;
+    links.prepend(header);
+
+    const scrollWrap = document.createElement('div');
+    scrollWrap.className = 'nav__mobile-scroll';
+    while (links.children.length > 1) scrollWrap.appendChild(links.children[1]);
+    links.appendChild(scrollWrap);
+
+    const closeBtn = header.querySelector('.nav__mobile-close');
+
+    function closeMenu() {
+      links.classList.remove('nav--open');
+      backdrop.classList.remove('active');
+      hamburger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+    function openMenu() {
+      links.classList.add('nav--open');
+      backdrop.classList.add('active');
+      hamburger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+
+    closeBtn.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+    hamburger.addEventListener('click', () => links.classList.contains('nav--open') ? closeMenu() : openMenu());
+    links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setTimeout(closeMenu, 80)));
+
+    // Desktop hover dropdowns
+    const CLOSE_DELAY = 120;
+    const isMobile = () => window.innerWidth <= 640;
+
+    document.querySelectorAll('.nav__drop').forEach(drop => {
+      let closeTimer = null;
+      drop.addEventListener('mouseenter', () => {
+        if (isMobile()) return;
+        clearTimeout(closeTimer);
+        document.querySelectorAll('.nav__drop').forEach(d => { if (d !== drop) { d.classList.remove('open'); clearTimeout(d._closeTimer); } });
+        drop.classList.add('open');
+      });
+      drop.addEventListener('mouseleave', () => {
+        if (isMobile()) return;
+        closeTimer = setTimeout(() => drop.classList.remove('open'), CLOSE_DELAY);
+        drop._closeTimer = closeTimer;
+      });
+    });
+
+    // Click toggle (mobile accordion + keyboard fallback)
+    document.querySelectorAll('.nav__drop-toggle').forEach(toggle => {
+      toggle.addEventListener('click', e => {
+        e.stopPropagation();
+        const drop = toggle.closest('.nav__drop');
+        drop.classList.toggle('open');
+        if (!isMobile()) document.querySelectorAll('.nav__drop').forEach(d => { if (d !== drop) d.classList.remove('open'); });
+      });
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.nav__drop')) document.querySelectorAll('.nav__drop').forEach(d => d.classList.remove('open'));
+    });
   }
+
+  // Run after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNav);
+  } else {
+    initNav();
+  }
+
 })();

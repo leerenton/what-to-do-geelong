@@ -3097,10 +3097,30 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
     }
   }
 
-  // If no URL filter set, auto-hint from group prefs (soft suggestion — adds banner, doesn't force filter)
+  // Personalisation subtitle + optional filter suggestion
   const _prefs = getPrefs();
-  if (activeFilter === 'all' && pageKey && _prefs.interests?.length) {
-    showPrefsHint(filterEl, _prefs, pageKey, (f) => { setActive(f); });
+  if ((_prefs.interests?.length || _prefs.group) && filterEl) {
+    const groupLabel = { family: 'families', couple: 'couples', friends: 'groups', solo: 'solo' }[_prefs.group] || null;
+    const interestLabels = (_prefs.interests || []).slice(0, 3).map(i => i.replace('_', ' '));
+    const parts = [...(groupLabel ? [groupLabel] : []), ...interestLabels];
+    const matchCount = items.filter(i => prefsMatchCard(i, _prefs)).length;
+
+    const sub = document.createElement('p');
+    sub.className = 'weekend-personalised-sub';
+    sub.innerHTML = `
+      <span class="wps__row">
+        <span class="wps__spark">✦</span>
+        <span class="wps__label">Sorted for <strong>${parts.join(' · ')}</strong></span>
+        <a href="onboarding.html" class="wps__edit">edit</a>
+      </span>
+      ${matchCount ? `<span class="wps__count">${matchCount} match${matchCount !== 1 ? 'es' : ''} up first</span>` : ''}
+    `;
+    filterEl.closest('.coll-topbar')?.insertAdjacentElement('afterend', sub);
+
+    // Also suggest a specific filter if one maps to their interests
+    if (activeFilter === 'all' && pageKey) {
+      showPrefsHint(filterEl, _prefs, pageKey, (f) => { setActive(f); });
+    }
   }
 
   // Apply initial SEO meta

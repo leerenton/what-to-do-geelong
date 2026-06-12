@@ -447,9 +447,8 @@ async function saveBusiness() {
   const payload = {
     name, slug,
     emoji:             document.getElementById('bf-emoji').value.trim()    || null,
-    category,       // primary display label (first selected)
     categories,     // full array
-    type: category, // keep legacy type field in sync for card display
+    type: category, // primary display label stored in legacy type field
     section,
     sections,
     tags,

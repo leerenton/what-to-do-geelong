@@ -1704,9 +1704,11 @@ function initDateBar() {
   });
 
   document.getElementById('js-dp-apply')?.addEventListener('click', () => {
-    drawer.hidden = true;
-    toggle.textContent = '🗓 Planning a visit?';
-    document.getElementById('do')?.scrollIntoView({ behavior: 'smooth' });
+    const from = document.getElementById('dp-from')?.value;
+    const to   = document.getElementById('dp-to')?.value;
+    if (!from) { document.getElementById('dp-from')?.focus(); return; }
+    const toParam = to ? `&to=${to}` : '';
+    window.location.href = `events.html?from=${from}${toParam}`;
   });
 }
 

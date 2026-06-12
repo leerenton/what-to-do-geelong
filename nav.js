@@ -241,17 +241,24 @@
     </div>
   </footer>`;
 
-  // ── INJECT NAV ────────────────────────────────────────────
-  const root = document.getElementById('js-nav-root');
-  if (root) root.outerHTML = NAV_HTML;
-  else document.body.insertAdjacentHTML('afterbegin', NAV_HTML);
+  // ── INJECT + INIT ─────────────────────────────────────────
+  function run() {
+    const root = document.getElementById('js-nav-root');
+    if (root) root.outerHTML = NAV_HTML;
+    else document.body.insertAdjacentHTML('afterbegin', NAV_HTML);
 
-  // ── INJECT FOOTER ─────────────────────────────────────────
-  const footerRoot = document.getElementById('js-footer-root');
-  if (footerRoot) footerRoot.outerHTML = FOOTER_HTML;
+    const footerRoot = document.getElementById('js-footer-root');
+    if (footerRoot) footerRoot.outerHTML = FOOTER_HTML;
 
-  // ── NAV BEHAVIOUR ─────────────────────────────────────────
-  // Self-contained so it works on pages that don't load app.js
+    initNav();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
   function initNav() {
     const hamburger = document.querySelector('.nav__hamburger');
     const links     = document.querySelector('.nav__links');
@@ -327,13 +334,6 @@
     document.addEventListener('click', e => {
       if (!e.target.closest('.nav__drop')) document.querySelectorAll('.nav__drop').forEach(d => d.classList.remove('open'));
     });
-  }
-
-  // Run after DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initNav);
-  } else {
-    initNav();
   }
 
 })();

@@ -63,103 +63,173 @@ async function loadRevenue() {
   const content = document.getElementById('js-rev-content');
   content.innerHTML = '<div style="color:var(--adm-mid)">Calculating…</div>';
 
-  const { PRICING } = window.wtdgAdminAuth;
   const { from, to } = getDateRange(revPeriod, '', '');
   const fromDate = new Date(from);
+  const toDate   = new Date(to);
+  const days     = Math.max(1, Math.round((toDate - fromDate) / 864e5));
 
-  const { data: bizData } = await db.from('businesses').select('id,name,plan,is_claimed,created_at');
-  const biz = bizData || [];
+  // Fetch businesses (Gold subs) + promotions (one-off ad spend) in parallel
+  const [{ data: bizData }, { data: promoData }] = await Promise.all([
+    db.from('businesses').select('id,name,is_gold,gold_expires_at,stripe_customer_id,created_at'),
+    db.from('promotions').select('id,business_id,package,paid_amount,credits_used,status,created_at,starts_at,ends_at').in('status', ['pending','approved','live']),
+  ]);
 
-  // Current MRR by tier
-  const tiers = ['free', 'starter', 'growth', 'premium'];
-  const tierCounts = {};
-  tiers.forEach(t => { tierCounts[t] = 0; });
-  biz.forEach(b => {
-    const t = b.plan || 'free';
-    if (tierCounts[t] !== undefined) tierCounts[t]++;
-    else tierCounts['free']++;
-  });
+  const biz    = bizData   || [];
+  const promos = promoData || [];
 
-  const mrr = tiers.reduce((s, t) => s + (tierCounts[t] * (PRICING[t] || 0)), 0);
-  const arr = mrr * 12;
-  const paidCount = biz.filter(b => b.plan && b.plan !== 'free').length;
+  // ── Gold subscriptions ───────────────────────────────────
+  // Gold annual = $249/yr = $20.75/mo   Gold monthly = $25/mo
+  // We don't store which plan they're on separately, so approximate:
+  // use $249 for annual (gold_expires_at roughly 1yr from created), $25/mo otherwise
+  const goldBiz = biz.filter(b => b.is_gold);
 
-  // New paid in period
-  const newPaidInPeriod = biz.filter(b => {
-    const t = b.plan;
-    return t && t !== 'free' && new Date(b.created_at) >= fromDate;
+  // MRR from Gold: treat each as monthly Gold ($25) for MRR purposes
+  // (some may be annual — flag those separately)
+  const GOLD_MONTHLY_PRICE = 25;
+  const GOLD_ANNUAL_PRICE  = 249;
+  const goldMrr = goldBiz.length * GOLD_MONTHLY_PRICE;
+
+  // New Gold in period
+  const newGoldInPeriod = goldBiz.filter(b => {
+    const d = new Date(b.created_at);
+    return d >= fromDate && d <= toDate;
   }).length;
 
-  // Revenue in period (approximation: MRR × months)
-  const days = Math.max(1, Math.round((new Date(to) - fromDate) / 864e5));
-  const periodRevenue = Math.round(mrr * (days / 30));
+  // ── Promotions (one-off payments) ───────────────────────
+  // paid_amount is in cents from Stripe
+  const paidPromos = promos.filter(p => p.paid_amount > 0);
 
-  // Per-tier MRR
-  const tierRevenue = tiers.map(t => ({ tier: t, count: tierCounts[t], price: PRICING[t]||0, rev: (tierCounts[t])*(PRICING[t]||0) }));
+  // Total promotion revenue collected ever
+  const totalPromoRevenue = paidPromos.reduce((s, p) => s + (p.paid_amount / 100), 0);
 
-  // Revenue projection (3 months, 6 months, 12 months)
-  // Assumes current MRR stays flat (conservative)
-  const proj3  = mrr * 3;
-  const proj6  = mrr * 6;
-  const proj12 = mrr * 12;
+  // Promo revenue in selected period (by created_at)
+  const periodPromos = paidPromos.filter(p => {
+    const d = new Date(p.created_at);
+    return d >= fromDate && d <= toDate;
+  });
+  const periodPromoRevenue = periodPromos.reduce((s, p) => s + (p.paid_amount / 100), 0);
 
-  // Paying businesses table
-  const paidBiz = biz.filter(b => b.plan && b.plan !== 'free')
-    .sort((a,b) => (PRICING[b.plan]||0) - (PRICING[a.plan]||0));
+  // Active promos right now
+  const now = new Date();
+  const activePromos = promos.filter(p => {
+    const start = p.starts_at ? new Date(p.starts_at) : null;
+    const end   = p.ends_at   ? new Date(p.ends_at)   : null;
+    return start && end && start <= now && end >= now;
+  });
+
+  // Promo breakdown by package
+  const pkgNames = ['boost', 'spotlight', 'premier'];
+  const pkgPrices = { boost: 49, spotlight: 99, premier: 199 };
+  const pkgBreakdown = pkgNames.map(pkg => {
+    const all     = paidPromos.filter(p => p.package === pkg);
+    const inPeriod = all.filter(p => { const d = new Date(p.created_at); return d >= fromDate && d <= toDate; });
+    const rev      = inPeriod.reduce((s, p) => s + (p.paid_amount / 100), 0);
+    return { pkg, count: inPeriod.length, rev, total: all.length };
+  });
+
+  // ── Combined metrics ─────────────────────────────────────
+  // Period subscription revenue = Gold MRR × (days/30)
+  const periodSubRevenue  = Math.round(goldMrr * (days / 30));
+  const periodTotalRevenue = periodSubRevenue + periodPromoRevenue;
+
+  // ARR = Gold annual run rate + promotion run rate (annualised from period)
+  const promoAnnualised = days > 0 ? Math.round((totalPromoRevenue / Math.max(days, 30)) * 365) : 0;
+  const arr = (goldMrr * 12) + promoAnnualised;
+
+  // ── Gold subscribers table ───────────────────────────────
+  const goldTable = goldBiz.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  // ── Recent promotions table ──────────────────────────────
+  const recentPromos = [...paidPromos]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 20);
+  const bizMap = Object.fromEntries(biz.map(b => [b.id, b.name]));
 
   content.innerHTML = `
     <!-- Headline metrics -->
     <div class="adm-stats" style="margin-bottom:1.75rem">
-      ${sc('MRR', '$'+mrr.toLocaleString(), 'Monthly Recurring Revenue', 'green')}
-      ${sc('ARR', '$'+arr.toLocaleString(), 'Annual run rate')}
-      ${sc('Paid Accounts', paidCount, '', 'teal')}
-      ${sc('New Paid (period)', newPaidInPeriod, '', '')}
-      ${sc('Period Revenue', '$'+periodRevenue.toLocaleString(), `~${days} days`, '')}
+      ${sc('Gold MRR',       '$'+goldMrr.toLocaleString(),              'Monthly recurring (Gold subs)', 'green')}
+      ${sc('Gold ARR',       '$'+(goldMrr*12).toLocaleString(),         'Annual run rate')}
+      ${sc('Gold Members',   goldBiz.length,                            `+${newGoldInPeriod} this period`, 'teal')}
+      ${sc('Promo Revenue',  '$'+Math.round(periodPromoRevenue).toLocaleString(), `This period (${days}d)`)}
+      ${sc('Total Period',   '$'+Math.round(periodTotalRevenue).toLocaleString(), 'Subs + promotions', 'green')}
     </div>
 
-    <!-- Tier breakdown -->
+    <!-- Subscriptions vs Promotions -->
+    <div class="adm-stats" style="margin-bottom:1.75rem">
+      ${sc('Active Gold Subs',    goldBiz.length,       '$'+GOLD_MONTHLY_PRICE+'/mo each')}
+      ${sc('Active Promotions',   activePromos.length,  'Live right now')}
+      ${sc('All-time Promo Rev',  '$'+Math.round(totalPromoRevenue).toLocaleString(), 'Boost + Spotlight + Premier')}
+    </div>
+
+    <!-- Promotion breakdown by package -->
     <div class="adm-section">
-      <div class="adm-section__header"><span class="adm-section__title">Revenue by Tier</span></div>
+      <div class="adm-section__header"><span class="adm-section__title">Promotion Revenue This Period</span></div>
       <div class="adm-rev-tiers">
-        ${tierRevenue.map(t => `
+        ${pkgBreakdown.map(p => `
           <div class="adm-tier-card">
-            <div class="adm-tier-card__name">${t.tier}</div>
-            <div class="adm-tier-card__count">${t.count} <span style="font-size:1rem;font-weight:500;color:var(--adm-mid)">listings</span></div>
-            <div class="adm-tier-card__price">${t.price > 0 ? `$${t.price}/mo each` : 'Free plan'}</div>
-            <div class="adm-tier-card__rev">${t.rev > 0 ? `$${t.rev.toLocaleString()}/mo` : '—'}</div>
+            <div class="adm-tier-card__name">${p.pkg[0].toUpperCase()+p.pkg.slice(1)}</div>
+            <div class="adm-tier-card__count">${p.count} <span style="font-size:1rem;font-weight:500;color:var(--adm-mid)">sold</span></div>
+            <div class="adm-tier-card__price">$${pkgPrices[p.pkg]} each</div>
+            <div class="adm-tier-card__rev">${p.rev > 0 ? '$'+p.rev.toLocaleString() : '—'}</div>
           </div>`).join('')}
       </div>
     </div>
 
     <!-- Revenue projection -->
     <div class="adm-section">
-      <div class="adm-section__header"><span class="adm-section__title">Revenue Projection (flat MRR)</span></div>
-      <div class="adm-stats" style="margin-bottom:1.5rem">
-        ${sc('3 months',  '$'+proj3.toLocaleString(),  'Conservative estimate')}
-        ${sc('6 months',  '$'+proj6.toLocaleString(),  'Conservative estimate')}
-        ${sc('12 months', '$'+proj12.toLocaleString(), '= ARR', 'teal')}
+      <div class="adm-section__header"><span class="adm-section__title">Projection (flat Gold MRR, no new promo sales)</span></div>
+      <div class="adm-stats" style="margin-bottom:1rem">
+        ${sc('3 months',  '$'+(goldMrr*3).toLocaleString(),  'Gold subs only')}
+        ${sc('6 months',  '$'+(goldMrr*6).toLocaleString(),  'Gold subs only')}
+        ${sc('12 months', '$'+(goldMrr*12).toLocaleString(), '= Gold ARR', 'teal')}
       </div>
-      <p style="font-size:.78rem;color:var(--adm-mid)">Projections assume no churn and no new upgrades. Actual revenue will vary.</p>
+      <p style="font-size:.78rem;color:var(--adm-mid)">Projections assume no churn and no new upgrades. Promotion revenue is excluded as it is one-off.</p>
     </div>
 
-    <!-- Paying businesses -->
-    ${paidBiz.length ? `
+    <!-- Gold subscribers -->
     <div class="adm-section">
-      <div class="adm-section__header"><span class="adm-section__title">Paid Accounts (${paidBiz.length})</span></div>
+      <div class="adm-section__header"><span class="adm-section__title">Gold Members (${goldBiz.length})</span></div>
+      ${goldBiz.length ? `
       <div class="adm-table-wrap">
         <table class="adm-table">
-          <thead><tr><th>Business</th><th>Plan</th><th>Monthly Value</th><th>Since</th></tr></thead>
+          <thead><tr><th>Business</th><th>Plan</th><th>Gold Expires</th><th>Since</th></tr></thead>
           <tbody>
-            ${paidBiz.map(b => `<tr>
-              <td style="font-weight:600">${b.name||'—'}</td>
-              <td><span class="adm-badge adm-badge--green">${b.plan}</span></td>
-              <td style="color:var(--adm-teal);font-weight:700">$${(PRICING[b.plan]||0).toLocaleString()}/mo</td>
-              <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(b.created_at)}</td>
+            ${goldTable.map(b => {
+              const exp    = b.gold_expires_at ? new Date(b.gold_expires_at) : null;
+              const expStr = exp ? exp.toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'}) : 'Unknown';
+              const isAnnual = exp && (exp - new Date(b.created_at)) > (300 * 864e5);
+              return `<tr>
+                <td style="font-weight:600">${b.name||'—'}</td>
+                <td><span class="adm-badge adm-badge--green">Gold ${isAnnual ? 'Annual' : 'Monthly'}</span></td>
+                <td style="font-size:.78rem;color:var(--adm-mid)">${expStr}</td>
+                <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(b.created_at)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>` : `<p style="font-size:.85rem;color:var(--adm-mid)">No Gold members yet.</p>`}
+    </div>
+
+    <!-- Recent promotion payments -->
+    <div class="adm-section">
+      <div class="adm-section__header"><span class="adm-section__title">Recent Promotion Payments</span></div>
+      ${recentPromos.length ? `
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead><tr><th>Business</th><th>Package</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            ${recentPromos.map(p => `<tr>
+              <td style="font-weight:600">${bizMap[p.business_id] || p.business_id}</td>
+              <td>${p.package ? p.package[0].toUpperCase()+p.package.slice(1) : '—'}</td>
+              <td style="color:var(--adm-teal);font-weight:700">$${(p.paid_amount/100).toFixed(0)}</td>
+              <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(p.created_at)}</td>
+              <td><span class="adm-badge adm-badge--${p.status==='live'?'green':p.status==='pending'?'yellow':'grey'}">${p.status}</span></td>
             </tr>`).join('')}
           </tbody>
         </table>
-      </div>
-    </div>` : `<div style="color:var(--adm-mid);font-size:.85rem">No paid accounts yet. All businesses are on free plans.</div>`}`;
+      </div>` : `<p style="font-size:.85rem;color:var(--adm-mid)">No promotion payments recorded yet.</p>`}
+    </div>`;
 }
 
 function sc(label, value, sub='', variant='') {

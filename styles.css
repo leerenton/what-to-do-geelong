@@ -3278,6 +3278,10 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   background: var(--bg, #f5f4f0); color: var(--mid, #6b7280);
   border: 1px solid rgba(0,0,0,.07);
 }
+.listing-tag--teal {
+  background: rgba(72,199,212,.1); color: #0e9aa7;
+  border-color: rgba(72,199,212,.25);
+}
 
 /* Two-column layout */
 .listing-layout {

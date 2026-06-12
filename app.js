@@ -1845,20 +1845,79 @@ function injectSEOMeta({ title, description, canonical, ogImage, type, extra }) 
 }
 
 // ── LISTING PAGE ──────────────────────────────────────────
+const BIZ_TAG_ICONS = {
+  // interests
+  'music': '🎵', 'food': '🍴', 'arts': '🎨', 'outdoors': '🌿',
+  'fitness': '💪', 'wellness': '🧘', 'sport': '⚽', 'nightlife': '🌙',
+  'markets': '🛍', 'theatre': '🎭', 'nature': '🌳', 'shopping': '🛒',
+  // suitability
+  'family-friendly': '👨‍👩‍👧', 'kids': '🧒', 'teens': '🧑',
+  'adults-only': '🔞', 'dog-friendly': '🐶', 'accessible': '♿',
+  'free': '🆓', 'all-ages': '🌟',
+  // vibe
+  'indoor': '🏠', 'outdoor': '☀️', 'date-night': '💑',
+  'group': '👥', 'solo': '🧍', 'romantic': '🌹',
+  'live music': '🎸', 'pet-friendly': '🐾',
+};
+
+function normLabel(s) {
+  // "family-friendly" → "Family-Friendly", "date-night" → "Date Night"
+  return s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function getBizTags(biz) {
+  const seen = new Set();
   const tags = [];
-  const t = (biz.type || '').toLowerCase();
+
+  function add(key, label, icon) {
+    const k = key.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    tags.push({ label: label || normLabel(key), icon: icon || BIZ_TAG_ICONS[k] || '✦' });
+  }
+
+  // ── 1. Structured tags from DB (new system) ──────────────
+  const SUITABILITY = new Set(['family-friendly','kids','teens','adults-only','dog-friendly','accessible','free','all-ages','indoor','outdoor','date-night','group','solo','romantic','live-music','pet-friendly']);
+  for (const tag of (biz.tags || [])) {
+    const k = tag.toLowerCase().replace(/[\s]+/g, '-');
+    const isSuit = SUITABILITY.has(k);
+    const entry = { label: normLabel(tag), icon: BIZ_TAG_ICONS[k] || BIZ_TAG_ICONS[tag.toLowerCase()] || '✦' };
+    if (isSuit) entry.teal = true;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    tags.push(entry);
+  }
+
+  // ── 2. Categories array (new system) ────────────────────
+  const catIconMap = {
+    'café': '☕', 'restaurant': '🍽️', 'bar': '🍸', 'pub': '🍺',
+    'bakery': '🥐', 'brunch': '🍳', 'winery': '🍷', 'brewery': '🍻',
+    'gallery': '🖼', 'museum': '🏛', 'theatre': '🎭', 'cinema': '🎬',
+    'activity': '🎯', 'adventure': '🧗', 'wellness': '🧘', 'sport': '⚽',
+    'hotel': '🏨', 'market': '🛍',
+  };
+  for (const cat of (biz.categories || [])) {
+    add(cat.toLowerCase(), cat, catIconMap[cat.toLowerCase()]);
+  }
+
+  // ── 3. Legacy keyword fallback for older records ─────────
+  const t = (biz.type || biz.category || '').toLowerCase();
   const name = (biz.name || '').toLowerCase();
-  if (['family','kids','child','amusement','fairy','play','park','aquatic','mini golf','bowling','cinema','movie'].some(k => t.includes(k) || name.includes(k))) tags.push({ label: 'Family Friendly', icon: '👨‍👩‍👧' });
-  if (['bar','pub','brewery','winery','distillery','cocktail','nightclub'].some(k => t.includes(k))) tags.push({ label: 'Licensed Venue', icon: '🍺' });
-  if (['café','cafe','coffee','bakery','brunch'].some(k => t.includes(k))) tags.push({ label: 'Café & Coffee', icon: '☕' });
-  if (['restaurant','dining','bistro'].some(k => t.includes(k))) tags.push({ label: 'Dine In', icon: '🍽️' });
-  if (['park','garden','outdoor','nature','beach','coast','walking','hiking','trail','adventure','surf'].some(k => t.includes(k) || name.includes(k))) tags.push({ label: 'Outdoors', icon: '🌿' });
-  if (['gallery','museum','art','culture','theatre','theater','cinema'].some(k => t.includes(k))) tags.push({ label: 'Arts & Culture', icon: '🎨' });
-  if (['hotel','motel','accommodation','bnb','hostel','resort'].some(k => t.includes(k))) tags.push({ label: 'Accommodation', icon: '🏨' });
-  if (biz.rating && biz.rating >= 4.5) tags.push({ label: 'Highly Rated', icon: '⭐' });
-  if (biz.plan === 'premium') tags.push({ label: 'WTDG Partner', icon: '✓' });
-  return tags.slice(0, 5);
+  if (!tags.length) {
+    if (['family','kids','child','play','aquatic','bowling','cinema'].some(k => t.includes(k) || name.includes(k))) add('family-friendly', 'Family Friendly');
+    if (['bar','pub','brewery','winery','cocktail','nightclub'].some(k => t.includes(k))) add('licensed', 'Licensed Venue', '🍺');
+    if (['café','cafe','coffee','bakery','brunch'].some(k => t.includes(k))) add('café', 'Café & Coffee', '☕');
+    if (['restaurant','dining','bistro'].some(k => t.includes(k))) add('restaurant', 'Dine In', '🍽️');
+    if (['park','garden','outdoor','nature','beach','adventure','surf'].some(k => t.includes(k) || name.includes(k))) add('outdoors', 'Outdoors');
+    if (['gallery','museum','art','culture','theatre','theater'].some(k => t.includes(k))) add('arts', 'Arts & Culture');
+    if (['hotel','motel','accommodation','bnb','hostel'].some(k => t.includes(k))) add('accommodation', 'Accommodation', '🏨');
+  }
+
+  // ── 4. Rating / plan badges (always shown if applicable) ─
+  if (biz.rating && biz.rating >= 4.5) add('highly-rated', 'Highly Rated', '⭐');
+  if (biz.plan === 'premium') add('partner', 'WTDG Partner', '✓');
+
+  return tags;
 }
 
 function getTodayHours(openingHours) {
@@ -2027,7 +2086,7 @@ async function initListingPage() {
               ${biz.suburb || biz.location || 'Geelong'}${biz.rating ? ` <span class="lident__rating">★ ${biz.rating}</span>` : ''}<span class="lident__dist" id="js-listing-dist"></span>
             </p>
             <p class="lident__views" id="js-biz-view-count" style="display:none"></p>
-            ${bizTags.length ? `<div class="listing-tags">${bizTags.map(t => `<span class="listing-tag">${t.icon} ${t.label}</span>`).join('')}</div>` : ''}
+            ${bizTags.length ? `<div class="listing-tags">${bizTags.map(t => `<span class="listing-tag${t.teal ? ' listing-tag--teal' : ''}">${t.icon} ${t.label}</span>`).join('')}</div>` : ''}
           </div>
         </div>
         <div class="lheader__actions">

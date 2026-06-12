@@ -2719,16 +2719,33 @@ async function initEventPage() {
   });
 
   const heroImg = biz?.img || ev.img || '';
-  const isThisWeekend = true; // TODO: derive from ev.date
+  const urgency = getEventUrgency(ev);
+  const isPast  = urgency === 'past';
+  const isThisWeekend = urgency === 'today' || urgency === 'tomorrow' || urgency === 'soon' || (() => {
+    // rough "this weekend" check
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun,6=Sat
+    const daysToFri = (5 - day + 7) % 7;
+    const fri = new Date(now); fri.setDate(now.getDate() + daysToFri);
+    const sun = new Date(fri);  sun.setDate(fri.getDate() + 2);
+    const evDate = new Date(ev.date);
+    return evDate >= fri && evDate <= sun;
+  })();
+
+  // Strip external source URLs (geelongcity.vic.gov.au etc.) — we don't link out to scraped sources
+  const evUrl = ev.url && !ev.url.includes('geelongcity.vic.gov.au') ? ev.url : null;
+  // Strip generic council descriptions
+  const evDesc = ev.description && !ev.description.toLowerCase().includes('wide range of services to support life') ? ev.description : null;
 
   root.innerHTML = `
-    <div class="ev-hero2">
+    <div class="ev-hero2${isPast ? ' ev-hero2--past' : ''}">
       <!-- Hero image / emoji background -->
       <div class="ev-hero2__img-wrap">
         ${heroImg
           ? `<img src="${heroImg}" alt="${ev.title}" class="ev-hero2__img" />`
           : `<div class="ev-hero2__img ev-hero2__img--emoji" style="background:${ev.color}22"><span>${ev.emoji}</span></div>`
         }
+        ${isPast ? `<div class="ev-past-overlay"><span class="ev-past-badge">Past event</span></div>` : ''}
 
         <!-- Top-left: category badge -->
         <div class="ev-hero2__cat-badge">
@@ -2738,9 +2755,7 @@ async function initEventPage() {
 
         <!-- Top-right: actions -->
         <div class="ev-hero2__actions">
-          <button class="ev-hero2__action-btn star-btn" id="js-ev-save-btn" aria-label="Add to Guide">
-            ${wtdgIcon('heart', 20)}
-          </button>
+          ${!isPast ? `<button class="ev-hero2__action-btn star-btn" id="js-ev-save-btn" aria-label="Add to Guide">${wtdgIcon('heart', 20)}</button>` : ''}
           <button class="ev-hero2__action-btn" id="js-ev-share-btn" aria-label="Share">
             ${wtdgIcon('share', 20)}
           </button>
@@ -2756,26 +2771,32 @@ async function initEventPage() {
           ${ev.time ? `<span>${wtdgIcon('clock', 16, 'var(--teal)')} ${ev.time}</span>` : ''}
           <span>${wtdgIcon('location', 16, 'var(--teal)')} ${ev.location}</span>
         </div>
+        ${!isPast ? `
         <div class="ev-hero2__price-row">
           <span class="ev-price ${ev.price === 'Free' ? 'ev-price--free' : ''}">${ev.price}</span>
           ${ev.price !== 'Free'
             ? `<a href="#" class="btn btn--teal btn--sm js-ticket-btn" data-event-title="${ev.title}" data-price="${ev.price}">${wtdgIcon('ticket', 16, '#fff')} Get Tickets</a>`
             : `<span class="btn btn--teal btn--sm">Free Entry</span>`}
           ${isThisWeekend ? `<span class="ev-hero2__weekend-pill">${wtdgIcon('weekend', 14, 'var(--teal)')} This weekend</span>` : ''}
-        </div>
+        </div>` : `
+        <div class="ev-hero2__price-row">
+          <span class="ev-price ev-price--past">${ev.price}</span>
+        </div>`}
       </div>
     </div>
 
+    ${isPast ? `<div class="ev-past-banner"><span class="material-symbols-rounded">history</span> This event has already taken place</div>` : ''}
+
     <div class="container ev-body">
-      ${(ev.description || ev.description) ? `
+      ${evDesc ? `
         <div class="ev-description">
-          <p>${ev.description}</p>
+          <p>${evDesc}</p>
         </div>
       ` : ''}
 
-      ${ev.url ? `
+      ${!isPast && evUrl ? `
         <div class="ev-cta-row">
-          <a href="${ev.url}" target="_blank" rel="noopener" class="btn btn--teal">
+          <a href="${evUrl}" target="_blank" rel="noopener" class="btn btn--teal">
             ${ev.price === 'Free' ? '📍 More info' : '🎟️ Get Tickets'}
           </a>
         </div>
@@ -2792,12 +2813,12 @@ async function initEventPage() {
             </div>
             <span class="material-symbols-rounded" style="color:var(--teal);margin-left:auto">chevron_right</span>
           </a>
-          ${biz.website ? `<a href="https://${biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm" style="margin-top:.5rem">🌐 Visit ${biz.website}</a>` : ''}
+          ${!isPast && biz.website ? `<a href="https://${biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm" style="margin-top:.5rem">🌐 Visit ${biz.website}</a>` : ''}
         </div>
       ` : ''}
 
       <div class="ev-also">
-        <h2 class="ev-also__title">More this weekend</h2>
+        <h2 class="ev-also__title">${isPast ? 'Coming up next' : 'More this weekend'}</h2>
         <div class="event-scroll" id="js-ev-also-scroll"></div>
       </div>
 
@@ -2849,11 +2870,13 @@ async function initEventPage() {
     }
   });
 
-  // Render other events in the strip
-  const others = EVENTS.filter(e => e.id !== ev.id).slice(0, 6);
+  // Render other events in the strip — upcoming only, no past events
+  const others = EVENTS.filter(e => e.id !== ev.id && getEventUrgency(e) !== 'past').slice(0, 6);
   const strip = document.getElementById('js-ev-also-scroll');
   if (strip) {
-    strip.innerHTML = others.map(e => `
+    strip.innerHTML = others.map(e => {
+      const eIsFree = e.price === 'Free';
+      return `
       <a href="${evLink(e)}" class="event-card">
         <div class="event-card__thumb" style="background:${e.color}22">${e.emoji}</div>
         <div class="event-card__body">
@@ -2861,10 +2884,10 @@ async function initEventPage() {
           <h3 class="event-card__title">${e.title}</h3>
           <div class="event-card__meta">📍 ${e.location}</div>
           <div class="event-card__meta">🕐 ${e.time}</div>
-          <button class="event-card__cta ${e.price === 'Free' ? 'event-card__cta--free' : ''}">${e.price === 'Free' ? 'Free Entry' : 'Get Tickets →'}</button>
+          <button class="event-card__cta ${eIsFree ? 'event-card__cta--free' : ''}">${eIsFree ? 'Free Entry' : 'Get Tickets →'}</button>
         </div>
-      </a>
-    `).join('');
+      </a>`;
+    }).join('');
   }
 }
 

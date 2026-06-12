@@ -1720,6 +1720,33 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   font-size: .78rem; font-weight: 600; color: var(--teal);
 }
 
+/* Past event overlay on detail page */
+.ev-past-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.35);
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: .75rem 1rem;
+  pointer-events: none;
+}
+.ev-past-badge {
+  background: rgba(0,0,0,.65);
+  color: #fff;
+  font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: .3rem .75rem; border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+.ev-hero2--past .ev-hero2__img { filter: grayscale(30%); }
+.ev-price--past { opacity: .45; text-decoration: line-through; }
+/* Full-width past event notice bar */
+.ev-past-banner {
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  background: #f3f4f6; border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb;
+  padding: .75rem 1rem;
+  font-size: .85rem; font-weight: 600; color: #6b7280;
+  text-align: center;
+}
+.ev-past-banner .material-symbols-rounded { font-size: 1.1rem; }
+
 /* ── EVENT DETAIL PAGE (legacy, kept for fallback) ────────── */
 .ev-hero { padding: 0; }
 .ev-hero__inner { padding-block: 2rem; }
@@ -3811,7 +3838,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   transition: box-shadow .18s, transform .18s;
 }
 .ev-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-.ev-card--past { opacity: .55; }
+.ev-card--past { opacity: .5; filter: grayscale(25%); pointer-events: none; }
+.ev-card--past:hover { box-shadow: none; transform: none; }
 .ev-card--compact .ev-card__img { height: 130px; }
 
 .ev-card__img {

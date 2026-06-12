@@ -1683,7 +1683,14 @@ function initWeekendToggle(allEvents) {
     const matchCount = allEvents.filter(ev => prefsMatchCard(ev, prefs)).length;
     const subtitle = document.createElement('p');
     subtitle.className = 'weekend-personalised-sub';
-    subtitle.innerHTML = `✦ Sorted for <strong>${parts.join(' · ')}</strong>${matchCount ? ` &mdash; ${matchCount} matching event${matchCount !== 1 ? 's' : ''} up first` : ''} &nbsp;<a href="onboarding.html" style="font-size:.75rem;color:var(--teal)">edit</a>`;
+    subtitle.innerHTML = `
+      <span class="wps__row">
+        <span class="wps__spark">✦</span>
+        <span class="wps__label">Sorted for <strong>${parts.join(' · ')}</strong></span>
+        <a href="onboarding.html" class="wps__edit">edit</a>
+      </span>
+      ${matchCount ? `<span class="wps__count">${matchCount} matching event${matchCount !== 1 ? 's' : ''} up first</span>` : ''}
+    `;
     toggleEl.insertAdjacentElement('beforebegin', subtitle);
   }
 

@@ -3986,8 +3986,26 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   line-height: 1;
 }
 .weekend-personalised-sub {
-  font-size: .78rem; color: #0f766e; margin: -.25rem 0 .75rem;
-  display: flex; align-items: center; gap: .3rem;
+  font-size: .78rem; color: #0f766e;
+  margin: -.25rem 0 .75rem;
+  display: flex; flex-direction: column; gap: .15rem;
+}
+.wps__row {
+  display: flex; align-items: center; gap: .35rem; flex-wrap: wrap;
+}
+.wps__spark { flex-shrink: 0; }
+.wps__label { color: #0f766e; }
+.wps__label strong { color: #0d5c56; }
+.wps__edit {
+  margin-left: auto; font-size: .72rem; color: var(--teal);
+  text-decoration: none; white-space: nowrap; flex-shrink: 0;
+  padding: .1rem .45rem; border-radius: .3rem;
+  border: 1px solid rgba(72,199,212,.35);
+  transition: background .15s;
+}
+.wps__edit:hover { background: rgba(72,199,212,.1); }
+.wps__count {
+  font-size: .72rem; color: #64748b; padding-left: 1.1rem;
 }
 
 /* ── Listing related businesses ─────────────────────────── */

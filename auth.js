@@ -110,6 +110,7 @@ async function initAccountNav() {
           <div class="nav__acct-divider"></div>
           <a href="account.html" class="nav__acct-item"><span class="material-symbols-rounded">person</span> My Account</a>
           <a href="guides.html" class="nav__acct-item"><span class="material-symbols-rounded">star</span> My WTDGuides</a>
+          <a href="onboarding.html" class="nav__acct-item"><span class="material-symbols-rounded">tune</span> Personalise my feed</a>
           ${['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au'].includes(acct.email) ? `
             <div class="nav__acct-divider"></div>
             <a href="wtdgadmin-dash.html" class="nav__acct-item" style="color:var(--teal);font-weight:600">

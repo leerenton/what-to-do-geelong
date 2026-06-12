@@ -2,6 +2,15 @@
 
 /* global db, loadAllData */
 
+// ── ADMIN CHECK ───────────────────────────────────────────
+const SITE_ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au'];
+function isAdminUser() {
+  try {
+    const acct = JSON.parse(localStorage.getItem('wtdg_account') || 'null');
+    return SITE_ADMIN_EMAILS.includes(acct?.email);
+  } catch { return false; }
+}
+
 // ── BUSINESSES ────────────────────────────────────────────
 let BUSINESSES = [
   // ── CAFES ─────────────────────────────────────────────
@@ -2433,7 +2442,7 @@ async function initListingPage() {
     }, 1000);
     // Show view count after a short delay so it doesn't block page paint
     window.wtdgViews.getCount(biz.id, 'business', '7d').then(count => {
-      if (count > 0) {
+      if (count > 0 && isAdminUser()) {
         const el = document.getElementById('js-biz-view-count');
         if (el) {
           el.textContent = `👁 ${window.wtdgViews.formatViews(count)} views this week`;
@@ -3258,7 +3267,7 @@ function initEventsPage() {
       : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No events match your filters.</p></div>`;
 
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
-    if (window.wtdgViews) window.wtdgViews.injectViewBadges('event');
+    if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('event');
   }
 
   // ── URL date banner (range already set above) ──────────
@@ -3344,7 +3353,7 @@ function initEatPage() {
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
-    if (window.wtdgViews) window.wtdgViews.injectViewBadges('business');
+    if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('business');
   }
 
   collFilter(
@@ -3382,7 +3391,7 @@ function initDrinkPage() {
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
-    if (window.wtdgViews) window.wtdgViews.injectViewBadges('business');
+    if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('business');
   }
 
   collFilter(
@@ -3420,7 +3429,7 @@ function initDoPage() {
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
-    if (window.wtdgViews) window.wtdgViews.injectViewBadges('business');
+    if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('business');
   }
 
   collFilter(
@@ -3455,7 +3464,7 @@ function initStayPage() {
       );
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
-    if (window.wtdgViews) window.wtdgViews.injectViewBadges('stay');
+    if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('stay');
   }
 
   collFilter(
@@ -3586,7 +3595,7 @@ function initEditorialPage() {
       </a>
     `).join('');
     // Show view counts on article cards after render
-    if (window.wtdgViews) window.wtdgViews.injectViewBadges('article');
+    if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('article');
   }
 
   filterBtns.forEach(btn => {

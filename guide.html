@@ -26,20 +26,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager -->
-
-  <header class="nav">
-    <div class="nav__inner container">
-      <a href="index.html" class="nav__logo-link">
-        <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
-      </a>
-      <nav class="nav__links">
-        <a href="guides.html">← My WTDGuides</a>
-      </nav>
-      <button class="nav__hamburger" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+  <div id="js-nav-root"></div>
 
   <div id="js-guide-root"></div>
 
@@ -52,6 +39,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="nav.js"></script>
   <script src="supabase.js"></script>
   <script src="sitemode.js?v=1"></script>
   <script src="analytics.js?v=1"></script>

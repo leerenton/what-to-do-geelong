@@ -1373,6 +1373,177 @@ function renderGoldStrip(businesses) {
   if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
 }
 
+// ── PAID AD SYSTEM ────────────────────────────────────────
+// Fetches active promotions with uploaded ad creatives from Supabase
+// and renders them into the appropriate slots on the homepage.
+
+async function loadActiveAds() {
+  if (!window.db) return [];
+  try {
+    const now = new Date().toISOString();
+    const { data, error } = await window.db
+      .from('promotions')
+      .select('id, business_id, package, ad_image_url, ad_link_url, ad_headline, ends_at')
+      .eq('ad_live', true)
+      .gt('ends_at', now)
+      .in('package', ['boost', 'spotlight', 'premier']);
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.warn('loadActiveAds:', e.message);
+    return [];
+  }
+}
+
+// ── BOOST INLINE BANNER ──────────────────────────────────
+function renderBoostBanner(ads) {
+  const wrap = document.getElementById('js-boost-banner');
+  if (!wrap) return;
+  const boosters = ads.filter(a => a.package === 'boost' && a.ad_image_url);
+  if (!boosters.length) { wrap.style.display = 'none'; return; }
+
+  // Pick a random one on load; rotate every 8s if multiple
+  let idx = Math.floor(Math.random() * boosters.length);
+  const link = document.getElementById('js-boost-banner-link');
+  const img  = document.getElementById('js-boost-banner-img');
+
+  function setBoostAd(ad) {
+    img.src    = ad.ad_image_url;
+    img.alt    = ad.ad_headline || 'Advertisement';
+    link.href  = ad.ad_link_url || '#';
+    link.style.pointerEvents = ad.ad_link_url ? '' : 'none';
+  }
+
+  setBoostAd(boosters[idx]);
+  wrap.style.display = '';
+
+  if (boosters.length > 1) {
+    setInterval(() => {
+      idx = (idx + 1) % boosters.length;
+      img.style.opacity = '0';
+      setTimeout(() => { setBoostAd(boosters[idx]); img.style.opacity = '1'; }, 250);
+    }, 8000);
+    img.style.transition = 'opacity .25s ease';
+  }
+}
+
+// ── SPOTLIGHT STICKY REVEAL ───────────────────────────────
+function renderSpotlightAd(ads) {
+  const outer    = document.getElementById('js-spotlight-outer');
+  const adsense  = document.getElementById('js-spotlight-adsense');
+  if (!outer && !adsense) return;
+
+  const spotlights = ads.filter(a => a.package === 'spotlight' && a.ad_image_url);
+
+  if (spotlights.length) {
+    // Pick random spotlight; rotate if multiple
+    let idx = Math.floor(Math.random() * spotlights.length);
+    const link = document.getElementById('js-spotlight-link');
+    const img  = document.getElementById('js-spotlight-img');
+
+    function setSpotlight(ad) {
+      img.src   = ad.ad_image_url;
+      img.alt   = ad.ad_headline || 'Advertisement';
+      link.href = ad.ad_link_url || '#';
+      link.style.pointerEvents = ad.ad_link_url ? '' : 'none';
+    }
+
+    setSpotlight(spotlights[idx]);
+    if (outer) outer.style.display = '';
+    if (adsense) adsense.style.display = 'none';
+
+    if (spotlights.length > 1) {
+      setInterval(() => {
+        idx = (idx + 1) % spotlights.length;
+        img.style.opacity = '0';
+        setTimeout(() => { setSpotlight(spotlights[idx]); img.style.opacity = '1'; }, 300);
+      }, 12000);
+      img.style.transition = 'opacity .3s ease';
+    }
+  } else {
+    // No active spotlight — show AdSense fallback
+    if (outer) outer.style.display = 'none';
+    if (adsense) {
+      adsense.style.display = '';
+      // Push the AdSense ad if the slot hasn't been pushed yet
+      if (window.adsbygoogle && !adsense.dataset.adPushed) {
+        try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+        adsense.dataset.adPushed = '1';
+      }
+    }
+  }
+}
+
+// ── PREMIER BOTTOM SHEET ──────────────────────────────────
+function renderPremierAd(ads) {
+  const sheet    = document.getElementById('js-premier-sheet');
+  const backdrop = document.getElementById('js-premier-backdrop');
+  if (!sheet || !backdrop) return;
+
+  const premiers = ads.filter(a => a.package === 'premier' && a.ad_image_url);
+  if (!premiers.length) return;
+
+  // Only show once per session
+  if (sessionStorage.getItem('wtdg_premier_shown')) return;
+
+  const ad = premiers[Math.floor(Math.random() * premiers.length)];
+  document.getElementById('js-premier-img').src   = ad.ad_image_url;
+  document.getElementById('js-premier-img').alt   = ad.ad_headline || 'Advertisement';
+  document.getElementById('js-premier-link').href = ad.ad_link_url || '#';
+  if (!ad.ad_link_url) document.getElementById('js-premier-link').style.pointerEvents = 'none';
+
+  const closeBtn     = document.getElementById('js-premier-close');
+  const countdownEl  = document.getElementById('js-premier-countdown');
+  const xIconEl      = sheet.querySelector('.premier-sheet__x');
+  const progressBar  = document.getElementById('js-premier-progress');
+
+  function dismissSheet() {
+    sheet.classList.remove('premier-sheet--visible');
+    backdrop.classList.remove('premier-sheet-backdrop--visible');
+    sheet.setAttribute('aria-hidden', 'true');
+    backdrop.style.display = 'none';
+    sessionStorage.setItem('wtdg_premier_shown', '1');
+  }
+
+  closeBtn.addEventListener('click', dismissSheet);
+  backdrop.addEventListener('click', dismissSheet);
+
+  // Show after 2s page dwell (don't hit immediately)
+  setTimeout(() => {
+    backdrop.style.display = 'block';
+    requestAnimationFrame(() => {
+      backdrop.classList.add('premier-sheet-backdrop--visible');
+      sheet.classList.add('premier-sheet--visible');
+      sheet.setAttribute('aria-hidden', 'false');
+    });
+
+    // Start 5-second countdown
+    let remaining = 5;
+    // Kick off CSS progress bar animation
+    requestAnimationFrame(() => progressBar.classList.add('premier-sheet__progress-bar--running'));
+
+    const tick = setInterval(() => {
+      remaining--;
+      if (remaining > 0) {
+        countdownEl.textContent = remaining;
+      } else {
+        clearInterval(tick);
+        countdownEl.style.display = 'none';
+        xIconEl.style.display     = '';
+        closeBtn.disabled         = false;
+      }
+    }, 1000);
+  }, 2000);
+}
+
+// ── INIT ADS (called from DOMContentLoaded after data load) ──
+async function initAds() {
+  const ads = await loadActiveAds();
+  renderBoostBanner(ads);
+  renderSpotlightAd(ads);
+  renderPremierAd(ads);
+}
+
 // ── RENDER EAT STRIP ──────────────────────────────────────
 function renderEatStrip(eatBiz) {
   const strip = document.getElementById('js-eat-strip');
@@ -3885,6 +4056,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMasonryHero(personalisedEvents, sortedArticles, _hpSettings, _trendingScores);
     renderPromotedEvents(personalisedEvents);
     renderGoldStrip(BUSINESSES);
+    initAds();
     renderEatStrip(personalisedBiz);
     renderStays(personalisedStays);
     renderOffers();

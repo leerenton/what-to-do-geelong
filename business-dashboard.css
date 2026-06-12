@@ -427,16 +427,46 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
 
 /* Promotion rows */
 .dash-promo-row {
-  display: flex; align-items: center; gap: .75rem;
-  padding: .65rem .85rem;
+  display: flex; flex-direction: column; gap: 0;
+  padding: 0;
   background: var(--surface, #fff);
   border: 1.5px solid var(--border, #e5e7eb);
   border-radius: .65rem; margin-bottom: .5rem;
+  overflow: hidden;
+}
+.dash-promo-row__top {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .65rem .85rem;
 }
 .dash-promo-row__icon { font-size: 1.3rem; flex-shrink: 0; }
 .dash-promo-row__body { flex: 1; min-width: 0; }
 .dash-promo-row__title { font: 600 .88rem/1.3 'DM Sans', sans-serif; color: var(--dark); }
 .dash-promo-row__meta  { font: 400 .78rem/1.3 'DM Sans', sans-serif; color: var(--mid); }
+.dash-promo-row__action-hint { font-size: .76rem; color: #b45309; margin-top: .2rem; font-weight: 600; }
+.dash-promo-row__action-hint--live { color: #16a34a; }
+.dash-link { color: var(--teal); text-decoration: none; font-weight: 600; }
+.dash-link:hover { text-decoration: underline; }
+
+/* Ad creative upload panel (inside promo row) */
+.dash-promo-creative {
+  border-top: 1.5px dashed var(--border);
+  padding: .9rem .85rem 1rem;
+  background: #f9fafb;
+}
+.dash-creative-spec {
+  display: flex; flex-direction: column; gap: .15rem;
+  margin-bottom: .65rem;
+  font-size: .8rem;
+}
+.dash-creative-spec strong { font-weight: 700; color: var(--dark); }
+.dash-creative-spec span   { color: var(--mid); }
+.dash-creative-spec__hint  { font-size: .73rem; color: var(--mid); font-style: italic; }
+.dash-creative-preview {
+  width: 100%; height: auto; max-height: 120px;
+  object-fit: cover; border-radius: .45rem;
+  border: 1px solid var(--border);
+  display: block; margin-bottom: .5rem;
+}
 
 .dash-email-slots { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.25rem; }
 .dash-email-slot {

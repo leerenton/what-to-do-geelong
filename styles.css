@@ -2694,6 +2694,235 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .wwg-card__excerpt { font-size: .88rem; color: var(--mid); line-height: 1.6; flex: 1; }
 .wwg-card__cta { font-size: .82rem; font-weight: 700; color: var(--teal); margin-top: auto; }
 
+/* ── PAID AD UNITS ───────────────────────────────────────── */
+
+/* Shared eyebrow label */
+.ad-eyebrow {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mid);
+  text-align: center;
+  margin: 0 0 .35rem;
+  opacity: .7;
+}
+
+/* ── BOOST BANNER ─────────────────────────── */
+.boost-banner-wrap {
+  padding: .75rem 0;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.boost-banner-link {
+  display: block;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  line-height: 0;
+  transition: opacity .2s;
+}
+.boost-banner-link:hover { opacity: .92; }
+.boost-banner-img {
+  width: 100%;
+  height: auto;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+/* ── SPOTLIGHT STICKY REVEAL ──────────────── */
+.spotlight-reveal-outer {
+  height: 280px;       /* controls how long the sticky window lasts */
+  position: relative;
+  z-index: 0;          /* sits behind adjacent page-sections */
+}
+.spotlight-reveal-inner {
+  position: sticky;
+  top: 60px;           /* sit just below the nav */
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.spotlight-reveal-eyebrow {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+  text-align: center;
+  margin: 0 0 .4rem;
+  position: relative;
+  z-index: 1;
+}
+.spotlight-reveal-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  line-height: 0;
+}
+.spotlight-reveal-img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+  transition: transform .3s ease;
+}
+.spotlight-reveal-link:hover .spotlight-reveal-img { transform: scale(1.015); }
+
+/* Adjacent sections need solid backgrounds + z-index so they slide over the sticky ad */
+/* (applied inline where needed — also ensure all .page-section variants have position:relative) */
+.page-section,
+.page-section--alt,
+.page-section--gold {
+  position: relative;
+  z-index: 1;
+}
+
+/* AdSense fallback for spotlight slot */
+.spotlight-adsense-outer {
+  padding: 1.25rem 0;
+  background: var(--white);
+}
+.spotlight-adsense-unit {
+  display: block;
+  width: 100%;
+  min-height: 90px;
+}
+
+@media (max-width: 640px) {
+  .spotlight-reveal-outer { height: 200px; }
+  .spotlight-reveal-inner { top: 56px; height: 200px; }
+  .spotlight-reveal-img   { height: 200px; }
+  .boost-banner-img       { max-height: 80px; }
+}
+
+/* ── PREMIER BOTTOM SHEET ─────────────────── */
+.premier-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 9000;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.premier-sheet-backdrop--visible {
+  display: block;
+  opacity: 1;
+}
+
+.premier-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9001;
+  background: #fff;
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 -4px 32px rgba(0,0,0,.18);
+  transform: translateY(100%);
+  transition: transform .4s cubic-bezier(.32,.72,0,1);
+  overflow: hidden;
+  /* height controlled by content, capped at 50vh on mobile */
+  max-height: 50vh;
+  display: flex;
+  flex-direction: column;
+}
+.premier-sheet--visible {
+  transform: translateY(0);
+}
+
+.premier-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .65rem 1rem .5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.premier-sheet__label {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+.premier-sheet__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--dark);
+  transition: background .15s;
+  line-height: 1;
+}
+.premier-sheet__close:hover:not(:disabled) { background: var(--cream); }
+.premier-sheet__close:disabled { opacity: .6; cursor: default; }
+.premier-sheet__countdown {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--mid);
+  font-variant-numeric: tabular-nums;
+}
+.premier-sheet__x { font-size: 1.1rem; }
+
+.premier-sheet__content {
+  display: block;
+  flex: 1;
+  overflow: hidden;
+  line-height: 0;
+}
+.premier-sheet__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.premier-sheet__progress {
+  height: 3px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.premier-sheet__progress-bar {
+  height: 100%;
+  background: var(--teal);
+  width: 100%;
+  transform-origin: left;
+  transition: transform 5s linear;
+  transform: scaleX(1);
+}
+.premier-sheet__progress-bar--running {
+  transform: scaleX(0);
+}
+
+/* On desktop, cap width and centre it */
+@media (min-width: 768px) {
+  .premier-sheet {
+    max-width: 540px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(100%);
+    border-radius: 1rem 1rem 0 0;
+    max-height: 420px;
+  }
+  .premier-sheet--visible {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* ── ADSENSE POPUP ───────────────────────────────────────── */
 .ad-popup-overlay {
   position: fixed;

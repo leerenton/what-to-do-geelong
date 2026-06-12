@@ -225,6 +225,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </section>
 
+  <!-- BOOST BANNER (ad rotation) -->
+  <div class="boost-banner-wrap" id="js-boost-banner" style="display:none">
+    <div class="container">
+      <p class="ad-eyebrow">Advertisement</p>
+      <a class="boost-banner-link" id="js-boost-banner-link" href="#" target="_blank" rel="noopener sponsored">
+        <img class="boost-banner-img" id="js-boost-banner-img" src="" alt="Advertisement" />
+      </a>
+    </div>
+  </div>
+
   <!-- FEATURED EVENTS (promoted) -->
   <section class="page-section" id="js-promoted-section" style="display:none">
     <div class="container">
@@ -246,6 +256,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="biz-scroll" id="js-gold-strip"></div>
     </div>
   </section>
+
+  <!-- SPOTLIGHT REVEAL AD STRIP -->
+  <!-- The sticky ad sits here; sections above + below have z-index:1 + solid bg so they "slide over" it -->
+  <div class="spotlight-reveal-outer" id="js-spotlight-outer" style="display:none">
+    <div class="spotlight-reveal-inner" id="js-spotlight-inner">
+      <p class="spotlight-reveal-eyebrow">Advertisement</p>
+      <a class="spotlight-reveal-link" id="js-spotlight-link" href="#" target="_blank" rel="noopener sponsored">
+        <img class="spotlight-reveal-img" id="js-spotlight-img" src="" alt="Advertisement" />
+      </a>
+    </div>
+  </div>
+  <!-- AdSense fallback when no active Spotlight -->
+  <div class="spotlight-adsense-outer" id="js-spotlight-adsense" style="display:none">
+    <div class="container">
+      <p class="ad-eyebrow">Advertisement</p>
+      <ins class="adsbygoogle spotlight-adsense-unit"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="horizontal"
+           data-full-width-responsive="true"></ins>
+    </div>
+  </div>
 
   <!-- WHERE TO EAT -->
   <section class="page-section page-section--alt" id="eat">
@@ -317,6 +349,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </section>
 
+  <!-- PREMIER BOTTOM SHEET AD -->
+  <div class="premier-sheet-backdrop" id="js-premier-backdrop" aria-hidden="true"></div>
+  <div class="premier-sheet" id="js-premier-sheet" role="dialog" aria-label="Advertisement" aria-hidden="true">
+    <div class="premier-sheet__header">
+      <span class="premier-sheet__label">Advertisement</span>
+      <button class="premier-sheet__close" id="js-premier-close" aria-label="Close advertisement" disabled>
+        <span class="premier-sheet__countdown" id="js-premier-countdown" aria-live="polite">5</span>
+        <span class="premier-sheet__x material-symbols-rounded" style="display:none">close</span>
+      </button>
+    </div>
+    <a class="premier-sheet__content" id="js-premier-link" href="#" target="_blank" rel="noopener sponsored">
+      <img class="premier-sheet__img" id="js-premier-img" src="" alt="Advertisement" />
+    </a>
+    <div class="premier-sheet__progress">
+      <div class="premier-sheet__progress-bar" id="js-premier-progress"></div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <div id="js-footer-root"></div>
 
@@ -330,6 +380,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script src="/guides.js" defer></script>
   <script src="/location.js" defer></script>
   <script src="/view-tracker.js" defer></script>
-  <script src="/app.js?v=11"></script>
+  <script src="/app.js?v=12"></script>
 </body>
 </html>

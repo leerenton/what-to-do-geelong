@@ -1188,6 +1188,13 @@ function bindEventActions() {
   });
 }
 
+// Ad creative specs per package
+const AD_SPECS = {
+  boost:     { label: 'Boost',     size: '1200 × 300 px', ratio: '4:1',   hint: 'Leaderboard banner shown between homepage sections.' },
+  spotlight: { label: 'Spotlight', size: '1400 × 350 px', ratio: '4:1',   hint: 'Full-width sticky strip that reveals behind scrolling content.' },
+  premier:   { label: 'Premier',   size: '800 × 600 px',  ratio: '4:3',   hint: 'Half-screen slide-up on mobile with a 5-second countdown.' },
+};
+
 async function loadActivePromotions() {
   const container = document.getElementById('js-active-promotions');
   if (!container) return;
@@ -1211,21 +1218,108 @@ async function loadActivePromotions() {
     const statusBg    = { pending: '#fef9c3', approved: '#ccfbf1', live: '#dcfce7' };
 
     container.innerHTML = data.map(p => {
-      const col  = statusColor[p.status] || '#64748b';
-      const bg   = statusBg[p.status]   || '#f1f5f9';
-      const pkg  = p.package ? p.package[0].toUpperCase() + p.package.slice(1) : '—';
-      const type = p.item_type ? p.item_type[0].toUpperCase() + p.item_type.slice(1) : '—';
-      const paid = p.paid_amount ? `$${(p.paid_amount/100).toFixed(0)} AUD` : p.credits_used ? `${p.credits_used} credit${p.credits_used !== 1 ? 's' : ''}` : '—';
-      const ends = p.ends_at ? `Ends ${new Date(p.ends_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' })}` : '';
-      return `<div class="dash-promo-row">
-        <div class="dash-promo-row__icon">${{ business:'🏢', event:'📅', offer:'🎁', article:'📰' }[p.item_type] || '📣'}</div>
-        <div class="dash-promo-row__body">
-          <div class="dash-promo-row__title">${pkg} · ${type}</div>
-          <div class="dash-promo-row__meta">${paid}${ends ? ' · ' + ends : ''}</div>
+      const col   = statusColor[p.status] || '#64748b';
+      const bg    = statusBg[p.status]    || '#f1f5f9';
+      const pkg   = p.package ? p.package[0].toUpperCase() + p.package.slice(1) : '—';
+      const type  = p.item_type ? p.item_type[0].toUpperCase() + p.item_type.slice(1) : '—';
+      const paid  = p.paid_amount ? `$${(p.paid_amount/100).toFixed(0)} AUD` : p.credits_used ? `${p.credits_used} credit${p.credits_used !== 1 ? 's' : ''}` : '—';
+      const ends  = p.ends_at ? `Ends ${new Date(p.ends_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' })}` : '';
+      const spec  = AD_SPECS[p.package];
+      const needsCreative = ['boost','spotlight','premier'].includes(p.package);
+      const hasCreative   = !!p.ad_image_url;
+      const adLive        = p.ad_live;
+
+      return `
+      <div class="dash-promo-row dash-promo-row--expandable" data-promoid="${p.id}">
+        <div class="dash-promo-row__top">
+          <div class="dash-promo-row__icon">${{ business:'🏢', event:'📅', offer:'🎁', article:'📰' }[p.item_type] || '📣'}</div>
+          <div class="dash-promo-row__body">
+            <div class="dash-promo-row__title">${pkg} · ${type}</div>
+            <div class="dash-promo-row__meta">${paid}${ends ? ' · ' + ends : ''}</div>
+            ${needsCreative && !hasCreative ? `<div class="dash-promo-row__action-hint">⚠️ Upload your ad creative to go live</div>` : ''}
+            ${hasCreative && adLive ? `<div class="dash-promo-row__action-hint dash-promo-row__action-hint--live">✅ Ad live — <a class="dash-link" href="#" data-promoid="${p.id}" data-action="edit-creative">Update creative</a></div>` : ''}
+            ${hasCreative && !adLive ? `<div class="dash-promo-row__action-hint">⏳ Creative uploaded, pending review</div>` : ''}
+          </div>
+          <span style="background:${bg};color:${col};font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:1rem;flex-shrink:0">${p.status}</span>
         </div>
-        <span style="background:${bg};color:${col};font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:1rem">${p.status}</span>
+
+        ${needsCreative ? `
+        <div class="dash-promo-creative" id="js-creative-${p.id}" style="${hasCreative ? 'display:none' : ''}">
+          <div class="dash-creative-spec">
+            <strong>${spec?.label || pkg} ad creative</strong>
+            <span>Recommended: ${spec?.size || '1200 × 300 px'}</span>
+            <span class="dash-creative-spec__hint">${spec?.hint || ''}</span>
+          </div>
+          ${hasCreative ? `<img class="dash-creative-preview" src="${p.ad_image_url}" alt="Current creative" />` : ''}
+          <div class="dash-upload-row" style="margin-top:.75rem">
+            <label class="dash-upload-btn" for="ad-img-${p.id}">🖼 ${hasCreative ? 'Replace image' : 'Upload ad image'}</label>
+            <input type="file" id="ad-img-${p.id}" accept="image/jpeg,image/png,image/webp" style="display:none" data-promoid="${p.id}" class="js-ad-img-input" />
+            <span class="dash-upload-status" id="ad-img-status-${p.id}"></span>
+          </div>
+          <div style="margin-top:.65rem">
+            <label class="dash-field-label">Click-through URL (optional)</label>
+            <input type="url" class="dash-input js-ad-link-input" data-promoid="${p.id}"
+              placeholder="https://yourwebsite.com.au" value="${p.ad_link_url || ''}"
+              style="margin-top:.3rem;width:100%;box-sizing:border-box" />
+          </div>
+          <button class="btn btn--teal btn--sm dash-creative-save" data-promoid="${p.id}" style="margin-top:.75rem">
+            Save &amp; go live
+          </button>
+          <div class="dash-creative-error" id="ad-err-${p.id}" style="display:none;color:#dc2626;font-size:.8rem;margin-top:.4rem"></div>
+        </div>` : ''}
       </div>`;
     }).join('');
+
+    // Bind image upload + save handlers for each promotion
+    data.filter(p => ['boost','spotlight','premier'].includes(p.package)).forEach(p => {
+      const fileInput = document.getElementById(`ad-img-${p.id}`);
+      const saveBtn   = container.querySelector(`.dash-creative-save[data-promoid="${p.id}"]`);
+      const linkInput = container.querySelector(`.js-ad-link-input[data-promoid="${p.id}"]`);
+      if (!fileInput || !saveBtn) return;
+
+      let uploadedUrl = p.ad_image_url || null;
+
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const statusEl = document.getElementById(`ad-img-status-${p.id}`);
+        uploadedUrl = await uploadImage(file, `ad-creatives/${currentBiz.id}`, statusEl);
+      });
+
+      // Toggle creative panel via "Update creative" link
+      container.querySelector(`[data-promoid="${p.id}"][data-action="edit-creative"]`)?.addEventListener('click', e => {
+        e.preventDefault();
+        const panel = document.getElementById(`js-creative-${p.id}`);
+        if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const errEl  = document.getElementById(`ad-err-${p.id}`);
+        errEl.style.display = 'none';
+        if (!uploadedUrl && !p.ad_image_url) {
+          errEl.textContent = 'Please upload an image first.';
+          errEl.style.display = '';
+          return;
+        }
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving…';
+        const { error } = await db.from('promotions').update({
+          ad_image_url: uploadedUrl || p.ad_image_url,
+          ad_link_url:  linkInput?.value?.trim() || null,
+          ad_live:      true,
+        }).eq('id', p.id);
+
+        if (error) {
+          errEl.textContent = 'Save failed: ' + error.message;
+          errEl.style.display = '';
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save & go live';
+        } else {
+          await loadActivePromotions(); // re-render
+        }
+      });
+    });
+
   } catch (e) {
     container.innerHTML = `<p style="font-size:.82rem;color:var(--mid)">Could not load promotions.</p>`;
   }

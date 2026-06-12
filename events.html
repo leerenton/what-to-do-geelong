@@ -252,47 +252,55 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- Happening Today -->
   <div id="js-happening-today" hidden></div>
 
-  <!-- Calendar + Filters + Grid -->
-  <div class="coll-body container">
+  <!-- Two-column desktop layout -->
+  <div class="events-layout container">
 
-    <!-- Calendar + filter row (side-by-side on desktop) -->
-    <div class="events-cal-row">
-      <div id="js-events-calendar" class="events-calendar-wrap"></div>
-
-    <div class="coll-topbar">
-      <div class="coll-filters" id="js-events-filters">
-        <button class="coll-filter-pill active" data-filter="all">All</button>
-        <button class="coll-filter-pill" data-filter="music">Music</button>
-        <button class="coll-filter-pill" data-filter="markets">Markets</button>
-        <button class="coll-filter-pill" data-filter="arts">Arts</button>
-        <button class="coll-filter-pill" data-filter="food">Food &amp; Drink</button>
-        <button class="coll-filter-pill" data-filter="family">Family</button>
-        <button class="coll-filter-pill" data-filter="sport">Sport</button>
-        <button class="coll-filter-pill" data-filter="festival">Festival</button>
+    <!-- LEFT: sticky sidebar — calendar + category filters -->
+    <aside class="events-sidebar">
+      <div class="events-sidebar__inner">
+        <div id="js-events-calendar" class="events-calendar-wrap"></div>
+        <div class="events-sidebar__filters">
+          <div class="events-sidebar__filters-label">Category</div>
+          <div class="coll-filters coll-filters--vertical" id="js-events-filters">
+            <button class="coll-filter-pill active" data-filter="all">All</button>
+            <button class="coll-filter-pill" data-filter="music">Music</button>
+            <button class="coll-filter-pill" data-filter="markets">Markets</button>
+            <button class="coll-filter-pill" data-filter="arts">Arts</button>
+            <button class="coll-filter-pill" data-filter="food">Food &amp; Drink</button>
+            <button class="coll-filter-pill" data-filter="family">Family</button>
+            <button class="coll-filter-pill" data-filter="sport">Sport</button>
+            <button class="coll-filter-pill" data-filter="festival">Festival</button>
+          </div>
+        </div>
       </div>
-      <div class="coll-topbar-row2">
+    </aside>
+
+    <!-- RIGHT: search + results -->
+    <div class="events-main">
+      <!-- Search + near me row -->
+      <div class="events-main__topbar">
         <div class="coll-search-wrap">
           <span class="material-symbols-rounded">search</span>
           <input class="coll-search" type="text" id="js-events-search" placeholder="Search events…" />
         </div>
         <div id="js-events-loc"></div>
       </div>
-    </div>
-    </div><!-- end events-cal-row -->
 
-    <div id="js-events-date-banner" hidden style="padding:.5rem 0 .25rem;display:flex;align-items:center;gap:.75rem"></div>
+      <div id="js-events-date-banner" hidden style="padding:.5rem 0 .25rem;display:flex;align-items:center;gap:.75rem"></div>
 
-    <div class="events-toolbar">
-      <p class="coll-count" id="js-events-count"></p>
-      <button class="past-toggle" id="js-past-toggle">Show past events</button>
-    </div>
+      <div class="events-toolbar">
+        <p class="coll-count" id="js-events-count"></p>
+        <button class="past-toggle" id="js-past-toggle">Show past events</button>
+      </div>
 
-    <div id="js-events-root">
-      <div class="coll-loading">
-        <span class="material-symbols-rounded" style="font-size:2rem;color:#ccc">event</span>
-        <p>Loading…</p>
+      <div id="js-events-root">
+        <div class="coll-loading">
+          <span class="material-symbols-rounded" style="font-size:2rem;color:#ccc">event</span>
+          <p>Loading…</p>
+        </div>
       </div>
     </div>
+
   </div>
 
   <footer class="footer">

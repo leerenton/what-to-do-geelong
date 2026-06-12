@@ -3599,33 +3599,79 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 
 /* ── Events page: calendar + filters layout ─────────────── */
 /* On desktop: calendar sits left, filters/toolbar right */
-.events-cal-row {
-  display: flex;
+/* ── Events two-column desktop layout ──────────────────── */
+.events-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
   align-items: flex-start;
-  gap: 1.5rem;
-  padding-top: .75rem;
-}
-.events-cal-row .events-calendar-wrap {
-  flex-shrink: 0;
-  width: 272px;
-  padding: 0;
-}
-.events-cal-row .coll-topbar { flex: 1; min-width: 0; padding-top: 0; }
-/* Inside the cal-row the filter bar must not sticky-escape the flex container
-   or inherit the full page-gutter padding */
-.events-cal-row .coll-filters {
-  position: relative !important;
-  top: auto !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding-top: 1rem;
+  padding-bottom: 3rem;
 }
 
-@media (max-width: 640px) {
-  /* Drop the flex wrapper entirely on mobile — block stacking avoids
-     flex children with overflow-x:auto stretching the parent wider than viewport */
-  .events-cal-row { display: block; padding-top: 0; }
-  .events-cal-row .events-calendar-wrap { width: 100%; margin-bottom: .85rem; }
-  .events-cal-row .coll-topbar { width: 100%; }
+/* Sticky sidebar */
+.events-sidebar__inner {
+  position: sticky;
+  top: 80px; /* below fixed nav */
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.events-sidebar__inner::-webkit-scrollbar { display: none; }
+
+.events-sidebar__filters { margin-top: 1.25rem; }
+.events-sidebar__filters-label {
+  font: 700 .72rem/1 'DM Sans', sans-serif;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--mid); margin-bottom: .65rem;
+  padding-left: .1rem;
+}
+
+/* Vertical filter pills in sidebar */
+.coll-filters--vertical {
+  display: flex !important;
+  flex-direction: column;
+  gap: .35rem;
+  overflow: visible !important;
+  flex-wrap: nowrap !important;
+}
+.coll-filters--vertical .coll-filter-pill {
+  text-align: left;
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: .6rem;
+}
+
+/* Right column */
+.events-main__topbar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.events-main__topbar .coll-search-wrap { flex: 1; }
+
+/* Mobile: stack calendar above results */
+@media (max-width: 768px) {
+  .events-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: 0;
+  }
+  .events-sidebar__inner {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  .events-sidebar { margin-bottom: .75rem; }
+  .coll-filters--vertical {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: .4rem !important;
+  }
+  .coll-filters--vertical .coll-filter-pill {
+    width: auto !important;
+  }
 }
 
 /* ── Events mini calendar ──────────────────────────────── */

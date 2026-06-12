@@ -1680,7 +1680,7 @@ function initWeekendToggle(allEvents) {
     const groupLabel = { family: 'families', couple: 'couples', friends: 'groups', solo: 'solo explorers' }[prefs.group] || null;
     const interestLabels = (prefs.interests || []).slice(0, 2).map(i => i.replace('_', ' '));
     const parts = [...(groupLabel ? [groupLabel] : []), ...interestLabels];
-    const matchCount = allEvents.filter(ev => prefsMatchCard(ev, prefs)).length;
+    const matchCount = allEvents.filter(ev => prefsMatchCard(ev, prefs) && getEventUrgency(ev) !== 'past').length;
     const subtitle = document.createElement('p');
     subtitle.className = 'weekend-personalised-sub';
     subtitle.innerHTML = `
@@ -3837,7 +3837,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    const sortedEvents   = applyHomepageSort(EVENTS, 'event');
+    // Strip past events before any homepage rendering
+    const upcomingEvents = EVENTS.filter(ev => getEventUrgency(ev) !== 'past');
+    const sortedEvents   = applyHomepageSort(upcomingEvents, 'event');
     const sortedBiz      = applyHomepageSort(BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('eat') : b.section === 'eat')), 'business');
     const sortedStays    = applyHomepageSort(STAYS, 'stay');
     const sortedArticles = applyHomepageSort(ARTICLES, 'article');

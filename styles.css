@@ -83,6 +83,55 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 
 /* ── MASONRY HERO ──────────────────────────────────────── */
+/* ── Skeleton loaders ──────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skel-shimmer {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+.skel-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 380px;
+  gap: .5rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: 1rem;
+}
+@media (max-width: 640px) {
+  .skel-hero-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 240px 308px;
+  }
+}
+.skel-box {
+  border-radius: var(--radius-md);
+  background: #e2e8f0;
+}
+.skel-stack {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: .5rem;
+}
+/* Event pair skeleton */
+.skel-event-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 640px) {
+  .skel-event-pair { grid-template-columns: 1fr; }
+}
+.skel-event-card {
+  height: 260px;
+  border-radius: var(--radius-md, .75rem);
+}
+
 .masonry-hero {
   padding: 1rem 0 0;
   margin-bottom: 0;

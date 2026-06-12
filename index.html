@@ -279,6 +279,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
+  <!-- HERO SKELETON — shown until JS populates real content -->
+  <section class="container" id="js-hero-skeleton" aria-hidden="true">
+    <div class="skel-hero-grid">
+      <div class="skel-box skel-box--main skel-shimmer"></div>
+      <div class="skel-stack">
+        <div class="skel-box skel-shimmer"></div>
+        <div class="skel-box skel-shimmer"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- MASONRY HERO -->
   <section class="masonry-hero" id="js-masonry-hero" style="display:none">
     <div class="container masonry-hero__grid">
@@ -332,7 +343,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <a class="weekend-toggle__btn" id="js-week-next" href="events.html">Next weekend →</a>
       </div>
 
-      <div id="js-featured-event"></div>
+      <div id="js-featured-event">
+        <!-- skeleton pair — replaced by renderFeatured() -->
+        <div class="skel-event-pair" id="js-featured-skeleton" aria-hidden="true">
+          <div class="skel-event-card skel-shimmer"></div>
+          <div class="skel-event-card skel-shimmer"></div>
+        </div>
+      </div>
       <div class="event-scroll" id="js-event-scroll"></div>
       <div class="weekend-see-all" id="js-weekend-see-all">
         <a class="btn btn--outline" id="js-weekend-see-all-link" href="events.html">See all this weekend →</a>

@@ -878,6 +878,9 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
     document.getElementById('js-mh-btm-title').textContent = btmEvFinal.title;
   }
 
+  // Hide skeleton, reveal real hero
+  const skel = document.getElementById('js-hero-skeleton');
+  if (skel) skel.style.display = 'none';
   section.style.display = 'block';
 }
 
@@ -931,6 +934,10 @@ function renderFeatured(events) {
         </div>
       </a>`;
   }
+
+  // Remove skeleton, inject real cards
+  const skel = document.getElementById('js-featured-skeleton');
+  if (skel) skel.remove();
 
   el.innerHTML = picks.length === 1
     ? featCard(picks[0])

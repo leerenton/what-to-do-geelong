@@ -1536,6 +1536,26 @@ function prefsMatchCard(ev, prefs) {
   });
 }
 
+// ── PERSONALISED SORT ────────────────────────────────────
+// Bubbles matching events/items to the top. Matched items keep their
+// relative order; unmatched items keep their relative order below.
+function personaliseSort(items, prefs) {
+  if (!prefs?.interests?.length && !prefs?.group) return items;
+  const matched   = items.filter(item => prefsMatchCard(item, prefs));
+  const unmatched = items.filter(item => !prefsMatchCard(item, prefs));
+  // family group: also float family-friendly unmatched items higher
+  if (prefs.group === 'family') {
+    const familyTags = PREF_TAG_MAP.family;
+    const famUnmatched = unmatched.filter(item => {
+      const h = [...(item.tags||[]), item.category, item.type].filter(Boolean).map(s=>s.toLowerCase());
+      return familyTags.some(t => h.some(hh => hh.includes(t)));
+    });
+    const rest = unmatched.filter(item => !famUnmatched.includes(item));
+    return [...matched, ...famUnmatched, ...rest];
+  }
+  return [...matched, ...unmatched];
+}
+
 // Interest → filter pill value on collection pages
 const INTEREST_TO_FILTER = {
   music:     { events: 'music' },
@@ -1660,9 +1680,10 @@ function initWeekendToggle(allEvents) {
     const groupLabel = { family: 'families', couple: 'couples', friends: 'groups', solo: 'solo explorers' }[prefs.group] || null;
     const interestLabels = (prefs.interests || []).slice(0, 2).map(i => i.replace('_', ' '));
     const parts = [...(groupLabel ? [groupLabel] : []), ...interestLabels];
+    const matchCount = allEvents.filter(ev => prefsMatchCard(ev, prefs)).length;
     const subtitle = document.createElement('p');
     subtitle.className = 'weekend-personalised-sub';
-    subtitle.innerHTML = `✦ Curated for <strong>${parts.join(' · ')}</strong> &nbsp;<a href="onboarding.html" style="font-size:.75rem;color:var(--teal)">edit</a>`;
+    subtitle.innerHTML = `✦ Sorted for <strong>${parts.join(' · ')}</strong>${matchCount ? ` &mdash; ${matchCount} matching event${matchCount !== 1 ? 's' : ''} up first` : ''} &nbsp;<a href="onboarding.html" style="font-size:.75rem;color:var(--teal)">edit</a>`;
     toggleEl.insertAdjacentElement('beforebegin', subtitle);
   }
 
@@ -3725,19 +3746,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sortedStays    = applyHomepageSort(STAYS, 'stay');
     const sortedArticles = applyHomepageSort(ARTICLES, 'article');
 
+    // Apply personalisation sort on top of trending/latest sort
+    const _prefs = getPrefs();
+    const personalisedEvents  = personaliseSort(sortedEvents, _prefs);
+    const personalisedBiz     = personaliseSort(sortedBiz, _prefs);
+    const personalisedStays   = personaliseSort(sortedStays, _prefs);
+
     // Store all businesses globally for cross-function lookups
     window._allBiz = BUSINESSES;
     // Store all events globally for planner preview
-    window._allEvents = sortedEvents;
+    window._allEvents = personalisedEvents;
 
-    renderMasonryHero(sortedEvents, sortedArticles, _hpSettings, _trendingScores);
-    renderPromotedEvents(sortedEvents);
+    renderMasonryHero(personalisedEvents, sortedArticles, _hpSettings, _trendingScores);
+    renderPromotedEvents(personalisedEvents);
     renderGoldStrip(BUSINESSES);
-    renderEatStrip(sortedBiz);
-    renderStays(sortedStays);
+    renderEatStrip(personalisedBiz);
+    renderStays(personalisedStays);
     renderOffers();
     renderCommunityGuidesStrip();
-    initWeekendToggle(sortedEvents);
+    initWeekendToggle(personalisedEvents);
     initDateBar();
     initPlannerCard();
     initPersonaliseCTAs();

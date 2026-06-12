@@ -38,7 +38,18 @@ function requireAuth(redirectTo) {
 
 // ── NAV ACCOUNT BUTTON INJECTION ──────────────────────────
 async function initAccountNav() {
-  const hamburger = document.querySelector('.nav__hamburger');
+  // Wait for nav.js to inject the header (it may run after auth.js on some pages)
+  let hamburger = document.querySelector('.nav__hamburger');
+  if (!hamburger) {
+    await new Promise(resolve => {
+      const obs = new MutationObserver(() => {
+        if (document.querySelector('.nav__hamburger')) { obs.disconnect(); resolve(); }
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
+      setTimeout(resolve, 2000); // fallback
+    });
+  }
+  hamburger = document.querySelector('.nav__hamburger');
   if (!hamburger) return;
   // Insert account button inside nav__end (before hamburger), or fall back to before hamburger
   const navEnd = document.querySelector('.nav__end');

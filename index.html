@@ -19,6 +19,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta property="og:image" content="https://whattodogeelong.com.au/assets/og-default.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="canonical" href="https://whattodogeelong.com.au" />
+  <link rel="preconnect" href="https://duhxszqyyzrbzrhwneey.supabase.co" />
+  <link rel="dns-prefetch" href="https://duhxszqyyzrbzrhwneey.supabase.co" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"What To Do Geelong","url":"https://whattodogeelong.com.au","description":"Your local guide to events, restaurants, bars and things to do in Geelong, Victoria.","potentialAction":{"@type":"SearchAction","target":"https://whattodogeelong.com.au/events/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -282,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="container masonry-hero__grid">
       <a class="masonry-hero__main" id="js-mh-main" href="#">
         <div class="masonry-hero__img-wrap">
-          <img id="js-mh-main-img" src="" alt="" loading="eager" />
+          <img id="js-mh-main-img" src="" alt="" loading="eager" fetchpriority="high" decoding="async" />
           <div class="masonry-hero__overlay"></div>
         </div>
         <div class="masonry-hero__info">
@@ -526,16 +528,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <script src="supabase.js"></script>
-  <script src="sitemode.js?v=1"></script>
-  <script src="analytics.js?v=1"></script>
-  <script src="icons.js"></script>
-  <script src="auth.js"></script>
-  <script src="guides.js"></script>
-  <script src="location.js"></script>
-  <script src="view-tracker.js"></script>
-  <script src="app.js?v=11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase.js" defer></script>
+  <script src="sitemode.js?v=1" defer></script>
+  <script src="analytics.js?v=1" defer></script>
+  <script src="icons.js" defer></script>
+  <script src="auth.js" defer></script>
+  <script src="guides.js" defer></script>
+  <script src="location.js" defer></script>
+  <script src="view-tracker.js" defer></script>
+  <script src="app.js?v=11" defer></script>
 </body>
 </html>

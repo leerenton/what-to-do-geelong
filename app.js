@@ -1577,10 +1577,15 @@ function localISODate(d) {
 function getWeekendDates(offset = 0) {
   // offset=0 → this weekend, offset=1 → next weekend
   // Weekend = Fri–Sun
+  // If today is Fri/Sat/Sun we're already in the weekend — anchor to this Friday
+  // If today is Mon–Thu the weekend starts on the upcoming Friday
   const today = new Date(); today.setHours(0,0,0,0);
   const dow = today.getDay(); // 0=Sun,1=Mon...6=Sat
-  // Days until next Friday
-  const daysToFri = ((5 - dow + 7) % 7) || 7;
+  let daysToFri;
+  if      (dow === 5) daysToFri =  0;  // today IS Friday
+  else if (dow === 6) daysToFri = -1;  // Saturday — Friday was yesterday
+  else if (dow === 0) daysToFri = -2;  // Sunday   — Friday was 2 days ago
+  else                daysToFri = 5 - dow; // Mon=4, Tue=3, Wed=2, Thu=1
   const fri = new Date(today); fri.setDate(today.getDate() + daysToFri + offset * 7);
   const sat = new Date(fri);   sat.setDate(fri.getDate() + 1);
   const sun = new Date(fri);   sun.setDate(fri.getDate() + 2);
@@ -1628,8 +1633,7 @@ function initWeekendToggle(allEvents) {
 
     // Filter and render events
     const weekendEvs = filterToWeekend(allEvents, { fri, sat, sun });
-    const toShow = weekendEvs.length ? weekendEvs : allEvents;
-    renderFeatured(toShow);    // sets _weekendFeaturedIds
+    renderFeatured(weekendEvs);    // sets _weekendFeaturedIds
     renderUpcoming(allEvents); // upcoming excludes the featured pair
   }
 

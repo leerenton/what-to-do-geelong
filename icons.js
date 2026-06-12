@@ -89,6 +89,9 @@ const _icons = {
 
   close: `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`,
 
+  // Reversed "Added to Guide" — filled teal circle, white cross + sparkles
+  'added-to-guide': `<circle cx="12" cy="12" r="9" fill="#48c7d4" stroke="#48c7d4" stroke-width="1.8"/><line x1="8" y1="12" x2="16" y2="12" stroke="#fff" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="16" stroke="#fff" stroke-width="2"/><line x1="18.5" y1="5.5" x2="21" y2="3" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="20" y1="9" x2="23" y2="8" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="16" y1="4" x2="16.5" y2="1.5" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/>`,
+
   // Custom WTDG "Add to Guide" icon (from brand icon sheet)
   // Circle + plus + teal sparkle lines
   'add-to-guide': `<circle cx="12" cy="12" r="9" stroke-width="1.8" fill="none"/><line x1="8" y1="12" x2="16" y2="12" stroke-width="1.8"/><line x1="12" y1="8" x2="12" y2="16" stroke-width="1.8"/><line x1="18.5" y1="5.5" x2="21" y2="3" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="20" y1="9" x2="23" y2="8" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="16" y1="4" x2="16.5" y2="1.5" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/>`,

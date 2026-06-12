@@ -236,7 +236,10 @@ async function starItemToGuide(item, btn) {
 
   if (guide) {
     btn.classList.add('starred');
-    btn.textContent = '⭐';
+    // Reversed "Add to Guide": teal filled circle, white cross
+    btn.innerHTML = typeof wtdgIcon === 'function'
+      ? wtdgIcon('added-to-guide', 20)
+      : '✦';
     showGuideToast(`Added to "${guide.name}" <a href="guide.html?id=${guide.id}">View →</a>`);
   }
 }

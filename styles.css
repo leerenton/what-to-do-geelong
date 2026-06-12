@@ -1665,8 +1665,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .ev-hero2__action-btn:nth-child(1) { right: 4rem; }
 .ev-hero2__action-btn:nth-child(2) { right: 1rem; }
 .ev-hero2__action-btn:hover { background: #fff; transform: scale(1.08); }
-.ev-hero2__action-btn.starred { color: #e53e3e; }
-.ev-hero2__action-btn.starred svg { fill: #e53e3e; stroke: #e53e3e; }
+.ev-hero2__action-btn.starred { background: #fff; }
+.ev-hero2__action-btn.starred svg { /* icon handles its own colours */ }
 
 /* Views badge — bottom right */
 .ev-hero2__views {

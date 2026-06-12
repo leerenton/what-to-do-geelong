@@ -2006,7 +2006,7 @@ async function initListingPage() {
         <span class="lhero__type-badge">${biz.type}</span>
       </div>
       <div class="lhero__actions">
-        <button class="ev-hero2__action-btn star-btn" id="js-biz-save-btn" aria-label="Save">
+        <button class="ev-hero2__action-btn star-btn" id="js-biz-save-btn" aria-label="Add to Guide">
           ${typeof wtdgIcon === 'function' ? wtdgIcon('heart', 20) : '♡'}
         </button>
         <button class="ev-hero2__action-btn" id="js-biz-share-btn" aria-label="Share">
@@ -2466,7 +2466,7 @@ function updateItinBadge() {
 function addStarBtn(el, item) {
   const btn = document.createElement('button');
   btn.className = 'star-btn';
-  btn.setAttribute('aria-label', 'Save to WTDGuide');
+  btn.setAttribute('aria-label', 'Add to Guide');
   btn.textContent = '☆';
   btn.addEventListener('click', async e => {
     e.preventDefault();
@@ -2663,7 +2663,7 @@ async function initEventPage() {
 
         <!-- Top-right: actions -->
         <div class="ev-hero2__actions">
-          <button class="ev-hero2__action-btn star-btn" id="js-ev-save-btn" aria-label="Save to WTDGuide">
+          <button class="ev-hero2__action-btn star-btn" id="js-ev-save-btn" aria-label="Add to Guide">
             ${wtdgIcon('heart', 20)}
           </button>
           <button class="ev-hero2__action-btn" id="js-ev-share-btn" aria-label="Share">

@@ -89,7 +89,12 @@ const _icons = {
 
   close: `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`,
 
-  heart: `<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>`,
+  // Custom WTDG "Add to Guide" icon (from brand icon sheet)
+  // Circle + plus + teal sparkle lines
+  'add-to-guide': `<circle cx="12" cy="12" r="9" stroke-width="1.8" fill="none"/><line x1="8" y1="12" x2="16" y2="12" stroke-width="1.8"/><line x1="12" y1="8" x2="12" y2="16" stroke-width="1.8"/><line x1="18.5" y1="5.5" x2="21" y2="3" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="20" y1="9" x2="23" y2="8" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="16" y1="4" x2="16.5" y2="1.5" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/>`,
+
+  // heart aliased to add-to-guide so all existing save buttons get the new icon
+  heart: `<circle cx="12" cy="12" r="9" stroke-width="1.8" fill="none"/><line x1="8" y1="12" x2="16" y2="12" stroke-width="1.8"/><line x1="12" y1="8" x2="12" y2="16" stroke-width="1.8"/><line x1="18.5" y1="5.5" x2="21" y2="3" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="20" y1="9" x2="23" y2="8" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/><line x1="16" y1="4" x2="16.5" y2="1.5" stroke="#48c7d4" stroke-width="1.8" stroke-linecap="round"/>`,
 
   'chevron-right': `<polyline points="9 18 15 12 9 6"/>`,
   'chevron-left':  `<polyline points="15 18 9 12 15 6"/>`,

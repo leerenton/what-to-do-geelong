@@ -993,22 +993,26 @@ function renderEvents(events) {
 // Parse a freeform event date string → Date object (or null if unparseable)
 // Handles: "Sun 15 Jun", "Sat 28 – Sun 29 Jun", "Daily Jun 14–22", "Daily until Jul 6"
 function parseEventDate(str) {
-  if (!str || str.toLowerCase().startsWith('daily') && !str.match(/\d/)) return null;
-  // Strip leading day-of-week prefix e.g. "Fri 12 Jun" → "12 Jun"
-  str = str.replace(/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+/i, '');
-  const MONTHS = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
-  // Find first "day month" pair, e.g. "15 Jun" or "Jun 14"
-  const m = str.match(/(\d{1,2})\s+([A-Za-z]{3})|([A-Za-z]{3})\s+(\d{1,2})/);
+  if (!str) return null;
+  // Strip leading day-of-week prefix e.g. "Fri 12 Jun", "Friday 12 June"
+  str = str.replace(/^(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Mon|Tue|Wed|Thu|Fri|Sat|Sun)[,\s]+/i, '');
+  const MONTHS = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
+    january:0,february:1,march:2,april:3,june:5,july:6,august:7,september:8,october:9,november:10,december:11 };
+  // Try ISO date first: YYYY-MM-DD
+  const iso = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return new Date(parseInt(iso[1]), parseInt(iso[2])-1, parseInt(iso[3]));
+  // Try "day month [year]" or "month day [year]" — handles full and short month names
+  const m = str.match(/(\d{1,2})\s+([A-Za-z]+)(?:\s+(\d{4}))?|([A-Za-z]+)\s+(\d{1,2})(?:[,\s]+(\d{4}))?/);
   if (!m) return null;
-  const day   = parseInt(m[1] || m[4]);
-  const monStr = (m[2] || m[3]).toLowerCase().slice(0, 3);
-  const month  = MONTHS[monStr];
+  const day    = parseInt(m[1] || m[5]);
+  const monStr = (m[2] || m[4]).toLowerCase();
+  const month  = MONTHS[monStr] ?? MONTHS[monStr.slice(0,3)];
   if (month === undefined) return null;
   const now  = new Date();
-  const year = now.getFullYear();
+  const year = m[3] ? parseInt(m[3]) : m[6] ? parseInt(m[6]) : now.getFullYear();
   const d    = new Date(year, month, day);
-  // If that date is more than 2 weeks in the past, assume next year
-  if (d < new Date(now - 14 * 864e5)) d.setFullYear(year + 1);
+  // If no year specified and date is more than 2 weeks in the past, assume next year
+  if (!m[3] && !m[6] && d < new Date(now - 14 * 864e5)) d.setFullYear(year + 1);
   return d;
 }
 
@@ -1718,15 +1722,60 @@ function initPersonaliseCTAs() {
 
 // ── PLANNER CARD ─────────────────────────────────────────
 function initPlannerCard() {
-  const fromEl = document.getElementById('dp-from-2');
-  const toEl   = document.getElementById('dp-to-2');
-  const goBtn  = document.getElementById('js-planner-go');
+  const fromEl    = document.getElementById('dp-from-2');
+  const toEl      = document.getElementById('dp-to-2');
+  const goBtn     = document.getElementById('js-planner-go');
+  const previewEl = document.getElementById('js-planner-preview');
   if (!goBtn || !fromEl || !toEl) return;
 
   // Pre-fill with this weekend
   const { sat, sun } = getWeekendDates(0);
   fromEl.valueAsDate = sat;
   toEl.valueAsDate   = sun;
+
+  function filterByDateRange(from, to) {
+    const events = window._allEvents || [];
+    const fromD = from ? new Date(from + 'T00:00:00') : null;
+    const toD   = to   ? new Date(to   + 'T23:59:59') : null;
+    return events.filter(ev => {
+      const d = parseEventDate(ev.date);
+      if (!d) return false;
+      if (fromD && d < fromD) return false;
+      if (toD   && d > toD)   return false;
+      return true;
+    });
+  }
+
+  function updatePreview() {
+    if (!previewEl) return;
+    const from = fromEl.value;
+    const to   = toEl.value;
+    if (!from) { previewEl.style.display = 'none'; return; }
+    const filtered = filterByDateRange(from, to);
+    const n = filtered.length;
+    if (n === 0) {
+      previewEl.textContent = 'No events found for those dates';
+      previewEl.style.color = '#888';
+    } else {
+      const fromDate = new Date(from + 'T00:00:00');
+      const toDate   = to ? new Date(to + 'T00:00:00') : null;
+      const fmt = d => d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+      const range = toDate && to !== from ? `${fmt(fromDate)} – ${fmt(toDate)}` : fmt(fromDate);
+      previewEl.textContent = `${n} event${n !== 1 ? 's' : ''} found for ${range}`;
+      previewEl.style.color = 'var(--teal)';
+    }
+    previewEl.style.display = 'block';
+  }
+
+  fromEl.addEventListener('change', updatePreview);
+  toEl.addEventListener('change', updatePreview);
+  // Run once on load to show weekend count
+  // Wait for _allEvents to be populated
+  const tryPreview = () => {
+    if (window._allEvents) updatePreview();
+    else setTimeout(tryPreview, 300);
+  };
+  tryPreview();
 
   goBtn.addEventListener('click', () => {
     const from = fromEl.value;
@@ -3670,6 +3719,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Store all businesses globally for cross-function lookups
     window._allBiz = BUSINESSES;
+    // Store all events globally for planner preview
+    window._allEvents = sortedEvents;
 
     renderMasonryHero(sortedEvents, sortedArticles, _hpSettings, _trendingScores);
     renderPromotedEvents(sortedEvents);

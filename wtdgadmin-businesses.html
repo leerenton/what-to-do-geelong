@@ -373,10 +373,11 @@ function openDrawer(id) {
   document.getElementById('bf-emoji').value    = b?.emoji    || '';
   document.getElementById('bf-desc').value     = b?.description || '';
 
-  // Categories checkboxes — use categories[] with fallback to legacy category string
-  const activeCats = b?.categories?.length ? b.categories : (b?.category ? [b.category] : []);
+  // Categories checkboxes — use categories[] with fallback to legacy type field
+  const activeCats = b?.categories?.length ? b.categories : (b?.type ? [b.type] : []);
+  const normCat = s => s.toLowerCase().trim();
   document.querySelectorAll('#bf-categories input[type=checkbox]').forEach(cb => {
-    cb.checked = activeCats.includes(cb.value);
+    cb.checked = activeCats.some(c => normCat(c) === normCat(cb.value));
   });
   document.getElementById('bf-location').value = b?.location  || '';
   document.getElementById('bf-suburb').value   = b?.suburb    || '';
@@ -396,11 +397,12 @@ function openDrawer(id) {
     cb.checked = activeSections.includes(cb.value);
   });
 
-  // Tags checkboxes
+  // Tags checkboxes — normalise both sides (lowercase, collapse spaces/hyphens)
   const activeTags = b?.tags || [];
+  const normTag = s => s.toLowerCase().replace(/[\s-]+/g, '-');
   ['bf-tags-interests','bf-tags-suit','bf-tags-vibe'].forEach(groupId => {
     document.querySelectorAll(`#${groupId} input[type=checkbox]`).forEach(cb => {
-      cb.checked = activeTags.includes(cb.value);
+      cb.checked = activeTags.some(t => normTag(t) === normTag(cb.value));
     });
   });
 

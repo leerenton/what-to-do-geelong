@@ -1494,6 +1494,14 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .promo-card__desc { font-size: .83rem; color: var(--mid); line-height: 1.5; }
 .promo-card__expires { font-size: .75rem; color: var(--mid); font-weight: 600; }
 
+/* ── NAV END GROUP (guide badge + auth + hamburger) ─────── */
+.nav__end {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  flex-shrink: 0;
+}
+
 /* ── ITINERARY BADGE (nav) ──────────────────────────────── */
 .itin-badge {
   display: inline-flex;

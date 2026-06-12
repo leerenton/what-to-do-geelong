@@ -40,6 +40,8 @@ function requireAuth(redirectTo) {
 async function initAccountNav() {
   const hamburger = document.querySelector('.nav__hamburger');
   if (!hamburger) return;
+  // Insert account button inside nav__end (before hamburger), or fall back to before hamburger
+  const navEnd = document.querySelector('.nav__end');
 
   // ── Impersonation override ────────────────────────────────
   // If admin is viewing as a user, show THAT user's nav identity
@@ -126,7 +128,9 @@ async function initAccountNav() {
     `;
   }
 
-  hamburger.insertAdjacentElement('beforebegin', wrap);
+  // Insert inside nav__end before the hamburger so all right icons are grouped
+  if (navEnd) navEnd.insertBefore(wrap, hamburger);
+  else hamburger.insertAdjacentElement('beforebegin', wrap);
 
   // Dropdown toggle
   const btn  = document.getElementById('js-acct-btn');

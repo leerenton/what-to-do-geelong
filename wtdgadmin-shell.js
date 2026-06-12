@@ -82,9 +82,55 @@ function initAdminShell(pageTitle) {
   const session = window.wtdgAdminAuth?.getAdminSession?.() || {};
   if (sidebarEl) sidebarEl.innerHTML = buildAdminSidebar(session.email);
 
-  // Topbar title
+  // Topbar title — wrap in left group so hamburger + title sit together
   const titleEl = document.getElementById('js-adm-page-title');
-  if (titleEl) titleEl.textContent = pageTitle || '';
+  if (titleEl) {
+    titleEl.textContent = pageTitle || '';
+    // Inject mobile hamburger before the title if not already there
+    if (titleEl.parentElement && !titleEl.parentElement.classList.contains('adm-topbar__left')) {
+      const topbar = titleEl.closest('.adm-topbar');
+      if (topbar) {
+        const leftWrap = document.createElement('div');
+        leftWrap.className = 'adm-topbar__left';
+        const hamburger = document.createElement('button');
+        hamburger.className = 'adm-mobile-menu-btn';
+        hamburger.setAttribute('aria-label', 'Open navigation');
+        hamburger.id = 'js-adm-mobile-menu';
+        hamburger.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`;
+        topbar.insertBefore(leftWrap, titleEl);
+        leftWrap.appendChild(hamburger);
+        leftWrap.appendChild(titleEl);
+      }
+    }
+  }
+
+  // Backdrop for mobile sidebar
+  let backdrop = document.getElementById('js-adm-sidebar-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'adm-sidebar-backdrop';
+    backdrop.id = 'js-adm-sidebar-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  function openSidebar() {
+    sidebarEl?.classList.add('adm-sidebar--open');
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebarEl?.classList.remove('adm-sidebar--open');
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('js-adm-mobile-menu')?.addEventListener('click', openSidebar);
+  backdrop.addEventListener('click', closeSidebar);
+
+  // Close sidebar when a nav link is tapped on mobile
+  sidebarEl?.querySelectorAll('.adm-nav__item').forEach(a => {
+    a.addEventListener('click', () => { if (window.innerWidth <= 900) closeSidebar(); });
+  });
 
   // Logout
   const logoutBtn = document.getElementById('js-adm-logout');

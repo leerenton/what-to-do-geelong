@@ -251,6 +251,14 @@
     if (footerRoot) footerRoot.outerHTML = FOOTER_HTML;
 
     initNav();
+
+    // Lazy-load the super-admin edit FAB (no-op for non-admins)
+    // Skip on admin pages — they have their own tooling
+    if (!window.location.pathname.includes('wtdgadmin')) {
+      const fabScript = document.createElement('script');
+      fabScript.src = '/wtdg-edit-fab.js';
+      document.body.appendChild(fabScript);
+    }
   }
 
   if (document.readyState === 'loading') {

@@ -67,7 +67,7 @@ async function loadRevenue() {
   const { from, to } = getDateRange(revPeriod, '', '');
   const fromDate = new Date(from);
 
-  const { data: bizData } = await db.from('businesses').select('id,name,subscription_tier,is_claimed,created_at');
+  const { data: bizData } = await db.from('businesses').select('id,name,plan,is_claimed,created_at');
   const biz = bizData || [];
 
   // Current MRR by tier
@@ -75,18 +75,18 @@ async function loadRevenue() {
   const tierCounts = {};
   tiers.forEach(t => { tierCounts[t] = 0; });
   biz.forEach(b => {
-    const t = b.subscription_tier || 'free';
+    const t = b.plan || 'free';
     if (tierCounts[t] !== undefined) tierCounts[t]++;
     else tierCounts['free']++;
   });
 
   const mrr = tiers.reduce((s, t) => s + (tierCounts[t] * (PRICING[t] || 0)), 0);
   const arr = mrr * 12;
-  const paidCount = biz.filter(b => b.subscription_tier && b.subscription_tier !== 'free').length;
+  const paidCount = biz.filter(b => b.plan && b.plan !== 'free').length;
 
   // New paid in period
   const newPaidInPeriod = biz.filter(b => {
-    const t = b.subscription_tier;
+    const t = b.plan;
     return t && t !== 'free' && new Date(b.created_at) >= fromDate;
   }).length;
 
@@ -104,8 +104,8 @@ async function loadRevenue() {
   const proj12 = mrr * 12;
 
   // Paying businesses table
-  const paidBiz = biz.filter(b => b.subscription_tier && b.subscription_tier !== 'free')
-    .sort((a,b) => (PRICING[b.subscription_tier]||0) - (PRICING[a.subscription_tier]||0));
+  const paidBiz = biz.filter(b => b.plan && b.plan !== 'free')
+    .sort((a,b) => (PRICING[b.plan]||0) - (PRICING[a.plan]||0));
 
   content.innerHTML = `
     <!-- Headline metrics -->
@@ -152,8 +152,8 @@ async function loadRevenue() {
           <tbody>
             ${paidBiz.map(b => `<tr>
               <td style="font-weight:600">${b.name||'—'}</td>
-              <td><span class="adm-badge adm-badge--green">${b.subscription_tier}</span></td>
-              <td style="color:var(--adm-teal);font-weight:700">$${(PRICING[b.subscription_tier]||0).toLocaleString()}/mo</td>
+              <td><span class="adm-badge adm-badge--green">${b.plan}</span></td>
+              <td style="color:var(--adm-teal);font-weight:700">$${(PRICING[b.plan]||0).toLocaleString()}/mo</td>
               <td style="font-size:.78rem;color:var(--adm-mid)">${fmtDate(b.created_at)}</td>
             </tr>`).join('')}
           </tbody>

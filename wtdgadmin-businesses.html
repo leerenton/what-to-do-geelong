@@ -300,9 +300,9 @@ async function loadBiz() {
 
 function updateStats() {
   const { PRICING } = window.wtdgAdminAuth;
-  const paid    = allBiz.filter(b => b.subscription_tier && b.subscription_tier !== 'free');
+  const paid    = allBiz.filter(b => b.plan && b.plan !== 'free');
   const claimed = allBiz.filter(b => b.is_claimed);
-  const mrr     = allBiz.reduce((s, b) => s + (PRICING[b.subscription_tier] || 0), 0);
+  const mrr     = allBiz.reduce((s, b) => s + (PRICING[b.plan] || 0), 0);
   document.getElementById('js-biz-count').textContent = `${allBiz.length} businesses`;
   document.getElementById('js-biz-stats').innerHTML = `
     ${sc('Total',allBiz.length)} ${sc('Claimed',claimed.length,'teal')}
@@ -321,7 +321,7 @@ function renderTable() {
 
   let list = allBiz.filter(b => {
     const mQ = (b.name||'').toLowerCase().includes(q) || (b.suburb||'').toLowerCase().includes(q);
-    const mT = !tier    || (b.subscription_tier||'free') === tier;
+    const mT = !tier    || (b.plan||'free') === tier;
     const mC = !claimed || (claimed==='claimed' && b.is_claimed) || (claimed==='unclaimed' && !b.is_claimed);
     return mQ && mT && mC;
   });
@@ -333,7 +333,7 @@ function renderTable() {
 
   const { PRICING } = window.wtdgAdminAuth;
   const rows = list.map(b => {
-    const t = b.subscription_tier || 'free';
+    const t = b.plan || 'free';
     const tierBadge    = t === 'free' ? `<span class="adm-badge adm-badge--blue">${t}</span>`
                                       : `<span class="adm-badge adm-badge--green">${t} · $${PRICING[t]||0}/mo</span>`;
     const claimedBadge = b.is_claimed ? `<span class="adm-badge adm-badge--teal">Claimed</span>`
@@ -384,7 +384,7 @@ function openDrawer(id) {
   document.getElementById('bf-img').value      = b?.img       || '';
   document.getElementById('bf-lat').value      = b?.lat       || '';
   document.getElementById('bf-lng').value      = b?.lng       || '';
-  document.getElementById('bf-tier').value     = b?.subscription_tier || 'free';
+  document.getElementById('bf-tier').value     = b?.plan || 'free';
   document.getElementById('bf-claimed').value  = String(!!b?.is_claimed);
 
   // Sections checkboxes — use sections[] with fallback to legacy section field
@@ -459,7 +459,7 @@ async function saveBusiness() {
     img:               document.getElementById('bf-img').value.trim()      || null,
     lat:               parseFloat(document.getElementById('bf-lat').value) || null,
     lng:               parseFloat(document.getElementById('bf-lng').value) || null,
-    subscription_tier: document.getElementById('bf-tier').value,
+    plan: document.getElementById('bf-tier').value,
     is_claimed:        document.getElementById('bf-claimed').value === 'true',
   };
 

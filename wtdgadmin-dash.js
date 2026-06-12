@@ -93,7 +93,7 @@ async function loadDashboard() {
     profilesData,
     promosData,
   ] = await Promise.all([
-    db.from('businesses').select('id,name,subscription_tier,is_claimed,created_at').throwOnError().then(r => r.data || []).catch(() => []),
+    db.from('businesses').select('id,name,plan,is_claimed,created_at').throwOnError().then(r => r.data || []).catch(() => []),
     db.from('events').select('id,title,created_at').throwOnError().then(r => r.data || []).catch(() => []),
     db.from('guides').select('id,created_at,user_id').throwOnError().then(r => r.data || []).catch(() => []),
     db.from('profiles').select('id,email,name,created_at').throwOnError().then(r => r.data || []).catch(() => []),
@@ -114,7 +114,7 @@ async function loadDashboard() {
   const newBiz         = bizData.filter(b => inRange(b.created_at)).length;
   const claimedBiz     = bizData.filter(b => b.is_claimed).length;
   const claimedInRange = bizData.filter(b => b.is_claimed && inRange(b.created_at)).length;
-  const paidBiz        = bizData.filter(b => b.subscription_tier && b.subscription_tier !== 'free' && b.subscription_tier !== null && b.subscription_tier !== '').length;
+  const paidBiz        = bizData.filter(b => b.plan && b.plan !== 'free' && b.plan !== null && b.plan !== '').length;
   const freeBiz        = totalBiz - paidBiz;
 
   // Events
@@ -128,7 +128,7 @@ async function loadDashboard() {
   // Revenue (MRR based on tier × businesses)
   const { PRICING } = window.wtdgAdminAuth;
   let mrr = 0;
-  bizData.forEach(b => { mrr += PRICING[b.subscription_tier] || 0; });
+  bizData.forEach(b => { mrr += PRICING[b.plan] || 0; });
   const arr = mrr * 12;
 
   // Offers

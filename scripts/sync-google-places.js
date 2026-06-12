@@ -22,7 +22,7 @@ const SUPABASE_URL  = 'https://duhxszqyyzrbzrhwneey.supabase.co';
 const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1aHhzenF5eXpyYnpyaHduZWV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDcyNTc1OCwiZXhwIjoyMDk2MzAxNzU4fQ.iXhO6IWYgZl-58thx2ZUySg5Dt0-s9QXYS98j4fvRQ8';
 const STORAGE_BUCKET = 'business-images';
 
-const MAX_REQUESTS = 18;   // ← hard cap on Google API calls this run
+const MAX_REQUESTS = 30;   // ← hard cap on Google API calls this run
 const DELAY_MS     = 400;  // ← ms between requests
 const DRY_RUN      = false; // ← set true to preview without saving
 const CLEAR_FIRST  = false; // ← incremental: only add new, don't wipe
@@ -36,97 +36,96 @@ const SEARCHES = [
   // ── Drink ─────────────────────────────────────────────────
   {
     query: 'wineries cellar door Bellarine Peninsula Victoria',
-    type: 'Winery', emoji: '🍷', color: '#6B2737',
+    section: 'drink', type: 'Winery', emoji: '🍷', color: '#6B2737',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 40000 },
   },
   {
     query: 'brewery craft beer distillery Geelong Bellarine Victoria',
-    type: 'Brewery', emoji: '🍺', color: '#C47F17',
+    section: 'drink', type: 'Brewery', emoji: '🍺', color: '#C47F17',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 40000 },
   },
 
   // ── Eat ──────────────────────────────────────────────────
   {
     query: 'best cafes coffee Geelong Victoria',
-    type: 'Café', emoji: '☕', color: '#8B5E3C',
+    section: 'eat', type: 'Café', emoji: '☕', color: '#8B5E3C',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 15000 },
   },
   {
     query: 'best restaurants dining Geelong Victoria',
-    type: 'Restaurant', emoji: '🍽️', color: '#E76F51',
+    section: 'eat', type: 'Restaurant', emoji: '🍽️', color: '#E76F51',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 15000 },
   },
   {
     query: 'bars pubs craft beer Geelong Victoria',
-    type: 'Bar', emoji: '🍺', color: '#F4A261',
+    section: 'drink', type: 'Bar', emoji: '🍺', color: '#F4A261',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
   },
 
   // ── Do / Activities ───────────────────────────────────────
+  // section:'do', type must match do.html filter pills:
+  // activity | attraction | adventure | art | sport | nature | wellness | family
   {
-    query: 'things to do attractions Geelong Victoria',
-    type: 'Attraction', emoji: '⭐', color: '#2A9D8F',
-    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 25000 },
+    query: 'things to do attractions tourist Geelong Victoria',
+    section: 'do', type: 'attraction', emoji: '⭐', color: '#2A9D8F',
+    maxResults: 15, bias: { lat: -38.1499, lng: 144.3617, radius: 25000 },
   },
   {
     query: 'adventure activities outdoor experiences Geelong Surf Coast Bellarine',
-    type: 'Activity', emoji: '🧗', color: '#264653',
+    section: 'do', type: 'adventure', emoji: '🧗', color: '#264653',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 60000 },
   },
   {
-    query: 'art gallery museum cultural Geelong Victoria',
-    type: 'Arts & Culture', emoji: '🎨', color: '#8338EC',
+    query: 'art gallery museum cultural centre Geelong Victoria',
+    section: 'do', type: 'art', emoji: '🎨', color: '#8338EC',
+    maxResults: 15, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
+  },
+  {
+    query: 'theatre cinema live music comedy performance venue Geelong Victoria',
+    section: 'do', type: 'art', emoji: '🎭', color: '#9B2226',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
   },
   {
-    query: 'family kids activities fun Geelong Victoria',
-    type: 'Family', emoji: '👨‍👩‍👧', color: '#FB8500',
+    query: 'family kids activities fun indoor playground Geelong Victoria',
+    section: 'do', type: 'family', emoji: '👨‍👩‍👧', color: '#FB8500',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 30000 },
   },
   {
-    query: 'golf course mini golf bowling Geelong Victoria',
-    type: 'Sport & Leisure', emoji: '⛳', color: '#2D6A4F',
-    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 30000 },
+    query: 'escape room laser tag mini golf bowling entertainment Geelong Victoria',
+    section: 'do', type: 'activity', emoji: '🎮', color: '#7209B7',
+    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
   },
   {
     query: 'kayaking paddleboarding surfing water sports Geelong Bellarine Surf Coast',
-    type: 'Water Sports', emoji: '🏄', color: '#0096C7',
+    section: 'do', type: 'adventure', emoji: '🏄', color: '#0096C7',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.4000, radius: 60000 },
-  },
-  {
-    query: 'tours experiences sightseeing wildlife nature Geelong Bellarine',
-    type: 'Tour & Experience', emoji: '🗺️', color: '#52B788',
-    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 50000 },
   },
   {
     query: 'parks gardens nature reserves hiking walking trails Geelong Victoria',
-    type: 'Parks & Nature', emoji: '🌿', color: '#40916C',
+    section: 'do', type: 'nature', emoji: '🌿', color: '#40916C',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 30000 },
   },
   {
-    query: 'escape rooms laser tag entertainment venues Geelong Victoria',
-    type: 'Entertainment', emoji: '🎮', color: '#7209B7',
+    query: 'golf course tennis sport stadium recreation Geelong Victoria',
+    section: 'do', type: 'sport', emoji: '⛳', color: '#2D6A4F',
+    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 30000 },
+  },
+
+  // ── Wellness ──────────────────────────────────────────────
+  {
+    query: 'day spa massage beauty wellness retreat Geelong Victoria',
+    section: 'do', type: 'wellness', emoji: '💆', color: '#B5838D',
+    maxResults: 15, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
+  },
+  {
+    query: 'yoga pilates meditation studio Geelong Victoria',
+    section: 'do', type: 'wellness', emoji: '🧘', color: '#C9ADA7',
     maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
   },
   {
-    query: 'cycling bike hire fitness classes yoga gym Geelong Victoria',
-    type: 'Health & Fitness', emoji: '🚴', color: '#F77F00',
-    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
-  },
-  {
-    query: 'cinema theatre live music comedy performance venue Geelong Victoria',
-    type: 'Arts & Entertainment', emoji: '🎭', color: '#9B2226',
-    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
-  },
-  {
-    query: 'spa massage beauty wellness retreat day spa Geelong Victoria',
-    type: 'Wellness', emoji: '💆', color: '#B5838D',
-    maxResults: 10, bias: { lat: -38.1499, lng: 144.3617, radius: 20000 },
-  },
-  {
-    query: 'scenic lookout viewpoint beach swimming pier Geelong Bellarine Surf Coast',
-    type: 'Outdoor', emoji: '🌊', color: '#48CAE4',
-    maxResults: 10, bias: { lat: -38.1499, lng: 144.4000, radius: 60000 },
+    query: 'hot springs bathing wellness retreat Mornington Peninsula Bellarine Victoria',
+    section: 'do', type: 'wellness', emoji: '♨️', color: '#E8C4C4',
+    maxResults: 10, bias: { lat: -38.3000, lng: 144.5000, radius: 80000 },
   },
 ];
 
@@ -426,6 +425,7 @@ async function main() {
         google_place_id: place.id,
         name,
         slug:            slugify(name + '-' + suburb),
+        section:         search.section || 'do',
         type:            search.type,
         emoji,
         color:           search.color,

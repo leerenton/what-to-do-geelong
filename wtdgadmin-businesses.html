@@ -38,15 +38,34 @@
       </div>
     </div>
     <div class="adm-field">
-      <label>Category (primary type)</label>
-      <select id="bf-category">
-        <option>Café</option><option>Restaurant</option><option>Bar</option>
-        <option>Pub</option><option>Bar & Restaurant</option><option>Seafood</option>
-        <option>Market</option><option>Gallery</option><option>Museum</option>
-        <option>Theatre</option><option>Retail / Shop</option>
-        <option>Hotel</option><option>Tour</option><option>Activity</option>
-        <option>Waterfront</option><option>Other</option>
-      </select>
+      <label>Category / Type (select all that apply)</label>
+      <p style="font-size:.73rem;color:var(--adm-mid);margin-bottom:.5rem">First selected = label shown on the card. Affects filter pill matching.</p>
+      <div class="adm-check-grid" id="bf-categories">
+        <label class="adm-check-item"><input type="checkbox" value="Café" /> ☕ Café</label>
+        <label class="adm-check-item"><input type="checkbox" value="Restaurant" /> 🍽 Restaurant</label>
+        <label class="adm-check-item"><input type="checkbox" value="Bar" /> 🍸 Bar</label>
+        <label class="adm-check-item"><input type="checkbox" value="Pub" /> 🍺 Pub</label>
+        <label class="adm-check-item"><input type="checkbox" value="Bakery" /> 🥐 Bakery</label>
+        <label class="adm-check-item"><input type="checkbox" value="Brunch" /> 🍳 Brunch</label>
+        <label class="adm-check-item"><input type="checkbox" value="Pizza" /> 🍕 Pizza</label>
+        <label class="adm-check-item"><input type="checkbox" value="Asian" /> 🍜 Asian</label>
+        <label class="adm-check-item"><input type="checkbox" value="Seafood" /> 🦞 Seafood</label>
+        <label class="adm-check-item"><input type="checkbox" value="Winery" /> 🍷 Winery</label>
+        <label class="adm-check-item"><input type="checkbox" value="Brewery" /> 🍻 Brewery</label>
+        <label class="adm-check-item"><input type="checkbox" value="Market" /> 🛍 Market</label>
+        <label class="adm-check-item"><input type="checkbox" value="Gallery" /> 🖼 Gallery</label>
+        <label class="adm-check-item"><input type="checkbox" value="Museum" /> 🏛 Museum</label>
+        <label class="adm-check-item"><input type="checkbox" value="Theatre" /> 🎭 Theatre</label>
+        <label class="adm-check-item"><input type="checkbox" value="Cinema" /> 🎬 Cinema</label>
+        <label class="adm-check-item"><input type="checkbox" value="Activity" /> 🎯 Activity</label>
+        <label class="adm-check-item"><input type="checkbox" value="Adventure" /> 🧗 Adventure</label>
+        <label class="adm-check-item"><input type="checkbox" value="Sport" /> ⚽ Sport</label>
+        <label class="adm-check-item"><input type="checkbox" value="Wellness" /> 🧘 Wellness</label>
+        <label class="adm-check-item"><input type="checkbox" value="Hotel" /> 🏨 Hotel</label>
+        <label class="adm-check-item"><input type="checkbox" value="Tour" /> 🗺 Tour</label>
+        <label class="adm-check-item"><input type="checkbox" value="Retail / Shop" /> 🛒 Retail / Shop</label>
+        <label class="adm-check-item"><input type="checkbox" value="Other" /> ✦ Other</label>
+      </div>
     </div>
 
     <!-- Multi-section -->
@@ -352,8 +371,13 @@ function openDrawer(id) {
   document.getElementById('bf-name').value     = b?.name     || '';
   document.getElementById('bf-slug').value     = b?.slug     || '';
   document.getElementById('bf-emoji').value    = b?.emoji    || '';
-  document.getElementById('bf-category').value = b?.category || 'Café';
   document.getElementById('bf-desc').value     = b?.description || '';
+
+  // Categories checkboxes — use categories[] with fallback to legacy category string
+  const activeCats = b?.categories?.length ? b.categories : (b?.category ? [b.category] : []);
+  document.querySelectorAll('#bf-categories input[type=checkbox]').forEach(cb => {
+    cb.checked = activeCats.includes(cb.value);
+  });
   document.getElementById('bf-location').value = b?.location  || '';
   document.getElementById('bf-suburb').value   = b?.suburb    || '';
   document.getElementById('bf-color').value    = b?.color     || '#4ac8d0';
@@ -401,6 +425,12 @@ async function saveBusiness() {
   const slug = document.getElementById('bf-slug').value.trim() ||
     name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
+  // Collect categories
+  const categories = [...document.querySelectorAll('#bf-categories input[type=checkbox]:checked')].map(cb => cb.value);
+  if (!categories.length) { alert('Please select at least one category.'); return; }
+  // Primary category = first selected (shown on card)
+  const category = categories[0];
+
   // Collect sections
   const sections = [...document.querySelectorAll('#bf-sections input[type=checkbox]:checked')].map(cb => cb.value);
   if (!sections.length) { alert('Please select at least one page section.'); return; }
@@ -417,7 +447,9 @@ async function saveBusiness() {
   const payload = {
     name, slug,
     emoji:             document.getElementById('bf-emoji').value.trim()    || null,
-    category:          document.getElementById('bf-category').value,
+    category,       // primary display label (first selected)
+    categories,     // full array
+    type: category, // keep legacy type field in sync for card display
     section,
     sections,
     tags,

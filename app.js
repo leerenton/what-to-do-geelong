@@ -2972,11 +2972,13 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
   function render() {
     const prefs = getPrefs();
     let filtered = items.filter(item => {
-      // Match filter pill against type/category AND tags array
+      // Match filter pill against type/category/categories[] AND tags[]
       const typeHay = (item.type || item.category || '').toLowerCase();
+      const catsHay = (item.categories || []).map(c => c.toLowerCase());
       const tagsHay = (item.tags || []).map(t => t.toLowerCase());
       const matchFilter = activeFilter === 'all'
         || typeHay.includes(activeFilter)
+        || catsHay.some(c => c.includes(activeFilter))
         || tagsHay.some(t => t.includes(activeFilter));
       const matchSearch = !searchQ ||
         (item.name  || item.title || '').toLowerCase().includes(searchQ) ||
@@ -3707,6 +3709,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (remote) {
       if (remote.businesses.length) BUSINESSES = remote.businesses.map(b => ({
         ...b,
+        // Ensure categories[] is populated from whichever field exists
+        categories: b.categories?.length ? b.categories
+          : (b.category ? [b.category] : (b.type ? [b.type] : [])),
         section: b.section || (
           ['Bar','Pub','Winery','Brewery','Distillery','Cocktail','Nightclub'].some(t => b.type?.includes(t)) ? 'drink' :
           ['Café','Restaurant','Bakery','Food'].some(t => b.type?.includes(t)) ? 'eat' :

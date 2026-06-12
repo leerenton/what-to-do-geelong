@@ -28,11 +28,11 @@ function camelize(data) {
 async function loadAllData() {
   try {
     const [bizRes, evRes, stayRes, promoRes, artRes] = await Promise.all([
-      db.from('businesses').select('id,name,slug,type,suburb,emoji,img,description,phone,website,location,lat,lng,is_gold,status,owner_id').or('status.eq.approved,status.is.null').order('name'),
-      db.from('events').select('id,title,name,category,date,time,location,img,emoji,url,is_promoted,promoted_package,business_id,status').or('status.eq.approved,status.is.null').order('id'),
-      db.from('stays').select('id,name,suburb,img,emoji,url,description').order('id'),
-      db.from('promos').select('id,title,description,discount,img,emoji,url,business_id,status').or('status.eq.approved,status.is.null').order('id'),
-      db.from('articles').select('id,title,slug,excerpt,img,category,published_at,author').order('published_at', { ascending: false }).limit(20),
+      db.from('businesses').select('*').or('status.eq.approved,status.is.null').order('name'),
+      db.from('events').select('*').or('status.eq.approved,status.is.null').order('id'),
+      db.from('stays').select('*').order('id'),
+      db.from('promos').select('*').or('status.eq.approved,status.is.null').order('id'),
+      db.from('articles').select('*').order('published_at', { ascending: false }).limit(20),
     ]);
 
     if (bizRes.error) throw bizRes.error;

@@ -2737,11 +2737,6 @@ async function initEventPage() {
           </button>
         </div>
 
-        <!-- Bottom-right: views badge -->
-        <div class="ev-hero2__views">
-          ${wtdgIcon('views', 16, '#fff')}
-          <span>${Math.floor(Math.random()*3000+500).toLocaleString()} people viewed this week</span>
-        </div>
       </div>
 
       <!-- Info card -->

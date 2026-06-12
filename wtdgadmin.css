@@ -171,6 +171,20 @@ body.adm-body {
   .adm-field-row, .adm-field-row--3 { grid-template-columns: 1fr; }
 }
 
+/* ── DRAWER MOBILE ───────────────────────────────────────── */
+@media (max-width: 600px) {
+  .adm-drawer { width: 100vw; }
+  .adm-drawer__body { padding: 1rem; }
+  .adm-drawer__footer { padding: .75rem 1rem; flex-wrap: wrap; }
+  /* Collapse all field rows inside drawer on small screens */
+  .adm-drawer .adm-field-row,
+  .adm-drawer .adm-field-row--3 { grid-template-columns: 1fr; }
+  /* Prevent inputs overflowing on iOS */
+  .adm-drawer input,
+  .adm-drawer select,
+  .adm-drawer textarea { max-width: 100%; box-sizing: border-box; }
+}
+
 /* ── DATE FILTER ─────────────────────────────────────────── */
 .adm-date-filter { display: flex; gap: .4rem; flex-wrap: wrap; }
 .adm-date-btn {

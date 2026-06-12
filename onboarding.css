@@ -279,6 +279,18 @@
 .ob-next:disabled { background: #c8eeef; color: rgba(26,26,26,.4); cursor: default; box-shadow: none; }
 .ob-next--link { display: block; }
 
+.ob-secondary-btn {
+  display: block; width: 100%; text-align: center;
+  background: none; border: 1.5px solid var(--teal);
+  color: var(--teal); border-radius: .75rem;
+  padding: .85rem 1.25rem; font-size: 1rem; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  margin-top: .65rem; margin-bottom: .25rem;
+  transition: background .15s, color .15s;
+  font-family: inherit;
+}
+.ob-secondary-btn:hover { background: rgba(74,200,208,.08); }
+
 .ob-skip {
   background: none;
   border: none;

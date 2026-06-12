@@ -144,25 +144,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
       <div class="ob-body">
-        <div class="ob-emoji">💌</div>
-        <h1 class="ob-title">Save your Geelong plan</h1>
-        <p class="ob-sub">Drop your email and we'll save your preferences, send your itinerary, and let you know when new events match your vibe.</p>
 
-        <div class="ob-perks">
-          <div class="ob-perk">⭐ Save and star events to your itinerary</div>
-          <div class="ob-perk">📧 Email your plan to yourself or a friend</div>
-          <div class="ob-perk">🎁 One-click entry to competitions & giveaways</div>
-          <div class="ob-perk">🔔 Alerts when something new matches your interests</div>
+        <!-- STATE A: logged in — auto-save to account -->
+        <div id="ob-s5-loggedin" style="display:none">
+          <div class="ob-emoji">✅</div>
+          <h1 class="ob-title">Preferences saved!</h1>
+          <p class="ob-sub" id="ob-s5-greeting">Your personalised Geelong guide is ready.</p>
+          <div class="ob-perks">
+            <div class="ob-perk">✦ Your homepage is now sorted to your tastes</div>
+            <div class="ob-perk">⭐ Events and places matching your vibe come first</div>
+            <div class="ob-perk">🔔 We'll alert you when new events match your interests</div>
+          </div>
+          <button class="ob-next" onclick="loggedInFinish()">Show me my Geelong →</button>
         </div>
 
-        <div class="ob-form">
-          <input type="text" id="ob-name" placeholder="Your first name" class="ob-input" />
-          <input type="email" id="ob-email" placeholder="Your email address" class="ob-input" />
-          <button class="ob-next" id="js-save-btn" onclick="saveAndFinish()">Save my Geelong ✨</button>
+        <!-- STATE B: not logged in — prompt to sign up or skip -->
+        <div id="ob-s5-loggedout">
+          <div class="ob-emoji">💌</div>
+          <h1 class="ob-title">Save your Geelong plan</h1>
+          <p class="ob-sub">Create a free account to save your preferences, build a guide and get alerts when new events match your vibe.</p>
+          <div class="ob-perks">
+            <div class="ob-perk">⭐ Save events &amp; places to your itinerary</div>
+            <div class="ob-perk">🎁 One-click entry to competitions &amp; giveaways</div>
+            <div class="ob-perk">🔔 Alerts when something new matches your interests</div>
+          </div>
+          <a href="login.html?next=onboarding.html&ob_prefs=1" class="ob-next ob-next--link">Create a free account →</a>
+          <a href="login.html?next=onboarding.html&ob_prefs=1" class="ob-secondary-btn">Already have an account? Log in</a>
+          <button class="ob-skip" onclick="skipAndFinish()">Skip for now — just show me what's on</button>
+          <p class="ob-legal">No spam, ever. Unsubscribe anytime. <a href="#">Privacy policy</a>.</p>
         </div>
 
-        <button class="ob-skip" onclick="skipAndFinish()">Skip for now — just show me what's on</button>
-        <p class="ob-legal">No spam, ever. Unsubscribe anytime. <a href="#">Privacy policy</a>.</p>
       </div>
     </div>
 

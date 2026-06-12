@@ -16,6 +16,7 @@ function showScreen(id) {
   document.querySelectorAll('.ob-screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
+  if (id === 'ob-s5') initSaveScreen();
 }
 
 // ── SCREEN 1: Group type ──────────────────────────────────
@@ -67,53 +68,59 @@ document.querySelectorAll('#js-interest-tags .ob-tag').forEach(tag => {
   });
 });
 
-// ── SCREEN 4: Dates ───────────────────────────────────────
-(function initDates() {
-  const today = new Date();
-  const sat = new Date(today);
-  sat.setDate(today.getDate() + ((6 - today.getDay() + 7) % 7 || 7));
-  const sun = new Date(sat); sun.setDate(sat.getDate() + 1);
-  const nextSat = new Date(sat); nextSat.setDate(sat.getDate() + 7);
-  const nextSun = new Date(nextSat); nextSun.setDate(nextSat.getDate() + 1);
-  const endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
+// ── SCREEN 4 (save): Auth-aware ───────────────────────────
+// Called when screen 5 becomes active — check login state and show correct UI
+async function initSaveScreen() {
+  let loggedIn = false;
+  let userName = '';
 
-  function fmt(d) { return d.toISOString().split('T')[0]; }
-
-  document.getElementById('js-qd-weekend').addEventListener('click', () => {
-    document.getElementById('ob-from').value = fmt(sat);
-    document.getElementById('ob-to').value = fmt(sun);
-    document.querySelectorAll('.ob-quick-dates .ob-chip').forEach(c => c.classList.remove('selected'));
-    document.getElementById('js-qd-weekend').classList.add('selected');
-  });
-
-  document.getElementById('js-qd-next').addEventListener('click', () => {
-    document.getElementById('ob-from').value = fmt(nextSat);
-    document.getElementById('ob-to').value = fmt(nextSun);
-    document.querySelectorAll('.ob-quick-dates .ob-chip').forEach(c => c.classList.remove('selected'));
-    document.getElementById('js-qd-next').classList.add('selected');
-  });
-
-  document.getElementById('js-qd-week').addEventListener('click', () => {
-    document.getElementById('ob-from').value = fmt(today);
-    document.getElementById('ob-to').value = fmt(endOfWeek);
-    document.querySelectorAll('.ob-quick-dates .ob-chip').forEach(c => c.classList.remove('selected'));
-    document.getElementById('js-qd-week').classList.add('selected');
-  });
-})();
-
-// ── SCREEN 5: Save ────────────────────────────────────────
-function saveAndFinish() {
-  prefs.name  = document.getElementById('ob-name').value.trim();
-  prefs.email = document.getElementById('ob-email').value.trim();
-  prefs.from  = document.getElementById('ob-from')?.value || document.getElementById('ob-from')?.value;
-  prefs.to    = document.getElementById('ob-to')?.value;
-
-  if (!prefs.email) {
-    document.getElementById('ob-email').focus();
-    document.getElementById('ob-email').style.borderColor = '#e76f51';
-    return;
+  // Check Supabase session
+  if (typeof db !== 'undefined') {
+    try {
+      const { data } = await db.auth.getSession();
+      if (data?.session) {
+        loggedIn = true;
+        userName = data.session.user?.user_metadata?.name
+          || data.session.user?.email?.split('@')[0]
+          || '';
+      }
+    } catch (_) {}
   }
 
+  // Fallback: check localStorage account
+  if (!loggedIn) {
+    try {
+      const acct = JSON.parse(localStorage.getItem('wtdg_account') || 'null');
+      if (acct?.email) { loggedIn = true; userName = acct.name || acct.email.split('@')[0]; }
+    } catch (_) {}
+  }
+
+  if (loggedIn) {
+    // Save prefs now and show confirmation
+    prefs.name = userName;
+    persistPrefs();
+    // Update greeting
+    const greeting = document.getElementById('ob-s5-greeting');
+    if (greeting) greeting.textContent = userName
+      ? `Hey ${userName}! Your personalised Geelong guide is ready.`
+      : 'Your personalised Geelong guide is ready.';
+    document.getElementById('ob-s5-loggedin').style.display = '';
+    document.getElementById('ob-s5-loggedout').style.display = 'none';
+  } else {
+    // Persist locally so prefs survive the login redirect
+    persistPrefs();
+    document.getElementById('ob-s5-loggedin').style.display = 'none';
+    document.getElementById('ob-s5-loggedout').style.display = '';
+  }
+}
+
+function loggedInFinish() {
+  buildResultScreen();
+  showScreen('ob-s6');
+}
+
+// ── SCREEN 5: Save (legacy logged-out path) ───────────────
+function saveAndFinish() {
   persistPrefs();
   buildResultScreen();
   showScreen('ob-s6');
@@ -177,6 +184,12 @@ function interestEmoji(val) {
 }
 
 function cap(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+
+// ── RETURN FROM LOGIN ─────────────────────────────────────
+// If user was sent to login mid-onboarding and came back, jump to save screen
+if (new URLSearchParams(window.location.search).get('ob_prefs') === '1') {
+  showScreen('ob-s5');
+}
 
 // ── LOAD EXISTING PREFS ───────────────────────────────────
 (function loadExisting() {

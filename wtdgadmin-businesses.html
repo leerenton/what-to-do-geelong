@@ -37,26 +37,72 @@
         <input type="text" id="bf-emoji" placeholder="☕" maxlength="4" />
       </div>
     </div>
-    <div class="adm-field-row">
-      <div class="adm-field">
-        <label>Category</label>
-        <select id="bf-category">
-          <option>Café</option><option>Restaurant</option><option>Bar</option>
-          <option>Pub</option><option>Bar & Restaurant</option><option>Seafood</option>
-          <option>Market</option><option>Gallery</option><option>Museum</option>
-          <option>Theatre</option><option>Retail / Shop</option>
-          <option>Hotel</option><option>Tour</option><option>Activity</option>
-          <option>Waterfront</option><option>Other</option>
-        </select>
+    <div class="adm-field">
+      <label>Category (primary type)</label>
+      <select id="bf-category">
+        <option>Café</option><option>Restaurant</option><option>Bar</option>
+        <option>Pub</option><option>Bar & Restaurant</option><option>Seafood</option>
+        <option>Market</option><option>Gallery</option><option>Museum</option>
+        <option>Theatre</option><option>Retail / Shop</option>
+        <option>Hotel</option><option>Tour</option><option>Activity</option>
+        <option>Waterfront</option><option>Other</option>
+      </select>
+    </div>
+
+    <!-- Multi-section -->
+    <div class="adm-field">
+      <label>Appears on pages (select all that apply)</label>
+      <div class="adm-check-grid" id="bf-sections">
+        <label class="adm-check-item"><input type="checkbox" value="eat" /> 🍽 Eat &amp; Drink</label>
+        <label class="adm-check-item"><input type="checkbox" value="drink" /> 🍸 Bars &amp; Nightlife</label>
+        <label class="adm-check-item"><input type="checkbox" value="do" /> 🎯 Things to Do</label>
+        <label class="adm-check-item"><input type="checkbox" value="stay" /> 🛏 Accommodation</label>
       </div>
-      <div class="adm-field">
-        <label>Section</label>
-        <select id="bf-section">
-          <option value="eat">Eat & Drink</option>
-          <option value="do">Things to Do</option>
-          <option value="shop">Shop</option>
-          <option value="other">Other</option>
-        </select>
+    </div>
+
+    <!-- Tags -->
+    <div class="adm-field">
+      <label>Tags</label>
+      <p style="font-size:.73rem;color:var(--adm-mid);margin-bottom:.6rem">Used for personalisation, filtering and search. Select everything that applies.</p>
+
+      <p class="adm-tag-group-label">Interests &amp; Personalisation</p>
+      <div class="adm-check-grid" id="bf-tags-interests">
+        <label class="adm-check-item"><input type="checkbox" value="music" /> 🎵 Music</label>
+        <label class="adm-check-item"><input type="checkbox" value="food" /> 🍴 Food</label>
+        <label class="adm-check-item"><input type="checkbox" value="arts" /> 🎨 Arts &amp; Culture</label>
+        <label class="adm-check-item"><input type="checkbox" value="outdoors" /> 🌿 Outdoors</label>
+        <label class="adm-check-item"><input type="checkbox" value="fitness" /> 💪 Fitness</label>
+        <label class="adm-check-item"><input type="checkbox" value="wellness" /> 🧘 Wellness</label>
+        <label class="adm-check-item"><input type="checkbox" value="sport" /> ⚽ Sport</label>
+        <label class="adm-check-item"><input type="checkbox" value="nightlife" /> 🌙 Nightlife</label>
+        <label class="adm-check-item"><input type="checkbox" value="markets" /> 🛍 Markets</label>
+        <label class="adm-check-item"><input type="checkbox" value="theatre" /> 🎭 Theatre</label>
+        <label class="adm-check-item"><input type="checkbox" value="nature" /> 🌳 Nature</label>
+        <label class="adm-check-item"><input type="checkbox" value="shopping" /> 🛒 Shopping</label>
+      </div>
+
+      <p class="adm-tag-group-label" style="margin-top:.75rem">Suitability</p>
+      <div class="adm-check-grid" id="bf-tags-suit">
+        <label class="adm-check-item"><input type="checkbox" value="family-friendly" /> 👨‍👩‍👧 Family-Friendly</label>
+        <label class="adm-check-item"><input type="checkbox" value="kids" /> 🧒 Good for Kids</label>
+        <label class="adm-check-item"><input type="checkbox" value="teens" /> 🧑 Teens</label>
+        <label class="adm-check-item"><input type="checkbox" value="adults-only" /> 🔞 Adults Only</label>
+        <label class="adm-check-item"><input type="checkbox" value="dog-friendly" /> 🐶 Dog-Friendly</label>
+        <label class="adm-check-item"><input type="checkbox" value="accessible" /> ♿ Accessible</label>
+        <label class="adm-check-item"><input type="checkbox" value="free" /> 🆓 Free</label>
+        <label class="adm-check-item"><input type="checkbox" value="all-ages" /> 🌟 All Ages</label>
+      </div>
+
+      <p class="adm-tag-group-label" style="margin-top:.75rem">Vibe</p>
+      <div class="adm-check-grid" id="bf-tags-vibe">
+        <label class="adm-check-item"><input type="checkbox" value="indoor" /> 🏠 Indoor</label>
+        <label class="adm-check-item"><input type="checkbox" value="outdoor" /> ☀️ Outdoor</label>
+        <label class="adm-check-item"><input type="checkbox" value="date-night" /> 💑 Date Night</label>
+        <label class="adm-check-item"><input type="checkbox" value="group" /> 👥 Groups</label>
+        <label class="adm-check-item"><input type="checkbox" value="solo" /> 🧍 Solo-Friendly</label>
+        <label class="adm-check-item"><input type="checkbox" value="romantic" /> 🌹 Romantic</label>
+        <label class="adm-check-item"><input type="checkbox" value="live music" /> 🎸 Live Music</label>
+        <label class="adm-check-item"><input type="checkbox" value="pet-friendly" /> 🐾 Pet-Friendly</label>
       </div>
     </div>
     <div class="adm-field">
@@ -307,7 +353,6 @@ function openDrawer(id) {
   document.getElementById('bf-slug').value     = b?.slug     || '';
   document.getElementById('bf-emoji').value    = b?.emoji    || '';
   document.getElementById('bf-category').value = b?.category || 'Café';
-  document.getElementById('bf-section').value  = b?.section  || 'eat';
   document.getElementById('bf-desc').value     = b?.description || '';
   document.getElementById('bf-location').value = b?.location  || '';
   document.getElementById('bf-suburb').value   = b?.suburb    || '';
@@ -320,6 +365,20 @@ function openDrawer(id) {
   document.getElementById('bf-lng').value      = b?.lng       || '';
   document.getElementById('bf-tier').value     = b?.subscription_tier || 'free';
   document.getElementById('bf-claimed').value  = String(!!b?.is_claimed);
+
+  // Sections checkboxes — use sections[] with fallback to legacy section field
+  const activeSections = b?.sections?.length ? b.sections : (b?.section ? [b.section] : ['eat']);
+  document.querySelectorAll('#bf-sections input[type=checkbox]').forEach(cb => {
+    cb.checked = activeSections.includes(cb.value);
+  });
+
+  // Tags checkboxes
+  const activeTags = b?.tags || [];
+  ['bf-tags-interests','bf-tags-suit','bf-tags-vibe'].forEach(groupId => {
+    document.querySelectorAll(`#${groupId} input[type=checkbox]`).forEach(cb => {
+      cb.checked = activeTags.includes(cb.value);
+    });
+  });
 
   const prev = document.getElementById('bf-img-preview');
   prev.src = b?.img || ''; prev.style.display = b?.img ? 'block' : 'none';
@@ -342,11 +401,26 @@ async function saveBusiness() {
   const slug = document.getElementById('bf-slug').value.trim() ||
     name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
+  // Collect sections
+  const sections = [...document.querySelectorAll('#bf-sections input[type=checkbox]:checked')].map(cb => cb.value);
+  if (!sections.length) { alert('Please select at least one page section.'); return; }
+  // Primary section = first selected (for backward compat)
+  const section = sections[0];
+
+  // Collect all tags
+  const tags = [
+    ...document.querySelectorAll('#bf-tags-interests input[type=checkbox]:checked'),
+    ...document.querySelectorAll('#bf-tags-suit input[type=checkbox]:checked'),
+    ...document.querySelectorAll('#bf-tags-vibe input[type=checkbox]:checked'),
+  ].map(cb => cb.value);
+
   const payload = {
     name, slug,
     emoji:             document.getElementById('bf-emoji').value.trim()    || null,
     category:          document.getElementById('bf-category').value,
-    section:           document.getElementById('bf-section').value,
+    section,
+    sections,
+    tags,
     description:       document.getElementById('bf-desc').value.trim()     || null,
     location:          document.getElementById('bf-location').value.trim() || null,
     suburb:            document.getElementById('bf-suburb').value.trim()   || null,

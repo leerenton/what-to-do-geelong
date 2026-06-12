@@ -331,6 +331,29 @@ body.adm-body {
 .adm-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
 .adm-field-row--3 { grid-template-columns: 1fr 1fr 1fr; }
 
+/* ── Checkbox grid (multi-section / tags) ─────────────────── */
+.adm-check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: .35rem;
+}
+.adm-check-item {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .4rem .6rem; border-radius: .4rem;
+  border: 1px solid var(--adm-border);
+  background: var(--adm-card2);
+  cursor: pointer; font-size: .82rem; color: var(--adm-text);
+  transition: border-color .15s, background .15s;
+  user-select: none;
+}
+.adm-check-item:hover { border-color: var(--adm-teal); }
+.adm-check-item input[type=checkbox] { accent-color: var(--adm-teal); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+.adm-check-item:has(input:checked) { border-color: var(--adm-teal); background: var(--adm-teal-dim); }
+.adm-tag-group-label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--adm-mid); margin-bottom: .4rem;
+}
+
 /* ── Upload zone ──────────────────────────────────────────── */
 .adm-upload-zone {
   border: 2px dashed var(--adm-border); border-radius: .6rem;

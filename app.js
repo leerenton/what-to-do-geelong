@@ -1369,7 +1369,7 @@ function renderEatStrip(eatBiz) {
   const strip = document.getElementById('js-eat-strip');
   if (!strip) return;
 
-  if (!eatBiz) eatBiz = BUSINESSES.filter(b => b.section === 'eat');
+  if (!eatBiz) eatBiz = BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('eat') : b.section === 'eat'));
   strip.innerHTML = eatBiz.map(biz => {
     const hasEvent = businessHasUpcoming(biz.id);
     const hasPromo = businessHasPromo(biz.id);
@@ -2972,12 +2972,17 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
   function render() {
     const prefs = getPrefs();
     let filtered = items.filter(item => {
-      const haystack = (item.type || item.category || '').toLowerCase();
-      const matchFilter = activeFilter === 'all' || haystack.includes(activeFilter);
+      // Match filter pill against type/category AND tags array
+      const typeHay = (item.type || item.category || '').toLowerCase();
+      const tagsHay = (item.tags || []).map(t => t.toLowerCase());
+      const matchFilter = activeFilter === 'all'
+        || typeHay.includes(activeFilter)
+        || tagsHay.some(t => t.includes(activeFilter));
       const matchSearch = !searchQ ||
         (item.name  || item.title || '').toLowerCase().includes(searchQ) ||
         (item.description || item.subtitle || '').toLowerCase().includes(searchQ) ||
-        (item.suburb || item.location || '').toLowerCase().includes(searchQ);
+        (item.suburb || item.location || '').toLowerCase().includes(searchQ) ||
+        (item.tags || []).some(t => t.toLowerCase().includes(searchQ));
       return matchFilter && matchSearch;
     });
     // Sort: pref-matched items first
@@ -3238,7 +3243,7 @@ function initEatPage() {
   const root = document.getElementById('js-eat-root');
   if (!root) return;
 
-  const eatBiz = BUSINESSES.filter(b => b.section === 'eat');
+  const eatBiz = BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('eat') : b.section === 'eat'));
 
   function renderEat(items) {
     root.innerHTML = items.length ? items.map(biz => {
@@ -3276,7 +3281,7 @@ function initDrinkPage() {
   const root = document.getElementById('js-drink-root');
   if (!root) return;
 
-  const drinkBiz = BUSINESSES.filter(b => b.section === 'drink');
+  const drinkBiz = BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('drink') : b.section === 'drink'));
 
   function renderDrink(items) {
     root.innerHTML = items.length ? items.map(biz => {
@@ -3314,7 +3319,7 @@ function initDoPage() {
   const root = document.getElementById('js-do-root');
   if (!root) return;
 
-  const doBiz = BUSINESSES.filter(b => b.section === 'do');
+  const doBiz = BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('do') : b.section === 'do'));
 
   function renderDo(items) {
     root.innerHTML = items.length ? items.map(biz => {
@@ -3742,7 +3747,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const sortedEvents   = applyHomepageSort(EVENTS, 'event');
-    const sortedBiz      = applyHomepageSort(BUSINESSES.filter(b => b.section === 'eat'), 'business');
+    const sortedBiz      = applyHomepageSort(BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('eat') : b.section === 'eat')), 'business');
     const sortedStays    = applyHomepageSort(STAYS, 'stay');
     const sortedArticles = applyHomepageSort(ARTICLES, 'article');
 

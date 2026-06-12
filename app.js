@@ -878,6 +878,12 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
     document.getElementById('js-mh-btm-title').textContent = btmEvFinal.title;
   }
 
+  // Cache hero image for instant display on next visit
+  try {
+    const heroCache = { img: mainEv.img, title: mainEv.title, ts: Date.now() };
+    localStorage.setItem('wtdg_hero_cache', JSON.stringify(heroCache));
+  } catch(e) {}
+
   // Hide skeleton, reveal real hero
   const skel = document.getElementById('js-hero-skeleton');
   if (skel) skel.style.display = 'none';

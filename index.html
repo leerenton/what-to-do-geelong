@@ -26,9 +26,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <!-- Critical skeleton CSS inlined — renders before styles.css downloads -->
+  <style>
+    *,::before,::after{box-sizing:border-box}
+    body{margin:0;background:#f5f5f0;font-family:'DM Sans',sans-serif}
+    .container{max-width:1140px;margin:0 auto;padding:0 1.25rem}
+    @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+    .skel-shimmer{background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);background-size:1200px 100%;animation:shimmer 1.4s infinite linear}
+    .skel-hero-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:380px;gap:.5rem;border-radius:1rem;overflow:hidden;margin-top:1rem}
+    @media(max-width:640px){.skel-hero-grid{grid-template-columns:1fr;grid-template-rows:240px 308px}}
+    .skel-box{border-radius:.75rem;background:#e2e8f0}
+    .skel-stack{display:grid;grid-template-rows:1fr 1fr;gap:.5rem}
+    .skel-event-pair{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+    @media(max-width:640px){.skel-event-pair{grid-template-columns:1fr}}
+    .skel-event-card{height:260px;border-radius:.75rem}
+  </style>
   <link rel="stylesheet" href="styles.css?v=10" />
-  <link rel="stylesheet" href="guides.css" />
-  <link rel="stylesheet" href="giveaway.css" />
+  <!-- Non-critical CSS loaded async -->
+  <link rel="stylesheet" href="guides.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="giveaway.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="guides.css" /><link rel="stylesheet" href="giveaway.css" /></noscript>
   <!-- Google AdSense verification -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7991778555943890" crossorigin="anonymous"></script>
 </head>
@@ -278,6 +295,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </div>
+
+  <!-- Pre-fill hero from cache for returning visitors (eliminates LCP delay) -->
+  <script>
+    try {
+      var _hc = JSON.parse(localStorage.getItem('wtdg_hero_cache') || 'null');
+      // Only use cache if less than 6 hours old
+      if (_hc && _hc.img && (Date.now() - _hc.ts) < 21600000) {
+        document.addEventListener('DOMContentLoaded', function() {
+          var img = document.getElementById('js-mh-main-img');
+          var skel = document.getElementById('js-hero-skeleton');
+          var hero = document.getElementById('js-masonry-hero');
+          if (img && !img.src) {
+            img.src = _hc.img;
+            if (skel) skel.style.display = 'none';
+            if (hero) hero.style.display = 'block';
+          }
+        });
+      }
+    } catch(e) {}
+  </script>
 
   <!-- HERO SKELETON — shown until JS populates real content -->
   <section class="container" id="js-hero-skeleton" aria-hidden="true">

@@ -274,23 +274,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="datebar">
     <div class="container datebar__inner">
       <div class="datebar__ticker" id="js-datebar-ticker" aria-live="polite"></div>
-      <button class="datebar__btn" id="js-datebar-toggle">
-        <span class="material-symbols-rounded">calendar_month</span> Planning a visit?
-      </button>
-    </div>
-    <div class="date-drawer" id="js-date-drawer" hidden>
-      <div class="container date-drawer__inner">
-        <p class="date-drawer__label">When are you heading to Geelong?</p>
-        <div class="date-drawer__fields">
-          <div class="date-field">
-            <label for="dp-from">Arriving</label>
-            <input type="date" id="dp-from" />
+      <div class="datebar__popout-wrap">
+        <button class="datebar__btn" id="js-datebar-toggle">
+          <span class="material-symbols-rounded">calendar_month</span> Planning a visit?
+        </button>
+        <div class="date-popout" id="js-date-drawer" hidden>
+          <p class="date-popout__label">When are you visiting Geelong?</p>
+          <div class="date-popout__row">
+            <div class="date-field">
+              <label for="dp-from">Arriving</label>
+              <input type="date" id="dp-from" />
+            </div>
+            <div class="date-field">
+              <label for="dp-to">Leaving</label>
+              <input type="date" id="dp-to" />
+            </div>
           </div>
-          <div class="date-field">
-            <label for="dp-to">Leaving</label>
-            <input type="date" id="dp-to" />
-          </div>
-          <button class="btn btn--teal" id="js-dp-apply">Show me what's on</button>
+          <button class="btn btn--teal btn--full" id="js-dp-apply">Show me what's on →</button>
         </div>
       </div>
     </div>

@@ -1697,10 +1697,16 @@ function initDateBar() {
     if (el) el.valueAsDate = sun;
   });
 
-  toggle.addEventListener('click', () => {
-    const isHidden = drawer.hidden;
-    drawer.hidden = !isHidden;
-    toggle.textContent = isHidden ? '✕ Close' : '🗓 Planning a visit?';
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    drawer.hidden = !drawer.hidden;
+  });
+
+  // Close popout when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!drawer.hidden && !drawer.contains(e.target) && e.target !== toggle) {
+      drawer.hidden = true;
+    }
   });
 
   document.getElementById('js-dp-apply')?.addEventListener('click', () => {

@@ -660,49 +660,62 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 .datebar__btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 
-/* Date drawer */
-.date-drawer {
-  background: var(--dark);
-  padding: 1rem 0;
+/* Date popout */
+.datebar__popout-wrap {
+  position: relative;
 }
-.date-drawer__inner {
-  display: flex;
-  align-items: flex-end;
-  gap: .75rem;
-  flex-wrap: wrap;
+.date-popout {
+  position: absolute;
+  top: calc(100% + .5rem);
+  right: 0;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  padding: 1.1rem 1.1rem .9rem;
+  width: 280px;
+  z-index: 200;
+  animation: popout-in .15s ease;
 }
-.date-drawer__label {
-  width: 100%;
-  font-size: .8rem;
-  color: rgba(255,255,255,.6);
-  font-weight: 600;
-  letter-spacing: .04em;
+@keyframes popout-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.date-popout__label {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--mid);
   text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: .75rem;
+}
+.date-popout__row {
+  display: flex;
+  gap: .6rem;
+  margin-bottom: .75rem;
 }
 .date-field {
   display: flex;
   flex-direction: column;
   gap: .25rem;
   flex: 1;
-  min-width: 120px;
+  min-width: 0;
 }
 .date-field label {
-  font-size: .7rem;
+  font-size: .68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
-  color: rgba(255,255,255,.5);
+  color: var(--mid);
 }
 .date-field input[type="date"] {
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.2);
+  background: var(--light);
+  border: 1.5px solid #e0e0e0;
   border-radius: var(--radius-sm);
-  color: var(--white);
+  color: var(--dark);
   font-family: var(--font-body);
-  font-size: .88rem;
-  padding: .42rem .65rem;
+  font-size: .84rem;
+  padding: .38rem .5rem;
   width: 100%;
-  color-scheme: dark;
 }
 .date-field input[type="date"]:focus {
   outline: none;

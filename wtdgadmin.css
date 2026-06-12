@@ -76,7 +76,23 @@ body.adm-body {
 }
 @media (max-width: 900px) {
   .adm-layout { grid-template-columns: 1fr; }
-  /* Sidebar becomes a slide-over on mobile — see .adm-sidebar--open */
+}
+@media (min-width: 901px) {
+  .adm-sidebar-backdrop { display: none !important; }
+  .adm-mobile-menu-btn { display: none !important; }
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.adm-sidebar {
+  background: var(--adm-sidebar);
+  border-right: 1px solid var(--adm-border);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto;
+}
+
+/* Mobile sidebar slide-over — MUST come after base .adm-sidebar to override position:sticky */
+@media (max-width: 900px) {
   .adm-sidebar {
     position: fixed; top: 0; left: -260px; width: 240px;
     height: 100vh; z-index: 300;
@@ -91,19 +107,6 @@ body.adm-body {
     transition: opacity .25s;
   }
   .adm-sidebar-backdrop.open { opacity: 1; pointer-events: all; }
-}
-@media (min-width: 901px) {
-  .adm-sidebar-backdrop { display: none !important; }
-  .adm-mobile-menu-btn { display: none !important; }
-}
-
-/* ── SIDEBAR ─────────────────────────────────────────────── */
-.adm-sidebar {
-  background: var(--adm-sidebar);
-  border-right: 1px solid var(--adm-border);
-  display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
-  overflow-y: auto;
 }
 .adm-sidebar__logo {
   padding: 1.5rem 1.25rem 1rem;

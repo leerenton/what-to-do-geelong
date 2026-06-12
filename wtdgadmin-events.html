@@ -348,6 +348,20 @@ function fmtDate(d) {
 }
 
 window.openDrawer = openDrawer;
+
+// Auto-open edit drawer if ?edit=<id> is in the URL (from admin FAB)
+(function () {
+  const editId = new URLSearchParams(window.location.search).get('edit');
+  if (!editId) return;
+  const interval = setInterval(() => {
+    if (document.querySelector('.adm-table td')) {
+      clearInterval(interval);
+      openDrawer(editId);
+      history.replaceState({}, '', window.location.pathname);
+    }
+  }, 150);
+  setTimeout(() => clearInterval(interval), 8000);
+})();
 </script>
 </body>
 </html>

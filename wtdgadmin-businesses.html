@@ -152,10 +152,7 @@
         <input type="tel" id="bf-phone" placeholder="03 5222 …" />
       </div>
     </div>
-    <div class="adm-field">
-      <label>Contact Email</label>
-      <input type="email" id="bf-email" placeholder="hello@business.com.au" />
-    </div>
+    <!-- Contact email removed — column not in DB -->
 
     <!-- Hero image upload -->
     <div class="adm-field">
@@ -460,7 +457,6 @@ async function saveBusiness() {
     color:             document.getElementById('bf-color').value           || null,
     website:           document.getElementById('bf-website').value.trim()  || null,
     phone:             document.getElementById('bf-phone').value.trim()    || null,
-    email:             document.getElementById('bf-email').value.trim()    || null,
     img:               document.getElementById('bf-img').value.trim()      || null,
     lat:               parseFloat(document.getElementById('bf-lat').value) || null,
     lng:               parseFloat(document.getElementById('bf-lng').value) || null,

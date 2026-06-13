@@ -21,7 +21,9 @@
           <span class="premier-sheet__x material-symbols-rounded">close</span>
         </button>
       </div>
-      <div class="premier-sheet__content" id="js-premier-content"></div>
+      <a class="premier-sheet__content" id="js-premier-content" href="#" target="_blank" rel="noopener sponsored">
+        <img class="premier-sheet__img" id="js-premier-img" src="" alt="Advertisement" />
+      </a>
       <div class="premier-sheet__progress">
         <div class="premier-sheet__progress-bar" id="js-premier-progress"></div>
       </div>
@@ -106,18 +108,10 @@
         sessionStorage.setItem('wtdg_premier_shown', '1');
 
         const ad = premiers[Math.floor(Math.random() * premiers.length)];
-        const url = ad.ad_link_url || '#';
-
-        content.innerHTML = `
-          <a href="${url}" target="_blank" rel="noopener sponsored" class="ad-card ad-card--premier" style="display:block;text-decoration:none">
-            <div class="ad-card__bg" style="background-image:url('${ad.ad_image_url || ''}')"></div>
-            <div class="ad-card__overlay"></div>
-            <div class="ad-card__body">
-              ${ad.ad_headline ? `<div class="ad-card__title">${ad.ad_headline}</div>` : ''}
-              ${ad.ad_body    ? `<div class="ad-card__desc">${ad.ad_body}</div>`       : ''}
-              <div class="ad-card__cta">Learn more →</div>
-            </div>
-          </a>`;
+        const contentEl = document.getElementById('js-premier-content');
+        const imgEl     = document.getElementById('js-premier-img');
+        if (contentEl) contentEl.href = ad.ad_link_url || '#';
+        if (imgEl && ad.ad_image_url) imgEl.src = ad.ad_image_url;
 
         setTimeout(() => showSheet(true), 2000);
 
@@ -127,17 +121,21 @@
         if (views % 5 !== 0) return;
         sessionStorage.setItem('wtdg_adsense_shown', '1');
 
-        content.innerHTML = `
-          <div style="padding:.75rem">
-            <ins class="adsbygoogle"
-                 style="display:block;width:100%;min-height:160px"
-                 data-ad-client="ca-pub-7991778555943890"
-                 data-ad-slot="PREMIER_SLOT_ID"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});<\/script>
-            <p style="text-align:center;font-size:.75rem;color:#999;margin:.5rem 0 0">This ad supports free local content.</p>
-          </div>`;
+        // Replace the img-based content with AdSense unit
+        const contentEl = document.getElementById('js-premier-content');
+        if (contentEl) {
+          contentEl.outerHTML = `
+            <div class="premier-sheet__content" id="js-premier-content" style="display:flex;flex-direction:column;justify-content:center;padding:.75rem">
+              <ins class="adsbygoogle"
+                   style="display:block;width:100%;min-height:160px"
+                   data-ad-client="ca-pub-7991778555943890"
+                   data-ad-slot="PREMIER_SLOT_ID"
+                   data-ad-format="auto"
+                   data-full-width-responsive="true"></ins>
+              <script>(adsbygoogle = window.adsbygoogle || []).push({});<\/script>
+              <p style="text-align:center;font-size:.75rem;color:#999;margin:.5rem 0 0">This ad supports free local content.</p>
+            </div>`;
+        }
 
         setTimeout(() => showSheet(false), 2000);
       }

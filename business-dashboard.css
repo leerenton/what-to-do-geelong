@@ -447,11 +447,71 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
 .dash-link { color: var(--teal); text-decoration: none; font-weight: 600; }
 .dash-link:hover { text-decoration: underline; }
 
+/* Ad preview card inside dashboard */
+.dash-ad-preview-wrap {
+  width: 100%;
+  border-radius: .55rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+}
+/* Reuse .ad-card styles from styles.css but scoped for preview */
+.ad-card-preview {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.ad-card-preview--boost     { height: 100px; }
+.ad-card-preview--spotlight { height: 160px; }
+.ad-card-preview--premier   { height: 200px; }
+.ad-card-preview__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.ad-card-preview__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.2) 60%, transparent 100%);
+}
+.ad-card-preview__body {
+  position: relative;
+  z-index: 1;
+  padding: .75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+.ad-card-preview__eyebrow { font-size: .58rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+.ad-card-preview__title   { font-size: .95rem; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; text-shadow: 0 1px 4px rgba(0,0,0,.4); }
+.ad-card-preview__desc    { font-size: .75rem; color: rgba(255,255,255,.8); margin: 0; line-height: 1.4; }
+.ad-card-preview__cta     { display: inline-block; margin-top: .2rem; font-size: .7rem; font-weight: 700; color: #fff; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: .2rem .65rem; align-self: flex-start; }
+
 /* Ad creative upload panel (inside promo row) */
 .dash-promo-creative {
   border-top: 1.5px dashed var(--border);
   padding: .9rem .85rem 1rem;
   background: #f9fafb;
+}
+.dash-creative-intro {
+  font-size: .8rem; color: var(--mid); margin: 0 0 .85rem; line-height: 1.5;
+}
+.dash-field-group {
+  display: flex; flex-direction: column; gap: .2rem; margin-bottom: .75rem;
+}
+.dash-field-label {
+  font-size: .78rem; font-weight: 600; color: var(--dark);
+}
+.dash-field-hint {
+  font-size: .71rem; color: var(--mid); font-style: italic;
+}
+.dash-creative-default-img {
+  width: 100%; height: 80px; object-fit: cover;
+  border-radius: .4rem; border: 1px solid var(--border); display: block;
 }
 .dash-creative-spec {
   display: flex; flex-direction: column; gap: .15rem;

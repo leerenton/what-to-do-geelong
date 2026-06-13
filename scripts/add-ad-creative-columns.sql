@@ -20,3 +20,7 @@ SELECT id, business_id, package, status, ad_live, ad_image_url, starts_at, ends_
 FROM promotions
 ORDER BY created_at DESC
 LIMIT 20;
+
+-- Add ad_body column for editorial body text (run if not already added)
+ALTER TABLE promotions
+  ADD COLUMN IF NOT EXISTS ad_body text;

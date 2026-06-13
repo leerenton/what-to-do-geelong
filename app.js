@@ -1383,7 +1383,7 @@ async function loadActiveAds() {
     const now = new Date().toISOString();
     const { data, error } = await window.db
       .from('promotions')
-      .select('id, business_id, package, ad_image_url, ad_link_url, ad_headline, ends_at')
+      .select('id, business_id, package, ad_image_url, ad_link_url, ad_headline, ad_body, ends_at')
       .eq('ad_live', true)
       .gt('ends_at', now)
       .in('package', ['boost', 'spotlight', 'premier']);
@@ -1395,57 +1395,77 @@ async function loadActiveAds() {
   }
 }
 
+// Build a single editorial ad card HTML for use in each slot
+function buildAdCard(ad, variant) {
+  // variant: 'boost' | 'spotlight' | 'premier'
+  const img  = ad.ad_image_url || '';
+  const href = ad.ad_link_url  || '#';
+  const noLink = !ad.ad_link_url;
+  return `
+    <a class="ad-card ad-card--${variant}" href="${href}" ${noLink ? 'style="pointer-events:none"' : 'target="_blank" rel="noopener sponsored"'}>
+      <div class="ad-card__bg" style="${img ? `background-image:url('${img}')` : 'background:#1e293b'}"></div>
+      <div class="ad-card__overlay"></div>
+      <div class="ad-card__body">
+        <span class="ad-card__eyebrow">Advertisement</span>
+        ${ad.ad_headline ? `<h3 class="ad-card__title">${ad.ad_headline}</h3>` : ''}
+        ${ad.ad_body     ? `<p  class="ad-card__desc">${ad.ad_body}</p>` : ''}
+        ${ad.ad_link_url ? `<span class="ad-card__cta">Find out more →</span>` : ''}
+      </div>
+    </a>`;
+}
+
 // ── BOOST INLINE BANNER ──────────────────────────────────
 function renderBoostBanner(ads) {
   const wrap = document.getElementById('js-boost-banner');
   if (!wrap) return;
-  const boosters = ads.filter(a => a.package === 'boost' && a.ad_image_url);
+  // Boost shows any ad with a headline OR image
+  const boosters = ads.filter(a => a.package === 'boost' && (a.ad_image_url || a.ad_headline));
   if (!boosters.length) { wrap.style.display = 'none'; return; }
 
-  // Pick a random one on load; rotate every 8s if multiple
   let idx = Math.floor(Math.random() * boosters.length);
-  const link = document.getElementById('js-boost-banner-link');
-  const img  = document.getElementById('js-boost-banner-img');
+  const inner = wrap.querySelector('.container');
 
   function setBoostAd(ad) {
-    img.src    = ad.ad_image_url;
-    img.alt    = ad.ad_headline || 'Advertisement';
-    link.href  = ad.ad_link_url || '#';
-    link.style.pointerEvents = ad.ad_link_url ? '' : 'none';
+    // Replace the old img/link with editorial card
+    const existing = inner.querySelector('.ad-card');
+    if (existing) existing.remove();
+    inner.insertAdjacentHTML('beforeend', buildAdCard(ad, 'boost'));
   }
 
+  // Remove static img/link placeholders
+  inner.querySelector('.boost-banner-link')?.remove();
   setBoostAd(boosters[idx]);
   wrap.style.display = '';
 
   if (boosters.length > 1) {
     setInterval(() => {
       idx = (idx + 1) % boosters.length;
-      img.style.opacity = '0';
-      setTimeout(() => { setBoostAd(boosters[idx]); img.style.opacity = '1'; }, 250);
+      const card = inner.querySelector('.ad-card');
+      if (card) { card.style.opacity = '0'; card.style.transition = 'opacity .25s ease'; }
+      setTimeout(() => setBoostAd(boosters[idx]), 260);
     }, 8000);
-    img.style.transition = 'opacity .25s ease';
   }
 }
 
 // ── SPOTLIGHT STICKY REVEAL ───────────────────────────────
 function renderSpotlightAd(ads) {
-  const outer    = document.getElementById('js-spotlight-outer');
-  const adsense  = document.getElementById('js-spotlight-adsense');
+  const outer   = document.getElementById('js-spotlight-outer');
+  const inner   = document.getElementById('js-spotlight-inner');
+  const adsense = document.getElementById('js-spotlight-adsense');
   if (!outer && !adsense) return;
 
-  const spotlights = ads.filter(a => a.package === 'spotlight' && a.ad_image_url);
+  const spotlights = ads.filter(a => a.package === 'spotlight' && (a.ad_image_url || a.ad_headline));
 
   if (spotlights.length) {
-    // Pick random spotlight; rotate if multiple
     let idx = Math.floor(Math.random() * spotlights.length);
-    const link = document.getElementById('js-spotlight-link');
-    const img  = document.getElementById('js-spotlight-img');
 
     function setSpotlight(ad) {
-      img.src   = ad.ad_image_url;
-      img.alt   = ad.ad_headline || 'Advertisement';
-      link.href = ad.ad_link_url || '#';
-      link.style.pointerEvents = ad.ad_link_url ? '' : 'none';
+      if (!inner) return;
+      // Remove old ad card and static placeholders
+      inner.querySelector('.ad-card')?.remove();
+      inner.querySelector('.spotlight-reveal-link')?.remove();
+      inner.querySelector('.spotlight-reveal-eyebrow')?.remove();
+      inner.insertAdjacentHTML('beforeend', buildAdCard(ad, 'spotlight'));
     }
 
     setSpotlight(spotlights[idx]);
@@ -1455,17 +1475,15 @@ function renderSpotlightAd(ads) {
     if (spotlights.length > 1) {
       setInterval(() => {
         idx = (idx + 1) % spotlights.length;
-        img.style.opacity = '0';
-        setTimeout(() => { setSpotlight(spotlights[idx]); img.style.opacity = '1'; }, 300);
+        const card = inner?.querySelector('.ad-card');
+        if (card) { card.style.opacity = '0'; card.style.transition = 'opacity .3s ease'; }
+        setTimeout(() => setSpotlight(spotlights[idx]), 310);
       }, 12000);
-      img.style.transition = 'opacity .3s ease';
     }
   } else {
-    // No active spotlight — show AdSense fallback
     if (outer) outer.style.display = 'none';
     if (adsense) {
       adsense.style.display = '';
-      // Push the AdSense ad if the slot hasn't been pushed yet
       if (window.adsbygoogle && !adsense.dataset.adPushed) {
         try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
         adsense.dataset.adPushed = '1';
@@ -1480,17 +1498,19 @@ function renderPremierAd(ads) {
   const backdrop = document.getElementById('js-premier-backdrop');
   if (!sheet || !backdrop) return;
 
-  const premiers = ads.filter(a => a.package === 'premier' && a.ad_image_url);
+  const premiers = ads.filter(a => a.package === 'premier' && (a.ad_image_url || a.ad_headline));
   if (!premiers.length) return;
 
   // Only show once per session
   if (sessionStorage.getItem('wtdg_premier_shown')) return;
 
   const ad = premiers[Math.floor(Math.random() * premiers.length)];
-  document.getElementById('js-premier-img').src   = ad.ad_image_url;
-  document.getElementById('js-premier-img').alt   = ad.ad_headline || 'Advertisement';
-  document.getElementById('js-premier-link').href = ad.ad_link_url || '#';
-  if (!ad.ad_link_url) document.getElementById('js-premier-link').style.pointerEvents = 'none';
+
+  // Replace static img/link with editorial card
+  const content = document.getElementById('js-premier-link');
+  if (content) {
+    content.outerHTML = buildAdCard(ad, 'premier');
+  }
 
   const closeBtn     = document.getElementById('js-premier-close');
   const countdownEl  = document.getElementById('js-premier-countdown');

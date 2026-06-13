@@ -1498,15 +1498,15 @@ function renderPremierAd(ads) {
   const backdrop = document.getElementById('js-premier-backdrop');
   if (!sheet || !backdrop) return;
 
-  // Only show once per session
-  if (sessionStorage.getItem('wtdg_premier_shown')) return;
+  // Always track page views (used by AdSense fallback)
+  let views = parseInt(localStorage.getItem('wtdg_page_views') || '0', 10) + 1;
+  localStorage.setItem('wtdg_page_views', views);
 
   const premiers = ads.filter(a => a.package === 'premier' && (a.ad_image_url || a.ad_headline));
 
   if (!premiers.length) {
-    // No active premier ad — fall back to AdSense every 5 page views
-    let views = parseInt(localStorage.getItem('wtdg_page_views') || '0', 10) + 1;
-    localStorage.setItem('wtdg_page_views', views);
+    // No active premier ad — fall back to AdSense every 5 page views, once per session
+    if (sessionStorage.getItem('wtdg_adsense_shown')) return;
     if (views % 5 !== 0) return;
 
     const content = document.getElementById('js-premier-link');
@@ -1522,7 +1522,7 @@ function renderPremierAd(ads) {
           <script>(adsbygoogle = window.adsbygoogle || []).push({});<\/script>
         </div>`;
     }
-    // Hide countdown for AdSense (no 5-sec rule needed)
+    // Hide countdown for AdSense (no 5-sec rule needed, immediately dismissable)
     const countdownEl = document.getElementById('js-premier-countdown');
     const xIconEl     = sheet.querySelector('.premier-sheet__x');
     const progressBar = document.getElementById('js-premier-progress');
@@ -1537,7 +1537,7 @@ function renderPremierAd(ads) {
       backdrop.classList.remove('premier-sheet-backdrop--visible');
       sheet.setAttribute('aria-hidden', 'true');
       backdrop.style.display = 'none';
-      sessionStorage.setItem('wtdg_premier_shown', '1');
+      sessionStorage.setItem('wtdg_adsense_shown', '1');
     }
     closeBtn?.addEventListener('click', dismissAdSenseSheet);
     backdrop.addEventListener('click', dismissAdSenseSheet);
@@ -1552,6 +1552,9 @@ function renderPremierAd(ads) {
     }, 2000);
     return;
   }
+
+  // Active premier ad — show once per session
+  if (sessionStorage.getItem('wtdg_premier_shown')) return;
 
   const ad = premiers[Math.floor(Math.random() * premiers.length)];
 

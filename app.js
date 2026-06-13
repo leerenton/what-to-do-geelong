@@ -1498,11 +1498,60 @@ function renderPremierAd(ads) {
   const backdrop = document.getElementById('js-premier-backdrop');
   if (!sheet || !backdrop) return;
 
-  const premiers = ads.filter(a => a.package === 'premier' && (a.ad_image_url || a.ad_headline));
-  if (!premiers.length) return;
-
   // Only show once per session
   if (sessionStorage.getItem('wtdg_premier_shown')) return;
+
+  const premiers = ads.filter(a => a.package === 'premier' && (a.ad_image_url || a.ad_headline));
+
+  if (!premiers.length) {
+    // No active premier ad — fall back to AdSense every 5 page views
+    let views = parseInt(localStorage.getItem('wtdg_page_views') || '0', 10) + 1;
+    localStorage.setItem('wtdg_page_views', views);
+    if (views % 5 !== 0) return;
+
+    const content = document.getElementById('js-premier-link');
+    if (content) {
+      content.outerHTML = `
+        <div style="padding:1rem 1rem .5rem;display:flex;flex-direction:column;align-items:center;gap:.5rem">
+          <ins class="adsbygoogle"
+               style="display:block;width:100%;min-height:160px"
+               data-ad-client="ca-pub-7991778555943890"
+               data-ad-slot="PREMIER_SLOT_ID"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});<\/script>
+        </div>`;
+    }
+    // Hide countdown for AdSense (no 5-sec rule needed)
+    const countdownEl = document.getElementById('js-premier-countdown');
+    const xIconEl     = sheet.querySelector('.premier-sheet__x');
+    const progressBar = document.getElementById('js-premier-progress');
+    if (countdownEl) countdownEl.style.display = 'none';
+    if (xIconEl)     xIconEl.style.display = '';
+    if (progressBar) progressBar.style.display = 'none';
+    const closeBtn = document.getElementById('js-premier-close');
+    if (closeBtn) closeBtn.disabled = false;
+
+    function dismissAdSenseSheet() {
+      sheet.classList.remove('premier-sheet--visible');
+      backdrop.classList.remove('premier-sheet-backdrop--visible');
+      sheet.setAttribute('aria-hidden', 'true');
+      backdrop.style.display = 'none';
+      sessionStorage.setItem('wtdg_premier_shown', '1');
+    }
+    closeBtn?.addEventListener('click', dismissAdSenseSheet);
+    backdrop.addEventListener('click', dismissAdSenseSheet);
+
+    setTimeout(() => {
+      backdrop.style.display = 'block';
+      requestAnimationFrame(() => {
+        backdrop.classList.add('premier-sheet-backdrop--visible');
+        sheet.classList.add('premier-sheet--visible');
+        sheet.setAttribute('aria-hidden', 'false');
+      });
+    }, 2000);
+    return;
+  }
 
   const ad = premiers[Math.floor(Math.random() * premiers.length)];
 
@@ -3742,47 +3791,7 @@ function initRotatingBanner() {
   }, 4000);
 }
 
-// ── ADSENSE POPUP (every 5 page loads) ───────────────────
-function initAdPopup() {
-  try {
-    let views = parseInt(localStorage.getItem('wtdg_page_views') || '0', 10) + 1;
-    localStorage.setItem('wtdg_page_views', views);
-    if (views % 5 !== 0) return;
-
-    const overlay = document.createElement('div');
-    overlay.className = 'ad-popup-overlay';
-    overlay.innerHTML = `
-      <div class="ad-popup">
-        <button class="ad-popup__close" aria-label="Close ad">
-          <span class="material-symbols-rounded">close</span>
-        </button>
-        <p class="ad-popup__label">Advertisement</p>
-        <!-- AdSense Popup Ad — replace data-ad-slot with your slot ID from AdSense console -->
-        <ins class="adsbygoogle ad-popup__unit"
-             style="display:block"
-             data-ad-client="ca-pub-7991778555943890"
-             data-ad-slot="POPUP_SLOT_ID"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});<\/script>
-        <p class="ad-popup__skip">This ad supports free local content.</p>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    requestAnimationFrame(() => overlay.classList.add('ad-popup-overlay--visible'));
-
-    overlay.querySelector('.ad-popup__close').addEventListener('click', () => {
-      overlay.classList.remove('ad-popup-overlay--visible');
-      setTimeout(() => overlay.remove(), 300);
-    });
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) {
-        overlay.classList.remove('ad-popup-overlay--visible');
-        setTimeout(() => overlay.remove(), 300);
-      }
-    });
-  } catch(e) {}
-}
+// ── ADSENSE POPUP — replaced by Premier sheet fallback ───
 
 // ── EDITORIAL HUB PAGE ────────────────────────────────────
 function initEditorialPage() {
@@ -4030,8 +4039,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (remote.articles.length)   ARTICLES   = remote.articles;
     }
   }
-
-  initAdPopup();
 
   if (document.getElementById('js-event-scroll')) {
     // Load homepage sort settings and trending scores, then render

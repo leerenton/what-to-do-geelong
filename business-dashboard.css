@@ -497,6 +497,16 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
   padding: .9rem .85rem 1rem;
   background: #f9fafb;
 }
+.dash-promo-creative--locked { background: #f9fafb; }
+.dash-creative-locked-note {
+  font-size: .75rem; color: var(--mid); text-align: center;
+  margin: .5rem 0 0; padding: 0 .85rem .85rem;
+  font-style: italic;
+}
+.dash-url-default {
+  font-size: .8rem; color: var(--mid); display: flex; align-items: center; gap: .25rem; flex-wrap: wrap;
+}
+.dash-url-default strong { color: var(--dark); }
 .dash-creative-intro {
   font-size: .8rem; color: var(--mid); margin: 0 0 .85rem; line-height: 1.5;
 }

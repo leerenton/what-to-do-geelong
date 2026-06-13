@@ -1200,16 +1200,21 @@ async function fetchItemData(itemType, itemId) {
   if (!itemType || !itemId) return null;
   try {
     if (itemType === 'business') {
-      const { data } = await db.from('businesses').select('id,name,description,img,category,suburb').eq('id', itemId).single();
-      return data ? { title: data.name, body: data.description, img: data.img, sub: data.category || data.suburb } : null;
+      const { data } = await db.from('businesses').select('id,name,slug,description,img,category,suburb').eq('id', itemId).single();
+      if (!data) return null;
+      const slug = data.slug || currentBiz.slug;
+      return { title: data.name, body: data.description, img: data.img, sub: data.category || data.suburb, defaultUrl: slug ? `/${slug}` : null };
     }
     if (itemType === 'event') {
-      const { data } = await db.from('events').select('id,title,description,img,heroImg,category,date,price').eq('id', itemId).single();
-      return data ? { title: data.title, body: data.description, img: data.heroImg || data.img, sub: data.category } : null;
+      const { data } = await db.from('events').select('id,title,slug,description,img,heroImg,category').eq('id', itemId).single();
+      if (!data) return null;
+      const bizSlug = currentBiz.slug;
+      const evSlug  = data.slug;
+      return { title: data.title, body: data.description, img: data.heroImg || data.img, sub: data.category, defaultUrl: bizSlug && evSlug ? `/${bizSlug}/${evSlug}` : null };
     }
     if (itemType === 'offer') {
       const { data } = await db.from('promos').select('id,title,description,img').eq('id', itemId).single();
-      return data ? { title: data.title, body: data.description, img: data.img } : null;
+      return data ? { title: data.title, body: data.description, img: data.img, defaultUrl: currentBiz.slug ? `/${currentBiz.slug}` : null } : null;
     }
   } catch {}
   return null;
@@ -1283,6 +1288,9 @@ async function loadActivePromotions() {
       const defaultHeadline = item?.title || currentBiz.name || '';
       const defaultBody     = item?.body ? item.body.replace(/<[^>]+>/g,'').slice(0, 150) : '';
       const defaultImg      = item?.img  || '';
+      const defaultUrl      = item?.defaultUrl || (currentBiz.slug ? `/${currentBiz.slug}` : '');
+      // Has the user set a custom URL that differs from the default?
+      const hasCustomUrl    = p.ad_link_url && p.ad_link_url !== defaultUrl;
 
       return `
       <div class="dash-promo-row dash-promo-row--expandable" data-promoid="${p.id}">
@@ -1292,14 +1300,23 @@ async function loadActivePromotions() {
             <div class="dash-promo-row__title">${pkg} · ${type}</div>
             <div class="dash-promo-row__meta">${paid}${ends ? ' · ' + ends : ''}</div>
             ${needsCreative && !adLive ? `<div class="dash-promo-row__action-hint">⚠️ Review your ad below and go live</div>` : ''}
-            ${adLive ? `<div class="dash-promo-row__action-hint dash-promo-row__action-hint--live">✅ Ad live — <a class="dash-link" href="#" data-promoid="${p.id}" data-action="edit-creative">Edit ad</a></div>` : ''}
+            ${adLive ? `<div class="dash-promo-row__action-hint dash-promo-row__action-hint--live">✅ Ad live</div>` : ''}
           </div>
           <span style="background:${bg};color:${col};font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:1rem;flex-shrink:0">${p.status}</span>
         </div>
 
-        ${needsCreative ? `
-        <div class="dash-promo-creative" id="js-creative-${p.id}" style="${adLive ? 'display:none' : ''}">
-          <p class="dash-creative-intro">Your ad is built from your listing details. Customise the text and image below, then preview before going live.</p>
+        ${needsCreative && adLive ? `
+        <!-- Read-only preview for live ads -->
+        <div class="dash-promo-creative dash-promo-creative--locked">
+          <div class="dash-ad-preview-wrap">
+            ${buildAdPreviewHtml(p, item, null)}
+          </div>
+          <p class="dash-creative-locked-note">Your ad is live and cannot be edited. Contact us if you need to make changes.</p>
+        </div>` : ''}
+
+        ${needsCreative && !adLive ? `
+        <div class="dash-promo-creative" id="js-creative-${p.id}">
+          <p class="dash-creative-intro">Your ad is pre-filled from your listing. Tweak the text below, then preview before going live.</p>
 
           <!-- Ad preview -->
           <div class="dash-ad-preview-wrap" id="js-preview-${p.id}">
@@ -1325,14 +1342,6 @@ async function loadActivePromotions() {
             <span class="dash-field-hint">Up to 120 characters</span>
           </div>
 
-          <!-- Click-through URL -->
-          <div class="dash-field-group">
-            <label class="dash-field-label">Click-through URL <span style="font-weight:400;color:var(--mid)">(optional)</span></label>
-            <input type="url" class="dash-input js-ad-link-input" data-promoid="${p.id}"
-              placeholder="https://yourwebsite.com.au" value="${p.ad_link_url || ''}"
-              style="width:100%;box-sizing:border-box" />
-          </div>
-
           <!-- Image override -->
           <div class="dash-field-group">
             <label class="dash-field-label">Image <span style="font-weight:400;color:var(--mid)">(defaults to your listing photo)</span></label>
@@ -1343,6 +1352,21 @@ async function loadActivePromotions() {
               <span class="dash-upload-status" id="ad-img-status-${p.id}"></span>
             </div>
             <span class="dash-field-hint">${spec?.hint || ''}</span>
+          </div>
+
+          <!-- URL: default shown, custom override hidden behind toggle -->
+          <div class="dash-field-group">
+            <div class="dash-url-default">
+              <span class="material-symbols-rounded" style="font-size:.85rem;color:var(--teal);vertical-align:middle">link</span>
+              Ad clicks go to your <strong>listing page</strong>
+              <a class="dash-link dash-url-override-toggle" href="#" data-promoid="${p.id}" style="margin-left:.4rem;font-size:.75rem">Use a different URL</a>
+            </div>
+            <div class="dash-url-override-wrap" id="js-url-override-${p.id}" style="${hasCustomUrl ? '' : 'display:none'}">
+              <input type="url" class="dash-input js-ad-link-input" data-promoid="${p.id}"
+                placeholder="https://yourwebsite.com.au" value="${p.ad_link_url || ''}"
+                style="width:100%;box-sizing:border-box;margin-top:.4rem" />
+              <a class="dash-link" href="#" data-promoid="${p.id}" data-action="use-default-url" style="font-size:.73rem;margin-top:.2rem;display:inline-block">← Use listing page instead</a>
+            </div>
           </div>
 
           <div style="display:flex;gap:.65rem;align-items:center;margin-top:.25rem">
@@ -1398,11 +1422,21 @@ async function loadActivePromotions() {
         refreshPreview();
       });
 
-      // Toggle edit panel for live ads
-      container.querySelector(`[data-promoid="${p.id}"][data-action="edit-creative"]`)?.addEventListener('click', e => {
+      // "Use a different URL" toggle
+      const urlOverrideWrap   = document.getElementById(`js-url-override-${p.id}`);
+      const urlOverrideToggle = container.querySelector(`.dash-url-override-toggle[data-promoid="${p.id}"]`);
+      const useDefaultLink    = container.querySelector(`[data-promoid="${p.id}"][data-action="use-default-url"]`);
+
+      urlOverrideToggle?.addEventListener('click', e => {
         e.preventDefault();
-        const panel = document.getElementById(`js-creative-${p.id}`);
-        if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
+        if (urlOverrideWrap) urlOverrideWrap.style.display = '';
+        linkInput?.focus();
+      });
+      useDefaultLink?.addEventListener('click', e => {
+        e.preventDefault();
+        if (urlOverrideWrap) urlOverrideWrap.style.display = 'none';
+        if (linkInput) linkInput.value = '';
+        refreshPreview();
       });
 
       saveBtn.addEventListener('click', async () => {
@@ -1415,12 +1449,15 @@ async function loadActivePromotions() {
         const finalImg  = uploadedUrl || p.ad_image_url || null;
         const headline  = headlineInput?.value?.trim() || itemData?.title || currentBiz.name || '';
         const body      = bodyInput?.value?.trim()     || (itemData?.body ? itemData.body.replace(/<[^>]+>/g,'').slice(0,150) : '') || '';
+        // Use custom URL if entered, otherwise fall back to the listing's default URL
+        const customUrl = linkInput?.value?.trim();
+        const finalUrl  = customUrl || itemData?.defaultUrl || (currentBiz.slug ? `/${currentBiz.slug}` : null);
 
         const { error } = await db.from('promotions').update({
-          ad_headline:  headline  || null,
-          ad_body:      body      || null,
+          ad_headline:  headline || null,
+          ad_body:      body     || null,
           ad_image_url: finalImg,
-          ad_link_url:  linkInput?.value?.trim() || null,
+          ad_link_url:  finalUrl,
           ad_live:      true,
         }).eq('id', p.id);
 

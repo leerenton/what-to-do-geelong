@@ -1523,7 +1523,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadBizData();
 
   renderSwitcher();
-  switchTab('overview');
+
+  // If returning from a promotion purchase, go to promotions tab and show a prompt
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('promoted') === '1') {
+    switchTab('promotions');
+    // Clean up URL without reload
+    history.replaceState({}, '', window.location.pathname);
+    // Show a prominent banner prompting them to set up their ad
+    const banner = document.createElement('div');
+    banner.className = 'dash-promoted-success-banner';
+    banner.innerHTML = `
+      <span class="material-symbols-rounded">celebration</span>
+      <div>
+        <strong>Promotion purchased!</strong>
+        Your ad is ready to set up below — add your headline, tweak the text, and go live.
+      </div>
+      <button class="dash-promoted-success-banner__close" aria-label="Dismiss">
+        <span class="material-symbols-rounded">close</span>
+      </button>`;
+    const promoSection = document.getElementById('js-active-promotions');
+    promoSection?.parentElement?.insertBefore(banner, promoSection);
+    banner.querySelector('.dash-promoted-success-banner__close').addEventListener('click', () => banner.remove());
+  } else {
+    switchTab('overview');
+  }
 
   document.querySelectorAll('.dash-tab').forEach(tab => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));

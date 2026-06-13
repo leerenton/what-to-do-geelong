@@ -103,20 +103,21 @@
       loading.style.display  = 'none';
       sections.style.display = '';
 
-      // Render business listings
+      // Render business listing
       const bizItems = document.getElementById('js-promo-biz-items');
-      bizRows.forEach(b => {
+      bizRows.filter(b => b.id === _bizId).forEach(b => {
         bizItems.appendChild(makeItemCard({
           id: b.id, type: 'business', name: b.name,
           img: b.img, meta: 'Business listing', bizId: b.id,
         }));
       });
 
-      // Events
-      if (evRows && evRows.length) {
+      // Events — only for the active biz
+      const bizEvRows = evRows?.filter(e => e.business_id === _bizId) || [];
+      if (bizEvRows.length) {
         document.getElementById('js-promo-events-section').style.display = '';
         const cont = document.getElementById('js-promo-event-items');
-        evRows.forEach(e => {
+        bizEvRows.forEach(e => {
           cont.appendChild(makeItemCard({
             id: e.id, type: 'event', name: e.name,
             img: e.img, meta: e.date ? `Event · ${e.date}` : 'Event',
@@ -125,11 +126,12 @@
         });
       }
 
-      // Offers
-      if (promoRows && promoRows.length) {
+      // Offers — only for the active biz
+      const bizPromoRows = promoRows?.filter(p => p.business_id === _bizId) || [];
+      if (bizPromoRows.length) {
         document.getElementById('js-promo-offers-section').style.display = '';
         const cont = document.getElementById('js-promo-offer-items');
-        promoRows.forEach(p => {
+        bizPromoRows.forEach(p => {
           cont.appendChild(makeItemCard({
             id: p.id, type: 'offer', name: p.title || 'Untitled offer',
             img: p.img, meta: p.discount || 'Offer',
@@ -138,10 +140,21 @@
         });
       }
 
-      if (!bizRows.length && !evRows?.length && !promoRows?.length) {
+      const hasContent = bizItems.children.length || bizEvRows.length || bizPromoRows.length;
+      if (!hasContent) {
         sections.style.display = 'none';
         empty.style.display    = '';
+        return;
       }
+
+      // Auto-select the biz listing and skip straight to step 2
+      const firstCard = document.querySelector('.promo-item');
+      if (firstCard) firstCard.click();
+      // Jump directly to package selection — no need to show step 1
+      _step = 2;
+      setProgress(50);
+      document.getElementById('js-s2-item-label').textContent = _selectedItem?.name || '';
+      showScreen('ps-s2');
 
     } catch (err) {
       loading.textContent = 'Failed to load content: ' + err.message;
@@ -323,7 +336,7 @@
         userId:     user.id,
         itemType:   _selectedItem.type,
         itemId:     String(_selectedItem.id),
-        successUrl: window.location.origin + '/promote.html?success=1',
+        successUrl: window.location.origin + '/business-dashboard.html?promoted=1',
         cancelUrl:  window.location.origin + '/promote.html?cancelled=1',
       }),
     });
@@ -363,10 +376,8 @@
       reason:      `${_selectedPkg}_redeemed`,
     });
 
-    // Show done
-    document.getElementById('js-done-sub').textContent =
-      `Your ${_selectedPkg} promotion for "${_selectedItem.name}" has been submitted and is under review.`;
-    showScreen('ps-done');
+    // Redirect to dashboard to set up ad creative
+    window.location.href = '/business-dashboard.html?promoted=1';
   }
 
   // ── Handle ?success=1 from Stripe redirect ────────────

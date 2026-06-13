@@ -497,6 +497,20 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
   padding: .9rem .85rem 1rem;
   background: #f9fafb;
 }
+.dash-promoted-success-banner {
+  display: flex; align-items: flex-start; gap: .75rem;
+  background: #f0fdf4; border: 1.5px solid #86efac;
+  border-radius: var(--radius-lg); padding: .9rem 1rem;
+  margin-bottom: 1rem; font-size: .85rem; color: #166534;
+}
+.dash-promoted-success-banner .material-symbols-rounded { font-size: 1.4rem; flex-shrink: 0; color: #16a34a; }
+.dash-promoted-success-banner strong { display: block; font-weight: 700; margin-bottom: .15rem; }
+.dash-promoted-success-banner__close {
+  margin-left: auto; flex-shrink: 0; background: none; border: none;
+  cursor: pointer; color: #16a34a; padding: 0; line-height: 1;
+}
+.dash-promoted-success-banner__close .material-symbols-rounded { font-size: 1.1rem; }
+
 .dash-promo-creative--locked { background: #f9fafb; }
 .dash-creative-locked-note {
   font-size: .75rem; color: var(--mid); text-align: center;

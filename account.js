@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ${profiles.length ? `
           <div class="acct-biz-list" id="js-biz-list">
             ${profiles.map(b => `
-              <a href="business-dashboard.html" class="acct-biz-card" onclick="setCurrentBizId('${b.id}')">
+              <a href="business-dashboard.html?biz=${b.id}" class="acct-biz-card">
                 <div class="acct-biz-card__icon" style="background:${b.color || 'var(--cream)'}22">${b.emoji || '🏪'}</div>
                 <div>
                   <div class="acct-biz-card__name">${b.name}</div>

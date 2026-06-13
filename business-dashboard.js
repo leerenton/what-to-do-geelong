@@ -872,7 +872,6 @@ function renderSettings() {
           <span class="dash-plan-card__price">${isGold() ? '$249 / year' : '$0'}</span>
         </div>
         ${isGold() ? `
-          ${planExpiry}
           <ul class="dash-plan-features">
             <li>✓ Enquiry form live on your listing</li>
             <li>✓ Homepage rotation</li>
@@ -880,11 +879,19 @@ function renderSettings() {
             <li>✓ Unlimited offers</li>
             <li>✓ Featured in weekly email</li>
           </ul>
-          ${currentBiz.stripe_customer_id ? `
-            <button class="btn btn--outline btn--sm" id="js-manage-billing" style="margin-top:.85rem">
-              <span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle">credit_card</span>
-              Manage billing / cancel
-            </button>` : ''}
+          <div class="dash-billing-row">
+            ${currentBiz.gold_expires_at ? `
+              <span class="dash-billing-row__date">
+                <span class="material-symbols-rounded">calendar_today</span>
+                Next renewal ${fmtDate(currentBiz.gold_expires_at)}
+              </span>` : ''}
+            ${currentBiz.stripe_customer_id ? `
+              <button class="btn btn--outline btn--sm" id="js-manage-billing">
+                <span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle">credit_card</span>
+                Manage subscription &amp; billing
+              </button>
+              <p class="dash-billing-row__hint">View invoices, update payment method or cancel your subscription.</p>` : ''}
+          </div>
         ` : `
           <p style="font-size:.82rem;color:var(--mid);margin:.5rem 0 1rem">Upgrade to Gold to unlock enquiries, homepage rotation, promoted events, and more.</p>
           <a href="upgrade.html?biz=${encodeURIComponent(currentBiz.slug || currentBiz.id)}" class="btn btn--gold">Upgrade to Gold — $249/yr</a>

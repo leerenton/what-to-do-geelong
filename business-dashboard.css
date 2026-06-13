@@ -396,6 +396,19 @@ button.dash-tag-chip.active { border-color: var(--teal) !important; background: 
   font-size: .82rem; color: #166534;
 }
 
+.dash-billing-row {
+  margin-top: .85rem;
+  display: flex; flex-direction: column; gap: .45rem;
+}
+.dash-billing-row__date {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .8rem; color: var(--mid);
+}
+.dash-billing-row__date .material-symbols-rounded { font-size: .85rem; }
+.dash-billing-row__hint {
+  font-size: .72rem; color: var(--mid); margin: 0; line-height: 1.45;
+}
+
 /* ── PROMOTE TAB ─────────────────────────────────────────── */
 .dash-promo-cta-card {
   display: flex; align-items: center; gap: 1rem;

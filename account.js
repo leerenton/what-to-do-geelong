@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   <div class="acct-biz-card__name">${b.name}</div>
                   <div class="acct-biz-card__meta">${b.type || ''} · ${b.suburb || ''}</div>
                 </div>
-                <span class="acct-biz-card__plan acct-biz-card__plan--${b.plan}">${b.plan === 'featured' ? '⭐ Featured' : 'Free'}</span>
+                <span class="acct-biz-card__plan acct-biz-card__plan--${b.is_gold ? 'gold' : (b.plan || 'free')}">${b.is_gold ? '⭐ Gold' : (b.plan === 'featured' ? '⭐ Featured' : 'Free')}</span>
               </a>
             `).join('')}
           </div>

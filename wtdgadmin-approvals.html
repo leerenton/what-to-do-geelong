@@ -330,7 +330,9 @@ document.getElementById('js-apv-tabs').addEventListener('click', e => {
 });
 
 // Init
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
   initAdminShell('Approvals');
   loadQueue();
 });

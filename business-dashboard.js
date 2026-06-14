@@ -1131,9 +1131,13 @@ function bindPanelEvents(tab) {
       const btn = document.getElementById('js-manage-billing');
       btn.disabled = true; btn.textContent = 'Opening billing portal…';
       try {
+        const { data: { session: bSess } } = await db.auth.getSession();
         const res  = await fetch('/api/stripe-portal', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${bSess?.access_token}`,
+          },
           body: JSON.stringify({ customerId: currentBiz.stripe_customer_id }),
         });
         const json = await res.json();

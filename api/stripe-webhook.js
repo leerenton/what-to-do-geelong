@@ -264,11 +264,13 @@ module.exports = async function handler(req, res) {
 
   // Verify signature
   const sigHeader = req.headers['stripe-signature'];
-  if (WEBHOOK_SECRET) {
-    if (!sigHeader || !verifyStripeSignature(rawBody, sigHeader, WEBHOOK_SECRET)) {
-      console.warn('Invalid Stripe signature');
-      return res.status(400).json({ error: 'Invalid signature' });
-    }
+  if (!WEBHOOK_SECRET) {
+    console.error('STRIPE_WEBHOOK_SECRET is not set — refusing all webhook requests');
+    return res.status(500).json({ error: 'Webhook secret not configured' });
+  }
+  if (!sigHeader || !verifyStripeSignature(rawBody, sigHeader, WEBHOOK_SECRET)) {
+    console.warn('Invalid Stripe signature');
+    return res.status(400).json({ error: 'Invalid signature' });
   }
 
   let event;

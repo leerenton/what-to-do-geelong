@@ -1,12 +1,15 @@
 'use strict';
 
+// Only allow relative redirects — blocks open-redirect phishing via ?next=https://evil.com
+function safeNext(fallback) {
+  const raw = new URLSearchParams(window.location.search).get('next') || fallback;
+  return /^(https?:)?\/\//i.test(raw) ? fallback : raw;
+}
+
 // Redirect if already logged in
 (async () => {
   const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    const next = new URLSearchParams(window.location.search).get('next') || 'account.html';
-    window.location.href = next;
-  }
+  if (session) window.location.href = safeNext('account.html');
 })();
 
 document.getElementById('js-pw-toggle')?.addEventListener('click', () => {
@@ -50,8 +53,7 @@ document.getElementById('js-login-form')?.addEventListener('submit', async e => 
 
   if (typeof trackLogin === 'function') trackLogin('email');
 
-  const next = new URLSearchParams(window.location.search).get('next') || 'account.html';
-  window.location.href = next;
+  window.location.href = safeNext('account.html');
 });
 
 document.getElementById('js-google-btn')?.addEventListener('click', async () => {

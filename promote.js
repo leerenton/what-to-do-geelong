@@ -327,9 +327,13 @@
   });
 
   async function payWithCard() {
+    const { data: { session: coSess } } = await db.auth.getSession();
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${coSess?.access_token}`,
+      },
       body: JSON.stringify({
         type:       _selectedPkg,
         bizId:      _bizId,

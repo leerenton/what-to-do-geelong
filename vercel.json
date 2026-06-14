@@ -14,6 +14,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/victoria",               "destination": "/victoria.html" },
     { "source": "/parks",                  "destination": "/parks.html" },
     { "source": "/date-night",             "destination": "/date-night.html" },
     { "source": "/wtdgadmin",              "destination": "/wtdgadmin.html" },

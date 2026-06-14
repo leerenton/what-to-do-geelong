@@ -197,6 +197,24 @@
     </div>
   </header>`;
 
+  // Network bar — only shown on city sites, not on the Victoria hub itself
+  const NETWORK_BAR_HTML = site.slug !== 'victoria' ? `
+  <div class="wtdv-network-bar">
+    <div class="container wtdv-network-bar__inner">
+      <span class="wtdv-network-bar__text">
+        Part of the
+        <a href="https://whattodovictoria.com.au" class="wtdv-network-bar__link" target="_blank" rel="noopener">
+          <img src="/assets/logo-victoria.png" alt="What To Do Victoria" class="wtdv-network-bar__logo" onerror="this.style.display='none'" />
+          What To Do Victoria
+        </a>
+        network
+      </span>
+      <a href="https://whattodovictoria.com.au#cities" class="wtdv-network-bar__cta" target="_blank" rel="noopener">
+        Explore all cities →
+      </a>
+    </div>
+  </div>` : '';
+
   const FOOTER_HTML = `
   <footer class="footer">
     <div class="container footer__grid">
@@ -252,7 +270,7 @@
     else document.body.insertAdjacentHTML('afterbegin', NAV_HTML);
 
     const footerRoot = document.getElementById('js-footer-root');
-    if (footerRoot) footerRoot.outerHTML = FOOTER_HTML;
+    if (footerRoot) footerRoot.outerHTML = NETWORK_BAR_HTML + FOOTER_HTML;
 
     initNav();
 

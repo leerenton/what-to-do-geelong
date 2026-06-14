@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What To Do Victoria — Your Guide to Events &amp; Things To Do Across Victoria</title>
+  <meta name="description" content="What To Do Victoria is a network of local city guides covering events, restaurants, bars and things to do across Victoria." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, ::before, ::after { box-sizing: border-box; }
+    :root {
+      --vic-navy:   #1e1b4b;
+      --vic-indigo: #3730a3;
+      --vic-purple: #6d28d9;
+      --vic-teal:   #0d9488;
+      --vic-gold:   #f59e0b;
+      --vic-light:  #f5f5f5;
+      --vic-white:  #ffffff;
+      --vic-mid:    #6b7280;
+      --font-head:  'Nunito', sans-serif;
+      --font-body:  'DM Sans', sans-serif;
+      --gutter:     1.25rem;
+      --radius:     .85rem;
+    }
+    body { margin: 0; font-family: var(--font-body); background: var(--vic-white); color: #111; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 var(--gutter); }
+    a { color: inherit; }
+
+    /* ── HEADER ── */
+    .vic-header {
+      background: var(--vic-navy);
+      padding: 1.1rem var(--gutter);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .vic-header__logo {
+      display: flex; align-items: center; gap: .75rem; text-decoration: none;
+    }
+    .vic-header__logo img { height: 36px; width: auto; }
+    .vic-header__logo-text {
+      font-family: var(--font-head); font-weight: 900; font-size: 1rem;
+      color: #fff; line-height: 1.2;
+    }
+    .vic-header__nav { display: flex; gap: 1.5rem; align-items: center; }
+    .vic-header__nav a {
+      color: rgba(255,255,255,.7); font-size: .88rem; font-weight: 600;
+      text-decoration: none; transition: color .15s;
+    }
+    .vic-header__nav a:hover { color: #fff; }
+    .vic-header__cta {
+      background: var(--vic-gold); color: var(--vic-navy) !important;
+      padding: .45rem 1rem; border-radius: 99px; font-weight: 800 !important;
+    }
+
+    /* ── HERO ── */
+    .vic-hero {
+      background: linear-gradient(135deg, var(--vic-navy) 0%, var(--vic-indigo) 60%, var(--vic-purple) 100%);
+      color: #fff; padding: 5rem var(--gutter) 4rem;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .vic-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .vic-hero__eyebrow {
+      font-size: .78rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--vic-gold); margin-bottom: 1rem;
+    }
+    .vic-hero__title {
+      font-family: var(--font-head); font-size: clamp(2.2rem, 6vw, 3.5rem);
+      font-weight: 900; margin: 0 0 1rem; line-height: 1.1;
+    }
+    .vic-hero__title span { color: var(--vic-gold); }
+    .vic-hero__sub {
+      font-size: 1.1rem; color: rgba(255,255,255,.75);
+      max-width: 560px; margin: 0 auto 2rem; line-height: 1.6;
+    }
+    .vic-hero__stats {
+      display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap;
+      margin-top: 2.5rem; padding-top: 2.5rem;
+      border-top: 1px solid rgba(255,255,255,.12);
+    }
+    .vic-hero__stat { text-align: center; }
+    .vic-hero__stat-num {
+      font-family: var(--font-head); font-size: 2rem; font-weight: 900;
+      color: var(--vic-gold); display: block; line-height: 1;
+    }
+    .vic-hero__stat-label { font-size: .78rem; color: rgba(255,255,255,.6); margin-top: .3rem; }
+
+    /* ── CITIES ── */
+    .vic-section { padding: 4rem 0; }
+    .vic-section--alt { background: var(--vic-light); }
+    .vic-section__eyebrow {
+      font-size: .72rem; font-weight: 800; letter-spacing: .15em;
+      text-transform: uppercase; color: var(--vic-teal); margin-bottom: .6rem;
+    }
+    .vic-section__title {
+      font-family: var(--font-head); font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 900; margin: 0 0 .6rem;
+    }
+    .vic-section__sub {
+      font-size: .95rem; color: var(--vic-mid); max-width: 560px; line-height: 1.6;
+      margin: 0 0 2.5rem;
+    }
+    .vic-cities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .vic-city-card {
+      background: var(--vic-white); border-radius: var(--radius);
+      border: 1.5px solid #e5e7eb;
+      overflow: hidden; text-decoration: none; color: inherit;
+      transition: box-shadow .2s, transform .2s;
+      display: flex; flex-direction: column;
+    }
+    .vic-city-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.1); transform: translateY(-2px); }
+    .vic-city-card--coming {
+      opacity: .6; pointer-events: none;
+    }
+    .vic-city-card__img {
+      height: 140px; background: linear-gradient(135deg, var(--vic-indigo), var(--vic-purple));
+      background-size: cover; background-position: center;
+      position: relative;
+    }
+    .vic-city-card__badge {
+      position: absolute; top: .75rem; left: .75rem;
+      font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      padding: .25rem .6rem; border-radius: 99px;
+    }
+    .vic-city-card__badge--live { background: #d1fae5; color: #065f46; }
+    .vic-city-card__badge--soon { background: #fef3c7; color: #92400e; }
+    .vic-city-card__body { padding: 1.1rem 1.25rem 1.25rem; flex: 1; display: flex; flex-direction: column; }
+    .vic-city-card__name {
+      font-family: var(--font-head); font-size: 1.15rem; font-weight: 900;
+      margin: 0 0 .35rem;
+    }
+    .vic-city-card__domain { font-size: .75rem; color: var(--vic-teal); font-weight: 600; margin-bottom: .65rem; }
+    .vic-city-card__desc { font-size: .85rem; color: var(--vic-mid); line-height: 1.55; flex: 1; }
+    .vic-city-card__stats {
+      display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem;
+      border-top: 1px solid #f3f4f6;
+    }
+    .vic-city-card__stat { font-size: .75rem; color: var(--vic-mid); }
+    .vic-city-card__stat strong { color: #111; font-weight: 700; display: block; font-size: .9rem; }
+    .vic-city-card__cta {
+      display: inline-block; margin-top: 1rem;
+      font-size: .82rem; font-weight: 700; color: var(--vic-indigo);
+      text-decoration: none;
+    }
+
+    /* ── WHY JOIN ── */
+    .vic-benefits-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem; margin-top: 2.5rem;
+    }
+    .vic-benefit {
+      background: var(--vic-white); border-radius: var(--radius);
+      padding: 1.5rem; border: 1.5px solid #e5e7eb;
+    }
+    .vic-benefit__icon { font-size: 2rem; margin-bottom: .75rem; }
+    .vic-benefit__title { font-family: var(--font-head); font-weight: 800; font-size: 1rem; margin-bottom: .5rem; }
+    .vic-benefit__desc { font-size: .85rem; color: var(--vic-mid); line-height: 1.55; }
+
+    /* ── REACH STATS ── */
+    .vic-reach {
+      background: var(--vic-navy); color: #fff;
+      padding: 4rem var(--gutter); text-align: center;
+    }
+    .vic-reach__title {
+      font-family: var(--font-head); font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 900; margin: 0 0 .5rem;
+    }
+    .vic-reach__sub { color: rgba(255,255,255,.6); font-size: .95rem; margin: 0 0 3rem; }
+    .vic-reach__grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 2rem; max-width: 800px; margin: 0 auto;
+    }
+    .vic-reach__stat-num {
+      font-family: var(--font-head); font-size: 2.5rem; font-weight: 900;
+      color: var(--vic-gold); display: block; line-height: 1;
+    }
+    .vic-reach__stat-label { font-size: .8rem; color: rgba(255,255,255,.6); margin-top: .4rem; }
+
+    /* ── ADVERTISE ── */
+    .vic-advertise { padding: 4rem var(--gutter); background: var(--vic-light); }
+    .vic-advertise__inner {
+      max-width: 760px; margin: 0 auto;
+    }
+    .vic-packages { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .vic-package {
+      background: var(--vic-white); border-radius: var(--radius);
+      padding: 1.4rem; border: 1.5px solid #e5e7eb;
+    }
+    .vic-package--featured { border-color: var(--vic-indigo); background: #eef2ff; }
+    .vic-package__label {
+      font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--vic-indigo); margin-bottom: .5rem;
+    }
+    .vic-package__name { font-family: var(--font-head); font-size: 1rem; font-weight: 900; margin-bottom: .35rem; }
+    .vic-package__price { font-size: 1.4rem; font-weight: 800; color: var(--vic-navy); margin-bottom: .75rem; }
+    .vic-package__price span { font-size: .8rem; font-weight: 500; color: var(--vic-mid); }
+    .vic-package__features { list-style: none; padding: 0; margin: 0; }
+    .vic-package__features li { font-size: .82rem; color: var(--vic-mid); padding: .2rem 0; }
+    .vic-package__features li::before { content: '✓ '; color: var(--vic-teal); font-weight: 700; }
+
+    .vic-cta-box {
+      background: linear-gradient(135deg, var(--vic-indigo), var(--vic-purple));
+      color: #fff; border-radius: var(--radius); padding: 2.5rem;
+      text-align: center; margin-top: 2rem;
+    }
+    .vic-cta-box__title { font-family: var(--font-head); font-size: 1.4rem; font-weight: 900; margin: 0 0 .6rem; }
+    .vic-cta-box__sub { color: rgba(255,255,255,.75); font-size: .9rem; margin: 0 0 1.5rem; }
+    .vic-btn {
+      display: inline-block; padding: .8rem 2rem;
+      border-radius: 99px; font-weight: 800; font-size: .95rem;
+      text-decoration: none; transition: opacity .15s;
+    }
+    .vic-btn:hover { opacity: .9; }
+    .vic-btn--gold { background: var(--vic-gold); color: var(--vic-navy); }
+    .vic-btn--outline { background: transparent; border: 2px solid rgba(255,255,255,.4); color: #fff; margin-left: .75rem; }
+
+    /* ── FOOTER ── */
+    .vic-footer {
+      background: #0f0e23; color: rgba(255,255,255,.5);
+      padding: 2rem var(--gutter); text-align: center; font-size: .8rem;
+    }
+    .vic-footer a { color: rgba(255,255,255,.5); }
+    .vic-footer strong { color: rgba(255,255,255,.8); }
+
+    @media (max-width: 640px) {
+      .vic-header__nav { display: none; }
+      .vic-hero { padding: 3.5rem var(--gutter) 3rem; }
+      .vic-hero__stats { gap: 1.5rem; }
+      .vic-cta-box { padding: 1.75rem 1.25rem; }
+      .vic-btn--outline { margin-left: 0; margin-top: .5rem; display: block; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="vic-header">
+  <a href="/" class="vic-header__logo">
+    <img src="/assets/logo-victoria.png" alt="What To Do Victoria" onerror="this.style.display='none'" />
+    <div class="vic-header__logo-text">WHAT TO DO<br>VICTORIA</div>
+  </a>
+  <nav class="vic-header__nav">
+    <a href="#cities">Cities</a>
+    <a href="#network">The Network</a>
+    <a href="#advertise">Advertise</a>
+    <a href="#advertise" class="vic-header__cta">Join the network →</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="vic-hero">
+  <div class="container">
+    <div class="vic-hero__eyebrow">Victoria's local guide network</div>
+    <h1 class="vic-hero__title">
+      What's on across<br><span>Victoria</span>
+    </h1>
+    <p class="vic-hero__sub">
+      Hyperlocal guides to events, restaurants, bars and things to do — for locals and visitors across Victoria's great cities.
+    </p>
+    <a href="#cities" class="vic-btn vic-btn--gold">Explore cities →</a>
+
+    <div class="vic-hero__stats" id="js-hero-stats">
+      <div class="vic-hero__stat">
+        <span class="vic-hero__stat-num" id="js-stat-cities">—</span>
+        <div class="vic-hero__stat-label">Cities &amp; regions</div>
+      </div>
+      <div class="vic-hero__stat">
+        <span class="vic-hero__stat-num" id="js-stat-businesses">—</span>
+        <div class="vic-hero__stat-label">Local businesses listed</div>
+      </div>
+      <div class="vic-hero__stat">
+        <span class="vic-hero__stat-num" id="js-stat-events">—</span>
+        <div class="vic-hero__stat-label">Events published</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CITIES -->
+<section class="vic-section" id="cities">
+  <div class="container">
+    <div class="vic-section__eyebrow">The network</div>
+    <h2 class="vic-section__title">Explore our city guides</h2>
+    <p class="vic-section__sub">Each city guide is run by locals, covering the best events, food, drink, stays and things to do in their region.</p>
+    <div class="vic-cities-grid" id="js-cities-grid">
+      <!-- populated by JS -->
+      <div style="color:#999;font-size:.9rem">Loading cities…</div>
+    </div>
+  </div>
+</section>
+
+<!-- NETWORK REACH -->
+<div class="vic-reach" id="network">
+  <h2 class="vic-reach__title">The reach of the network</h2>
+  <p class="vic-reach__sub">Real audiences. Real locals. Real results.</p>
+  <div class="vic-reach__grid">
+    <div>
+      <span class="vic-reach__stat-num" id="js-reach-biz">196+</span>
+      <div class="vic-reach__stat-label">Businesses listed across the network</div>
+    </div>
+    <div>
+      <span class="vic-reach__stat-num" id="js-reach-events">336+</span>
+      <div class="vic-reach__stat-label">Events published in the last 12 months</div>
+    </div>
+    <div>
+      <span class="vic-reach__stat-num">10k+</span>
+      <div class="vic-reach__stat-label">Monthly visitors across all city sites</div>
+    </div>
+    <div>
+      <span class="vic-reach__stat-num">Weekly</span>
+      <div class="vic-reach__stat-label">Email digest sent to local subscribers</div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY JOIN -->
+<section class="vic-section vic-section--alt">
+  <div class="container">
+    <div class="vic-section__eyebrow">For businesses</div>
+    <h2 class="vic-section__title">Why list on the network?</h2>
+    <p class="vic-section__sub">From a free listing to premium placements — we help locals and visitors find you.</p>
+    <div class="vic-benefits-grid">
+      <div class="vic-benefit">
+        <div class="vic-benefit__icon">📍</div>
+        <div class="vic-benefit__title">Hyperlocal audience</div>
+        <div class="vic-benefit__desc">Visitors and locals actively looking for things to do, eat and experience in your city — not a generic national directory.</div>
+      </div>
+      <div class="vic-benefit">
+        <div class="vic-benefit__icon">🗓️</div>
+        <div class="vic-benefit__title">Event promotion</div>
+        <div class="vic-benefit__desc">List your events, promote them to subscribers, and reach people who are planning their weekend right now.</div>
+      </div>
+      <div class="vic-benefit">
+        <div class="vic-benefit__icon">⭐</div>
+        <div class="vic-benefit__title">Gold membership</div>
+        <div class="vic-benefit__desc">Featured placement, rich listings, gallery photos, special offers and direct inquiry forms. Stand out from the crowd.</div>
+      </div>
+      <div class="vic-benefit">
+        <div class="vic-benefit__icon">📢</div>
+        <div class="vic-benefit__title">Advertising packages</div>
+        <div class="vic-benefit__desc">Boost, Spotlight and Premier placements put your brand in front of an engaged local audience across the site and email.</div>
+      </div>
+      <div class="vic-benefit">
+        <div class="vic-benefit__icon">📬</div>
+        <div class="vic-benefit__title">Weekly email digest</div>
+        <div class="vic-benefit__desc">Sponsor our weekly email sent to thousands of local subscribers who rely on us to tell them what's on.</div>
+      </div>
+      <div class="vic-benefit">
+        <div class="vic-benefit__icon">🌐</div>
+        <div class="vic-benefit__title">Network-wide reach</div>
+        <div class="vic-benefit__desc">As the network grows across Victoria, your listing and promotions gain visibility across more cities and more audiences.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADVERTISE -->
+<section class="vic-advertise" id="advertise">
+  <div class="vic-advertise__inner">
+    <div class="vic-section__eyebrow">Advertising &amp; promotions</div>
+    <h2 class="vic-section__title">Get in front of your audience</h2>
+    <p class="vic-section__sub">Choose the package that suits your business — from free listings to premium placements across the network.</p>
+
+    <div class="vic-packages">
+      <div class="vic-package">
+        <div class="vic-package__label">Free</div>
+        <div class="vic-package__name">Basic listing</div>
+        <div class="vic-package__price">$0 <span>/ forever</span></div>
+        <ul class="vic-package__features">
+          <li>Business profile page</li>
+          <li>Listed in city guide</li>
+          <li>Event submissions</li>
+          <li>Basic contact info</li>
+        </ul>
+      </div>
+      <div class="vic-package vic-package--featured">
+        <div class="vic-package__label">Most popular</div>
+        <div class="vic-package__name">Gold membership</div>
+        <div class="vic-package__price">$25 <span>/ month</span></div>
+        <ul class="vic-package__features">
+          <li>Featured placement</li>
+          <li>Rich listing with gallery</li>
+          <li>Special offers</li>
+          <li>Direct inquiry form</li>
+          <li>Priority in search results</li>
+        </ul>
+      </div>
+      <div class="vic-package">
+        <div class="vic-package__label">Advertising</div>
+        <div class="vic-package__name">Boost / Spotlight</div>
+        <div class="vic-package__price">From $49</div>
+        <ul class="vic-package__features">
+          <li>In-feed banner ad</li>
+          <li>Sticky reveal strip</li>
+          <li>7–14 day campaigns</li>
+          <li>Self-serve upload</li>
+        </ul>
+      </div>
+      <div class="vic-package">
+        <div class="vic-package__label">Premium</div>
+        <div class="vic-package__name">Premier</div>
+        <div class="vic-package__price">$199 <span>/ 30 days</span></div>
+        <ul class="vic-package__features">
+          <li>Slide-up mobile ad</li>
+          <li>Full-screen impact</li>
+          <li>30 day campaign</li>
+          <li>Cross-city reach</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="vic-cta-box">
+      <div class="vic-cta-box__title">Ready to reach more locals?</div>
+      <p class="vic-cta-box__sub">List your business for free or get in touch to discuss advertising across the What To Do Victoria network.</p>
+      <a href="mailto:hello@whattodovictoria.com.au" class="vic-btn vic-btn--gold">Get in touch →</a>
+      <a href="https://whattodogeelong.com.au/business-signup.html" class="vic-btn vic-btn--outline">List your business free</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="vic-footer">
+  <div class="container">
+    <p><strong>What To Do Victoria</strong> — a network of local city guides across Victoria, Australia.</p>
+    <p style="margin:.4rem 0 0">
+      <a href="https://whattodogeelong.com.au">Geelong</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:hello@whattodovictoria.com.au">Contact</a>
+      &nbsp;·&nbsp;
+      <a href="https://whattodogeelong.com.au/business-signup.html">List your business</a>
+    </p>
+    <p style="margin:.75rem 0 0;font-size:.72rem">© ${new Date().getFullYear()} What To Do Victoria</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase.js"></script>
+<script>
+'use strict';
+
+// City descriptions — can be moved to the sites table later
+const CITY_DESCRIPTIONS = {
+  geelong:  'Victoria\'s second-largest city — known for its waterfront, food scene, arts culture, and gateway to the Bellarine Peninsula.',
+  ballarat: 'Gold rush history meets a thriving arts, food and events scene in regional Victoria\'s cultural capital.',
+  bendigo:  'A stunning regional city with world-class galleries, a buzzing food scene and rich goldfields heritage.',
+  melbourne:'The heart of Victoria — live music, world-class dining, sport and events at every turn.',
+};
+
+async function loadStats() {
+  try {
+    const [bizRes, evRes] = await Promise.all([
+      db.from('businesses').select('id', { count: 'exact', head: true }).or('status.eq.approved,status.is.null'),
+      db.from('events').select('id', { count: 'exact', head: true }).or('status.eq.approved,status.is.null'),
+    ]);
+    const bizCount = bizRes.count || 0;
+    const evCount  = evRes.count  || 0;
+    document.getElementById('js-stat-businesses').textContent = bizCount + '+';
+    document.getElementById('js-stat-events').textContent     = evCount  + '+';
+    document.getElementById('js-reach-biz').textContent       = bizCount + '+';
+    document.getElementById('js-reach-events').textContent    = evCount  + '+';
+  } catch (_) {}
+}
+
+async function loadCities() {
+  const grid = document.getElementById('js-cities-grid');
+  try {
+    const { data: sites } = await db
+      .from('sites')
+      .select('*')
+      .order('created_at');
+
+    const all = sites || [];
+    // Active live sites + placeholder "coming soon" cities
+    const comingSoon = [
+      { slug: 'ballarat',  name: 'Ballarat',  full_name: 'What To Do Ballarat',  domain: 'whattodoballarat.com.au',  active: false },
+      { slug: 'bendigo',   name: 'Bendigo',   full_name: 'What To Do Bendigo',   domain: 'whattodobendigo.com.au',   active: false },
+      { slug: 'melbourne', name: 'Melbourne', full_name: 'What To Do Melbourne', domain: 'whattodomelbourne.com.au', active: false },
+    ].filter(cs => !all.find(s => s.slug === cs.slug));
+
+    const cards = [...all.filter(s => s.slug !== 'victoria'), ...comingSoon];
+    document.getElementById('js-stat-cities').textContent = all.filter(s => s.slug !== 'victoria' && s.active).length;
+
+    grid.innerHTML = cards.map(s => {
+      const live = s.active !== false;
+      const desc = CITY_DESCRIPTIONS[s.slug] || `Discover events, food and things to do in ${s.name}.`;
+      const url  = live ? `https://${s.domain}` : '#';
+      return `
+        <a href="${url}" class="vic-city-card ${live ? '' : 'vic-city-card--coming'}"
+           ${live ? 'target="_blank" rel="noopener"' : ''}>
+          <div class="vic-city-card__img" style="${s.logo_url ? `background-image:url('${s.logo_url}')` : ''}">
+            <span class="vic-city-card__badge vic-city-card__badge--${live ? 'live' : 'soon'}">
+              ${live ? 'Live' : 'Coming soon'}
+            </span>
+          </div>
+          <div class="vic-city-card__body">
+            <div class="vic-city-card__name">${s.full_name || s.name}</div>
+            <div class="vic-city-card__domain">${s.domain}</div>
+            <div class="vic-city-card__desc">${desc}</div>
+            ${live ? `<span class="vic-city-card__cta">Visit ${s.name} guide →</span>` : ''}
+          </div>
+        </a>`;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = '<div style="color:#999">Could not load cities.</div>';
+    console.warn(e);
+  }
+}
+
+loadCities();
+loadStats();
+</script>
+</body>
+</html>

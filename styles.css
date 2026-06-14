@@ -4400,9 +4400,10 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 
 /* ── WHAT TO DO VICTORIA NETWORK BAR ────────────────────── */
 .wtdv-network-bar {
-  border-top: 1px solid rgba(255,255,255,.08);
-  margin-top: 2rem;
-  padding: .9rem 0 .1rem;
+  background: #000;
+  /* Sit flush to footer edges — cancel footer's horizontal padding */
+  margin: 2rem 0 -2rem;
+  padding: .9rem 0 .75rem;
 }
 .wtdv-network-bar__inner {
   display: flex;

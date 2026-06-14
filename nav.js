@@ -203,7 +203,7 @@
       <div class="container wtdv-network-bar__inner">
         <span class="wtdv-network-bar__text">Part of the</span>
         <a href="https://whattodovictoria.com.au" class="wtdv-network-bar__link" target="_blank" rel="noopener">
-          <img src="/assets/logo-victoria-white.png" alt="What To Do Victoria" class="wtdv-network-bar__logo" onerror="this.style.display='none'" />
+          <img src="/assets/wtd_victoria_inverted.png" alt="What To Do Victoria" class="wtdv-network-bar__logo" onerror="this.style.display='none'" />
           <span class="wtdv-network-bar__name">What To Do Victoria</span>
         </a>
         <span class="wtdv-network-bar__text">network</span>

@@ -245,7 +245,7 @@
 <!-- HEADER -->
 <header class="vic-header">
   <a href="/" class="vic-header__logo">
-    <img src="/assets/logo-victoria-white.png" alt="What To Do Victoria" onerror="this.style.display='none'" />
+    <img src="/assets/wtd_victoria_inverted.png" alt="What To Do Victoria" onerror="this.style.display='none'" />
     <div class="vic-header__logo-text">WHAT TO DO<br>VICTORIA</div>
   </a>
   <nav class="vic-header__nav">
@@ -449,10 +449,16 @@
 
 // City descriptions — can be moved to the sites table later
 const CITY_DESCRIPTIONS = {
-  geelong:  'Victoria\'s second-largest city — known for its waterfront, food scene, arts culture, and gateway to the Bellarine Peninsula.',
-  ballarat: 'Gold rush history meets a thriving arts, food and events scene in regional Victoria\'s cultural capital.',
-  bendigo:  'A stunning regional city with world-class galleries, a buzzing food scene and rich goldfields heritage.',
-  melbourne:'The heart of Victoria — live music, world-class dining, sport and events at every turn.',
+  geelong:     'Victoria\'s second-largest city — known for its waterfront, food scene, arts culture, and gateway to the Bellarine Peninsula.',
+  ballarat:    'Gold rush history meets a thriving arts, food and events scene in regional Victoria\'s cultural capital.',
+  bendigo:     'A stunning regional city with world-class galleries, a buzzing food scene and rich goldfields heritage.',
+  horsham:     'The heart of the Wimmera — gateway to the Grampians with a vibrant community events and food scene.',
+  mildura:     'Sun-drenched riverfront city famous for its food, wine, art and Murray River lifestyle.',
+  sale:        'Gateway to the Gippsland Lakes — a thriving regional hub with festivals, markets and natural beauty.',
+  shepparton:  'The food bowl of Victoria — multicultural, vibrant and home to a growing arts and events scene.',
+  traralgon:   'The commercial heart of Latrobe Valley, with growing dining, arts and community events.',
+  warrnambool: 'Coastal city on the Great Ocean Road — whale watching, food, festivals and stunning scenery.',
+  wodonga:     'Border city on the Murray River — twin city energy, great food and outdoor adventures.',
 };
 
 async function loadStats() {
@@ -479,12 +485,33 @@ async function loadCities() {
       .order('created_at');
 
     const all = sites || [];
-    // Active live sites + placeholder "coming soon" cities
+    // Coming-soon placeholders for all network cities
     const comingSoon = [
-      { slug: 'ballarat',  name: 'Ballarat',  full_name: 'What To Do Ballarat',  domain: 'whattodoballarat.com.au',  active: false },
-      { slug: 'bendigo',   name: 'Bendigo',   full_name: 'What To Do Bendigo',   domain: 'whattodobendigo.com.au',   active: false },
-      { slug: 'melbourne', name: 'Melbourne', full_name: 'What To Do Melbourne', domain: 'whattodomelbourne.com.au', active: false },
+      { slug: 'ballarat',    name: 'Ballarat',    full_name: 'What To Do Ballarat',    domain: 'whattodoballarat.com.au',    logo_url: '/assets/wtd_ballarat_black.png',    active: false },
+      { slug: 'bendigo',     name: 'Bendigo',     full_name: 'What To Do Bendigo',     domain: 'whattodobendigo.com.au',     logo_url: '/assets/wtd_bendigo_black.png',     active: false },
+      { slug: 'horsham',     name: 'Horsham',     full_name: 'What To Do Horsham',     domain: 'whattodohorsham.com.au',     logo_url: '/assets/wtd_horsham_black.png',     active: false },
+      { slug: 'mildura',     name: 'Mildura',     full_name: 'What To Do Mildura',     domain: 'whattadomildura.com.au',     logo_url: '/assets/wtd_mildura_black.png',     active: false },
+      { slug: 'sale',        name: 'Sale',        full_name: 'What To Do Sale',        domain: 'whattodosale.com.au',        logo_url: '/assets/wtd_sale_black.png',        active: false },
+      { slug: 'shepparton',  name: 'Shepparton',  full_name: 'What To Do Shepparton',  domain: 'whattodoshepparton.com.au',  logo_url: '/assets/wtd_shepparton_black.png',  active: false },
+      { slug: 'traralgon',   name: 'Traralgon',   full_name: 'What To Do Traralgon',   domain: 'whattodotraralgon.com.au',   logo_url: '/assets/wtd_traralgon_black.png',   active: false },
+      { slug: 'warrnambool', name: 'Warrnambool', full_name: 'What To Do Warrnambool', domain: 'whattodowarrnambool.com.au', logo_url: '/assets/wtd_warrnambool_black.png', active: false },
+      { slug: 'wodonga',     name: 'Wodonga',     full_name: 'What To Do Wodonga',     domain: 'whattodowodonga.com.au',     logo_url: '/assets/wtd_wodonga_black.png',     active: false },
     ].filter(cs => !all.find(s => s.slug === cs.slug));
+
+    // Fallback logos for live sites that don't have logo_url set in DB yet
+    const LOGO_FALLBACK = {
+      geelong:     '/assets/wtd_geelong_inverted.png',
+      ballarat:    '/assets/wtd_ballarat_inverted.png',
+      bendigo:     '/assets/wtd_bendigo_inverted.png',
+      horsham:     '/assets/wtd_horsham_inverted.png',
+      mildura:     '/assets/wtd_mildura_inverted.png',
+      sale:        '/assets/wtd_sale_inverted.png',
+      shepparton:  '/assets/wtd_shepparton_inverted.png',
+      traralgon:   '/assets/wtd_traralgon_inverted.png',
+      warrnambool: '/assets/wtd_warrnambool_inverted.png',
+      wodonga:     '/assets/wtd_wodonga_inverted.png',
+    };
+    all.forEach(s => { if (!s.logo_url) s.logo_url = LOGO_FALLBACK[s.slug] || null; });
 
     const cards = [...all.filter(s => s.slug !== 'victoria'), ...comingSoon];
     document.getElementById('js-stat-cities').textContent = all.filter(s => s.slug !== 'victoria' && s.active).length;
@@ -496,7 +523,8 @@ async function loadCities() {
       return `
         <a href="${url}" class="vic-city-card ${live ? '' : 'vic-city-card--coming'}"
            ${live ? 'target="_blank" rel="noopener"' : ''}>
-          <div class="vic-city-card__img" style="${s.logo_url ? `background-image:url('${s.logo_url}')` : ''}">
+          <div class="vic-city-card__img" style="background:${live ? '#1e1b4b' : '#f3f4f6'};display:flex;align-items:center;justify-content:center;padding:1.5rem">
+            ${s.logo_url ? `<img src="${s.logo_url}" alt="${s.name}" style="max-height:60px;max-width:80%;object-fit:contain" />` : ''}
             <span class="vic-city-card__badge vic-city-card__badge--${live ? 'live' : 'soon'}">
               ${live ? 'Live' : 'Coming soon'}
             </span>

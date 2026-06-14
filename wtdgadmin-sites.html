@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sites &amp; Cities — WTDG Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/wtdgadmin.css?v=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    .sites-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .site-card {
+      background: var(--adm-card);
+      border: 1.5px solid var(--adm-border);
+      border-radius: var(--adm-radius);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+    .site-card--inactive { opacity: .55; }
+    .site-card__header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+    .site-card__name { font-size: 1.05rem; font-weight: 800; color: var(--adm-text); }
+    .site-card__badge {
+      font-size: .65rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+      padding: .2rem .55rem; border-radius: 99px;
+    }
+    .site-card__badge--active { background: #d1fae5; color: #065f46; }
+    .site-card__badge--inactive { background: var(--adm-card2); color: var(--adm-mid); }
+    .site-card__slug {
+      font-size: .75rem; font-family: monospace; color: var(--adm-mid);
+      background: var(--adm-card2); padding: .2rem .5rem; border-radius: .3rem; display: inline-block;
+    }
+    .site-card__domain { font-size: .85rem; color: var(--adm-teal); font-weight: 600; }
+    .site-card__meta { font-size: .8rem; color: var(--adm-mid); display: flex; flex-wrap: wrap; gap: .4rem .75rem; }
+    .site-card__actions { display: flex; gap: .5rem; margin-top: .25rem; }
+    .adm-btn--xs {
+      font-size: .75rem; padding: .3rem .7rem; border-radius: .4rem;
+      border: 1.5px solid var(--adm-border); background: transparent;
+      color: var(--adm-text); cursor: pointer; font-family: inherit; font-weight: 600;
+      transition: background .15s, border-color .15s;
+    }
+    .adm-btn--xs:hover { background: var(--adm-card2); border-color: var(--adm-teal); }
+    .adm-btn--xs--danger:hover { border-color: var(--adm-red); color: var(--adm-red); }
+    .adm-btn--xs--teal { background: var(--adm-teal); color: #fff; border-color: var(--adm-teal); }
+    .adm-btn--xs--teal:hover { opacity: .85; }
+
+    /* Modal */
+    .adm-modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .adm-modal-backdrop--open { display: flex; }
+    .adm-modal {
+      background: var(--adm-card); border-radius: var(--adm-radius);
+      padding: 1.75rem 2rem; width: 100%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .adm-modal__title { font-size: 1.1rem; font-weight: 800; margin: 0 0 1.25rem; }
+    .adm-modal__footer { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--adm-border); }
+    .adm-field { margin-bottom: 1rem; }
+    .adm-field label { display: block; font-size: .8rem; font-weight: 700; color: var(--adm-mid); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .35rem; }
+    .adm-field input, .adm-field select, .adm-field textarea {
+      width: 100%; padding: .55rem .75rem; border: 1.5px solid var(--adm-border);
+      border-radius: .45rem; background: var(--adm-card2); color: var(--adm-text);
+      font-size: .9rem; font-family: inherit;
+    }
+    .adm-field input:focus, .adm-field select:focus { outline: none; border-color: var(--adm-teal); }
+    .adm-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .adm-field-hint { font-size: .75rem; color: var(--adm-mid); margin-top: .3rem; }
+    .adm-modal-status { font-size: .85rem; font-weight: 600; min-height: 1.2em; margin-top: .5rem; }
+    .adm-modal-status--ok  { color: var(--adm-green); }
+    .adm-modal-status--err { color: var(--adm-red); }
+
+    .adm-add-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--adm-teal); color: #fff; border: none;
+      border-radius: .5rem; padding: .6rem 1.25rem;
+      font-size: .88rem; font-weight: 700; cursor: pointer;
+      font-family: inherit; margin-bottom: 1.5rem;
+    }
+    .adm-add-btn:hover { opacity: .9; }
+
+    .adm-vercel-tip {
+      background: var(--adm-card2); border: 1px solid var(--adm-border);
+      border-radius: var(--adm-radius); padding: 1rem 1.25rem;
+      font-size: .82rem; color: var(--adm-mid); line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .adm-vercel-tip strong { color: var(--adm-text); }
+    .adm-vercel-tip ol { margin: .5rem 0 0 1rem; padding: 0; }
+    .adm-vercel-tip li { margin-bottom: .25rem; }
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-layout">
+  <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
+
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <span class="adm-topbar__title" id="js-adm-page-title">Sites &amp; Cities</span>
+    </div>
+
+    <div class="adm-content">
+
+      <div class="adm-vercel-tip">
+        <strong>Adding a new city</strong> — create the site row here, then:
+        <ol>
+          <li>Go to your <strong>Vercel dashboard</strong> → project → Settings → Domains</li>
+          <li>Add the new domain as an alias (e.g. <code>whattodoballarat.com.au</code>)</li>
+          <li>Point DNS to Vercel — the site will auto-configure from this table</li>
+        </ol>
+      </div>
+
+      <button class="adm-add-btn" id="js-add-site">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add city / site
+      </button>
+
+      <div class="sites-grid" id="js-sites-grid">
+        <div style="color:var(--adm-mid);font-size:.9rem">Loading…</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EDIT / ADD MODAL -->
+<div class="adm-modal-backdrop" id="js-modal-backdrop">
+  <div class="adm-modal">
+    <div class="adm-modal__title" id="js-modal-title">Add city</div>
+
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>City slug *</label>
+        <input type="text" id="f-slug" placeholder="geelong" />
+        <div class="adm-field-hint">Lowercase, no spaces. Used as city filter key.</div>
+      </div>
+      <div class="adm-field">
+        <label>Short name *</label>
+        <input type="text" id="f-name" placeholder="Geelong" />
+      </div>
+    </div>
+
+    <div class="adm-field">
+      <label>Full site name *</label>
+      <input type="text" id="f-full-name" placeholder="What To Do Geelong" />
+    </div>
+
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Domain *</label>
+        <input type="text" id="f-domain" placeholder="whattodogeelong.com.au" />
+      </div>
+      <div class="adm-field">
+        <label>WWW domain</label>
+        <input type="text" id="f-domain-www" placeholder="www.whattodogeelong.com.au" />
+      </div>
+    </div>
+
+    <div class="adm-field">
+      <label>Logo URL</label>
+      <input type="text" id="f-logo-url" placeholder="https://..." />
+      <div class="adm-field-hint">Upload to Supabase storage and paste the public URL.</div>
+    </div>
+
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Primary colour</label>
+        <input type="color" id="f-color" value="#0d9488" />
+      </div>
+      <div class="adm-field">
+        <label>Active</label>
+        <select id="f-active">
+          <option value="true">Yes — live</option>
+          <option value="false">No — hidden</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="adm-field">
+      <label>Hero tagline</label>
+      <input type="text" id="f-tagline" placeholder="Your guide to Geelong" />
+    </div>
+
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Map latitude</label>
+        <input type="number" step="any" id="f-lat" placeholder="-38.1499" />
+      </div>
+      <div class="adm-field">
+        <label>Map longitude</label>
+        <input type="number" step="any" id="f-lng" placeholder="144.3617" />
+      </div>
+    </div>
+
+    <div class="adm-field">
+      <label>Map zoom (1–18)</label>
+      <input type="number" id="f-zoom" placeholder="13" min="1" max="18" />
+    </div>
+
+    <div id="js-modal-status" class="adm-modal-status"></div>
+
+    <div class="adm-modal__footer">
+      <button class="adm-btn adm-btn--outline" id="js-modal-cancel">Cancel</button>
+      <button class="adm-btn" id="js-modal-save">Save site</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase.js"></script>
+<script src="/wtdgadmin.js"></script>
+<script src="/wtdgadmin-shell.js"></script>
+<script>
+'use strict';
+
+let _sites = [];
+let _editingId = null;
+
+// ── RENDER GRID ───────────────────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('js-sites-grid');
+  if (!_sites.length) {
+    grid.innerHTML = '<div style="color:var(--adm-mid);font-size:.9rem">No sites found.</div>';
+    return;
+  }
+  grid.innerHTML = _sites.map(s => `
+    <div class="site-card ${s.active ? '' : 'site-card--inactive'}">
+      <div class="site-card__header">
+        <div>
+          <div class="site-card__name">${s.full_name}</div>
+          <span class="site-card__slug">${s.slug}</span>
+        </div>
+        <span class="site-card__badge site-card__badge--${s.active ? 'active' : 'inactive'}">
+          ${s.active ? 'Live' : 'Inactive'}
+        </span>
+      </div>
+      <div class="site-card__domain">
+        🌐 ${s.domain}${s.domain_www ? ` · ${s.domain_www}` : ''}
+      </div>
+      ${s.logo_url ? `<div style="font-size:.8rem;color:var(--adm-mid)">Logo: <a href="${s.logo_url}" target="_blank" style="color:var(--adm-teal)">${s.logo_url.split('/').pop()}</a></div>` : ''}
+      <div class="site-card__meta">
+        ${s.primary_color ? `<span>🎨 ${s.primary_color}</span>` : ''}
+        ${s.map_lat ? `<span>📍 ${s.map_lat}, ${s.map_lng} z${s.map_zoom}</span>` : ''}
+      </div>
+      ${s.hero_tagline ? `<div style="font-size:.82rem;color:var(--adm-mid);font-style:italic">"${s.hero_tagline}"</div>` : ''}
+      <div class="site-card__actions">
+        <button class="adm-btn--xs" onclick="openEdit('${s.id}')">Edit</button>
+        <button class="adm-btn--xs ${s.active ? 'adm-btn--xs--danger' : 'adm-btn--xs--teal'}"
+          onclick="toggleActive('${s.id}', ${!s.active})">
+          ${s.active ? 'Deactivate' : 'Activate'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── LOAD SITES ────────────────────────────────────────────
+async function loadSites() {
+  const { data, error } = await db.from('sites').select('*').order('created_at');
+  if (error) { console.error(error); return; }
+  _sites = data || [];
+  renderGrid();
+}
+
+// ── TOGGLE ACTIVE ─────────────────────────────────────────
+async function toggleActive(id, newVal) {
+  const { error } = await db.from('sites').update({ active: newVal }).eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  await loadSites();
+}
+window.toggleActive = toggleActive;
+
+// ── MODAL ─────────────────────────────────────────────────
+function openModal(site) {
+  _editingId = site?.id || null;
+  document.getElementById('js-modal-title').textContent = site ? `Edit — ${site.full_name}` : 'Add city';
+  document.getElementById('f-slug').value        = site?.slug         || '';
+  document.getElementById('f-name').value        = site?.name         || '';
+  document.getElementById('f-full-name').value   = site?.full_name    || '';
+  document.getElementById('f-domain').value      = site?.domain       || '';
+  document.getElementById('f-domain-www').value  = site?.domain_www   || '';
+  document.getElementById('f-logo-url').value    = site?.logo_url     || '';
+  document.getElementById('f-color').value       = site?.primary_color || '#0d9488';
+  document.getElementById('f-active').value      = String(site?.active !== false);
+  document.getElementById('f-tagline').value     = site?.hero_tagline || '';
+  document.getElementById('f-lat').value         = site?.map_lat      || '';
+  document.getElementById('f-lng').value         = site?.map_lng      || '';
+  document.getElementById('f-zoom').value        = site?.map_zoom     || 13;
+  document.getElementById('f-slug').disabled     = !!site; // slug is immutable after creation
+  document.getElementById('js-modal-status').textContent = '';
+  document.getElementById('js-modal-backdrop').classList.add('adm-modal-backdrop--open');
+}
+
+function closeModal() {
+  document.getElementById('js-modal-backdrop').classList.remove('adm-modal-backdrop--open');
+  _editingId = null;
+}
+
+function openEdit(id) {
+  const site = _sites.find(s => s.id === id);
+  if (site) openModal(site);
+}
+window.openEdit = openEdit;
+
+async function saveSite() {
+  const statusEl = document.getElementById('js-modal-status');
+  const saveBtn  = document.getElementById('js-modal-save');
+
+  const slug      = document.getElementById('f-slug').value.trim().toLowerCase();
+  const name      = document.getElementById('f-name').value.trim();
+  const fullName  = document.getElementById('f-full-name').value.trim();
+  const domain    = document.getElementById('f-domain').value.trim().toLowerCase().replace(/^https?:\/\//, '');
+  const domainWww = document.getElementById('f-domain-www').value.trim().toLowerCase().replace(/^https?:\/\//, '') || null;
+  const logoUrl   = document.getElementById('f-logo-url').value.trim() || null;
+  const color     = document.getElementById('f-color').value;
+  const active    = document.getElementById('f-active').value === 'true';
+  const tagline   = document.getElementById('f-tagline').value.trim() || null;
+  const lat       = parseFloat(document.getElementById('f-lat').value) || null;
+  const lng       = parseFloat(document.getElementById('f-lng').value) || null;
+  const zoom      = parseInt(document.getElementById('f-zoom').value)  || 13;
+
+  if (!slug || !name || !fullName || !domain) {
+    statusEl.textContent = 'Please fill in all required fields.';
+    statusEl.className = 'adm-modal-status adm-modal-status--err';
+    return;
+  }
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    statusEl.textContent = 'Slug must be lowercase letters, numbers and hyphens only.';
+    statusEl.className = 'adm-modal-status adm-modal-status--err';
+    return;
+  }
+
+  saveBtn.disabled = true;
+  statusEl.textContent = 'Saving…';
+  statusEl.className = 'adm-modal-status';
+
+  const payload = {
+    name, full_name: fullName, domain, domain_www: domainWww,
+    logo_url: logoUrl, primary_color: color, active,
+    hero_tagline: tagline, map_lat: lat, map_lng: lng, map_zoom: zoom,
+    updated_at: new Date().toISOString(),
+  };
+
+  let error;
+  if (_editingId) {
+    ({ error } = await db.from('sites').update(payload).eq('id', _editingId));
+  } else {
+    payload.slug = slug;
+    ({ error } = await db.from('sites').insert(payload));
+  }
+
+  saveBtn.disabled = false;
+  if (error) {
+    statusEl.textContent = 'Error: ' + error.message;
+    statusEl.className = 'adm-modal-status adm-modal-status--err';
+    return;
+  }
+
+  statusEl.textContent = 'Saved ✓';
+  statusEl.className = 'adm-modal-status adm-modal-status--ok';
+  await loadSites();
+  setTimeout(closeModal, 800);
+}
+
+// ── EVENTS ────────────────────────────────────────────────
+document.getElementById('js-add-site').addEventListener('click', () => openModal(null));
+document.getElementById('js-modal-cancel').addEventListener('click', closeModal);
+document.getElementById('js-modal-save').addEventListener('click', saveSite);
+document.getElementById('js-modal-backdrop').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── INIT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  const admin = await requireAdminAuth();
+  if (!admin) return;
+  initAdminShell('Sites & Cities');
+  await loadSites();
+});
+</script>
+</body>
+</html>

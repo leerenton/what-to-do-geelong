@@ -4399,48 +4399,39 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .listing-related__rating { color: #f59e0b; font-weight: 600; }
 
 /* ── WHAT TO DO VICTORIA NETWORK BAR ────────────────────── */
-/* Sits at the very bottom of the footer */
 .wtdv-network-bar {
-  border-top: 1px solid rgba(255,255,255,.1);
+  border-top: 1px solid rgba(255,255,255,.08);
   margin-top: 2rem;
-  padding: 1rem 0 .25rem;
+  padding: .9rem 0 .1rem;
 }
 .wtdv-network-bar__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: .75rem;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 .wtdv-network-bar__text {
-  font-size: .75rem;
-  color: rgba(255,255,255,.45);
+  font-size: .72rem;
+  color: rgba(255,255,255,.4);
+  letter-spacing: .01em;
 }
 .wtdv-network-bar__link {
-  color: rgba(255,255,255,.85);
-  font-weight: 700;
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: .5rem;
-  font-size: .75rem;
-  transition: color .15s;
+  gap: .65rem;
+  text-decoration: none;
+  transition: opacity .15s;
 }
-.wtdv-network-bar__link:hover { color: #fff; }
+.wtdv-network-bar__link:hover { opacity: .8; }
 .wtdv-network-bar__logo {
-  height: 22px;
+  height: 20px;
   width: auto;
   display: block;
 }
-.wtdv-network-bar__name {
-  font-size: .75rem;
-}
 .wtdv-network-bar__cta {
   font-size: .72rem;
-  color: rgba(255,255,255,.45);
+  color: rgba(255,255,255,.5);
   font-weight: 600;
-  text-decoration: none;
   white-space: nowrap;
-  transition: color .15s;
 }
-.wtdv-network-bar__cta:hover { color: rgba(255,255,255,.8); }

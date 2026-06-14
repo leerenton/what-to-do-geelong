@@ -201,14 +201,10 @@
   const NETWORK_BAR = site.slug !== 'victoria' ? `
     <div class="wtdv-network-bar">
       <div class="container wtdv-network-bar__inner">
-        <span class="wtdv-network-bar__text">Part of the</span>
+        <span class="wtdv-network-bar__text">Part of the What To Do Victoria network</span>
         <a href="https://whattodovictoria.com.au" class="wtdv-network-bar__link" target="_blank" rel="noopener">
-          <img src="/assets/wtd_victoria_inverted.png" alt="What To Do Victoria" class="wtdv-network-bar__logo" onerror="this.style.display='none'" />
-          <span class="wtdv-network-bar__name">What To Do Victoria</span>
-        </a>
-        <span class="wtdv-network-bar__text">network</span>
-        <a href="https://whattodovictoria.com.au" class="wtdv-network-bar__cta" target="_blank" rel="noopener">
-          Explore all cities →
+          <img src="/assets/wtd_victoria_inverted.png" alt="What To Do Victoria" class="wtdv-network-bar__logo" />
+          <span class="wtdv-network-bar__cta">Explore all cities →</span>
         </a>
       </div>
     </div>` : '';

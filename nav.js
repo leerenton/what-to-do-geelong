@@ -9,11 +9,15 @@
 (function () {
   const GUIDE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="18.5" y1="5.5" x2="21" y2="3" stroke="#48c7d4"/><line x1="20" y1="9" x2="23" y2="8" stroke="#48c7d4"/><line x1="16" y1="4" x2="16.5" y2="1.5" stroke="#48c7d4"/></svg>`;
 
+  const site     = window.SITE || {};
+  const siteName = site.fullName || 'What To Do Geelong';
+  const logoSrc  = site.logoUrl  || '/assets/logo.jpg';
+
   const NAV_HTML = `
   <header class="nav">
     <div class="nav__inner container">
       <a href="/index.html" class="nav__logo-link">
-        <img src="/assets/logo.jpg" alt="What To Do Geelong" class="nav__logo-img" />
+        <img src="${logoSrc}" alt="${siteName}" class="nav__logo-img" />
       </a>
       <nav class="nav__links">
 
@@ -197,9 +201,9 @@
   <footer class="footer">
     <div class="container footer__grid">
       <div class="footer__brand">
-        <div class="footer__logo">WHAT TO DO<br>GEELONG!</div>
-        <p class="footer__tagline">Your local guide to events, food, drink and things to do in Geelong, Victoria.</p>
-        <p class="footer__copy">© 2025 What To Do Geelong</p>
+        <div class="footer__logo">${siteName.toUpperCase()}!</div>
+        <p class="footer__tagline">${site.heroTagline || 'Your local guide to events, food, drink and things to do.'}</p>
+        <p class="footer__copy">© ${new Date().getFullYear()} ${siteName}</p>
       </div>
       <div class="footer__col">
         <h4 class="footer__heading">Things To Do</h4>
@@ -279,7 +283,7 @@
     const header = document.createElement('div');
     header.className = 'nav__mobile-header';
     header.innerHTML = `
-      <img src="/assets/logo.jpg" alt="What To Do Geelong" class="nav__mobile-logo" />
+      <img src="${logoSrc}" alt="${siteName}" class="nav__mobile-logo" />
       <button class="nav__mobile-close" aria-label="Close menu">
         <span class="material-symbols-rounded">close</span>
       </button>`;

@@ -1043,9 +1043,12 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 
 /* ── UPCOMING LIST ──────────────────────────────────────── */
 .upcoming-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: .6rem;
+}
+@media (min-width: 768px) {
+  .upcoming-list { grid-template-columns: 1fr 1fr; }
 }
 
 .upcoming-item {

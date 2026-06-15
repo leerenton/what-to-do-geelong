@@ -69,20 +69,18 @@
       <label>Headline *</label>
       <input type="text" id="af-title" placeholder="Article headline" />
     </div>
-    <div class="adm-field-row">
-      <div class="adm-field">
-        <label>Type</label>
-        <select id="af-type">
-          <option value="guide">Guide</option>
-          <option value="news">News</option>
-          <option value="history">What Was Geelong</option>
-          <option value="feature">Feature</option>
-        </select>
-      </div>
-      <div class="adm-field">
-        <label>Associate to Business</label>
-        <select id="af-business"><option value="">None</option></select>
-      </div>
+    <div class="adm-field">
+      <label>Type</label>
+      <select id="af-type">
+        <option value="guide">Guide</option>
+        <option value="news">News</option>
+        <option value="history">What Was Geelong</option>
+        <option value="feature">Feature</option>
+      </select>
+    </div>
+    <div class="adm-field">
+      <label>Associate to Business</label>
+      <select id="af-business" style="max-width:100%;overflow:hidden;text-overflow:ellipsis"><option value="">None</option></select>
     </div>
     <div class="adm-field-row">
       <div class="adm-field">
@@ -212,6 +210,12 @@
 let allArticles = [], allBizList = [], allSubmissions = [];
 let editingId = null, quill = null;
 
+// Outer scope so openDrawer can call it
+function toggleHistoryFields() {
+  const isHistory = document.getElementById('af-type').value === 'history';
+  document.getElementById('af-history-fields').style.display = isHistory ? 'flex' : 'none';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const admin = await requireAdminAuth();
   if (!admin) return;
@@ -220,12 +224,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initQuill();
 
   document.getElementById('js-new-article-btn').addEventListener('click', () => openDrawer(null));
-
-  // Show/hide history fields based on type
-  function toggleHistoryFields() {
-    const isHistory = document.getElementById('af-type').value === 'history';
-    document.getElementById('af-history-fields').style.display = isHistory ? 'flex' : 'none';
-  }
   document.getElementById('af-type').addEventListener('change', toggleHistoryFields);
 
   // Preview before/after images on URL input

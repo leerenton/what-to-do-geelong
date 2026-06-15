@@ -2225,7 +2225,7 @@ async function initListingPage() {
   if (biz.status === 'pending') {
     const session = await db.auth.getSession();
     const userId = session?.data?.session?.user?.id;
-    if (userId !== biz.owner_id) {
+    if (userId !== (biz.ownerId ?? biz.owner_id)) {
       document.getElementById('js-listing-root').innerHTML =
         '<p style="padding:2rem">This listing is not yet published. <a href="index.html">Go home</a></p>';
       return;
@@ -2462,8 +2462,8 @@ async function initListingPage() {
   //   claimed + visitor      → Gold listing: live form  |  Free: website link only
   //   claimed + owner + free → Gold gate upsell (owner only sees this)
   //   claimed + owner + gold → "Your enquiry form is live" confirmation
-  const isClaimed = !!biz.is_claimed;
-  const isGold    = !!biz.isGold;
+  const isClaimed = !!(biz.isClaimed ?? biz.is_claimed);
+  const isGold    = !!(biz.isGold    ?? biz.is_gold);
 
   // Get logged-in user async, then render the right state
   (async () => {

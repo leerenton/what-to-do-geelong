@@ -2602,13 +2602,11 @@ async function initListingPage() {
 
         try {
           await db.from('inquiries').insert({
-            business_id:   biz.id,
-            business_name: biz.name,
-            sender_name:   name || null,
-            sender_email:  email,
-            message:       msg,
-            status:        'unread',
-            created_at:    new Date().toISOString(),
+            business_id: biz.id,
+            name:        name || null,
+            email:       email,
+            message:     msg,
+            unread:      true,
           });
         } catch (_) {}
 

@@ -70,7 +70,7 @@ async function loadBizData() {
   bizInquiries = inqRes.data   || [];
 
   // Badge unread count
-  const unread = bizInquiries.filter(i => i.status === 'unread').length;
+  const unread = bizInquiries.filter(i => i.unread).length;
   const badge  = document.getElementById('js-inq-badge');
   if (badge) { badge.textContent = unread; badge.style.display = unread ? 'inline' : 'none'; }
 }
@@ -158,7 +158,7 @@ function goldUpgradeBanner() {
 // ── OVERVIEW ──────────────────────────────────────────────
 function renderOverview() {
   const views     = currentBiz.view_count || 0;
-  const unread    = bizInquiries.filter(i => i.status === 'unread').length;
+  const unread    = bizInquiries.filter(i => i.unread).length;
   const totalInq  = bizInquiries.length;
 
   const goldExpiry = currentBiz.gold_expires_at
@@ -245,13 +245,13 @@ function renderItemsMini(items) {
 
 function renderInquiryMini() {
   return `<div class="dash-item-list">${bizInquiries.slice(0,3).map(inq => `
-    <div class="dash-item ${inq.status === 'unread' ? 'dash-item--unread' : ''}">
+    <div class="dash-item ${inq.unread ? 'dash-item--unread' : ''}">
       <span class="dash-item__emoji">✉️</span>
       <div class="dash-item__body">
         <div class="dash-item__title">${inq.sender_name || inq.sender_email}</div>
         <div class="dash-item__meta">${(inq.message || '').substring(0, 60)}${inq.message?.length > 60 ? '…' : ''}</div>
       </div>
-      ${inq.status === 'unread' ? '<span class="dash-item__unread-dot"></span>' : ''}
+      ${inq.unread ? '<span class="dash-item__unread-dot"></span>' : ''}
     </div>
   `).join('')}</div>`;
 }
@@ -509,17 +509,17 @@ function renderInquiries() {
       ` : `
         <div class="dash-inq-list" id="js-inq-list">
           ${bizInquiries.map(inq => `
-            <div class="dash-inq-item${inq.status === 'unread' ? ' dash-inq-item--unread' : ''}" data-inqid="${inq.id}">
+            <div class="dash-inq-item${inq.unread ? ' dash-inq-item--unread' : ''}" data-inqid="${inq.id}">
               <div class="dash-inq-item__header">
                 <span class="dash-inq-item__name">${inq.sender_name || 'Anonymous'}</span>
                 <span class="dash-inq-item__email">${inq.sender_email}</span>
                 <span class="dash-inq-item__date">${fmtDate(inq.created_at)}</span>
-                ${inq.status === 'unread' ? '<span class="dash-inq-item__badge">New</span>' : ''}
+                ${inq.unread ? '<span class="dash-inq-item__badge">New</span>' : ''}
               </div>
               <p class="dash-inq-item__msg">${(inq.message || '').replace(/</g,'&lt;')}</p>
               <div class="dash-inq-item__actions">
                 <a href="mailto:${inq.sender_email}?subject=Re: Your enquiry about ${encodeURIComponent(currentBiz.name)}" class="btn btn--teal btn--xs">Reply →</a>
-                ${inq.status === 'unread' ? `<button class="btn btn--outline btn--xs js-inq-read" data-inqid="${inq.id}">Mark read</button>` : ''}
+                ${inq.unread ? `<button class="btn btn--outline btn--xs js-inq-read" data-inqid="${inq.id}">Mark read</button>` : ''}
               </div>
             </div>
           `).join('')}
@@ -1066,25 +1066,25 @@ function bindPanelEvents(tab) {
     document.querySelectorAll('.js-inq-read').forEach(btn => {
       btn.addEventListener('click', async () => {
         const inqId = btn.dataset.inqid;
-        await db.from('inquiries').update({ status: 'read' }).eq('id', inqId);
+        await db.from('inquiries').update({ unread: false }).eq('id', inqId);
         const inq = bizInquiries.find(i => i.id == inqId);
-        if (inq) inq.status = 'read';
+        if (inq) inq.unread = false;
         // Re-render just the badge and list
-        const unread = bizInquiries.filter(i => i.status === 'unread').length;
+        const unread = bizInquiries.filter(i => i.unread).length;
         const badge = document.getElementById('js-inq-badge');
         if (badge) { badge.textContent = unread; badge.style.display = unread ? 'inline' : 'none'; }
         document.getElementById('js-inq-list').innerHTML = bizInquiries.map(inq => `
-          <div class="dash-inq-item${inq.status === 'unread' ? ' dash-inq-item--unread' : ''}" data-inqid="${inq.id}">
+          <div class="dash-inq-item${inq.unread ? ' dash-inq-item--unread' : ''}" data-inqid="${inq.id}">
             <div class="dash-inq-item__header">
               <span class="dash-inq-item__name">${inq.sender_name || 'Anonymous'}</span>
               <span class="dash-inq-item__email">${inq.sender_email}</span>
               <span class="dash-inq-item__date">${fmtDate(inq.created_at)}</span>
-              ${inq.status === 'unread' ? '<span class="dash-inq-item__badge">New</span>' : ''}
+              ${inq.unread ? '<span class="dash-inq-item__badge">New</span>' : ''}
             </div>
             <p class="dash-inq-item__msg">${(inq.message || '').replace(/</g,'&lt;')}</p>
             <div class="dash-inq-item__actions">
               <a href="mailto:${inq.sender_email}?subject=Re: Your enquiry about ${encodeURIComponent(currentBiz.name)}" class="btn btn--teal btn--xs">Reply →</a>
-              ${inq.status === 'unread' ? `<button class="btn btn--outline btn--xs js-inq-read" data-inqid="${inq.id}">Mark read</button>` : ''}
+              ${inq.unread ? `<button class="btn btn--outline btn--xs js-inq-read" data-inqid="${inq.id}">Mark read</button>` : ''}
             </div>
           </div>
         `).join('');

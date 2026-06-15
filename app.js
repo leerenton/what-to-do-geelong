@@ -954,16 +954,37 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
     document.getElementById('js-mh-top-title').textContent = btmEv.title;
   }
 
-  // Populate bottom-right (second event)
+  // Populate bottom-right — random business, sticky for 1 hour
+  // (pref-matched if prefs set, otherwise any business with image)
   const btmEl  = document.getElementById('js-mh-btm');
   const btmImg = document.getElementById('js-mh-btm-img');
-  const btmEvFinal = btmEv || events.find(e => e.img && e.id !== mainEv.id);
-  if (btmEvFinal) {
-    btmEl.href = evLink(btmEvFinal);
-    btmImg.src = btmEvFinal.img;
-    btmImg.alt = btmEvFinal.title;
-    document.getElementById('js-mh-btm-badge').textContent = btmEvFinal.category || 'Event';
-    document.getElementById('js-mh-btm-title').textContent = btmEvFinal.title;
+  const prefs  = getPrefs();
+  const bizPool = BUSINESSES.filter(b => b.img);
+  const prefMatched = prefs.interests?.length
+    ? bizPool.filter(b => prefsMatchCard(b, prefs))
+    : [];
+  const btmBizPool = prefMatched.length ? prefMatched : bizPool;
+
+  // Sticky: reuse cached pick for 1 hour
+  const HERO_BIZ_TTL = 60 * 60 * 1000; // 1 hour
+  let btmBiz = null;
+  try {
+    const cached = JSON.parse(localStorage.getItem('wtdg_hero_biz') || 'null');
+    if (cached && (Date.now() - cached.ts) < HERO_BIZ_TTL) {
+      btmBiz = btmBizPool.find(b => b.id === cached.id) || null;
+    }
+  } catch (_) {}
+  if (!btmBiz) {
+    btmBiz = btmBizPool[Math.floor(Math.random() * btmBizPool.length)] || null;
+    try { localStorage.setItem('wtdg_hero_biz', JSON.stringify({ id: btmBiz?.id, ts: Date.now() })); } catch (_) {}
+  }
+
+  if (btmBiz) {
+    btmEl.href = bizLink(btmBiz);
+    btmImg.src = btmBiz.img;
+    btmImg.alt = btmBiz.name;
+    document.getElementById('js-mh-btm-badge').textContent = btmBiz.type || 'Place';
+    document.getElementById('js-mh-btm-title').textContent = btmBiz.name;
   }
 
   // Cache hero image for instant display on next visit

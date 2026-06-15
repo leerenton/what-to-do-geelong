@@ -987,7 +987,7 @@ function renderFeatured(events) {
     const borderStyle = brand ? `border-top:3px solid ${brand.accent}` : '';
 
     return `
-      <a href="${evLink(ev)}" class="featured-card" style="${borderStyle}">
+      <a href="${evLink(ev)}" class="featured-card" style="${borderStyle}" data-id="${ev.id}" data-type="event">
         ${imgEl}
         <div class="featured-card__body">
           <span class="featured-card__cat">${ev.category}</span>
@@ -1012,6 +1012,7 @@ function renderFeatured(events) {
   el.innerHTML = picks.length === 1
     ? featCard(picks[0])
     : `<div class="featured-pair">${picks.map(featCard).join('')}</div>`;
+  injectPriorityControls('event');
 }
 
 // ── RENDER EVENT SCROLL STRIP ─────────────────────────────
@@ -1137,7 +1138,7 @@ function eventGridCard(ev, opts = {}) {
     : '';
 
   return `
-    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}${isMatch ? ' ev-card--match' : ''}${brand ? ' ev-card--sport' : ''}" style="${cardStyle}"${latAttr}>
+    <a href="${evLink(ev)}" class="ev-card${isPast ? ' ev-card--past' : ''}${opts.compact ? ' ev-card--compact' : ''}${isMatch ? ' ev-card--match' : ''}${brand ? ' ev-card--sport' : ''}" style="${cardStyle}"${latAttr} data-id="${ev.id}" data-type="event">
       ${urgencyBadge}
       ${thumb}
       <div class="ev-card__body">
@@ -1343,11 +1344,11 @@ function renderUpcoming(events) {
     return;
   }
 
-  list.innerHTML = parsed.map(({ ev, d }, i) => {
+  list.innerHTML = parsed.map(({ ev, d }) => {
     const isFree = ev.price === 'Free';
     const teal   = isFree; // teal date block for free events (matches original design)
     return `
-      <a href="${evLink(ev)}" class="upcoming-item">
+      <a href="${evLink(ev)}" class="upcoming-item" data-id="${ev.id}" data-type="event">
         <div class="upcoming-item__date ${teal ? 'upcoming-item__date--teal' : ''}">
           <span class="upcoming-item__day">${d.getDate()}</span>
           <span class="upcoming-item__mon">${MONTHS[d.getMonth()]}</span>
@@ -1361,6 +1362,7 @@ function renderUpcoming(events) {
       </a>
     `;
   }).join('');
+  injectPriorityControls('event');
 }
 
 // ── RENDER PROMOTED EVENTS STRIP ─────────────────────────

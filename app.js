@@ -4049,6 +4049,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Expose globally for search (available on every page, not just homepage)
+  window.BUSINESSES = BUSINESSES;
+  window.EVENTS     = EVENTS;
+  window.ARTICLES   = ARTICLES;
+
   if (document.getElementById('js-event-scroll')) {
     // Load homepage sort settings and trending scores, then render
     let _hpSettings = { sort: 'latest', period: '7d' };
@@ -4100,10 +4105,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window._allBiz = BUSINESSES;
     // Store all events globally for planner preview
     window._allEvents = personalisedEvents;
-    // Expose for search
-    window.BUSINESSES = BUSINESSES;
-    window.EVENTS     = EVENTS;
-    window.ARTICLES   = ARTICLES;
 
     renderMasonryHero(personalisedEvents, sortedArticles, _hpSettings, _trendingScores);
     renderPromotedEvents(personalisedEvents);

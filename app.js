@@ -67,6 +67,7 @@ async function injectPriorityControls(tableKey) {
       // Re-render the relevant section so order updates instantly
       if (tableKey === 'event' && typeof initWeekendToggle === 'function') {
         initWeekendToggle(window._allEvents || EVENTS);
+        renderMasonryHero(window._allEvents || EVENTS, ARTICLES, window._hpSettings || {}, window._trendingScores || new Map());
       }
       if (tableKey === 'business' && typeof renderEatStrip === 'function') {
         renderEatStrip();
@@ -894,13 +895,13 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
   // Hide if admin toggled off
   if (settings.showMasonry === false) { section.style.display = 'none'; return; }
 
-  // Pick top trending event (with image)
+  // Pick top event (with image): admin_priority first, trending score as fallback
   function topTrendingEvent(exclude) {
     const scored = events
       .filter(e => e.img && !exclude.includes(e.id))
-      .map(e => ({ e, score: (trendingScores.get ? (trendingScores.get(`event:${e.id}`) || {}).score || 0 : 0) }))
-      .sort((a, b) => b.score - a.score);
-    return (scored[0] || { e: events.find(e => e.img && !exclude.includes(e.id)) })?.e || null;
+      .map(e => ({ e, prio: e.adminPriority || 0, score: (trendingScores.get ? (trendingScores.get(`event:${e.id}`) || {}).score || 0 : 0) }))
+      .sort((a, b) => b.prio - a.prio || b.score - a.score);
+    return scored[0]?.e || null;
   }
 
   // Pick top trending article (with image)
@@ -4023,6 +4024,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (_hpSettings.sort === 'trending' && window.wtdgViews) {
       _trendingScores = await window.wtdgViews.getAllTrendingScores(_hpSettings.period);
     }
+    // Expose for re-renders triggered by priority changes
+    window._hpSettings     = _hpSettings;
+    window._trendingScores = _trendingScores;
 
     // Sort helper — Featured → admin_priority → trending score → original order
     function applyHomepageSort(items, type) {

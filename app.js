@@ -65,9 +65,11 @@ async function injectPriorityControls(tableKey) {
       badge.style.outline = '2px solid #4ac8d0';
       setTimeout(() => badge.style.outline = '', 600);
       // Re-render the relevant section so order updates instantly
-      if (tableKey === 'event' && typeof initWeekendToggle === 'function') {
-        initWeekendToggle(window._allEvents || EVENTS);
+      if (tableKey === 'event') {
+        // Re-render hero first (updates _heroEventId), then featured pair (excludes hero)
         renderMasonryHero(window._allEvents || EVENTS, ARTICLES, window._hpSettings || {}, window._trendingScores || new Map());
+        if (window._currentWeekendEvs) renderFeatured(window._currentWeekendEvs);
+        renderUpcoming(window._allEvents || EVENTS);
       }
       if (tableKey === 'business' && typeof renderEatStrip === 'function') {
         renderEatStrip();
@@ -917,6 +919,9 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
   const article = topTrendingArticle();
   const btmEv   = topTrendingEvent(mainEv ? [mainEv.id] : []);
 
+  // Track hero event so featured pair can exclude it
+  window._heroEventId = mainEv?.id ?? null;
+
   // Need at least the main event with an image
   if (!mainEv) { section.style.display = 'none'; return; }
 
@@ -981,7 +986,9 @@ function renderFeatured(events) {
   if (!el) return;
 
   // Pick up to 2 events: admin_priority first, then featured flag as tiebreaker
+  // Exclude whatever is already shown in the masonry hero
   const picks = [...events]
+    .filter(e => e.id !== window._heroEventId)
     .sort((a, b) => {
       const ap = (b.adminPriority || 0) - (a.adminPriority || 0);
       if (ap !== 0) return ap;
@@ -1887,6 +1894,7 @@ function initWeekendToggle(allEvents) {
 
     // Filter and render events
     const weekendEvs = filterToWeekend(allEvents, { fri, sat, sun });
+    window._currentWeekendEvs = weekendEvs; // store for priority re-renders
     renderFeatured(weekendEvs);    // sets _weekendFeaturedIds
     renderUpcoming(allEvents); // upcoming excludes the featured pair
   }

@@ -138,7 +138,6 @@
           </div>
         </div>
 
-        <a href="#offers">Offers</a>
 
         <!-- Events -->
         <div class="nav__drop nav__drop--mega">
@@ -177,8 +176,7 @@
           </div>
         </div>
 
-        <a href="/cats.html" class="nav__cats-link"><span class="nav__cats-dot"></span> Cats</a>
-        <a href="/editorial.html">Read</a>
+<a href="/editorial.html">Read</a>
         <a href="/onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
 
         <!-- Mobile search (inside drawer) -->

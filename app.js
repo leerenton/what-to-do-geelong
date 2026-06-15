@@ -4097,6 +4097,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     window._allBiz = BUSINESSES;
     // Store all events globally for planner preview
     window._allEvents = personalisedEvents;
+    // Expose for search
+    window.BUSINESSES = BUSINESSES;
+    window.EVENTS     = EVENTS;
+    window.ARTICLES   = ARTICLES;
 
     renderMasonryHero(personalisedEvents, sortedArticles, _hpSettings, _trendingScores);
     renderPromotedEvents(personalisedEvents);

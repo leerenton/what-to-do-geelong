@@ -686,6 +686,9 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .sr-empty { padding: 1.2rem 1rem; color: #6b7280; font-size: .9rem; }
 
 /* ── Mobile search (inside drawer) ── */
+.nav__mobile-search { display: none; }
+.nav__mobile-search-results { display: none; }
+@media (max-width: 640px) {
 .nav__mobile-search {
   display: flex; align-items: center; gap: .5rem;
   margin: .75rem 1rem; padding: .55rem .75rem;
@@ -702,6 +705,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   margin: 0 .5rem .5rem; border-radius: 10px; overflow: hidden;
   background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.1); max-height: 50vh; overflow-y: auto;
 }
+} /* end mobile-only search */
 
 .nav__hamburger {
   display: none;

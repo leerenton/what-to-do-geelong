@@ -2210,8 +2210,7 @@ async function initListingPage() {
       data = rows?.[0] || null;
     }
     if (data) {
-      biz = data;
-      if (biz.business_id) biz.businessId = biz.business_id;
+      biz = camelize(data);
     }
   }
 

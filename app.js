@@ -53,12 +53,24 @@ async function injectPriorityControls(tableKey) {
         setTimeout(() => badge.style.outline = '', 800);
         return;
       }
+      // Update in-memory data so re-renders reflect the new priority immediately
+      const memArr = tableKey === 'business' ? BUSINESSES : EVENTS;
+      const memItem = memArr.find(x => String(x.id) === String(id));
+      if (memItem) memItem.adminPriority = next;
+
       const valEl = badge.querySelector('.admin-prio__val');
       valEl.textContent = next > 0 ? `+${next}` : next < 0 ? `${next}` : '–';
       valEl.style.color = next > 0 ? '#16a34a' : next < 0 ? '#dc2626' : '#6b7280';
       // Flash confirmation
       badge.style.outline = '2px solid #4ac8d0';
       setTimeout(() => badge.style.outline = '', 600);
+      // Re-render the relevant section so order updates instantly
+      if (tableKey === 'event' && typeof initWeekendToggle === 'function') {
+        initWeekendToggle(window._allEvents || EVENTS);
+      }
+      if (tableKey === 'business' && typeof renderEatStrip === 'function') {
+        renderEatStrip();
+      }
     });
 
     // Colour the initial value
@@ -967,11 +979,14 @@ function renderFeatured(events) {
   const el = document.getElementById('js-featured-event');
   if (!el) return;
 
-  // Pick up to 2 featured events (prefer flagged featured, otherwise first 2)
-  const featured = events.filter(e => e.featured);
-  const picks = featured.length >= 2
-    ? featured.slice(0, 2)
-    : [...featured, ...events.filter(e => !e.featured)].slice(0, 2);
+  // Pick up to 2 events: admin_priority first, then featured flag as tiebreaker
+  const picks = [...events]
+    .sort((a, b) => {
+      const ap = (b.adminPriority || 0) - (a.adminPriority || 0);
+      if (ap !== 0) return ap;
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    })
+    .slice(0, 2);
 
   if (!picks.length) { el.innerHTML = ''; _weekendFeaturedIds = []; return; }
 

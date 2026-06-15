@@ -487,14 +487,14 @@ window.updateSub  = updateSub;
 // Auto-open edit drawer if ?edit=ID in URL (e.g. from the FAB on article pages)
 const _editParam = new URLSearchParams(window.location.search).get('edit');
 if (_editParam) {
-  // Wait for articles to load then open drawer
+  // Wait for articles to load (allArticles is populated by loadArticles → renderArticles)
   const _waitAndOpen = setInterval(() => {
-    if (document.querySelector('.adm-table-row')) {
+    if (allArticles.length > 0) {
       clearInterval(_waitAndOpen);
       openDrawer(_editParam);
     }
-  }, 200);
-  setTimeout(() => clearInterval(_waitAndOpen), 5000); // give up after 5s
+  }, 100);
+  setTimeout(() => clearInterval(_waitAndOpen), 8000);
 }
 </script>
 </body>

@@ -221,7 +221,7 @@ body.adm-body {
 .adm-section__title { font-size: .95rem; font-weight: 700; color: var(--adm-text); }
 
 /* ── TABLES ──────────────────────────────────────────────── */
-.adm-table-wrap { background: var(--adm-card); border: 1px solid var(--adm-border); border-radius: var(--adm-radius); overflow: hidden; }
+.adm-table-wrap { background: var(--adm-card); border: 1px solid var(--adm-border); border-radius: var(--adm-radius); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .adm-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
 .adm-table th { background: var(--adm-card2); color: var(--adm-mid); font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--adm-border); }
 .adm-table td { padding: .75rem 1rem; border-bottom: 1px solid var(--adm-border); color: var(--adm-text); vertical-align: middle; }

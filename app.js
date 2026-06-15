@@ -2589,8 +2589,8 @@ async function initListingPage() {
       }
     } catch (_) {}
 
-    // Wire up send button for Gold visitor form
-    if (isGold && !isOwner) {
+    // Wire up send button for Gold listing enquiry form
+    if (isGold) {
       document.getElementById('js-inq-send')?.addEventListener('click', async () => {
         const name  = document.getElementById('inq-name').value.trim();
         const email = document.getElementById('inq-email').value.trim();

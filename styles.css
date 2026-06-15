@@ -3584,6 +3584,23 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 .view-badge svg { opacity: .8; }
 
+/* ── Admin priority controls (admin-only, invisible to public) ── */
+.admin-prio {
+  position: absolute; top: .4rem; left: .4rem; z-index: 10;
+  display: flex; align-items: center; gap: .15rem;
+  background: rgba(0,0,0,.72); backdrop-filter: blur(6px);
+  border-radius: 6px; padding: .15rem .3rem;
+  font-size: .7rem; font-weight: 700; color: #fff;
+  user-select: none;
+}
+.admin-prio__btn {
+  background: none; border: none; color: rgba(255,255,255,.6);
+  cursor: pointer; padding: 0 .1rem; line-height: 1;
+  font-size: .65rem; transition: color .1s;
+}
+.admin-prio__btn:hover { color: #4ac8d0; }
+.admin-prio__val { min-width: 1.4rem; text-align: center; color: #9ca3af; }
+
 /* ── Business listing view count ── */
 .lident__views {
   font-size: .78rem; color: var(--muted, #888);

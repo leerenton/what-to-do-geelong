@@ -11,6 +11,58 @@ function isAdminUser() {
   } catch { return false; }
 }
 
+// ── ADMIN PRIORITY CONTROLS ───────────────────────────────
+// Inject up/down priority arrows on listing cards. Admin-only, invisible to users.
+async function injectPriorityControls(tableKey) {
+  if (!isAdminUser()) return;
+  const cards = document.querySelectorAll(`[data-id][data-type="${tableKey}"]`);
+  if (!cards.length) return;
+
+  // Load current priorities from DB
+  const ids = [...cards].map(c => c.dataset.id);
+  const { data: rows } = await db.from(tableKey === 'business' ? 'businesses' : 'events')
+    .select('id, admin_priority').in('id', ids);
+  const prioMap = Object.fromEntries((rows || []).map(r => [r.id, r.admin_priority || 0]));
+
+  cards.forEach(card => {
+    const id = card.dataset.id;
+    const prio = prioMap[id] ?? 0;
+    if (card.querySelector('.admin-prio')) return; // already injected
+
+    const badge = document.createElement('div');
+    badge.className = 'admin-prio';
+    badge.innerHTML = `
+      <button class="admin-prio__btn" data-dir="up" title="Boost priority">▲</button>
+      <span class="admin-prio__val">${prio > 0 ? `+${prio}` : prio < 0 ? `${prio}` : '–'}</span>
+      <button class="admin-prio__btn" data-dir="down" title="Lower priority">▼</button>`;
+
+    badge.addEventListener('click', async e => {
+      e.preventDefault(); e.stopPropagation();
+      const dir = e.target.closest('[data-dir]')?.dataset.dir;
+      if (!dir) return;
+      const table = tableKey === 'business' ? 'businesses' : 'events';
+      const current = parseInt(badge.querySelector('.admin-prio__val').textContent) || 0;
+      const next = dir === 'up' ? current + 1 : current - 1;
+      await db.from(table).update({ admin_priority: next }).eq('id', id);
+      const valEl = badge.querySelector('.admin-prio__val');
+      valEl.textContent = next > 0 ? `+${next}` : next < 0 ? `${next}` : '–';
+      valEl.style.color = next > 0 ? '#16a34a' : next < 0 ? '#dc2626' : '#6b7280';
+      // Flash confirmation
+      badge.style.outline = '2px solid #4ac8d0';
+      setTimeout(() => badge.style.outline = '', 600);
+    });
+
+    // Colour the initial value
+    const valEl = badge.querySelector('.admin-prio__val');
+    if (prio > 0) valEl.style.color = '#16a34a';
+    else if (prio < 0) valEl.style.color = '#dc2626';
+
+    // Position relative on card so badge can sit top-left
+    card.style.position = 'relative';
+    card.appendChild(badge);
+  });
+}
+
 // ── BUSINESSES ────────────────────────────────────────────
 let BUSINESSES = [
   // ── CAFES ─────────────────────────────────────────────
@@ -3208,7 +3260,8 @@ function collFilter(items, filterEl, searchEl, countEl, renderFn, pageKey) {
         (item.tags || []).some(t => t.toLowerCase().includes(searchQ));
       return matchFilter && matchSearch;
     });
-    // Sort: pref-matched items first
+    // Sort: admin priority first, then pref-matched
+    filtered.sort((a, b) => (b.adminPriority || 0) - (a.adminPriority || 0));
     if (prefs.interests?.length) {
       filtered = [
         ...filtered.filter(i => prefsMatchCard(i, prefs)),
@@ -3419,6 +3472,7 @@ function initEventsPage() {
 
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
     if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('event');
+    injectPriorityControls('event');
   }
 
   // ── URL date banner (range already set above) ──────────
@@ -3505,6 +3559,7 @@ function initEatPage() {
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
     if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('business');
+    injectPriorityControls('business');
   }
 
   collFilter(
@@ -3543,6 +3598,7 @@ function initDrinkPage() {
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
     if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('business');
+    injectPriorityControls('business');
   }
 
   collFilter(
@@ -3581,6 +3637,7 @@ function initDoPage() {
     }).join('') : `<div class="coll-empty"><span class="material-symbols-rounded" style="font-size:2.5rem">search_off</span><p>No results match your search.</p></div>`;
     if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
     if (window.wtdgViews && isAdminUser()) window.wtdgViews.injectViewBadges('business');
+    injectPriorityControls('business');
   }
 
   collFilter(
@@ -3940,13 +3997,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       _trendingScores = await window.wtdgViews.getAllTrendingScores(_hpSettings.period);
     }
 
-    // Sort helper — sorts by trending score if setting is 'trending', else original order
+    // Sort helper — Featured → admin_priority → trending score → original order
     function applyHomepageSort(items, type) {
-      if (_hpSettings.sort !== 'trending' || !_trendingScores.size) return items;
       return [...items].sort((a, b) => {
-        const aScore = (_trendingScores.get(`${type}:${a.id}`) || {}).score || 0;
-        const bScore = (_trendingScores.get(`${type}:${b.id}`) || {}).score || 0;
-        return bScore - aScore;
+        // 1. Featured first
+        const af = a.featured ? 1 : 0, bf = b.featured ? 1 : 0;
+        if (bf !== af) return bf - af;
+        // 2. Admin priority (higher = earlier)
+        const ap = (b.adminPriority || 0) - (a.adminPriority || 0);
+        if (ap !== 0) return ap;
+        // 3. Trending score if enabled
+        if (_hpSettings.sort === 'trending' && _trendingScores.size) {
+          const aScore = (_trendingScores.get(`${type}:${a.id}`) || {}).score || 0;
+          const bScore = (_trendingScores.get(`${type}:${b.id}`) || {}).score || 0;
+          return bScore - aScore;
+        }
+        return 0;
       });
     }
 

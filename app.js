@@ -4027,13 +4027,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Ensure categories[] is populated from whichever field exists
         categories: b.categories?.length ? b.categories
           : (b.category ? [b.category] : (b.type ? [b.type] : [])),
-        section: b.section || (
-          ['Bar','Pub','Winery','Brewery','Distillery','Cocktail','Nightclub'].some(t => b.type?.includes(t)) ? 'drink' :
-          ['Café','Cafe','Restaurant','Bakery','Food','Brunch','Pizza','Asian','Diner'].some(t => b.type?.includes(t)) ? 'eat' :
-          ['Activity','Adventure','Attraction','Museum','Gallery','Garden','Park','Nature','Theatre','Cinema','Sport','Leisure','Golf','Bowling','Escape'].some(t => b.type?.includes(t)) ? 'do' :
-          ['Hotel','Motel','Accommodation','BnB','Hostel','Resort'].some(t => b.type?.includes(t)) ? 'stay' :
-          'do'
-        )
+        section: (() => {
+          const t = b.type || '';
+          // Type-based detection takes priority over the stored section value
+          // to catch mislabelled records in the DB
+          if (['Bar','Pub','Winery','Brewery','Distillery','Cocktail','Nightclub'].some(k => t.includes(k))) return 'drink';
+          if (['Activity','Adventure','Attraction','Museum','Gallery','Garden','Park','Nature','Theatre','Cinema','Sport','Leisure','Golf','Bowling','Escape','Fun'].some(k => t.includes(k))) return 'do';
+          if (['Hotel','Motel','Accommodation','BnB','Hostel','Resort'].some(k => t.includes(k))) return 'stay';
+          if (['Café','Cafe','Restaurant','Bakery','Food','Brunch','Pizza','Asian','Diner','Bistro','Eatery'].some(k => t.includes(k))) return 'eat';
+          // Fall back to stored section only if type gives no clear signal
+          return b.section || 'do';
+        })()
       }));
       if (remote.events.length)     EVENTS     = remote.events.filter(e => !e.isRecurring);
       if (remote.stays.length)      STAYS      = remote.stays;

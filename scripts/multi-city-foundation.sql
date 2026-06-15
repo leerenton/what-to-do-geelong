@@ -81,9 +81,14 @@ CREATE TABLE IF NOT EXISTS sites (
 ALTER TABLE sites ENABLE ROW LEVEL SECURITY;
 
 -- Anyone can read active sites (needed for domain detection on page load)
-CREATE POLICY IF NOT EXISTS "Public read active sites"
-  ON sites FOR SELECT
-  USING (active = true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'sites' AND policyname = 'Public read active sites'
+  ) THEN
+    EXECUTE 'CREATE POLICY "Public read active sites" ON sites FOR SELECT USING (active = true)';
+  END IF;
+END $$;
 
 -- Only service role can insert/update (managed via admin UI using service key)
 -- No INSERT/UPDATE policy needed for anon/authenticated roles

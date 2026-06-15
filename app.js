@@ -4029,10 +4029,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           : (b.category ? [b.category] : (b.type ? [b.type] : [])),
         section: b.section || (
           ['Bar','Pub','Winery','Brewery','Distillery','Cocktail','Nightclub'].some(t => b.type?.includes(t)) ? 'drink' :
-          ['Café','Restaurant','Bakery','Food'].some(t => b.type?.includes(t)) ? 'eat' :
-          ['Activity','Adventure','Attraction','Museum','Gallery','Garden','Park','Theatre','Cinema','Sport','Leisure'].some(t => b.type?.includes(t)) ? 'do' :
-          ['Hotel','Motel','Accommodation','BnB','Hostel'].some(t => b.type?.includes(t)) ? 'stay' :
-          'eat'
+          ['Café','Cafe','Restaurant','Bakery','Food','Brunch','Pizza','Asian','Diner'].some(t => b.type?.includes(t)) ? 'eat' :
+          ['Activity','Adventure','Attraction','Museum','Gallery','Garden','Park','Nature','Theatre','Cinema','Sport','Leisure','Golf','Bowling','Escape'].some(t => b.type?.includes(t)) ? 'do' :
+          ['Hotel','Motel','Accommodation','BnB','Hostel','Resort'].some(t => b.type?.includes(t)) ? 'stay' :
+          'do'
         )
       }));
       if (remote.events.length)     EVENTS     = remote.events.filter(e => !e.isRecurring);

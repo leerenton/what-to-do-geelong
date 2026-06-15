@@ -2512,7 +2512,6 @@ async function initListingPage() {
           </div>
         </div>`;
 
-    } else if (isOwner && isGold) {
     } else if (isGold) {
       // ── Gold listing: live enquiry form (owners see it too) ─
       inqHTML = `

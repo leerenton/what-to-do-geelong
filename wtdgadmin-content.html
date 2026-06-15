@@ -378,7 +378,22 @@ function openDrawer(id) {
   document.getElementById('js-drawer-title').textContent = a ? 'Edit Article' : 'New Article';
   document.getElementById('af-title').value    = a?.title    || '';
   document.getElementById('af-type').value     = a?.type     || 'news';
-  document.getElementById('af-business').value = (a?.business_ids || [])[0] || '';
+  // Set business select — defer if options not yet populated
+  const _bizVal = (a?.business_ids || [])[0] || '';
+  const _bizSel = document.getElementById('af-business');
+  if (_bizVal) {
+    if (_bizSel.options.length > 1) {
+      _bizSel.value = _bizVal;
+    } else {
+      // Options still loading — retry once they're in
+      const _bizPoll = setInterval(() => {
+        if (_bizSel.options.length > 1) { _bizSel.value = _bizVal; clearInterval(_bizPoll); }
+      }, 100);
+      setTimeout(() => clearInterval(_bizPoll), 5000);
+    }
+  } else {
+    _bizSel.value = '';
+  }
   document.getElementById('af-slug').value     = a?.slug     || '';
   document.getElementById('af-tags').value     = (a?.tags || []).join(', ');
   document.getElementById('af-excerpt').value  = a?.excerpt  || '';
@@ -529,9 +544,8 @@ window.updateSub  = updateSub;
 // Auto-open edit drawer if ?edit=ID in URL (e.g. from the FAB on article pages)
 const _editParam = new URLSearchParams(window.location.search).get('edit');
 if (_editParam) {
-  // Wait for articles to load (allArticles is populated by loadArticles → renderArticles)
   const _waitAndOpen = setInterval(() => {
-    if (allArticles.length > 0) {
+    if (allArticles.length > 0 && allBizList.length > 0) {
       clearInterval(_waitAndOpen);
       openDrawer(_editParam);
     }

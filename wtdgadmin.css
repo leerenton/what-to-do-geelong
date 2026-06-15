@@ -330,6 +330,7 @@ body.adm-body {
   padding: 1rem 1.5rem; border-top: 1px solid var(--adm-border);
   background: var(--adm-card); display: flex; gap: .65rem; align-items: center;
   position: sticky; bottom: 0; z-index: 2;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* ── Form helpers ─────────────────────────────────────────── */

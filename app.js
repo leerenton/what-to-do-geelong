@@ -18,11 +18,14 @@ async function injectPriorityControls(tableKey) {
   const cards = document.querySelectorAll(`[data-id][data-type="${tableKey}"]`);
   if (!cards.length) return;
 
-  // Load current priorities from DB
+  // Load current priorities from DB (graceful — works even if column not yet migrated)
   const ids = [...cards].map(c => c.dataset.id);
-  const { data: rows } = await db.from(tableKey === 'business' ? 'businesses' : 'events')
-    .select('id, admin_priority').in('id', ids);
-  const prioMap = Object.fromEntries((rows || []).map(r => [r.id, r.admin_priority || 0]));
+  let prioMap = {};
+  try {
+    const { data: rows } = await db.from(tableKey === 'business' ? 'businesses' : 'events')
+      .select('id, admin_priority').in('id', ids);
+    prioMap = Object.fromEntries((rows || []).map(r => [r.id, r.admin_priority || 0]));
+  } catch (_) { /* column may not exist yet — controls still render at 0 */ }
 
   cards.forEach(card => {
     const id = card.dataset.id;
@@ -1568,7 +1571,7 @@ function renderEatStrip(eatBiz) {
 
     const latAttr = (biz.lat && biz.lng) ? ` data-lat="${biz.lat}" data-lng="${biz.lng}"` : '';
     return `
-      <a href="${bizLink(biz)}" class="biz-card"${latAttr}>
+      <a href="${bizLink(biz)}" class="biz-card"${latAttr} data-id="${biz.id}" data-type="business">
         ${biz.img
           ? `<img src="${biz.img}" alt="${biz.name}" class="biz-card__img" loading="lazy" />`
           : `<div class="biz-card__img-placeholder" style="background:${biz.color}22">${biz.emoji}</div>`
@@ -1582,6 +1585,7 @@ function renderEatStrip(eatBiz) {
     `;
   }).join('');
   if (window.wtdgLocation) window.wtdgLocation.refreshDistanceBadges();
+  injectPriorityControls('business');
 }
 
 // ── RENDER STAYS ──────────────────────────────────────────

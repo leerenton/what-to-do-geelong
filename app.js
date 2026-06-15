@@ -46,7 +46,13 @@ async function injectPriorityControls(tableKey) {
       const table = tableKey === 'business' ? 'businesses' : 'events';
       const current = parseInt(badge.querySelector('.admin-prio__val').textContent) || 0;
       const next = dir === 'up' ? current + 1 : current - 1;
-      await db.from(table).update({ admin_priority: next }).eq('id', id);
+      const { error } = await db.from(table).update({ admin_priority: next }).eq('id', id);
+      if (error) {
+        console.error('[priority] update failed:', error.message, { table, id, next });
+        badge.style.outline = '2px solid #dc2626';
+        setTimeout(() => badge.style.outline = '', 800);
+        return;
+      }
       const valEl = badge.querySelector('.admin-prio__val');
       valEl.textContent = next > 0 ? `+${next}` : next < 0 ? `${next}` : '–';
       valEl.style.color = next > 0 ? '#16a34a' : next < 0 ? '#dc2626' : '#6b7280';

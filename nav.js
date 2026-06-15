@@ -181,15 +181,37 @@
         <a href="/editorial.html">Read</a>
         <a href="/onboarding.html" class="btn btn--teal btn--sm">Personalise</a>
 
+        <!-- Mobile search (inside drawer) -->
+        <div class="nav__mobile-search">
+          <span class="material-symbols-rounded nav__mobile-search__icon">search</span>
+          <input class="nav__mobile-search__input" id="js-mobile-search-input" type="search" placeholder="Search places, events…" autocomplete="off" />
+        </div>
+        <div class="nav__mobile-search-results" id="js-mobile-search-results" hidden></div>
+
         <!-- Mobile drawer close + secondary links -->
         <button class="nav__mobile-close" id="js-nav-close" aria-label="Close menu">✕ Close</button>
       </nav>
+
+  <!-- Search overlay (desktop) -->
+  <div class="nav__search-overlay" id="js-search-overlay" hidden>
+    <div class="nav__search-overlay__inner">
+      <span class="material-symbols-rounded nav__search-overlay__icon">search</span>
+      <input class="nav__search-overlay__input" id="js-search-input" type="search" placeholder="Search places, events, articles…" autocomplete="off" />
+      <button class="nav__search-overlay__close" id="js-search-close" aria-label="Close search">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+    <div class="nav__search-results" id="js-search-results"></div>
+  </div>
 
       <div class="nav__end">
         <a href="/guides.html" class="itin-badge" id="js-itin-badge" hidden>
           ${GUIDE_ICON}
           <span id="js-itin-count">0</span>
         </a>
+        <button class="nav__search-btn" id="js-nav-search-btn" aria-label="Search">
+          <span class="material-symbols-rounded">search</span>
+        </button>
         <button class="nav__hamburger" aria-label="Open menu">
           <span></span><span></span><span></span>
         </button>
@@ -358,6 +380,123 @@
 
     document.addEventListener('click', e => {
       if (!e.target.closest('.nav__drop')) document.querySelectorAll('.nav__drop').forEach(d => d.classList.remove('open'));
+    });
+
+    // ── SEARCH ────────────────────────────────────────────────
+    initSearch();
+  }
+
+  function initSearch() {
+    const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    function bizLink(b) {
+      const s = b.slug || b.name?.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+      return IS_LOCAL ? `listing.html?s=${s}` : `/${s}`;
+    }
+    function evLink(ev) {
+      const s = ev.slug || ev.title?.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+      if (ev.businessId || ev.business_id) {
+        const bs = (window.BUSINESSES||[]).find(b => b.id === (ev.businessId||ev.business_id));
+        if (bs) { const bslug = bs.slug||bs.name?.toLowerCase().replace(/[^a-z0-9]+/g,'-'); return IS_LOCAL ? `event.html?b=${bslug}&s=${s}` : `/${bslug}/${s}`; }
+      }
+      return IS_LOCAL ? `event.html?s=${s}` : `/events/${s}`;
+    }
+    function artLink(a) {
+      const s = a.slug || a.id;
+      return IS_LOCAL ? `article.html?s=${s}` : `/news/${s}`;
+    }
+
+    function getSearchData() {
+      const businesses = (window.BUSINESSES || []).map(b => ({ type:'place',  label: b.name, sub: b.type, href: bizLink(b), img: b.img||null }));
+      const events     = (window.EVENTS     || []).map(e => ({ type:'event',  label: e.title, sub: e.date, href: evLink(e),  img: e.img||null }));
+      const articles   = (window.ARTICLES   || []).map(a => ({ type:'article',label: a.title, sub: a.type||'Article', href: artLink(a), img: a.heroImg||null }));
+      return [...businesses, ...events, ...articles];
+    }
+
+    function runSearch(q) {
+      if (!q || q.length < 2) return [];
+      const lower = q.toLowerCase();
+      return getSearchData()
+        .filter(item => item.label?.toLowerCase().includes(lower) || item.sub?.toLowerCase().includes(lower))
+        .slice(0, 12);
+    }
+
+    const TYPE_ICON = { place:'store', event:'event', article:'article' };
+    const TYPE_LABEL = { place:'Place', event:'Event', article:'Article' };
+
+    function renderResults(results, q) {
+      if (!results.length) return `<div class="sr-empty">No results for "<strong>${q}</strong>"</div>`;
+      // Group by type
+      const groups = {};
+      results.forEach(r => { (groups[r.type] = groups[r.type]||[]).push(r); });
+      return Object.entries(groups).map(([type, items]) => `
+        <div class="sr-group">
+          <div class="sr-group__label"><span class="material-symbols-rounded">${TYPE_ICON[type]}</span>${TYPE_LABEL[type]}s</div>
+          ${items.map(item => `
+            <a href="${item.href}" class="sr-item">
+              ${item.img
+                ? `<img src="${item.img}" class="sr-item__img" alt="" loading="lazy" />`
+                : `<div class="sr-item__img sr-item__img--placeholder"><span class="material-symbols-rounded">${TYPE_ICON[type]}</span></div>`}
+              <div class="sr-item__body">
+                <div class="sr-item__name">${item.label}</div>
+                <div class="sr-item__sub">${item.sub||''}</div>
+              </div>
+            </a>`).join('')}
+        </div>`).join('');
+    }
+
+    // ── Desktop overlay ───────────────────────────────────────
+    const overlay   = document.getElementById('js-search-overlay');
+    const searchBtn = document.getElementById('js-nav-search-btn');
+    const closeBtn  = document.getElementById('js-search-close');
+    const input     = document.getElementById('js-search-input');
+    const results   = document.getElementById('js-search-results');
+
+    function openOverlay() {
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => input.focus(), 50);
+    }
+    function closeOverlay() {
+      overlay.hidden = true;
+      document.body.style.overflow = '';
+      input.value = '';
+      results.innerHTML = '';
+    }
+
+    searchBtn?.addEventListener('click', openOverlay);
+    closeBtn?.addEventListener('click', closeOverlay);
+    overlay?.addEventListener('click', e => { if (e.target === overlay) closeOverlay(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
+
+    let _desktopTimer;
+    input?.addEventListener('input', () => {
+      clearTimeout(_desktopTimer);
+      const q = input.value.trim();
+      if (!q) { results.innerHTML = ''; return; }
+      _desktopTimer = setTimeout(() => {
+        results.innerHTML = renderResults(runSearch(q), q);
+        results.querySelectorAll('a').forEach(a => a.addEventListener('click', closeOverlay));
+      }, 150);
+    });
+
+    // ── Mobile search (inside drawer) ─────────────────────────
+    const mobileInput   = document.getElementById('js-mobile-search-input');
+    const mobileResults = document.getElementById('js-mobile-search-results');
+
+    let _mobileTimer;
+    mobileInput?.addEventListener('input', () => {
+      clearTimeout(_mobileTimer);
+      const q = mobileInput.value.trim();
+      if (!q) { mobileResults.hidden = true; mobileResults.innerHTML = ''; return; }
+      _mobileTimer = setTimeout(() => {
+        const html = renderResults(runSearch(q), q);
+        mobileResults.innerHTML = html;
+        mobileResults.hidden = false;
+        mobileResults.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+          mobileResults.hidden = true; mobileInput.value = '';
+        }));
+      }, 150);
     });
   }
 

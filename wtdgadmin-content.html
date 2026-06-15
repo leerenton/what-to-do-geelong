@@ -99,6 +99,23 @@
       <textarea id="af-excerpt" rows="2" placeholder="Short description shown on article cards…"></textarea>
     </div>
 
+    <!-- What Was Geelong: before/after images (history type only) -->
+    <div class="adm-field" id="af-history-fields" style="display:none;background:var(--adm-card2);border:1px solid var(--adm-border);border-radius:.5rem;padding:.85rem;gap:.6rem">
+      <label style="font-weight:700;color:var(--adm-teal)">📸 Then &amp; Now Images</label>
+      <div class="adm-field-row" style="margin-top:.4rem">
+        <div class="adm-field">
+          <label>Then (Before) Image URL</label>
+          <input type="url" id="af-before-img" placeholder="URL of the historical photo…" />
+          <img id="af-before-preview" style="display:none;max-height:120px;margin-top:.4rem;border-radius:.4rem" alt="" />
+        </div>
+        <div class="adm-field">
+          <label>Now (After) Image URL</label>
+          <input type="url" id="af-after-img" placeholder="URL of the current photo…" />
+          <img id="af-after-preview" style="display:none;max-height:120px;margin-top:.4rem;border-radius:.4rem" alt="" />
+        </div>
+      </div>
+    </div>
+
     <!-- Hero image with upload -->
     <div class="adm-field">
       <label>Hero Image</label>
@@ -203,6 +220,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   initQuill();
 
   document.getElementById('js-new-article-btn').addEventListener('click', () => openDrawer(null));
+
+  // Show/hide history fields based on type
+  function toggleHistoryFields() {
+    const isHistory = document.getElementById('af-type').value === 'history';
+    document.getElementById('af-history-fields').style.display = isHistory ? 'flex' : 'none';
+  }
+  document.getElementById('af-type').addEventListener('change', toggleHistoryFields);
+
+  // Preview before/after images on URL input
+  function previewImg(inputId, previewId) {
+    const url = document.getElementById(inputId).value.trim();
+    const prev = document.getElementById(previewId);
+    prev.src = url; prev.style.display = url ? 'block' : 'none';
+  }
+  document.getElementById('af-before-img').addEventListener('input', () => previewImg('af-before-img','af-before-preview'));
+  document.getElementById('af-after-img').addEventListener('input',  () => previewImg('af-after-img', 'af-after-preview'));
   document.getElementById('js-drawer-close').addEventListener('click', closeDrawer);
   document.getElementById('js-art-cancel').addEventListener('click', closeDrawer);
   document.getElementById('js-drawer-overlay').addEventListener('click', closeDrawer);
@@ -351,7 +384,16 @@ function openDrawer(id) {
   document.getElementById('af-slug').value     = a?.slug     || '';
   document.getElementById('af-tags').value     = (a?.tags || []).join(', ');
   document.getElementById('af-excerpt').value  = a?.excerpt  || '';
-  document.getElementById('af-img').value      = a?.hero_img || '';
+  document.getElementById('af-img').value        = a?.hero_img   || '';
+  document.getElementById('af-before-img').value = a?.before_img || '';
+  document.getElementById('af-after-img').value  = a?.after_img  || '';
+  // Preview before/after
+  const bPrev = document.getElementById('af-before-preview');
+  bPrev.src = a?.before_img || ''; bPrev.style.display = a?.before_img ? 'block' : 'none';
+  const aPrev = document.getElementById('af-after-preview');
+  aPrev.src = a?.after_img || ''; aPrev.style.display = a?.after_img ? 'block' : 'none';
+  // Show/hide history fields
+  if (typeof toggleHistoryFields === 'function') toggleHistoryFields();
 
   // Load content into Quill
   if (quill) {
@@ -389,6 +431,8 @@ async function saveArticle() {
     type:         document.getElementById('af-type').value,
     business_ids: document.getElementById('af-business').value ? [document.getElementById('af-business').value] : [],
     hero_img:     document.getElementById('af-img').value.trim() || null,
+    before_img:   document.getElementById('af-before-img').value.trim() || null,
+    after_img:    document.getElementById('af-after-img').value.trim() || null,
     tags:        document.getElementById('af-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
     excerpt:     document.getElementById('af-excerpt').value.trim() || null,
     content,

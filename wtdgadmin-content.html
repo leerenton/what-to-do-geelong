@@ -483,6 +483,19 @@ function fmtDate(d) {
 
 window.openDrawer = openDrawer;
 window.updateSub  = updateSub;
+
+// Auto-open edit drawer if ?edit=ID in URL (e.g. from the FAB on article pages)
+const _editParam = new URLSearchParams(window.location.search).get('edit');
+if (_editParam) {
+  // Wait for articles to load then open drawer
+  const _waitAndOpen = setInterval(() => {
+    if (document.querySelector('.adm-table-row')) {
+      clearInterval(_waitAndOpen);
+      openDrawer(_editParam);
+    }
+  }, 200);
+  setTimeout(() => clearInterval(_waitAndOpen), 5000); // give up after 5s
+}
 </script>
 </body>
 </html>

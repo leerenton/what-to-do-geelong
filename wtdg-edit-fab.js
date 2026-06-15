@@ -26,10 +26,28 @@ async function initEditFab() {
   let fabTitle = 'Admin';
 
   const eventMatch = path.match(/^\/events\/(.+)$/) || path.match(/^\/([^/]+)\/([^/]+)$/);
-  const isEventPage = !!eventMatch || !!document.getElementById('js-event-root');
-  const isListingPage = !isEventPage && path.split('/').filter(Boolean).length === 1 && path !== '/';
+  const isArticlePage = path.startsWith('/news/') || !!document.getElementById('js-article-root');
+  const isEventPage = !isArticlePage && (!!eventMatch || !!document.getElementById('js-event-root'));
+  const isListingPage = !isArticlePage && !isEventPage && path.split('/').filter(Boolean).length === 1 && path !== '/';
 
-  if (isEventPage) {
+  if (isArticlePage) {
+    const slug = path.replace('/news/', '').split('/')[0];
+    if (slug) {
+      try {
+        const { data } = await db.from('articles').select('id').or(`slug.eq.${slug},id.eq.${slug}`).limit(1);
+        if (data?.[0]) {
+          adminUrl = `/wtdgadmin-content.html?edit=${data[0].id}`;
+          fabTitle = 'Edit Article';
+        } else {
+          adminUrl = '/wtdgadmin-content.html';
+          fabTitle = 'Content Admin';
+        }
+      } catch (_) {
+        adminUrl = '/wtdgadmin-content.html';
+        fabTitle = 'Content Admin';
+      }
+    }
+  } else if (isEventPage) {
     // Get event slug — last segment of path
     const slug = path.split('/').filter(Boolean).pop();
     if (slug) {

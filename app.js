@@ -2513,21 +2513,11 @@ async function initListingPage() {
         </div>`;
 
     } else if (isOwner && isGold) {
-      // ── Owner, Gold listing: confirmation state ────────────
-      inqHTML = `
-        <div class="listing-inq-card listing-inq-card--gold-active">
-          <div class="inq-gold-active">
-            <span class="inq-gold-active-badge">⭐ Gold Member</span>
-            <p class="inq-gold-active-title">Your enquiry form is live</p>
-            <p class="inq-gold-active-sub">Visitors to your listing can send you messages directly. Replies go straight to your email.</p>
-            <a href="dashboard.html" class="btn btn--outline btn--sm">View enquiries →</a>
-          </div>
-        </div>`;
-
     } else if (isGold) {
-      // ── Visitor, Gold listing: live enquiry form ───────────
+      // ── Gold listing: live enquiry form (owners see it too) ─
       inqHTML = `
         <div class="listing-inq-card">
+          ${isOwner ? `<div style="margin-bottom:.75rem;padding:.5rem .75rem;background:#f0fdf4;border-radius:.5rem;font-size:.8rem;color:#166534;border:1px solid #bbf7d0">⭐ <strong>Your enquiry form is live.</strong> This is how customers will see it. <a href="/business-dashboard.html" style="color:#166534">View enquiries →</a></div>` : ''}
           <h3 class="listing-inq-title"><span class="material-symbols-rounded">mail</span> Send an enquiry</h3>
           <p class="listing-inq-sub">Ask ${biz.name} a question — they'll get back to you directly.</p>
           <div class="listing-inq-form">

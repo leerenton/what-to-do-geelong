@@ -1623,7 +1623,7 @@ function renderEatStrip(eatBiz) {
 
     const latAttr = (biz.lat && biz.lng) ? ` data-lat="${biz.lat}" data-lng="${biz.lng}"` : '';
     return `
-      <a href="${bizLink(biz)}" class="biz-card"${latAttr} data-id="${biz.id}" data-type="business">
+      <a href="${bizLink(biz)}" class="biz-card${biz.isGold ? ' biz-card--gold' : ''}"${latAttr} data-id="${biz.id}" data-type="business">
         ${biz.img
           ? `<img src="${biz.img}" alt="${biz.name}" class="biz-card__img" loading="lazy" />`
           : `<div class="biz-card__img-placeholder" style="background:${biz.color}22">${biz.emoji}</div>`
@@ -3136,18 +3136,21 @@ function collCard(href, bg, emoji, img, type, name, desc, loc, badge1, badge2, l
   const prefs    = getPrefs();
   const fakeItem = { type, category: type, tags: itemTags || [] };
   const isMatch  = prefsMatchCard(fakeItem, prefs);
+  const isGold   = itemType === 'business' && !!(BUSINESSES.find(b => b.id === itemId)?.isGold);
   const thumb = img
     ? `<img src="${img}" alt="${name}" class="coll-card__img" loading="lazy" />`
     : `<div class="coll-card__img-placeholder" style="background:${bg}22">${emoji}</div>`;
   const latAttr  = (lat  && lng)      ? ` data-lat="${lat}" data-lng="${lng}"` : '';
   const trackAttr = (itemId && itemType) ? ` data-id="${itemId}" data-type="${itemType}"` : '';
+  const goldBadge = isGold ? `<span class="coll-card__gold-badge">⭐ Gold</span>` : '';
   return `
-    <a href="${href}" class="coll-card${isMatch ? ' coll-card--match' : ''}"${latAttr}${trackAttr}>
+    <a href="${href}" class="coll-card${isMatch ? ' coll-card--match' : ''}${isGold ? ' coll-card--gold' : ''}"${latAttr}${trackAttr}>
       ${thumb}
       <div class="coll-card__body">
         <div class="coll-card__type-row">
           <div class="coll-card__type">${type}</div>
           ${isMatch ? `<span class="ev-card__match">✦ Your vibe</span>` : ''}
+          ${goldBadge}
         </div>
         <div class="coll-card__name">${name}</div>
         <div class="coll-card__desc">${desc || ''}</div>
@@ -4104,7 +4107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderMasonryHero(personalisedEvents, sortedArticles, _hpSettings, _trendingScores);
     renderPromotedEvents(personalisedEvents);
-    renderGoldStrip(BUSINESSES);
+    // Gold strip removed — gold members are highlighted inline on collection pages instead
     initAds();
     renderEatStrip(personalisedBiz);
     renderStays(personalisedStays);

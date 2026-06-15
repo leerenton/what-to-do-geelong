@@ -4418,6 +4418,19 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .ev-card--match { border-color: #5eead4; }
 .event-card--match { border-color: #5eead4; }
 .coll-card--match { border-color: #5eead4; }
+.coll-card--gold {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px #fde68a, 0 2px 12px rgba(245,158,11,.15);
+}
+.coll-card--gold:hover {
+  box-shadow: 0 0 0 2px #f59e0b, 0 6px 24px rgba(245,158,11,.25);
+}
+.coll-card__gold-badge {
+  font-size: .65rem; font-weight: 700; color: #92400e;
+  background: #fef3c7; border: 1px solid #fde68a;
+  border-radius: 999px; padding: .1rem .45rem;
+  white-space: nowrap;
+}
 
 /* ── PREFS HINT BANNER ───────────────────────────────────── */
 .prefs-hint {

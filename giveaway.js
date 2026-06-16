@@ -48,7 +48,7 @@
   let linkedEvent = null;
   if (gw.linked_event_id) {
     try {
-      const { data } = await db.from('events').select('id,title,slug,start_date,venue').eq('id', gw.linked_event_id).single();
+      const { data } = await db.from('events').select('id,title,slug,date,time,location,price,emoji,color,img').eq('id', gw.linked_event_id).single();
       linkedEvent = data;
     } catch (_) {}
   }
@@ -62,9 +62,8 @@
         <h1 class="gw-hero__title">${gw.title}</h1>
         ${gw.prize ? `<p class="gw-hero__sub"><strong>Prize:</strong> ${gw.prize}</p>` : ''}
         <div class="gw-hero__meta">
-          ${linkedEvent ? `<span>🎟️ ${linkedEvent.title}</span>` : ''}
-          ${linkedEvent?.start_date ? `<span>📅 ${fmtDate(linkedEvent.start_date)}</span>` : ''}
-          ${linkedEvent?.venue ? `<span>📍 ${linkedEvent.venue}</span>` : ''}
+          ${linkedEvent?.date ? `<span>📅 ${linkedEvent.date}</span>` : ''}
+          ${linkedEvent?.location ? `<span>📍 ${linkedEvent.location}</span>` : ''}
           ${gw.age_restriction ? `<span>🔞 ${gw.age_restriction}</span>` : ''}
         </div>
         ${!isCompleted && gw.ends_at ? `<div class="gw-hero__closes">Entries close ${fmtDate(gw.ends_at)}</div>` : ''}
@@ -74,6 +73,28 @@
     <div class="container gw-main">
 
       ${gw.description ? `<div class="gw-description">${gw.description}</div>` : ''}
+
+      ${linkedEvent ? (() => {
+        const evSlug = linkedEvent.slug || String(linkedEvent.id);
+        const evUrl  = window.IS_LOCAL ? `event.html?s=${evSlug}` : `/${evSlug}`;
+        const evImg  = linkedEvent.img || '';
+        return `
+        <a href="${evUrl}" class="gw-event-card">
+          ${evImg ? `<div class="gw-event-card__img" style="background-image:url('${evImg}')"></div>`
+                  : `<div class="gw-event-card__img gw-event-card__img--emoji" style="background:${linkedEvent.color || 'var(--teal)'}22"><span style="font-size:2rem">${linkedEvent.emoji || '🎟️'}</span></div>`}
+          <div class="gw-event-card__body">
+            <span class="gw-event-card__label">The Event</span>
+            <strong class="gw-event-card__title">${linkedEvent.title}</strong>
+            <div class="gw-event-card__meta">
+              ${linkedEvent.date ? `<span>📅 ${linkedEvent.date}</span>` : ''}
+              ${linkedEvent.time ? `<span>🕐 ${linkedEvent.time}</span>` : ''}
+              ${linkedEvent.location ? `<span>📍 ${linkedEvent.location}</span>` : ''}
+              ${linkedEvent.price ? `<span>🎟️ ${linkedEvent.price}</span>` : ''}
+            </div>
+          </div>
+          <span class="gw-event-card__cta">View event →</span>
+        </a>`;
+      })() : ''}
 
       ${isCompleted ? `
         <div class="gw-panel gw-panel--winners">

@@ -3095,6 +3095,40 @@ async function initEventPage() {
     </div>
   `;
 
+  // ── Giveaway tile — fetch active giveaway linked to this event ─────────────
+  (async () => {
+    try {
+      const { data: gws } = await db.from('giveaways')
+        .select('id,title,slug,prize,ends_at,img')
+        .eq('linked_event_id', String(ev.id))
+        .eq('status', 'active')
+        .eq('published', true)
+        .limit(1);
+      const gw = gws?.[0];
+      if (!gw) return;
+      const gwUrl   = window.IS_LOCAL ? `giveaway.html?s=${gw.slug}` : `/giveaway/${gw.slug}`;
+      const closes  = gw.ends_at ? new Date(gw.ends_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' }) : null;
+      const tile    = document.createElement('div');
+      tile.className = 'ev-giveaway-tile';
+      tile.innerHTML = `
+        <a href="${gwUrl}" class="ev-giveaway-tile__inner">
+          <div class="ev-giveaway-tile__left">
+            <span class="ev-giveaway-tile__badge">🎁 Giveaway</span>
+            <strong class="ev-giveaway-tile__title">${gw.title}</strong>
+            ${gw.prize ? `<span class="ev-giveaway-tile__prize">${gw.prize}</span>` : ''}
+            ${closes ? `<span class="ev-giveaway-tile__closes">Entries close ${closes}</span>` : ''}
+          </div>
+          <span class="ev-giveaway-tile__cta">Enter free →</span>
+        </a>`;
+      // Insert after the CTA row (tickets button), before the biz card
+      const bizCard = root.querySelector('.ev-biz-card');
+      const ctaRow  = root.querySelector('.ev-cta-row');
+      const anchor  = bizCard || ctaRow?.nextElementSibling || root.querySelector('.ev-also');
+      if (anchor) anchor.before(tile);
+      else root.querySelector('.ev-hero2__card')?.appendChild(tile);
+    } catch (_) {}
+  })();
+
   // Track this as a real page view (user has opened and is reading the event)
   if (window.wtdgViews) {
     window.wtdgViews.track(String(ev.id), 'event', ev.category);

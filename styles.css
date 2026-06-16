@@ -4558,3 +4558,61 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* ── Event page giveaway tile ─────────────────────────────── */
+.ev-giveaway-tile {
+  margin: 1rem 0;
+}
+.ev-giveaway-tile__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: linear-gradient(135deg, #0f766e 0%, #0e9488 100%);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(13,148,136,.35);
+  transition: transform .15s, box-shadow .15s;
+}
+.ev-giveaway-tile__inner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(13,148,136,.45);
+}
+.ev-giveaway-tile__left {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.ev-giveaway-tile__badge {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.75);
+}
+.ev-giveaway-tile__title {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+}
+.ev-giveaway-tile__prize {
+  font-size: .8rem;
+  color: rgba(255,255,255,.8);
+}
+.ev-giveaway-tile__closes {
+  font-size: .72rem;
+  color: rgba(255,255,255,.55);
+}
+.ev-giveaway-tile__cta {
+  flex-shrink: 0;
+  background: #fff;
+  color: #0f766e;
+  font-size: .82rem;
+  font-weight: 800;
+  padding: .5rem .9rem;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}

@@ -157,10 +157,26 @@
     <div class="adm-field"><label>Title *</label><input type="text" id="gf-title" placeholder="Win tickets to Disney On Ice!" /></div>
     <div class="adm-field"><label>Slug (URL) *</label><input type="text" id="gf-slug" placeholder="disney-on-ice-jul-2025" /></div>
     <div class="adm-field"><label>Prize</label><input type="text" id="gf-prize" placeholder="Family pass (4 tickets)" /></div>
-    <div class="adm-field"><label>Description (HTML ok)</label><textarea id="gf-description" rows="4" placeholder="Tell people about this giveaway…"></textarea></div>
-    <div class="adm-field"><label>How to enter (HTML ok)</label><textarea id="gf-how-to-enter" rows="4" placeholder="Follow our Facebook page and comment on the giveaway post with…"></textarea></div>
+    <div class="adm-field">
+      <label>Description</label>
+      <div id="gf-description-editor"></div>
+      <textarea id="gf-description" style="display:none"></textarea>
+    </div>
+    <div class="adm-field">
+      <label>How to enter</label>
+      <div id="gf-how-to-enter-editor"></div>
+      <textarea id="gf-how-to-enter" style="display:none"></textarea>
+    </div>
     <div class="adm-field"><label>Age restriction</label><input type="text" id="gf-age-restriction" placeholder="Open to Aus residents 18+" /></div>
-    <div class="adm-field"><label>Hero image URL</label><input type="url" id="gf-img" placeholder="https://…" /></div>
+    <div class="adm-field">
+      <label>Hero Image</label>
+      <div class="adm-upload-zone" id="gf-img-zone">
+        <input type="file" id="gf-img-file" accept="image/*" />
+        📷 Drop an image here or click to upload
+      </div>
+      <img class="adm-upload-preview" id="gf-img-preview" style="display:none;max-height:160px;margin-top:.4rem" alt="" />
+      <input type="url" id="gf-img" placeholder="Or paste an image URL…" style="margin-top:.4rem" />
+    </div>
     <div class="adm-field"><label>Entries close</label><input type="datetime-local" id="gf-ends-at" /></div>
     <div class="adm-field"><label>Linked event ID (optional)</label><input type="text" id="gf-linked-event" placeholder="event-id" /></div>
     <div class="adm-field"><label>Status</label>
@@ -592,7 +608,25 @@ window.openDrawer = openDrawer;
 window.updateSub  = updateSub;
 
 // ── GIVEAWAYS ADMIN ────────────────────────────────────────────────────────
-let allGiveaways = [], editingGwId = null;
+let allGiveaways = [], editingGwId = null, quillGwDesc = null, quillGwHow = null;
+
+function initGwQuills() {
+  if (quillGwDesc) return; // already initialised
+  const toolbar = [[{ header: [2, 3, false] }], ['bold', 'italic', 'underline'], ['link', { list: 'bullet' }], ['clean']];
+  quillGwDesc = new Quill('#gf-description-editor', { theme: 'snow', modules: { toolbar } });
+  quillGwHow  = new Quill('#gf-how-to-enter-editor', { theme: 'snow', modules: { toolbar } });
+}
+
+// Init upload zone for giveaway hero image (once)
+document.addEventListener('DOMContentLoaded', () => {
+  bindUploadZone({
+    zoneEl:    document.getElementById('gf-img-zone'),
+    fileInput: document.getElementById('gf-img-file'),
+    urlInput:  document.getElementById('gf-img'),
+    previewEl: document.getElementById('gf-img-preview'),
+    folder:    'giveaways',
+  });
+});
 
 async function loadGiveaways() {
   const { data } = await db.from('giveaways').select('*').order('created_at', { ascending: false });
@@ -623,14 +657,12 @@ function renderGiveawaysTable() {
 function openGwDrawer(id) {
   editingGwId = id;
   const g = id ? allGiveaways.find(x => x.id === id) : null;
+  initGwQuills();
   document.getElementById('js-gw-drawer-title').textContent = g ? 'Edit Giveaway' : 'New Giveaway';
   document.getElementById('gf-title').value           = g?.title || '';
   document.getElementById('gf-slug').value            = g?.slug || '';
   document.getElementById('gf-prize').value           = g?.prize || '';
-  document.getElementById('gf-description').value     = g?.description || '';
-  document.getElementById('gf-how-to-enter').value    = g?.how_to_enter || '';
   document.getElementById('gf-age-restriction').value = g?.age_restriction || '';
-  document.getElementById('gf-img').value             = g?.img || '';
   document.getElementById('gf-ends-at').value         = g?.ends_at ? g.ends_at.slice(0,16) : '';
   document.getElementById('gf-linked-event').value    = g?.linked_event_id || '';
   document.getElementById('gf-status').value          = g?.status || 'active';
@@ -640,6 +672,14 @@ function openGwDrawer(id) {
   document.getElementById('gf-winners-section').style.display = (g?.status === 'completed') ? '' : 'none';
   document.getElementById('js-gw-delete').hidden = !id;
   document.getElementById('js-gw-save-status').textContent = '';
+  // Hero image preview
+  const imgUrl = g?.img || '';
+  document.getElementById('gf-img').value = imgUrl;
+  const prev = document.getElementById('gf-img-preview');
+  prev.src = imgUrl; prev.style.display = imgUrl ? 'block' : 'none';
+  // Load Quill content
+  quillGwDesc.root.innerHTML = g?.description || '';
+  quillGwHow.root.innerHTML  = g?.how_to_enter || '';
   document.getElementById('js-drawer-overlay').classList.add('open');
   document.getElementById('js-gw-drawer').classList.add('open');
 }
@@ -669,12 +709,14 @@ document.getElementById('js-gw-save')?.addEventListener('click', async () => {
   const slug  = document.getElementById('gf-slug').value.trim();
   if (!title || !slug) { alert('Title and slug are required.'); return; }
 
+  const descHtml    = quillGwDesc?.root.innerHTML.replace(/<p><br><\/p>/g,'').trim() || '';
+  const howHtml     = quillGwHow?.root.innerHTML.replace(/<p><br><\/p>/g,'').trim() || '';
   const payload = {
     title,
     slug,
     prize:           document.getElementById('gf-prize').value.trim() || null,
-    description:     document.getElementById('gf-description').value.trim() || null,
-    how_to_enter:    document.getElementById('gf-how-to-enter').value.trim() || null,
+    description:     descHtml || null,
+    how_to_enter:    howHtml || null,
     age_restriction: document.getElementById('gf-age-restriction').value.trim() || null,
     img:             document.getElementById('gf-img').value.trim() || null,
     ends_at:         document.getElementById('gf-ends-at').value || null,

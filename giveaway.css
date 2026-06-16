@@ -147,6 +147,90 @@
 .gw-more-card__title { font-family: var(--font-head); font-size: .88rem; font-weight: 800; color: var(--dark); }
 .gw-more-card__meta { font-size: .75rem; color: var(--mid); }
 
+/* Completed / winners state */
+.gw-hero--completed { background: #1e293b; }
+.gw-panel--winners { border-color: #f59e0b; background: #fffbeb; }
+.gw-winners-names {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--dark);
+  margin: .25rem 0;
+}
+.gw-winner-img {
+  width: 100%; max-width: 420px;
+  border-radius: var(--radius-md);
+  margin-top: .5rem;
+  object-fit: cover;
+}
+
+/* How to enter */
+.gw-how-to-enter {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+.gw-how-title {
+  font-family: var(--font-head);
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin-bottom: .5rem;
+}
+.gw-how-body { font-size: .85rem; color: var(--mid); line-height: 1.6; }
+
+/* Description */
+.gw-description {
+  font-size: .92rem;
+  color: var(--mid);
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+}
+
+/* Stay in the loop */
+.gw-loop-section {
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, var(--teal) 0%, #1a9fa8 100%);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  color: var(--white);
+}
+.gw-loop-inner { display: flex; flex-direction: column; gap: .65rem; }
+.gw-loop-title {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--white);
+}
+.gw-loop-sub { font-size: .88rem; color: rgba(255,255,255,.8); line-height: 1.55; }
+.gw-loop-section .ob-input {
+  background: rgba(255,255,255,.15);
+  border-color: rgba(255,255,255,.3);
+  color: var(--white);
+}
+.gw-loop-section .ob-input::placeholder { color: rgba(255,255,255,.55); }
+.gw-loop-section .btn--teal {
+  background: var(--white);
+  color: var(--teal);
+  font-weight: 800;
+}
+.gw-loop-section .btn--teal:hover { background: var(--teal-lt); }
+
+/* Offer card giveaway variant */
+.offer-card--giveaway { border-color: rgba(74,200,208,.35); background: #f0fdfd; }
+.offer-card--giveaway:hover { border-color: var(--teal); }
+.offer-card--closed { opacity: .6; }
+.offer-card__tag--giveaway {
+  background: rgba(74,200,208,.15);
+  color: #0e7490;
+}
+.offer-card__sub { font-size: .75rem; color: var(--mid); }
+
 /* Share toast reuse */
 .share-toast {
   position: fixed;

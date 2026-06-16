@@ -147,6 +147,45 @@
   </div>
 </div>
 
+<!-- GIVEAWAY DRAWER -->
+<div class="adm-drawer" id="js-gw-drawer" style="width:min(600px,100vw)">
+  <div class="adm-drawer__head">
+    <h2 class="adm-drawer__title" id="js-gw-drawer-title">New Giveaway</h2>
+    <button class="adm-drawer__close" id="js-gw-drawer-close">✕</button>
+  </div>
+  <div class="adm-drawer__body">
+    <div class="adm-field"><label>Title *</label><input type="text" id="gf-title" placeholder="Win tickets to Disney On Ice!" /></div>
+    <div class="adm-field"><label>Slug (URL) *</label><input type="text" id="gf-slug" placeholder="disney-on-ice-jul-2025" /></div>
+    <div class="adm-field"><label>Prize</label><input type="text" id="gf-prize" placeholder="Family pass (4 tickets)" /></div>
+    <div class="adm-field"><label>Description (HTML ok)</label><textarea id="gf-description" rows="4" placeholder="Tell people about this giveaway…"></textarea></div>
+    <div class="adm-field"><label>How to enter (HTML ok)</label><textarea id="gf-how-to-enter" rows="4" placeholder="Follow our Facebook page and comment on the giveaway post with…"></textarea></div>
+    <div class="adm-field"><label>Age restriction</label><input type="text" id="gf-age-restriction" placeholder="Open to Aus residents 18+" /></div>
+    <div class="adm-field"><label>Hero image URL</label><input type="url" id="gf-img" placeholder="https://…" /></div>
+    <div class="adm-field"><label>Entries close</label><input type="datetime-local" id="gf-ends-at" /></div>
+    <div class="adm-field"><label>Linked event ID (optional)</label><input type="text" id="gf-linked-event" placeholder="event-id" /></div>
+    <div class="adm-field"><label>Status</label>
+      <select id="gf-status">
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+    <div class="adm-field" id="gf-winners-section" style="display:none">
+      <label>Winner name(s)</label><input type="text" id="gf-winner-names" placeholder="Jane Smith, John Doe" />
+      <label style="margin-top:.6rem">Winner photo URL (optional)</label><input type="url" id="gf-winner-img" placeholder="https://…" />
+    </div>
+    <div class="adm-field" style="flex-direction:row;align-items:center;gap:.5rem">
+      <input type="checkbox" id="gf-published" checked />
+      <label for="gf-published" style="margin:0">Published (visible on site)</label>
+    </div>
+  </div>
+  <div class="adm-drawer__footer" style="padding-bottom:calc(1rem + env(safe-area-inset-bottom, 0px))">
+    <button class="adm-btn adm-btn--sm" id="js-gw-save">Save Giveaway</button>
+    <button class="adm-btn adm-btn--outline adm-btn--sm" id="js-gw-cancel">Cancel</button>
+    <span id="js-gw-save-status" style="font-size:.82rem;margin-left:.5rem"></span>
+    <button class="adm-btn adm-btn--sm" style="background:var(--adm-red);margin-left:auto" id="js-gw-delete" hidden>Delete</button>
+  </div>
+</div>
+
 <div class="adm-layout">
   <aside class="adm-sidebar" id="js-adm-sidebar"></aside>
   <div class="adm-main">
@@ -159,6 +198,7 @@
     <div class="adm-content">
       <div class="adm-tabs">
         <button class="adm-tab active" data-tab="articles">Articles / News</button>
+        <button class="adm-tab" data-tab="giveaways">🎁 Giveaways</button>
         <button class="adm-tab" data-tab="submissions">Business Submissions</button>
       </div>
 
@@ -177,6 +217,16 @@
         </div>
         <div class="adm-table-wrap" id="js-articles-table">
           <div class="adm-table-empty">Loading articles…</div>
+        </div>
+      </div>
+
+      <!-- Giveaways -->
+      <div class="adm-tab-panel" id="js-tab-giveaways">
+        <div class="adm-toolbar">
+          <button class="adm-btn adm-btn--teal" id="js-gw-new-btn">+ New Giveaway</button>
+        </div>
+        <div class="adm-table-wrap" id="js-giveaways-table">
+          <div class="adm-table-empty">Loading giveaways…</div>
         </div>
       </div>
 
@@ -540,6 +590,130 @@ function fmtDate(d) {
 
 window.openDrawer = openDrawer;
 window.updateSub  = updateSub;
+
+// ── GIVEAWAYS ADMIN ────────────────────────────────────────────────────────
+let allGiveaways = [], editingGwId = null;
+
+async function loadGiveaways() {
+  const { data } = await db.from('giveaways').select('*').order('created_at', { ascending: false });
+  allGiveaways = data || [];
+  renderGiveawaysTable();
+}
+
+function renderGiveawaysTable() {
+  const wrap = document.getElementById('js-giveaways-table');
+  if (!allGiveaways.length) {
+    wrap.innerHTML = '<div class="adm-table-empty">No giveaways yet. Create one above.</div>';
+    return;
+  }
+  wrap.innerHTML = `<table class="adm-table"><thead><tr><th>Title</th><th>Status</th><th>Closes</th><th></th></tr></thead><tbody>
+    ${allGiveaways.map(g => `
+      <tr>
+        <td><strong>${g.title}</strong><div style="font-size:.75rem;color:var(--adm-mid)">/giveaway/${g.slug}</div></td>
+        <td><span class="adm-badge ${g.status === 'completed' ? 'adm-badge--grey' : 'adm-badge--green'}">${g.status}</span></td>
+        <td style="font-size:.78rem;color:var(--adm-mid)">${g.ends_at ? new Date(g.ends_at).toLocaleDateString('en-AU') : '—'}</td>
+        <td style="display:flex;gap:.3rem">
+          <button class="adm-btn adm-btn--sm adm-btn--outline" onclick="openGwDrawer('${g.id}')">Edit</button>
+          <a href="/giveaway/${g.slug}" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm">View</a>
+        </td>
+      </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function openGwDrawer(id) {
+  editingGwId = id;
+  const g = id ? allGiveaways.find(x => x.id === id) : null;
+  document.getElementById('js-gw-drawer-title').textContent = g ? 'Edit Giveaway' : 'New Giveaway';
+  document.getElementById('gf-title').value           = g?.title || '';
+  document.getElementById('gf-slug').value            = g?.slug || '';
+  document.getElementById('gf-prize').value           = g?.prize || '';
+  document.getElementById('gf-description').value     = g?.description || '';
+  document.getElementById('gf-how-to-enter').value    = g?.how_to_enter || '';
+  document.getElementById('gf-age-restriction').value = g?.age_restriction || '';
+  document.getElementById('gf-img').value             = g?.img || '';
+  document.getElementById('gf-ends-at').value         = g?.ends_at ? g.ends_at.slice(0,16) : '';
+  document.getElementById('gf-linked-event').value    = g?.linked_event_id || '';
+  document.getElementById('gf-status').value          = g?.status || 'active';
+  document.getElementById('gf-winner-names').value    = g?.winner_names || '';
+  document.getElementById('gf-winner-img').value      = g?.winner_img || '';
+  document.getElementById('gf-published').checked     = g ? !!g.published : true;
+  document.getElementById('gf-winners-section').style.display = (g?.status === 'completed') ? '' : 'none';
+  document.getElementById('js-gw-delete').hidden = !id;
+  document.getElementById('js-gw-save-status').textContent = '';
+  document.getElementById('js-drawer-overlay').classList.add('open');
+  document.getElementById('js-gw-drawer').classList.add('open');
+}
+
+function closeGwDrawer() {
+  document.getElementById('js-gw-drawer').classList.remove('open');
+  document.getElementById('js-drawer-overlay').classList.remove('open');
+}
+
+document.getElementById('js-gw-new-btn')?.addEventListener('click', () => openGwDrawer(null));
+document.getElementById('js-gw-drawer-close')?.addEventListener('click', closeGwDrawer);
+document.getElementById('js-gw-cancel')?.addEventListener('click', closeGwDrawer);
+
+document.getElementById('gf-status')?.addEventListener('change', e => {
+  document.getElementById('gf-winners-section').style.display = e.target.value === 'completed' ? '' : 'none';
+});
+
+document.getElementById('gf-title')?.addEventListener('input', e => {
+  if (!editingGwId) {
+    document.getElementById('gf-slug').value = e.target.value.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-');
+  }
+});
+
+document.getElementById('js-gw-save')?.addEventListener('click', async () => {
+  const title = document.getElementById('gf-title').value.trim();
+  const slug  = document.getElementById('gf-slug').value.trim();
+  if (!title || !slug) { alert('Title and slug are required.'); return; }
+
+  const payload = {
+    title,
+    slug,
+    prize:           document.getElementById('gf-prize').value.trim() || null,
+    description:     document.getElementById('gf-description').value.trim() || null,
+    how_to_enter:    document.getElementById('gf-how-to-enter').value.trim() || null,
+    age_restriction: document.getElementById('gf-age-restriction').value.trim() || null,
+    img:             document.getElementById('gf-img').value.trim() || null,
+    ends_at:         document.getElementById('gf-ends-at').value || null,
+    linked_event_id: document.getElementById('gf-linked-event').value.trim() || null,
+    status:          document.getElementById('gf-status').value,
+    winner_names:    document.getElementById('gf-winner-names').value.trim() || null,
+    winner_img:      document.getElementById('gf-winner-img').value.trim() || null,
+    published:       document.getElementById('gf-published').checked,
+  };
+
+  const btn = document.getElementById('js-gw-save');
+  const status = document.getElementById('js-gw-save-status');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  let error;
+  if (editingGwId) {
+    ({ error } = await db.from('giveaways').update(payload).eq('id', editingGwId));
+    if (!error) { const idx = allGiveaways.findIndex(g => g.id === editingGwId); if (idx >= 0) allGiveaways[idx] = { ...allGiveaways[idx], ...payload }; }
+  } else {
+    payload.id = slug;
+    ({ error } = await db.from('giveaways').insert(payload));
+    if (!error) { allGiveaways.unshift({ ...payload }); editingGwId = slug; }
+  }
+
+  btn.disabled = false; btn.textContent = 'Save Giveaway';
+  if (error) { status.textContent = '❌ ' + error.message; status.style.color = 'var(--adm-red)'; }
+  else { status.textContent = '✓ Saved'; status.style.color = 'var(--adm-teal)'; renderGiveawaysTable(); }
+});
+
+document.getElementById('js-gw-delete')?.addEventListener('click', async () => {
+  if (!editingGwId || !confirm('Delete this giveaway? This cannot be undone.')) return;
+  const { error } = await db.from('giveaways').delete().eq('id', editingGwId);
+  if (!error) { allGiveaways = allGiveaways.filter(g => g.id !== editingGwId); renderGiveawaysTable(); closeGwDrawer(); }
+});
+
+// Load giveaways when tab is clicked
+document.querySelector('[data-tab="giveaways"]')?.addEventListener('click', () => {
+  if (!allGiveaways.length) loadGiveaways();
+});
 
 // Auto-open edit drawer if ?edit=ID in URL (e.g. from the FAB on article pages)
 const _editParam = new URLSearchParams(window.location.search).get('edit');

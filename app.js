@@ -1670,23 +1670,62 @@ function renderStays(stays) {
 
 // ── RENDER OFFERS STRIP ───────────────────────────────────
 function renderOffers() {
-  const strip = document.getElementById('js-offers-strip');
+  // Legacy — now handled by renderGiveawaysAndOffers
+}
+
+async function renderGiveawaysAndOffers() {
+  const strip   = document.getElementById('js-giveaways-offers-strip');
+  const section = document.getElementById('giveaways-offers');
   if (!strip) return;
 
-  strip.innerHTML = PROMOS.map(pr => {
+  // Fetch active giveaways from DB
+  let giveaways = [];
+  try {
+    const { data } = await db.from('giveaways')
+      .select('*')
+      .eq('published', true)
+      .order('created_at', { ascending: false });
+    giveaways = data || [];
+  } catch (_) {}
+
+  const gwUrl  = g  => window.IS_LOCAL ? `giveaway.html?s=${g.slug}` : `/giveaway/${g.slug}`;
+  const bizUrl = pr => { const b = getBusinessById(pr.businessId); return b ? bizLink(b) : '#'; };
+
+  const gwCards = giveaways.map(g => {
+    const isCompleted = g.status === 'completed';
+    return `
+      <a href="${gwUrl(g)}" class="offer-card offer-card--giveaway${isCompleted ? ' offer-card--closed' : ''}">
+        <div class="offer-card__icon">${g.img ? `<img src="${g.img}" style="width:48px;height:48px;object-fit:cover;border-radius:.5rem" />` : '🎁'}</div>
+        <div class="offer-card__body">
+          <span class="offer-card__tag offer-card__tag--giveaway">${isCompleted ? '🏆 Completed' : '🎁 Giveaway'}</span>
+          <span class="offer-card__title">${g.title}</span>
+          ${g.prize ? `<span class="offer-card__sub">${g.prize}</span>` : ''}
+          ${isCompleted
+            ? `<span class="offer-card__expires">🏆 ${g.winner_names || 'Winner announced'}</span>`
+            : g.ends_at ? `<span class="offer-card__expires">⏳ Closes ${new Date(g.ends_at).toLocaleDateString('en-AU', {day:'numeric',month:'short'})}</span>` : ''}
+        </div>
+      </a>`;
+  }).join('');
+
+  const offerCards = PROMOS.map(pr => {
     const biz = getBusinessById(pr.businessId);
     return `
-      <div class="offer-card">
+      <a href="${bizUrl(pr)}" class="offer-card">
         <div class="offer-card__icon">${pr.emoji}</div>
         <div class="offer-card__body">
           <span class="offer-card__tag">${pr.tag}</span>
           <span class="offer-card__title">${pr.title}</span>
-          ${biz ? `<a href="${bizLink(biz)}" class="offer-card__biz">${biz.emoji} ${biz.name}</a>` : ''}
+          ${biz ? `<span class="offer-card__sub">${biz.emoji} ${biz.name}</span>` : ''}
           <span class="offer-card__expires">⏳ ${pr.expires}</span>
         </div>
-      </div>
-    `;
+      </a>`;
   }).join('');
+
+  const combined = gwCards + offerCards;
+  if (!combined) { section && (section.style.display = 'none'); return; }
+
+  strip.innerHTML = combined;
+  if (section) section.style.display = '';
 }
 
 // ── COMMUNITY GUIDES STRIP ────────────────────────────────
@@ -4098,7 +4137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initAds();
     renderEatStrip(personalisedBiz);
     renderStays(personalisedStays);
-    renderOffers();
+    renderGiveawaysAndOffers();
     renderCommunityGuidesStrip();
     initWeekendToggle(personalisedEvents);
     initDateBar();

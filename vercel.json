@@ -55,6 +55,7 @@
     { "source": "/advertise",                 "destination": "/advertise.html" },
     { "source": "/maintenance",            "destination": "/maintenance.html" },
     { "source": "/coming-soon",            "destination": "/comingsoon.html" },
+    { "source": "/giveaway/:slug", "destination": "/giveaway.html?s=:slug" },
     { "source": "/news/:slug",   "destination": "/article.html?s=:slug" },
     { "source": "/events/:slug", "destination": "/event.html?s=:slug" },
     { "source": "/guide/:id",              "destination": "/guide.html?id=:id" },

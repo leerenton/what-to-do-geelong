@@ -178,7 +178,18 @@
       <input type="url" id="gf-img" placeholder="Or paste an image URL…" style="margin-top:.4rem" />
     </div>
     <div class="adm-field"><label>Entries close</label><input type="datetime-local" id="gf-ends-at" /></div>
-    <div class="adm-field"><label>Linked event ID (optional)</label><input type="text" id="gf-linked-event" placeholder="event-id" /></div>
+    <div class="adm-field">
+      <label>Linked Event (optional)</label>
+      <div style="position:relative">
+        <input type="text" id="gf-event-search" placeholder="Search events…" autocomplete="off" />
+        <div id="gf-event-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--adm-border);border-radius:.4rem;box-shadow:0 4px 16px rgba(0,0,0,.1);max-height:220px;overflow-y:auto;z-index:200"></div>
+      </div>
+      <div id="gf-event-selected" style="display:none;margin-top:.4rem;padding:.5rem .75rem;background:var(--adm-bg);border-radius:.4rem;font-size:.82rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+        <span id="gf-event-selected-label"></span>
+        <button type="button" id="gf-event-clear" style="background:none;border:none;cursor:pointer;color:var(--adm-mid);font-size:.8rem">✕ Clear</button>
+      </div>
+      <input type="hidden" id="gf-linked-event" />
+    </div>
     <div class="adm-field"><label>Status</label>
       <select id="gf-status">
         <option value="active">Active</option>
@@ -664,7 +675,17 @@ function openGwDrawer(id) {
   document.getElementById('gf-prize').value           = g?.prize || '';
   document.getElementById('gf-age-restriction').value = g?.age_restriction || '';
   document.getElementById('gf-ends-at').value         = g?.ends_at ? g.ends_at.slice(0,16) : '';
-  document.getElementById('gf-linked-event').value    = g?.linked_event_id || '';
+  document.getElementById('gf-linked-event').value = g?.linked_event_id || '';
+  document.getElementById('gf-event-search').value = '';
+  document.getElementById('gf-event-results').style.display = 'none';
+  // Show selected event chip if editing
+  if (g?.linked_event_id) {
+    db.from('events').select('id,title,date').eq('id', g.linked_event_id).single().then(({ data: ev }) => {
+      if (ev) selectGwEvent(ev.id, `${ev.title}${ev.date ? ' — ' + ev.date : ''}`);
+    });
+  } else {
+    document.getElementById('gf-event-selected').style.display = 'none';
+  }
   document.getElementById('gf-status').value          = g?.status || 'active';
   document.getElementById('gf-winner-names').value    = g?.winner_names || '';
   document.getElementById('gf-winner-img').value      = g?.winner_img || '';
@@ -750,6 +771,54 @@ document.getElementById('js-gw-delete')?.addEventListener('click', async () => {
   if (!editingGwId || !confirm('Delete this giveaway? This cannot be undone.')) return;
   const { error } = await db.from('giveaways').delete().eq('id', editingGwId);
   if (!error) { allGiveaways = allGiveaways.filter(g => g.id !== editingGwId); renderGiveawaysTable(); closeGwDrawer(); }
+});
+
+// ── Event search/lookup for giveaway drawer ────────────────────────────────
+let gwEventSearchTimer = null;
+
+document.getElementById('gf-event-search')?.addEventListener('input', function() {
+  clearTimeout(gwEventSearchTimer);
+  const q = this.value.trim();
+  const results = document.getElementById('gf-event-results');
+  if (q.length < 2) { results.style.display = 'none'; return; }
+  gwEventSearchTimer = setTimeout(async () => {
+    const { data } = await db.from('events').select('id,title,date,location')
+      .ilike('title', `%${q}%`).eq('status', 'approved').limit(8);
+    if (!data?.length) { results.innerHTML = '<div style="padding:.6rem .75rem;color:var(--adm-mid);font-size:.82rem">No events found</div>'; results.style.display = ''; return; }
+    results.style.display = '';
+    results.innerHTML = data.map(e => `
+      <div class="gf-event-option" data-id="${e.id}" data-label="${e.title} — ${e.date || ''}" style="padding:.55rem .75rem;cursor:pointer;font-size:.82rem;border-bottom:1px solid var(--adm-border)">
+        <strong>${e.title}</strong>
+        <div style="color:var(--adm-mid);font-size:.75rem">${e.date || ''} · ${e.location || ''}</div>
+      </div>`).join('');
+    results.querySelectorAll('.gf-event-option').forEach(el => {
+      el.addEventListener('mouseenter', () => el.style.background = 'var(--adm-bg)');
+      el.addEventListener('mouseleave', () => el.style.background = '');
+      el.addEventListener('click', () => selectGwEvent(el.dataset.id, el.dataset.label));
+    });
+  }, 200);
+});
+
+function selectGwEvent(id, label) {
+  document.getElementById('gf-linked-event').value = id;
+  document.getElementById('gf-event-search').value = '';
+  document.getElementById('gf-event-results').style.display = 'none';
+  const sel = document.getElementById('gf-event-selected');
+  document.getElementById('gf-event-selected-label').textContent = label;
+  sel.style.display = 'flex';
+}
+
+document.getElementById('gf-event-clear')?.addEventListener('click', () => {
+  document.getElementById('gf-linked-event').value = '';
+  document.getElementById('gf-event-selected').style.display = 'none';
+  document.getElementById('gf-event-search').value = '';
+});
+
+// Close results when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('#gf-event-search') && !e.target.closest('#gf-event-results')) {
+    document.getElementById('gf-event-results').style.display = 'none';
+  }
 });
 
 // Load giveaways when tab is clicked

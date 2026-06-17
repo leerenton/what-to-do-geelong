@@ -13,20 +13,6 @@
       "schedule": "0 0 * * 2"
     }
   ],
-  "redirects": [
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "whattodovictoria.com.au" }],
-      "destination": "/victoria",
-      "permanent": false
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "www.whattodovictoria.com.au" }],
-      "destination": "/victoria",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     { "source": "/victoria",               "destination": "/victoria.html" },
     { "source": "/parks",                  "destination": "/parks.html" },

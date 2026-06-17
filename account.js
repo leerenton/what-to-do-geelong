@@ -154,6 +154,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span class="material-symbols-rounded">tune</span> My preferences
             <span class="material-symbols-rounded acct-menu-item__arrow">chevron_right</span>
           </a>
+          <button class="acct-menu-item" id="js-reset-pw-btn">
+            <span class="material-symbols-rounded">lock_reset</span> Change password
+            <span class="material-symbols-rounded acct-menu-item__arrow">chevron_right</span>
+          </button>
           <button class="acct-menu-item acct-menu-item--danger" id="js-logout-btn">
             <span class="material-symbols-rounded">logout</span> Log out
           </button>
@@ -194,4 +198,64 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
   }
+
+  // ── Change password ───────────────────────────────────────
+  document.getElementById('js-reset-pw-btn')?.addEventListener('click', () => {
+    // Build modal
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:1rem 1rem 0 0;width:100%;max-width:440px;padding:1.5rem;font-family:-apple-system,BlinkMacSystemFont,'DM Sans',sans-serif;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+          <h3 style="margin:0;font-size:1rem;font-weight:700">Change password</h3>
+          <button id="js-pw-modal-close" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#64748b">✕</button>
+        </div>
+        <div style="margin-bottom:1rem">
+          <label style="font-size:.8rem;font-weight:600;color:#475569;display:block;margin-bottom:.35rem">New password</label>
+          <input id="js-pw-new" type="password" placeholder="At least 8 characters" style="width:100%;box-sizing:border-box;padding:.65rem .75rem;border:1px solid #e2e8f0;border-radius:.5rem;font-size:.9rem;" />
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <label style="font-size:.8rem;font-weight:600;color:#475569;display:block;margin-bottom:.35rem">Confirm password</label>
+          <input id="js-pw-confirm" type="password" placeholder="Repeat new password" style="width:100%;box-sizing:border-box;padding:.65rem .75rem;border:1px solid #e2e8f0;border-radius:.5rem;font-size:.9rem;" />
+        </div>
+        <p id="js-pw-error" style="font-size:.8rem;color:#ef4444;margin:0 0 .75rem;min-height:1.1em"></p>
+        <button id="js-pw-save" style="width:100%;padding:.75rem;background:var(--teal,#0d9488);color:#fff;border:none;border-radius:.5rem;font-size:.95rem;font-weight:700;cursor:pointer;">Update password</button>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    document.getElementById('js-pw-modal-close').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    document.getElementById('js-pw-save').addEventListener('click', async () => {
+      const newPw  = document.getElementById('js-pw-new').value;
+      const confPw = document.getElementById('js-pw-confirm').value;
+      const errEl  = document.getElementById('js-pw-error');
+      const saveBtn = document.getElementById('js-pw-save');
+
+      errEl.textContent = '';
+      if (newPw.length < 8)       { errEl.textContent = 'Password must be at least 8 characters.'; return; }
+      if (newPw !== confPw)        { errEl.textContent = 'Passwords don\'t match.'; return; }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Updating…';
+
+      const { error } = await db.auth.updateUser({ password: newPw });
+
+      if (error) {
+        errEl.textContent = error.message || 'Something went wrong. Please try again.';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Update password';
+      } else {
+        overlay.innerHTML = `
+          <div style="background:#fff;border-radius:1rem 1rem 0 0;width:100%;max-width:440px;padding:2rem 1.5rem;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'DM Sans',sans-serif;">
+            <div style="font-size:2.5rem;margin-bottom:.75rem">✅</div>
+            <h3 style="margin:0 0 .5rem;font-size:1rem;font-weight:700">Password updated</h3>
+            <p style="font-size:.85rem;color:#64748b;margin:0 0 1.25rem">You're all set. Use your new password next time you log in.</p>
+            <button id="js-pw-done" style="padding:.65rem 1.5rem;background:var(--teal,#0d9488);color:#fff;border:none;border-radius:.5rem;font-size:.9rem;font-weight:700;cursor:pointer;">Done</button>
+          </div>`;
+        document.getElementById('js-pw-done').addEventListener('click', close);
+      }
+    });
+  });
 });

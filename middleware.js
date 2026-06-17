@@ -4,6 +4,9 @@
 const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
 
+// Admin subdomain — all paths rewritten to /wtdgadmin/...
+const ADMIN_HOSTNAME = 'wtdadmin.whattodovictoria.com.au';
+
 // Map of hostname → file to serve at the root path
 const CITY_ROOTS = {
   'whattodovictoria.com.au':     '/victoria.html',
@@ -18,7 +21,17 @@ export default async function middleware(request) {
   const hostname = url.hostname;
   const pathname = url.pathname;
 
-  if (pathname !== '/') return; // only intercept root
+  // ── Admin subdomain: rewrite all paths to /wtdgadmin/* ────────────────────
+  if (hostname === ADMIN_HOSTNAME) {
+    // / or /dash → /wtdgadmin/dash
+    // /sites      → /wtdgadmin/sites
+    // /login      → /login (pass through for login page)
+    const clean = pathname === '/' ? '/dash' : pathname;
+    if (clean === '/login') return; // pass through to login.html via vercel.json
+    return fetch(new URL(`/wtdgadmin${clean}`, request.url));
+  }
+
+  if (pathname !== '/') return; // only intercept root for other domains
 
   const isCityDomain = hostname in CITY_ROOTS;
 
@@ -64,5 +77,6 @@ export default async function middleware(request) {
 }
 
 export const config = {
-  matcher: '/',
+  // Run on all paths so the admin subdomain can intercept any route
+  matcher: '/(.*)',
 };

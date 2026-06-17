@@ -57,6 +57,13 @@ document.getElementById('js-signup-form')?.addEventListener('submit', async e =>
   // Store name in localStorage for nav display
   if (data.user) {
     setAccount({ id: data.user.id, name, email });
+
+    // Auto-subscribe to the city this user signed up on
+    const citySlug = window.SITE?.slug || 'geelong';
+    await db.from('user_city_subscriptions').upsert(
+      { user_id: data.user.id, city: citySlug, subscribed: true },
+      { onConflict: 'user_id,city' }
+    );
   }
 
   const next = new URLSearchParams(window.location.search).get('next') || 'account.html';

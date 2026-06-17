@@ -43,12 +43,9 @@ function supabase(path) {
 }
 
 // ── Fetch upcoming events for the week ahead ──────────────
-async function getUpcomingEvents() {
-  const now  = new Date();
-  const end  = new Date(now);
-  end.setDate(now.getDate() + 7);
+async function getUpcomingEvents(city = 'geelong') {
   const res  = await supabase(
-    `events?is_recurring=eq.false&select=id,title,category,emoji,date,location,price,img,slug,description&order=created_at.desc&limit=6`
+    `events?city=eq.${city}&is_recurring=eq.false&select=id,title,category,emoji,date,location,price,img,slug,description&order=created_at.desc&limit=6`
   );
   return res.body || [];
 }
@@ -176,44 +173,70 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const [events, topSponsor, bottomSponsor, prefsRes] = await Promise.all([
-      getUpcomingEvents(),
+    // Load subscribers by city
+    const [topSponsor, bottomSponsor, subsRes, sitesRes] = await Promise.all([
       getSponsor('top'),
       getSponsor('bottom'),
-      supabase('email_preferences?weekly_digest=eq.true&select=user_id,email'),
+      supabase('user_city_subscriptions?subscribed=eq.true&select=user_id,city,email_preferences!inner(email,weekly_digest)&email_preferences.weekly_digest=eq.true'),
+      supabase('sites?select=slug,name,domain,full_name'),
     ]);
 
-    const prefs = prefsRes.body || [];
+    let prefs = [];
+    if (Array.isArray(subsRes.body) && subsRes.body.length) {
+      prefs = subsRes.body.map(r => ({ user_id: r.user_id, city: r.city, email: r.email_preferences?.email })).filter(r => r.email);
+    } else {
+      const legacyRes = await supabase('email_preferences?weekly_digest=eq.true&select=user_id,email');
+      prefs = (legacyRes.body || []).map(r => ({ ...r, city: 'geelong' }));
+    }
+
     if (!prefs.length) return res.status(200).json({ message: 'No subscribers', sent: 0 });
+
+    const sitesMap = {};
+    (sitesRes.body || []).forEach(s => { sitesMap[s.slug] = s; });
+
+    // Group by city so we only fetch events once per city
+    const byCityMap = {};
+    for (const pref of prefs) {
+      const c = pref.city || 'geelong';
+      if (!byCityMap[c]) byCityMap[c] = [];
+      byCityMap[c].push(pref);
+    }
 
     let sent = 0, errors = 0;
 
-    for (const pref of prefs) {
-      try {
-        const unsubUrl = `${SITE_URL}/api/unsubscribe?uid=${pref.user_id}`;
-        const html     = buildEmail({ events, topSponsor, bottomSponsor, unsubUrl });
-        const bodyStr  = JSON.stringify({
-          from:    `${FROM_NAME} <${FROM_EMAIL}>`,
-          to:      [pref.email],
-          subject: `What's happening in Geelong this week 🗓️`,
-          html,
-        });
+    for (const [citySlug, cityPrefs] of Object.entries(byCityMap)) {
+      const cityInfo   = sitesMap[citySlug] || { name: 'Geelong', domain: 'whattodogeelong.com.au', full_name: 'What To Do Geelong' };
+      const cityName   = cityInfo.name || 'Geelong';
+      const cityDomain = cityInfo.domain || 'whattodogeelong.com.au';
+      const events     = await getUpcomingEvents(citySlug);
 
-        const result = await httpsRequest({
-          hostname: 'api.resend.com', port: 443,
-          path: '/emails', method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${RESEND_KEY}`,
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(bodyStr),
-          },
-        }, bodyStr);
+      for (const pref of cityPrefs) {
+        try {
+          const unsubUrl = `https://${cityDomain}/api/unsubscribe?uid=${pref.user_id}&city=${citySlug}`;
+          const html     = buildEmail({ events, topSponsor, bottomSponsor, unsubUrl, cityName });
+          const bodyStr  = JSON.stringify({
+            from:    `${cityInfo.full_name || 'What To Do ' + cityName} <hello@${cityDomain}>`,
+            to:      [pref.email],
+            subject: `What's happening in ${cityName} this week 🗓️`,
+            html,
+          });
 
-        if (result.status >= 200 && result.status < 300) sent++;
-        else errors++;
+          const result = await httpsRequest({
+            hostname: 'api.resend.com', port: 443,
+            path: '/emails', method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${RESEND_KEY}`,
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(bodyStr),
+            },
+          }, bodyStr);
 
-        await new Promise(r => setTimeout(r, 200));
-      } catch { errors++; }
+          if (result.status >= 200 && result.status < 300) sent++;
+          else errors++;
+
+          await new Promise(r => setTimeout(r, 200));
+        } catch { errors++; }
+      }
     }
 
     return res.status(200).json({ sent, errors, total: prefs.length });

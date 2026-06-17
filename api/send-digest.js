@@ -70,19 +70,19 @@ async function getUserInterests(userId) {
 }
 
 // ── Fetch trending events for given categories ─────────────
-async function getTrendingEventsForCategories(categories) {
+async function getTrendingEventsForCategories(categories, city = 'geelong') {
   if (!categories.length) return [];
   const catFilter = categories.map(c => `"${c}"`).join(',');
   const res = await supabase(
-    `events?category=in.(${catFilter})&is_recurring=eq.false&select=id,title,category,emoji,date,location,price,img,slug,description&order=created_at.desc&limit=6`
+    `events?category=in.(${catFilter})&city=eq.${city}&is_recurring=eq.false&select=id,title,category,emoji,date,location,price,img,slug,description&order=created_at.desc&limit=6`
   );
   return res.body || [];
 }
 
 // ── Fetch general trending events (fallback) ───────────────
-async function getFallbackEvents() {
+async function getFallbackEvents(city = 'geelong') {
   const res = await supabase(
-    `events?is_recurring=eq.false&select=id,title,category,emoji,date,location,price,img,slug,description&order=created_at.desc&limit=4`
+    `events?city=eq.${city}&is_recurring=eq.false&select=id,title,category,emoji,date,location,price,img,slug,description&order=created_at.desc&limit=4`
   );
   return res.body || [];
 }
@@ -238,9 +238,9 @@ function buildEmail({ userName, categories, events, goldBiz, unsubUrl }) {
 }
 
 // ── Send one email via Resend ──────────────────────────────
-async function sendEmail({ to, subject, html }) {
+async function sendEmail({ to, subject, html, fromName, fromEmail }) {
   const body = JSON.stringify({
-    from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    from: `${fromName || FROM_NAME} <${fromEmail || FROM_EMAIL}>`,
     to:   [to],
     subject,
     html,
@@ -271,37 +271,61 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // 1. Load all users opted in to weekly digest
-    const prefsRes = await supabase('email_preferences?weekly_digest=eq.true&select=user_id,email');
-    const prefs = prefsRes.body || [];
+    // 1. Load subscribers grouped by city from user_city_subscriptions
+    //    Join email_preferences to ensure they have weekly_digest=true
+    const subsRes = await supabase(
+      'user_city_subscriptions?subscribed=eq.true&select=user_id,city,email_preferences!inner(email,weekly_digest)&email_preferences.weekly_digest=eq.true'
+    );
+    // Fallback: if join syntax not supported, use simple query
+    let prefs = [];
+    if (Array.isArray(subsRes.body) && subsRes.body.length) {
+      prefs = subsRes.body.map(r => ({
+        user_id: r.user_id,
+        city:    r.city,
+        email:   r.email_preferences?.email,
+      })).filter(r => r.email);
+    } else {
+      // Fallback to legacy email_preferences (all geelong)
+      const legacyRes = await supabase('email_preferences?weekly_digest=eq.true&select=user_id,email');
+      prefs = (legacyRes.body || []).map(r => ({ ...r, city: 'geelong' }));
+    }
 
     if (!prefs.length) {
       return res.status(200).json({ message: 'No subscribers', sent: 0 });
     }
 
-    // 2. Load Gold businesses once (same rotation for all recipients this week)
+    // 2. Load sites to get city names and from-addresses
+    const sitesRes = await supabase('sites?select=slug,name,domain,full_name');
+    const sitesMap = {};
+    (sitesRes.body || []).forEach(s => { sitesMap[s.slug] = s; });
+
+    // 3. Load Gold businesses once per run
     const goldBiz = await getGoldBusinesses(3);
 
     let sent = 0, errors = 0;
 
     for (const pref of prefs) {
       try {
+        const citySlug = pref.city || 'geelong';
+        const cityInfo = sitesMap[citySlug] || { name: 'Geelong', domain: 'whattodogeelong.com.au', full_name: 'What To Do Geelong' };
+        const cityName = cityInfo.name || 'Geelong';
+        const cityDomain = cityInfo.domain || 'whattodogeelong.com.au';
+
         // Get their top interests from last 30 days
         const categories = await getUserInterests(pref.user_id);
 
-        // Fetch matching events
+        // Fetch matching events for this city
         let events = categories.length
-          ? await getTrendingEventsForCategories(categories)
+          ? await getTrendingEventsForCategories(categories, citySlug)
           : [];
         if (events.length < 3) {
-          const fallback = await getFallbackEvents();
-          // Merge without duplicates
+          const fallback = await getFallbackEvents(citySlug);
           const ids = new Set(events.map(e => e.id));
           events = [...events, ...fallback.filter(e => !ids.has(e.id))].slice(0, 4);
         }
 
         // Build unsubscribe URL
-        const unsubUrl = `${SITE_URL}/api/unsubscribe?uid=${pref.user_id}`;
+        const unsubUrl = `https://${cityDomain}/api/unsubscribe?uid=${pref.user_id}&city=${citySlug}`;
 
         const html = buildEmail({
           userName:   '',
@@ -309,16 +333,20 @@ module.exports = async function handler(req, res) {
           events,
           goldBiz,
           unsubUrl,
+          cityName,
+          cityDomain,
         });
 
         const subjectLine = categories.length
-          ? `Your ${categories[0]} picks for this weekend in Geelong 🏙️`
-          : `What's on in Geelong this weekend & beyond 🏙️`;
+          ? `Your ${categories[0]} picks for this weekend in ${cityName} 🏙️`
+          : `What's on in ${cityName} this weekend & beyond 🏙️`;
 
         const result = await sendEmail({
-          to:      pref.email,
-          subject: subjectLine,
+          to:       pref.email,
+          subject:  subjectLine,
           html,
+          fromName: cityInfo.full_name || `What To Do ${cityName}`,
+          fromEmail: `hello@${cityDomain}`,
         });
 
         if (result.status >= 200 && result.status < 300) {
@@ -328,7 +356,6 @@ module.exports = async function handler(req, res) {
           errors++;
         }
 
-        // Polite delay between sends
         await new Promise(r => setTimeout(r, 200));
 
       } catch (e) {

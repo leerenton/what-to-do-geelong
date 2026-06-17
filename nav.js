@@ -214,6 +214,16 @@
         <button class="nav__search-btn" id="js-nav-search-btn" aria-label="Search">
           <span class="material-symbols-rounded">search</span>
         </button>
+        <button class="nav__city-switch" id="js-city-switch-btn" aria-label="Switch city" title="Switch city" style="
+          background:none;border:none;cursor:pointer;padding:.3rem .5rem;
+          display:flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:600;
+          color:var(--nav-text,#1e293b);border:1px solid rgba(0,0,0,.12);border-radius:6px;
+          line-height:1;
+        ">
+          <span class="material-symbols-rounded" style="font-size:1rem">location_on</span>
+          <span id="js-city-name-pill">${cityName}</span>
+          <span class="material-symbols-rounded" style="font-size:.9rem">expand_more</span>
+        </button>
         <button class="nav__hamburger" aria-label="Open menu">
           <span></span><span></span><span></span>
         </button>
@@ -500,5 +510,18 @@
       }, 150);
     });
   }
+
+  // ── City switcher button ──────────────────────────────────
+  document.getElementById('js-city-switch-btn')?.addEventListener('click', () => {
+    if (typeof openCitySwitcher === 'function') {
+      openCitySwitcher();
+    } else {
+      // Lazy-load city-switcher.js then open
+      const s = document.createElement('script');
+      s.src = '/city-switcher.js';
+      s.onload = () => openCitySwitcher();
+      document.head.appendChild(s);
+    }
+  });
 
 })();

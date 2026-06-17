@@ -309,6 +309,7 @@ function renderGrid() {
       ${s.hero_tagline ? `<div style="font-size:.82rem;color:var(--adm-mid);font-style:italic">"${s.hero_tagline}"</div>` : ''}
       <div class="site-card__actions">
         <button class="adm-btn--xs" onclick="openEdit('${s.id}')">Edit</button>
+        <a class="adm-btn--xs" href="https://${s.domain}/admin-preview" target="_blank" title="Sets a bypass cookie so you see the real site">👁 Preview</a>
         ${mode !== 'active'      ? `<button class="adm-btn--xs adm-btn--xs--teal"  onclick="setMode('${s.id}','active')">✅ Go Live</button>` : ''}
         ${mode !== 'coming_soon' ? `<button class="adm-btn--xs adm-btn--xs--warn"  onclick="setMode('${s.id}','coming_soon')">🚧 Coming Soon</button>` : ''}
         ${mode !== 'maintenance' ? `<button class="adm-btn--xs adm-btn--xs--danger" onclick="setMode('${s.id}','maintenance')">🔧 Maintenance</button>` : ''}

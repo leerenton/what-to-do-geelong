@@ -73,6 +73,7 @@ async function initAccountNav() {
     try {
       const { data: { session } } = await db.auth.getSession();
       if (session) {
+        if (window._siteConfigPromise) await window._siteConfigPromise;
         const citySlug = window.SITE?.slug || 'geelong';
         const { data } = await db.from('businesses').select('id, name, emoji, color').eq('owner_id', session.user.id).eq('city', citySlug);
         profiles = data || [];

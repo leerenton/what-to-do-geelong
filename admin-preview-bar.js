@@ -8,8 +8,8 @@
   if (!document.cookie.includes('wtdg_admin_bypass=1')) return;
 
   // Fetch current site mode from DB
-  let siteMode = 'active';
-  let siteName = document.title;
+  let siteMode = 'unknown';
+  let siteName = window.location.hostname;
   try {
     const host = window.location.hostname.replace(/^www\./, '');
     const { data } = await db
@@ -27,7 +27,8 @@
     active:      { text: '✅ Live',         bg: '#065f46', dot: '#4ade80' },
     coming_soon: { text: '🚧 Coming Soon',  bg: '#92400e', dot: '#fbbf24' },
     maintenance: { text: '🔧 Maintenance',  bg: '#991b1b', dot: '#f87171' },
-  }[siteMode] || { text: siteMode, bg: '#1e293b', dot: '#94a3b8' };
+    unknown:     { text: '⚠️ Unknown',      bg: '#374151', dot: '#9ca3af' },
+  }[siteMode] || { text: siteMode, bg: '#374151', dot: '#9ca3af' };
 
   // Inject bar
   const bar = document.createElement('div');

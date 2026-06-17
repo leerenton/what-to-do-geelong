@@ -75,11 +75,17 @@
       <label>Slug (URL)</label>
       <input type="text" id="ef-slug" placeholder="auto-generated" />
     </div>
-    <div class="adm-field">
-      <label>Associated Business</label>
-      <select id="ef-biz">
-        <option value="">None</option>
-      </select>
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>City / Site *</label>
+        <select id="ef-city"></select>
+      </div>
+      <div class="adm-field">
+        <label>Associated Business</label>
+        <select id="ef-biz">
+          <option value="">None</option>
+        </select>
+      </div>
     </div>
 
     <!-- Hero image -->
@@ -195,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     folder: 'events',
   });
 
-  await Promise.all([loadEvents(), loadBizList(), loadCityFilter('js-ev-city')]);
+  await Promise.all([loadEvents(), loadBizList(), loadCityFilter('js-ev-city'), loadFormCitySelect('ef-city')]);
 });
 
 async function loadCityFilter(selectId) {
@@ -207,6 +213,24 @@ async function loadCityFilter(selectId) {
     opt.value = s.slug; opt.textContent = s.name;
     sel.appendChild(opt);
   });
+}
+
+let _cityOptions = null;
+async function loadFormCitySelect(selectId) {
+  if (!_cityOptions) {
+    const { data } = await db.from('sites').select('slug, name').order('name');
+    _cityOptions = data || [];
+  }
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = '';
+  _cityOptions.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.slug; opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+  // Default to geelong if present
+  if (sel.querySelector('option[value="geelong"]')) sel.value = 'geelong';
 }
 
 async function loadBizList() {
@@ -293,6 +317,7 @@ function openDrawer(id) {
   document.getElementById('ef-desc').value     = e?.description || '';
   document.getElementById('ef-slug').value     = e?.slug     || '';
   document.getElementById('ef-biz').value      = e?.business_id || '';
+  document.getElementById('ef-city').value     = e?.city     || 'geelong';
   document.getElementById('ef-img').value      = e?.img      || '';
   document.getElementById('ef-lat').value      = e?.lat      || '';
   document.getElementById('ef-lng').value      = e?.lng      || '';
@@ -328,6 +353,7 @@ async function saveEvent() {
     price:       document.getElementById('ef-price').value.trim()    || null,
     url:         document.getElementById('ef-url').value.trim()       || null,
     description: document.getElementById('ef-desc').value.trim()     || null,
+    city:        document.getElementById('ef-city').value             || 'geelong',
     business_id: document.getElementById('ef-biz').value             || null,
     img:         document.getElementById('ef-img').value.trim()       || null,
     lat:         parseFloat(document.getElementById('ef-lat').value)  || null,

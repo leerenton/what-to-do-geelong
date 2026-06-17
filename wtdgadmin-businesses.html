@@ -179,6 +179,11 @@
     <hr style="border:none;border-top:1px solid var(--adm-border);margin:1rem 0" />
     <p style="font-size:.78rem;font-weight:700;color:var(--adm-mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem">Subscription</p>
 
+    <div class="adm-field">
+      <label>City / Site *</label>
+      <select id="bf-city"></select>
+    </div>
+
     <div class="adm-field-row">
       <div class="adm-field">
         <label>Plan Tier</label>
@@ -290,7 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     folder: 'businesses',
   });
 
-  await Promise.all([loadCityFilter('js-biz-city'), loadBiz()]);
+  await Promise.all([loadCityFilter('js-biz-city'), loadFormCitySelect('bf-city'), loadBiz()]);
 });
 
 async function loadCityFilter(selectId) {
@@ -302,6 +307,23 @@ async function loadCityFilter(selectId) {
     opt.value = s.slug; opt.textContent = s.name;
     sel.appendChild(opt);
   });
+}
+
+let _cityOptions = null;
+async function loadFormCitySelect(selectId) {
+  if (!_cityOptions) {
+    const { data } = await db.from('sites').select('slug, name').order('name');
+    _cityOptions = data || [];
+  }
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = '';
+  _cityOptions.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.slug; opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+  if (sel.querySelector('option[value="geelong"]')) sel.value = 'geelong';
 }
 
 async function loadBiz() {
@@ -400,6 +422,7 @@ function openDrawer(id) {
   document.getElementById('bf-img').value      = b?.img       || '';
   document.getElementById('bf-lat').value      = b?.lat       || '';
   document.getElementById('bf-lng').value      = b?.lng       || '';
+  document.getElementById('bf-city').value     = b?.city    || 'geelong';
   document.getElementById('bf-tier').value     = b?.plan || 'free';
   document.getElementById('bf-claimed').value  = String(!!b?.is_claimed);
 
@@ -475,6 +498,7 @@ async function saveBusiness() {
     img:               document.getElementById('bf-img').value.trim()      || null,
     lat:               parseFloat(document.getElementById('bf-lat').value) || null,
     lng:               parseFloat(document.getElementById('bf-lng').value) || null,
+    city:              document.getElementById('bf-city').value      || 'geelong',
     plan: document.getElementById('bf-tier').value,
     is_claimed:        document.getElementById('bf-claimed').value === 'true',
   };

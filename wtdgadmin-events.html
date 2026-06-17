@@ -317,7 +317,7 @@ function openDrawer(id) {
   document.getElementById('ef-desc').value     = e?.description || '';
   document.getElementById('ef-slug').value     = e?.slug     || '';
   document.getElementById('ef-biz').value      = e?.business_id || '';
-  document.getElementById('ef-city').value     = e?.city     || 'geelong';
+  document.getElementById('ef-city').value     = e?.city || document.querySelector('#ef-city option')?.value || 'geelong';
   document.getElementById('ef-img').value      = e?.img      || '';
   document.getElementById('ef-lat').value      = e?.lat      || '';
   document.getElementById('ef-lng').value      = e?.lng      || '';

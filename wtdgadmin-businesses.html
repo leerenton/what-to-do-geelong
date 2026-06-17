@@ -422,7 +422,7 @@ function openDrawer(id) {
   document.getElementById('bf-img').value      = b?.img       || '';
   document.getElementById('bf-lat').value      = b?.lat       || '';
   document.getElementById('bf-lng').value      = b?.lng       || '';
-  document.getElementById('bf-city').value     = b?.city    || 'geelong';
+  document.getElementById('bf-city').value     = b?.city || document.querySelector('#bf-city option')?.value || 'geelong';
   document.getElementById('bf-tier').value     = b?.plan || 'free';
   document.getElementById('bf-claimed').value  = String(!!b?.is_claimed);
 

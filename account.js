@@ -19,7 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   let allSites = [];
   if (session) {
     try {
-      const { data } = await db.from('businesses').select('*').eq('owner_id', session.user.id);
+      if (window._siteConfigPromise) await window._siteConfigPromise;
+      const citySlug = window.SITE?.slug || 'geelong';
+      const { data } = await db.from('businesses').select('*').eq('owner_id', session.user.id).eq('city', citySlug);
       profiles = data || [];
     } catch (_) {}
     try {

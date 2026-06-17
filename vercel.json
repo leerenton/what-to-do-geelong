@@ -67,6 +67,7 @@
     { "source": "/api/stripe-webhook",     "destination": "/api/stripe-webhook.js" },
     { "source": "/api/create-checkout",    "destination": "/api/create-checkout.js" },
     { "source": "/api/stripe-portal",      "destination": "/api/stripe-portal.js" },
+    { "source": "/admin-preview", "destination": "/admin-preview.html" },
     { "source": "/:biz/:item",   "destination": "/event.html?b=:biz&s=:item" },
     { "source": "/:slug",        "destination": "/listing.html?s=:slug" }
   ]

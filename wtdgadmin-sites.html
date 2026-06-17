@@ -183,9 +183,16 @@
       </div>
     </div>
 
-    <div class="adm-field">
-      <label>Full site name *</label>
-      <input type="text" id="f-full-name" placeholder="What To Do Geelong" />
+    <div class="adm-field-row">
+      <div class="adm-field">
+        <label>Full site name *</label>
+        <input type="text" id="f-full-name" placeholder="What To Do Geelong" />
+      </div>
+      <div class="adm-field">
+        <label>Abbreviation</label>
+        <input type="text" id="f-abbreviation" placeholder="WTDG" maxlength="10" />
+        <div class="adm-field-hint">Short code shown in UI e.g. WTDG, WTDB</div>
+      </div>
     </div>
 
     <div class="adm-field-row">
@@ -382,9 +389,10 @@ async function handleLogoFile(file) {
 function openModal(site) {
   _editingId = site?.id || null;
   document.getElementById('js-modal-title').textContent = site ? `Edit — ${site.full_name}` : 'Add city';
-  document.getElementById('f-slug').value       = site?.slug         || '';
-  document.getElementById('f-name').value       = site?.name         || '';
-  document.getElementById('f-full-name').value  = site?.full_name    || '';
+  document.getElementById('f-slug').value         = site?.slug         || '';
+  document.getElementById('f-name').value         = site?.name         || '';
+  document.getElementById('f-full-name').value    = site?.full_name    || '';
+  document.getElementById('f-abbreviation').value = site?.abbreviation || '';
   document.getElementById('f-domain').value     = site?.domain       || '';
   document.getElementById('f-domain-www').value = site?.domain_www   || '';
   document.getElementById('f-logo-url').value   = site?.logo_url     || '';
@@ -425,9 +433,10 @@ async function saveSite() {
   const statusEl = document.getElementById('js-modal-status');
   const saveBtn  = document.getElementById('js-modal-save');
 
-  const slug      = document.getElementById('f-slug').value.trim().toLowerCase();
-  const name      = document.getElementById('f-name').value.trim();
-  const fullName  = document.getElementById('f-full-name').value.trim();
+  const slug         = document.getElementById('f-slug').value.trim().toLowerCase();
+  const name         = document.getElementById('f-name').value.trim();
+  const fullName     = document.getElementById('f-full-name').value.trim();
+  const abbreviation = document.getElementById('f-abbreviation').value.trim().toUpperCase() || null;
   const domain    = document.getElementById('f-domain').value.trim().toLowerCase().replace(/^https?:\/\//, '');
   const domainWww = document.getElementById('f-domain-www').value.trim().toLowerCase().replace(/^https?:\/\//, '') || null;
   const logoUrl   = document.getElementById('f-logo-url').value.trim() || null;
@@ -454,7 +463,7 @@ async function saveSite() {
   statusEl.className = 'adm-modal-status';
 
   const payload = {
-    name, full_name: fullName, domain, domain_www: domainWww,
+    name, full_name: fullName, abbreviation, domain, domain_www: domainWww,
     logo_url: logoUrl, primary_color: color,
     site_mode: siteMode, active: siteMode === 'active',
     hero_tagline: tagline, map_lat: lat, map_lng: lng, map_zoom: zoom,

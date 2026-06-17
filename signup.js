@@ -40,10 +40,13 @@ document.getElementById('js-signup-form')?.addEventListener('submit', async e =>
   btn.disabled = true;
   btn.textContent = 'Creating account…';
 
+  if (window._siteConfigPromise) await window._siteConfigPromise;
+  const citySlug = window.SITE?.slug || 'geelong';
+
   const { data, error: authError } = await db.auth.signUp({
     email,
     password: pw,
-    options: { data: { name } }
+    options: { data: { name, city: citySlug } }
   });
 
   if (authError) {
@@ -59,17 +62,9 @@ document.getElementById('js-signup-form')?.addEventListener('submit', async e =>
     setAccount({ id: data.user.id, name, email });
 
     // Auto-subscribe to the city this user signed up on
-    if (window._siteConfigPromise) await window._siteConfigPromise;
-    const citySlug = window.SITE?.slug || 'geelong';
     await db.from('user_city_subscriptions').upsert(
       { user_id: data.user.id, city: citySlug, subscribed: true },
       { onConflict: 'user_id,city' }
-    );
-
-    // Save signup city to profile
-    await db.from('profiles').upsert(
-      { id: data.user.id, email, name, city: citySlug },
-      { onConflict: 'id' }
     );
   }
 

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8" /><title>Admin Preview…</title></head>
+<body>
+<script>
+  // Sets admin bypass cookie then redirects to homepage
+  // Only useful when opened by an admin from the admin panel
+  document.cookie = 'wtdg_admin_bypass=1; path=/; max-age=86400; SameSite=Lax';
+  window.location.replace('/');
+</script>
+<p style="font-family:sans-serif;padding:2rem">Setting preview cookie…</p>
+</body>
+</html>

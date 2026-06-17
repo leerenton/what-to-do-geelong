@@ -107,6 +107,12 @@
         <div class="site-tabs" id="js-site-tabs">
           <div style="color:var(--adm-mid);font-size:.85rem">Loading sites…</div>
         </div>
+        <div id="js-site-preview-link" style="margin-bottom:1.25rem;display:none">
+          <a id="js-preview-btn" href="#" target="_blank" class="preview-link" style="display:inline-flex;align-items:center;gap:.4rem">
+            👁 Preview site as admin
+          </a>
+          <span style="font-size:.75rem;color:var(--adm-mid);margin-left:.6rem">Sets a bypass cookie so you see the live site even in coming soon / maintenance mode.</span>
+        </div>
 
         <!-- Mode cards -->
         <div class="mode-cards">
@@ -207,6 +213,21 @@ function selectSite(id) {
   document.getElementById('js-save-mode').disabled = false;
   document.getElementById('js-mode-status').textContent = '';
   document.getElementById('js-mode-status').className = 'adm-status';
+
+  // Show preview link for this site
+  const previewWrap = document.getElementById('js-site-preview-link');
+  const previewBtn  = document.getElementById('js-preview-btn');
+  if (site?.domain) {
+    previewBtn.href = `https://${site.domain}`;
+    previewBtn.onclick = (e) => {
+      e.preventDefault();
+      // Open relay page on the target domain — sets cookie then redirects to /
+      window.open(`https://${site.domain}/admin-preview`, '_blank');
+    };
+    previewWrap.style.display = '';
+  } else {
+    previewWrap.style.display = 'none';
+  }
 }
 
 // ── HIGHLIGHT MODE CARD ─────────────────────────────────────

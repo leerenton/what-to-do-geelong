@@ -22,7 +22,17 @@ export default async function middleware(request) {
 
   const isCityDomain = hostname in CITY_ROOTS;
 
-  // ── 1. Check site mode from Supabase ──────────────────────────────────────
+  // ── 1. Admin bypass cookie — skip mode check for admins ──────────────────
+  const cookies = request.headers.get('cookie') || '';
+  if (cookies.includes('wtdg_admin_bypass=1')) {
+    // Let admin through to the real site — just do city routing below
+    if (CITY_ROOTS[hostname]) {
+      return fetch(new URL(CITY_ROOTS[hostname], request.url));
+    }
+    return;
+  }
+
+  // ── 2. Check site mode from Supabase ──────────────────────────────────────
   if (isCityDomain) {
     try {
       const res = await fetch(
@@ -50,7 +60,7 @@ export default async function middleware(request) {
     }
   }
 
-  // ── 2. City homepage routing ───────────────────────────────────────────────
+  // ── 3. City homepage routing ───────────────────────────────────────────────
   if (CITY_ROOTS[hostname]) {
     return fetch(new URL(CITY_ROOTS[hostname], request.url));
   }

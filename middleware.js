@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+'use strict';
+/* ── Vercel Edge Middleware (non-Next.js static site) ────────────────────── */
 
 const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
 
 // Map of hostname → file to serve at the root path
-// Add new cities here as they launch
 const CITY_ROOTS = {
   'whattodovictoria.com.au':     '/victoria.html',
   'www.whattodovictoria.com.au': '/victoria.html',
@@ -13,20 +13,20 @@ const CITY_ROOTS = {
   // 'whattodobendigo.com.au':   '/index.html',
 };
 
-export async function middleware(request) {
-  const host     = request.headers.get('host') || '';
-  const hostname = host.replace(/:\d+$/, ''); // strip port if present
-  const { pathname } = request.nextUrl;
+export default async function middleware(request) {
+  const url      = new URL(request.url);
+  const hostname = url.hostname;
+  const pathname = url.pathname;
 
-  // ── 1. Check site mode (coming_soon / maintenance) ──────────────────────────
-  // Only check on root path for known city domains — skip admin, assets, api
+  if (pathname !== '/') return; // only intercept root
+
   const isCityDomain = hostname in CITY_ROOTS;
-  const isRootPath   = pathname === '/';
 
-  if (isCityDomain && isRootPath) {
+  // ── 1. Check site mode from Supabase ──────────────────────────────────────
+  if (isCityDomain) {
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/sites?or=(domain.eq.${hostname},domain_www.eq.${host})&select=site_mode&limit=1`,
+        `${SUPABASE_URL}/rest/v1/sites?or=(domain.eq.${hostname},domain_www.eq.${hostname})&select=site_mode&limit=1`,
         {
           headers: {
             apikey:        SUPABASE_KEY,
@@ -39,29 +39,21 @@ export async function middleware(request) {
         const rows = await res.json();
         const mode = rows?.[0]?.site_mode;
         if (mode === 'maintenance') {
-          const url = request.nextUrl.clone();
-          url.pathname = '/maintenance.html';
-          return NextResponse.rewrite(url);
+          return fetch(new URL('/maintenance.html', request.url));
         }
         if (mode === 'coming_soon') {
-          const url = request.nextUrl.clone();
-          url.pathname = '/comingsoon.html';
-          return NextResponse.rewrite(url);
+          return fetch(new URL('/comingsoon.html', request.url));
         }
       }
     } catch (_) {
-      // Fail open — serve normally if Supabase is unreachable
+      // Fail open — serve normally if Supabase unreachable
     }
   }
 
-  // ── 2. City homepage routing ─────────────────────────────────────────────────
-  if (isRootPath && CITY_ROOTS[hostname]) {
-    const url = request.nextUrl.clone();
-    url.pathname = CITY_ROOTS[hostname];
-    return NextResponse.rewrite(url);
+  // ── 2. City homepage routing ───────────────────────────────────────────────
+  if (CITY_ROOTS[hostname]) {
+    return fetch(new URL(CITY_ROOTS[hostname], request.url));
   }
-
-  return NextResponse.next();
 }
 
 export const config = {

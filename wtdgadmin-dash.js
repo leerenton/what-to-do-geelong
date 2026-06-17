@@ -39,6 +39,9 @@ function setupDigestTools() {
 
   const status = document.getElementById('js-digest-admin-status');
 
+  // ── Cache flush controls ────────────────────────────────────
+  await setupCacheControls();
+
   // Test send to all admin emails
   document.getElementById('js-test-digest-btn')?.addEventListener('click', async () => {
     await callDigest('/api/test-digest', 'Sending test to admin accounts', status);
@@ -48,6 +51,68 @@ function setupDigestTools() {
   document.getElementById('js-send-digest-all-btn')?.addEventListener('click', async () => {
     if (!confirm('Send the weekly digest to ALL subscribed users now?')) return;
     await callDigest('/api/send-digest', 'Sending digest to all subscribers', status);
+  });
+}
+
+// ── PAGE CACHE CONTROLS ───────────────────────────────────────
+async function setupCacheControls() {
+  const cacheStatus = document.getElementById('js-cache-status');
+  if (!cacheStatus) return;
+
+  const setCacheStatus = (msg, ok = true) => {
+    cacheStatus.textContent = msg;
+    cacheStatus.style.color = ok ? 'var(--adm-green)' : 'var(--adm-red)';
+    setTimeout(() => { cacheStatus.textContent = ''; }, 4000);
+  };
+
+  // Populate city dropdown
+  const citySel = document.getElementById('js-flush-city-sel');
+  try {
+    const { data: sites } = await db.from('sites').select('slug, name').neq('slug', 'victoria').order('name');
+    (sites || []).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.slug; opt.textContent = s.name;
+      citySel?.appendChild(opt);
+    });
+  } catch (_) {}
+
+  // Show cache entry count
+  try {
+    const { count } = await db.from('page_cache').select('*', { count: 'exact', head: true });
+    if (cacheStatus) cacheStatus.textContent = `${count || 0} pages currently cached`;
+  } catch (_) {}
+
+  // Flush ALL
+  document.getElementById('js-flush-all-btn')?.addEventListener('click', async () => {
+    if (!confirm('Flush the entire page cache? All pages will be regenerated on next visit.')) return;
+    const { error } = await db.from('page_cache').delete().neq('url', '__never__');
+    if (error) { setCacheStatus('✗ ' + error.message, false); return; }
+    setCacheStatus('✅ All cache flushed — pages will regenerate on next visit');
+  });
+
+  // Flush by city
+  document.getElementById('js-flush-city-btn')?.addEventListener('click', async () => {
+    const city = document.getElementById('js-flush-city-sel')?.value;
+    if (!city) {
+      // Flush all if no city selected
+      const { error } = await db.from('page_cache').delete().neq('url', '__never__');
+      if (error) { setCacheStatus('✗ ' + error.message, false); return; }
+      setCacheStatus('✅ All cache flushed');
+    } else {
+      const { error } = await db.from('page_cache').delete().eq('city', city);
+      if (error) { setCacheStatus('✗ ' + error.message, false); return; }
+      setCacheStatus(`✅ Cache flushed for ${city}`);
+    }
+  });
+
+  // Flush single URL
+  document.getElementById('js-flush-url-btn')?.addEventListener('click', async () => {
+    const urlVal = document.getElementById('js-flush-url-inp')?.value.trim();
+    if (!urlVal) { setCacheStatus('Enter a URL to flush', false); return; }
+    const { error } = await db.from('page_cache').delete().eq('url', urlVal);
+    if (error) { setCacheStatus('✗ ' + error.message, false); return; }
+    setCacheStatus(`✅ Flushed: ${urlVal}`);
+    document.getElementById('js-flush-url-inp').value = '';
   });
 }
 
@@ -195,6 +260,34 @@ async function loadDashboard() {
       <a href="wtdgadmin-businesses.html" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">View Businesses</a>
       <a href="wtdgadmin-events.html" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">View Events</a>
       <a href="wtdgadmin-revenue.html" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">Revenue Dashboard →</a>
+    </div>
+
+    <!-- Page cache -->
+    <div style="margin-top:1.5rem;padding:1.25rem;background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:10px">
+      <div style="font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--adm-mid);margin-bottom:.85rem">🗄️ Page Cache (SEO)</div>
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+        <div>
+          <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Flush all cached pages</label>
+          <button class="adm-btn adm-btn--sm" id="js-flush-all-btn">Flush all cache</button>
+        </div>
+        <div style="border-left:1px solid var(--adm-border);padding-left:.75rem">
+          <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Flush by city</label>
+          <div style="display:flex;gap:.5rem">
+            <select id="js-flush-city-sel" class="adm-select" style="margin:0">
+              <option value="">All cities</option>
+            </select>
+            <button class="adm-btn adm-btn--sm adm-btn--outline" id="js-flush-city-btn">Flush city</button>
+          </div>
+        </div>
+        <div style="border-left:1px solid var(--adm-border);padding-left:.75rem">
+          <label style="font-size:.8rem;color:var(--adm-mid);display:block;margin-bottom:.3rem">Flush single URL</label>
+          <div style="display:flex;gap:.5rem">
+            <input type="text" id="js-flush-url-inp" placeholder="whattodogeelong.com.au/slug" style="padding:.35rem .6rem;border:1.5px solid var(--adm-border);border-radius:.4rem;background:var(--adm-card2);color:var(--adm-text);font-size:.82rem;width:260px" />
+            <button class="adm-btn adm-btn--sm adm-btn--outline" id="js-flush-url-btn">Flush</button>
+          </div>
+        </div>
+      </div>
+      <p id="js-cache-status" style="margin:.65rem 0 0;font-size:.82rem;color:var(--adm-teal);min-height:1.2em"></p>
     </div>
 
     <!-- Email tools -->

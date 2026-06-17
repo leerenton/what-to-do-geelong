@@ -372,8 +372,28 @@ async function saveEvent() {
 
   if (error) { status.textContent = '✗ ' + error.message; status.style.color = 'var(--adm-red)'; return; }
   status.textContent = '✓ Saved'; status.style.color = 'var(--adm-green)';
+
+  // Flush events page cache for this city
+  const savedCity = document.getElementById('ef-city').value || 'geelong';
+  flushEventCache(savedCity);
+
   closeDrawer();
   await loadEvents();
+}
+
+async function flushEventCache(citySlug) {
+  try {
+    const CITY_DOMAINS = {
+      geelong:  'whattodogeelong.com.au',
+      ballarat: 'whattodoballarat.com.au',
+    };
+    const domain = CITY_DOMAINS[citySlug];
+    if (!domain) return;
+    await db.from('page_cache').delete().in('url', [
+      `${domain}/events`,
+      `${domain}/`,
+    ]);
+  } catch (_) {}
 }
 
 async function deleteEvent() {

@@ -1,27 +1,208 @@
 'use strict';
-/* ── Vercel Edge Middleware (non-Next.js static site) ────────────────────── */
+/* ── Vercel Edge Middleware ───────────────────────────────────────────────────
+   1. Admin subdomain → wtdgadmin HTML files
+   2. City domains → check page cache, serve enhanced HTML if fresh
+   3. On cache miss → check site mode, enhance HTML with SEO data, cache & serve
+   ─────────────────────────────────────────────────────────────────────────── */
 
 const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
-
-// Admin subdomain — all paths rewritten to /wtdgadmin/...
 const ADMIN_HOSTNAME = 'wtdadmin.whattodovictoria.com.au';
+const CACHE_TTL_MS  = 24 * 60 * 60 * 1000; // 24 hours
 
-// Map of hostname → file to serve at the root path
+// Known city domains
+const CITY_MAP = {
+  'whattodogeelong.com.au':      { slug: 'geelong',  name: 'Geelong' },
+  'www.whattodogeelong.com.au':  { slug: 'geelong',  name: 'Geelong' },
+  'whattodoballarat.com.au':     { slug: 'ballarat', name: 'Ballarat' },
+  'www.whattodoballarat.com.au': { slug: 'ballarat', name: 'Ballarat' },
+};
+
+// City domains that need a different root HTML file
 const CITY_ROOTS = {
   'whattodovictoria.com.au':     '/victoria.html',
   'www.whattodovictoria.com.au': '/victoria.html',
   'whattodoballarat.com.au':     '/index.html',
   'www.whattodoballarat.com.au': '/index.html',
-  // 'whattodobendigo.com.au':   '/index.html',
 };
 
+// File extensions that are never HTML — skip all middleware logic
+const ASSET_RE = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|webp|map|json|txt|xml)$/i;
+
+// Paths that should always pass through untouched
+const PASSTHROUGH_RE = /^\/(api|_next|_vercel|wtdgadmin|assets)\//;
+
+// ── Page type detection ───────────────────────────────────────────────────────
+function getPageType(pathname) {
+  const p = pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+  if (p === '/' || p === '/index') return 'home';
+  if (p.startsWith('/eat'))    return 'eat';
+  if (p.startsWith('/drink'))  return 'drink';
+  if (p.startsWith('/do'))     return 'do';
+  if (p.startsWith('/events')) return 'events';
+  if (p.startsWith('/news'))   return 'other';
+  if (p.startsWith('/guide'))  return 'other';
+  if (p.startsWith('/giveaway')) return 'other';
+  // Single-segment clean path = business listing
+  const seg = p.replace(/^\//, '');
+  if (seg && !seg.includes('/')) return 'listing';
+  return 'other';
+}
+
+// ── Supabase helpers ──────────────────────────────────────────────────────────
+async function sbGet(path) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    cache: 'no-store',
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+async function getCachedPage(key) {
+  try {
+    const rows = await sbGet(`page_cache?url=eq.${encodeURIComponent(key)}&select=html,cached_at&limit=1`);
+    if (!rows?.length) return null;
+    const age = Date.now() - new Date(rows[0].cached_at).getTime();
+    return age < CACHE_TTL_MS ? rows[0].html : null;
+  } catch { return null; }
+}
+
+async function storeCachedPage(key, html, city) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/page_cache`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ url: key, html, city, cached_at: new Date().toISOString() }),
+    });
+  } catch (_) {}
+}
+
+// ── HTML enhancement ──────────────────────────────────────────────────────────
+function enhanceHtml(html, { cityName, citySlug, pageType, biz, businesses }) {
+  let out = html;
+
+  // 1. Replace Geelong → actual city name in title + meta
+  if (cityName !== 'Geelong') {
+    out = out.replace(/(<title>[^<]*)Geelong([^<]*<\/title>)/g, `$1${cityName}$2`);
+    out = out.replace(/(meta[^>]+name="description"[^>]+content=")([^"]*)"/,
+      (_, pre, content) => `${pre}${content.replace(/Geelong/g, cityName)}"`);
+    out = out.replace(/(meta[^>]+property="og:title"[^>]+content=")([^"]*)"/,
+      (_, pre, c) => `${pre}${c.replace(/Geelong/g, cityName)}"`);
+    out = out.replace(/(meta[^>]+property="og:description"[^>]+content=")([^"]*)"/,
+      (_, pre, c) => `${pre}${c.replace(/Geelong/g, cityName)}"`);
+  }
+
+  let jsonLd = null;
+  let ssrBlock = '';
+
+  // 2. Business listing page — full LocalBusiness schema + pre-rendered content
+  if (pageType === 'listing' && biz) {
+    const bizTitle = `${biz.name} — ${biz.suburb || cityName} | What To Do ${cityName}`;
+    const bizDesc  = (biz.description || `${biz.name} in ${biz.suburb || cityName}. Discover more on What To Do ${cityName}.`).slice(0, 155);
+
+    out = out.replace(/<title>[^<]*<\/title>/, `<title>${bizTitle}</title>`);
+    out = out.replace(/(meta[^>]+name="description"[^>]+content=")[^"]*"/, `$1${bizDesc}"`);
+    out = out.replace(/(meta[^>]+property="og:title"[^>]+content=")[^"]*"/, `$1${bizTitle}"`);
+    out = out.replace(/(meta[^>]+property="og:description"[^>]+content=")[^"]*"/, `$1${bizDesc}"`);
+    if (biz.img) {
+      out = out.replace(/(meta[^>]+property="og:image"[^>]+content=")[^"]*"/, `$1${biz.img}"`);
+    }
+
+    jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      name: biz.name,
+      ...(biz.description && { description: biz.description }),
+      ...(biz.img         && { image: biz.img }),
+      url: `https://whattodo${citySlug}.com.au/${biz.slug}`,
+      address: {
+        '@type': 'PostalAddress',
+        ...(biz.location && { streetAddress: biz.location }),
+        addressLocality: biz.suburb || cityName,
+        addressRegion: 'VIC',
+        addressCountry: 'AU',
+      },
+      ...(biz.phone   && { telephone: biz.phone }),
+      ...(biz.website && { sameAs: biz.website }),
+    };
+
+    // Crawlable SSR block — visually hidden, read by bots
+    ssrBlock = `<div id="js-ssr-biz" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden" aria-hidden="true">
+  <h1>${escHtml(biz.name)}</h1>
+  ${biz.type        ? `<p>${escHtml(biz.type)}</p>` : ''}
+  ${biz.suburb      ? `<p>Located in ${escHtml(biz.suburb)}, ${escHtml(cityName)}, Victoria.</p>` : ''}
+  ${biz.description ? `<p>${escHtml(biz.description)}</p>` : ''}
+  ${biz.location    ? `<address>${escHtml(biz.location)}</address>` : ''}
+  ${biz.phone       ? `<p>Phone: ${escHtml(biz.phone)}</p>` : ''}
+  ${biz.website     ? `<p><a href="${escAttr(biz.website)}" rel="noopener">Visit website</a></p>` : ''}
+</div>`;
+
+  // 3. Category pages — ItemList schema + crawlable business links
+  } else if ((pageType === 'eat' || pageType === 'drink' || pageType === 'do') && businesses?.length) {
+    const pageLabel = pageType === 'eat' ? 'Restaurants & Cafes'
+                    : pageType === 'drink' ? 'Bars, Pubs & Breweries'
+                    : 'Things To Do & Attractions';
+    const bizType   = pageType === 'eat' ? 'FoodEstablishment'
+                    : pageType === 'drink' ? 'BarOrPub'
+                    : 'TouristAttraction';
+
+    jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: `${pageLabel} in ${cityName}`,
+      description: `Discover the best ${pageLabel.toLowerCase()} in ${cityName}, Victoria.`,
+      itemListElement: businesses.slice(0, 30).map((b, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@type': bizType,
+          name: b.name,
+          url: `https://whattodo${citySlug}.com.au/${b.slug}`,
+          ...(b.description && { description: b.description.slice(0, 100) }),
+          ...(b.suburb && { address: { '@type': 'PostalAddress', addressLocality: b.suburb, addressRegion: 'VIC', addressCountry: 'AU' } }),
+        },
+      })),
+    };
+
+    // Hidden crawlable list so bots can follow links to individual pages
+    const links = businesses.slice(0, 50).map(b =>
+      `<li><a href="/${escAttr(b.slug)}">${escHtml(b.name)}${b.suburb ? ` — ${escHtml(b.suburb)}` : ''}</a></li>`
+    ).join('');
+    ssrBlock = `<ul id="js-ssr-list" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden" aria-hidden="true">${links}</ul>`;
+  }
+
+  // Inject JSON-LD into <head>
+  if (jsonLd) {
+    const tag = `\n<script type="application/ld+json">${JSON.stringify(jsonLd, null, 0)}</script>`;
+    out = out.replace('</head>', tag + '\n</head>');
+  }
+
+  // Inject SSR block right after <body>
+  if (ssrBlock) {
+    out = out.replace(/<body[^>]*>/, m => m + '\n' + ssrBlock);
+  }
+
+  return out;
+}
+
+function escHtml(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s)  { return String(s).replace(/"/g,'&quot;'); }
+
+// ── Main middleware ───────────────────────────────────────────────────────────
 export default async function middleware(request) {
   const url      = new URL(request.url);
   const hostname = url.hostname;
   const pathname = url.pathname;
+  const cookies  = request.headers.get('cookie') || '';
+  const bypass   = cookies.includes('wtdg_admin_bypass=1');
 
-  // ── Admin subdomain: map paths to wtdgadmin HTML files ───────────────────
+  // ── Admin subdomain ────────────────────────────────────────────────────────
   if (hostname === ADMIN_HOSTNAME) {
     const ADMIN_PAGES = {
       '/':            '/wtdgadmin-dash.html',
@@ -39,55 +220,115 @@ export default async function middleware(request) {
     };
     const target = ADMIN_PAGES[pathname];
     if (target) return fetch(new URL(target, request.url));
-    return; // pass through (assets, login.html, etc.)
-  }
-
-  if (pathname !== '/') return; // only intercept root for other domains
-
-  const isCityDomain = hostname in CITY_ROOTS;
-
-  // ── 1. Admin bypass cookie — skip mode check, pass through to index.html ──
-  const cookies = request.headers.get('cookie') || '';
-  if (cookies.includes('wtdg_admin_bypass=1')) {
-    // Return undefined — Vercel serves index.html for / on all domains by default
     return;
   }
 
-  // ── 2. Check site mode from Supabase ──────────────────────────────────────
-  if (isCityDomain) {
-    try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/sites?or=(domain.eq.${hostname},domain_www.eq.${hostname})&select=site_mode&limit=1`,
-        {
-          headers: {
-            apikey:        SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-          },
-          cache: 'no-store',
-        }
-      );
-      if (res.ok) {
-        const rows = await res.json();
-        const mode = rows?.[0]?.site_mode;
-        if (mode === 'maintenance') {
-          return fetch(new URL('/maintenance.html', request.url));
-        }
-        if (mode === 'coming_soon') {
-          return fetch(new URL('/comingsoon.html', request.url));
-        }
-      }
-    } catch (_) {
-      // Fail open — serve normally if Supabase unreachable
-    }
+  // ── Skip assets and passthrough paths ─────────────────────────────────────
+  if (ASSET_RE.test(pathname) || PASSTHROUGH_RE.test(pathname)) {
+    return; // Vercel handles it directly
   }
 
-  // ── 3. City homepage routing ───────────────────────────────────────────────
-  if (CITY_ROOTS[hostname]) {
-    return fetch(new URL(CITY_ROOTS[hostname], request.url));
+  const city     = CITY_MAP[hostname];
+  const pageType = getPageType(pathname);
+
+  // ── Non-city domains (Victoria homepage etc.) — no caching, just routing ──
+  if (!city) {
+    if (CITY_ROOTS[hostname] && pathname === '/') {
+      return fetch(new URL(CITY_ROOTS[hostname], request.url));
+    }
+    return;
   }
+
+  // ── Admin bypass: skip cache entirely, still do city root routing ─────────
+  if (bypass) {
+    if (CITY_ROOTS[hostname] && pathname === '/') {
+      return fetch(new URL(CITY_ROOTS[hostname], request.url));
+    }
+    return;
+  }
+
+  // ── Cache key = hostname + pathname (clean, no query string) ─────────────
+  const cacheKey = `${hostname}${pathname === '/' ? '/' : pathname.replace(/\.html$/, '')}`;
+
+  // ── Cache HIT — serve immediately ─────────────────────────────────────────
+  const cached = await getCachedPage(cacheKey);
+  if (cached) {
+    return new Response(cached, {
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Cache': 'HIT' },
+    });
+  }
+
+  // ── Cache MISS ─────────────────────────────────────────────────────────────
+
+  // 1. Check site mode
+  try {
+    const rows = await sbGet(
+      `sites?or=(domain.eq.${hostname},domain_www.eq.${hostname})&select=site_mode&limit=1`
+    );
+    const mode = rows?.[0]?.site_mode;
+    if (mode === 'maintenance') return fetch(new URL('/maintenance.html', request.url));
+    if (mode === 'coming_soon') return fetch(new URL('/comingsoon.html', request.url));
+  } catch (_) {}
+
+  // 2. Determine which HTML file to fetch
+  let htmlPath = pathname;
+  if (pathname === '/' || pathname === '') {
+    htmlPath = CITY_ROOTS[hostname] || '/index.html';
+  } else if (pageType === 'listing') {
+    htmlPath = '/listing.html';
+  } else if (!pathname.endsWith('.html')) {
+    // Clean URL → try .html version
+    htmlPath = pathname + '.html';
+  }
+
+  // 3. Fetch base HTML
+  let baseHtml;
+  try {
+    const r = await fetch(new URL(htmlPath, request.url));
+    if (!r.ok) return; // pass through to Vercel's 404 handler
+    baseHtml = await r.text();
+  } catch { return; }
+
+  // 4. Fetch page-specific SEO data from Supabase
+  let biz = null;
+  let businesses = [];
+
+  if (pageType === 'listing') {
+    const slug = pathname.replace(/^\//, '').replace(/\.html$/, '');
+    try {
+      const rows = await sbGet(
+        `businesses?slug=eq.${encodeURIComponent(slug)}&city=eq.${city.slug}&select=name,slug,description,location,suburb,phone,website,img,type&limit=1`
+      );
+      biz = rows?.[0] || null;
+    } catch (_) {}
+
+  } else if (pageType === 'eat' || pageType === 'drink' || pageType === 'do') {
+    try {
+      const rows = await sbGet(
+        `businesses?city=eq.${city.slug}&or=(status.eq.approved,status.is.null)&select=name,slug,description,suburb,type&order=admin_priority.desc.nullslast,name.asc&limit=60`
+      );
+      businesses = rows || [];
+    } catch (_) {}
+  }
+
+  // 5. Enhance HTML
+  const enhanced = enhanceHtml(baseHtml, {
+    cityName: city.name,
+    citySlug: city.slug,
+    pageType,
+    biz,
+    businesses,
+  });
+
+  // 6. Store in cache (awaited — ensures cache is warm for next visitor)
+  await storeCachedPage(cacheKey, enhanced, city.slug);
+
+  // 7. Serve
+  return new Response(enhanced, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Cache': 'MISS' },
+  });
 }
 
 export const config = {
-  // Run on all paths so the admin subdomain can intercept any route
   matcher: '/(.*)',
 };

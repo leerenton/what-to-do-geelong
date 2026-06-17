@@ -515,8 +515,31 @@ async function saveBusiness() {
 
   if (error) { status.textContent = '✗ ' + error.message; status.style.color = 'var(--adm-red)'; return; }
   status.textContent = '✓ Saved'; status.style.color = 'var(--adm-green)';
+
+  // Flush cache for this business page + category pages for its city
+  const savedCity = document.getElementById('bf-city').value || 'geelong';
+  flushCacheForBiz(slug, savedCity);
+
   closeDrawer();
   await loadBiz();
+}
+
+async function flushCacheForBiz(slug, citySlug) {
+  try {
+    const CITY_DOMAINS = {
+      geelong:  'whattodogeelong.com.au',
+      ballarat: 'whattodoballarat.com.au',
+    };
+    const domain = CITY_DOMAINS[citySlug];
+    if (!domain) return;
+    // Flush listing page + all category pages for this city
+    const urlsToFlush = [
+      `${domain}/${slug}`,
+      `${domain}/`,
+      `${domain}/eat`, `${domain}/drink`, `${domain}/do`,
+    ];
+    await db.from('page_cache').delete().in('url', urlsToFlush);
+  } catch (_) {}
 }
 
 async function deleteBusiness() {

@@ -4081,6 +4081,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.wtdgLocation) window.wtdgLocation.injectLocationNudge();
 
   // Try Supabase first; fall back silently to local static data if unavailable
+  // For non-Geelong cities, clear static fallback data so Geelong content
+  // doesn't bleed through when the city has no DB content yet
+  const _currentSite = await window._siteConfigPromise;
+  if (_currentSite?.slug && _currentSite.slug !== 'geelong') {
+    BUSINESSES = [];
+    EVENTS     = [];
+    ARTICLES   = [];
+    STAYS      = [];
+    PROMOS     = [];
+  }
+
   if (typeof loadAllData === 'function') {
     const remote = await loadAllData();
     if (remote) {

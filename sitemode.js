@@ -21,11 +21,12 @@
                   'wtdgadmin-settings.html', 'login.html'];
   if (exempt.some(e => page.includes(e))) return;
 
-  // ── Admin bypass ────────────────────────────────────────
-  const ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au']; // keep in sync with wtdgadmin.js
+  // ── Admin bypass (cookie or logged-in admin) ────────────────────────────
+  if (document.cookie.includes('wtdg_admin_bypass=1')) return;
+  const ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au'];
   try {
     const acct = JSON.parse(localStorage.getItem('wtdg_account') || 'null');
-    if (acct?.email && ADMIN_EMAILS.includes(acct.email)) return; // admin sees everything
+    if (acct?.email && ADMIN_EMAILS.includes(acct.email)) return;
   } catch (_) {}
 
   // ── Cache check (2 min TTL) ─────────────────────────────

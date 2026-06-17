@@ -95,7 +95,16 @@ async function loadSiteConfig() {
 window.loadSiteConfig = loadSiteConfig;
 
 // Kick off immediately so it's ready before DOMContentLoaded fires
-window._siteConfigPromise = loadSiteConfig();
+window._siteConfigPromise = loadSiteConfig().then(site => {
+  // Update <title> and meta description to replace 'Geelong' with actual city name
+  if (site.slug !== 'geelong' && site.name) {
+    const titleEl = document.querySelector('title');
+    const descEl  = document.querySelector('meta[name="description"]');
+    if (titleEl) titleEl.textContent = titleEl.textContent.replace(/Geelong/g, site.name);
+    if (descEl)  descEl.setAttribute('content', descEl.getAttribute('content').replace(/Geelong/g, site.name));
+  }
+  return site;
+});
 
 // ── SLUG UTILITY ─────────────────────────────────────────
 function slugify(str) {

@@ -3436,6 +3436,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.EVENTS     = EVENTS;
   window.ARTICLES   = ARTICLES;
 
+  // ── Dynamic city name in any remaining hardcoded elements ──
+  const _cn = cityName();
+  const _plannerTitle = document.getElementById('js-planner-title');
+  if (_plannerTitle) _plannerTitle.textContent = `Planning a trip to ${_cn}?`;
+  // editorial.html hero
+  const _edHero = document.querySelector('.ed-hub-hero__title');
+  if (_edHero) _edHero.innerHTML = _edHero.innerHTML.replace(/Geelong/g, _cn);
+
   if (document.getElementById('js-event-scroll')) {
     // Load homepage sort settings and trending scores, then render
     let _hpSettings = { sort: 'latest', period: '7d' };

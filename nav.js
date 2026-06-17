@@ -6,11 +6,15 @@
 // and a <script src="/nav.js"></script> before other scripts.
 // ──────────────────────────────────────────────────────────
 
-(function () {
+(async function () {
   const GUIDE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="18.5" y1="5.5" x2="21" y2="3" stroke="#48c7d4"/><line x1="20" y1="9" x2="23" y2="8" stroke="#48c7d4"/><line x1="16" y1="4" x2="16.5" y2="1.5" stroke="#48c7d4"/></svg>`;
+
+  // Wait for site config so city name is correct before rendering
+  if (window._siteConfigPromise) await window._siteConfigPromise;
 
   const site     = window.SITE || {};
   const siteName = site.fullName || 'What To Do Geelong';
+  const cityName = site.name     || 'Geelong';
   const logoSrc  = site.logoUrl  || '/assets/logo.jpg';
 
   const NAV_HTML = `
@@ -239,39 +243,38 @@
       </div>
       <div class="footer__col">
         <h4 class="footer__heading">Things To Do</h4>
-        <a href="/do.html">Things to do in Geelong</a>
-        <a href="/do.html?filter=family">Family activities Geelong</a>
-        <a href="/do.html?filter=nature">Outdoor activities Geelong</a>
-        <a href="/do.html?filter=art">Arts &amp; culture Geelong</a>
-        <a href="/do.html?filter=wellness">Day spas Geelong</a>
-        <a href="/do.html?filter=sport">Sport &amp; leisure Geelong</a>
+        <a href="/do.html">Things to do in ${cityName}</a>
+        <a href="/do.html?filter=family">Family activities ${cityName}</a>
+        <a href="/do.html?filter=nature">Outdoor activities ${cityName}</a>
+        <a href="/do.html?filter=art">Arts &amp; culture ${cityName}</a>
+        <a href="/do.html?filter=wellness">Day spas ${cityName}</a>
+        <a href="/do.html?filter=sport">Sport &amp; leisure ${cityName}</a>
       </div>
       <div class="footer__col">
         <h4 class="footer__heading">Food &amp; Drink</h4>
-        <a href="/eat.html">Restaurants in Geelong</a>
-        <a href="/eat.html?filter=caf%C3%A9">Cafes in Geelong</a>
-        <a href="/drink.html">Bars &amp; pubs Geelong</a>
-        <a href="/drink.html?filter=winery">Bellarine wineries</a>
-        <a href="/drink.html?filter=brewery">Geelong breweries</a>
-        <a href="/eat.html?filter=brunch">Brunch Geelong</a>
+        <a href="/eat.html">Restaurants in ${cityName}</a>
+        <a href="/eat.html?filter=caf%C3%A9">Cafes in ${cityName}</a>
+        <a href="/drink.html">Bars &amp; pubs ${cityName}</a>
+        <a href="/drink.html?filter=winery">Wineries near ${cityName}</a>
+        <a href="/drink.html?filter=brewery">Breweries ${cityName}</a>
+        <a href="/eat.html?filter=brunch">Brunch ${cityName}</a>
       </div>
       <div class="footer__col">
         <h4 class="footer__heading">Events</h4>
-        <a href="/events.html">What's on in Geelong</a>
-        <a href="/events.html#today">Events today Geelong</a>
-        <a href="/events.html#weekend">This weekend Geelong</a>
-        <a href="/festival-of-sails.html">Festival of Sails</a>
-        <a href="/cadel-evans.html">Cadel Evans Road Race</a>
-        <a href="#">Submit an event</a>
+        <a href="/events.html">What's on in ${cityName}</a>
+        <a href="/events.html#today">Events today ${cityName}</a>
+        <a href="/events.html#weekend">This weekend ${cityName}</a>
+        <a href="/promote-event.html">Submit an event</a>
+        <a href="/advertise.html">Advertise with us</a>
+        <a href="/email-sponsorship.html">Sponsor our emails</a>
       </div>
       <div class="footer__col">
         <h4 class="footer__heading">Explore</h4>
-        <a href="/editorial.html">Geelong travel guides</a>
-        <a href="/editorial.html">Best of Geelong</a>
-        <a href="/editorial.html">Bellarine Peninsula guide</a>
-        <a href="/advertise.html">Advertise with us</a>
-        <a href="/email-sponsorship.html">Sponsor our emails</a>
-        <a href="#">About WTDG</a>
+        <a href="/editorial.html">${cityName} travel guides</a>
+        <a href="/editorial.html">Best of ${cityName}</a>
+        <a href="/do.html">${cityName} attractions</a>
+        <a href="/eat.html">Where to eat in ${cityName}</a>
+        <a href="#">About us</a>
         <a href="#">Contact us</a>
       </div>
     </div>

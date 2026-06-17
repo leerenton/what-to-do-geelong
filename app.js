@@ -2,6 +2,11 @@
 
 /* global db, loadAllData */
 
+// ── CITY NAME HELPER ──────────────────────────────────────
+// Always reads from window.SITE so it's correct after async config loads
+const cityName = () => window.SITE?.name || 'Geelong';
+const siteName = () => window.SITE?.fullName || 'What To Do ${cityName()}';
+
 // ── ADMIN CHECK ───────────────────────────────────────────
 const SITE_ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au'];
 function isAdminUser() {
@@ -163,7 +168,7 @@ function formatArticleDate(iso) {
 }
 
 function articleTypeBadge(type) {
-  const map = { guide: { label: 'Guide', icon: 'menu_book', color: '#4ac8d0' }, news: { label: 'News', icon: 'newspaper', color: '#f4a261' }, history: { label: 'What Was Geelong', icon: 'history_edu', color: '#9b5de5' } };
+  const map = { guide: { label: 'Guide', icon: 'menu_book', color: '#4ac8d0' }, news: { label: 'News', icon: 'newspaper', color: '#f4a261' }, history: { label: 'What Was ${cityName()}', icon: 'history_edu', color: '#9b5de5' } };
   const t = map[type] || map.guide;
   return `<span class="art-badge" style="--badge-color:${t.color}"><span class="material-symbols-rounded">${t.icon}</span>${t.label}</span>`;
 }
@@ -753,7 +758,7 @@ function renderGoldStrip(businesses) {
         <div class="biz-card__body">
           <span class="biz-card__type">${biz.type || ''}</span>
           <h3 class="biz-card__name">${biz.name}</h3>
-          <span class="biz-card__suburb">${biz.suburb || biz.location || 'Geelong'}</span>
+          <span class="biz-card__suburb">${biz.suburb || biz.location || cityName()}</span>
         </div>
       </a>`;
   }).join('');
@@ -1558,10 +1563,10 @@ async function initListingPage() {
 
   const bizSlug  = biz.slug || slugify(biz.name + '-' + (biz.suburb || ''));
   const canonUrl = `https://whattodogeelong.com.au/${bizSlug}`;
-  const metaDesc = `${biz.name} in ${biz.suburb || 'Geelong'} — ${biz.description ? biz.description.slice(0, 140) + '…' : 'What To Do Geelong'}`;
-  document.title = `${biz.name} ${biz.suburb ? '· ' + biz.suburb : ''} — What To Do Geelong`;
+  const metaDesc = `${biz.name} in ${biz.suburb || cityName()} — ${biz.description ? biz.description.slice(0, 140) + '…' : 'What To Do ${cityName()}'}`;
+  document.title = `${biz.name} ${biz.suburb ? '· ' + biz.suburb : ''} — ${siteName()}`;
   injectSEOMeta({
-    title:       `${biz.name} — ${biz.type} in Geelong`,
+    title:       `${biz.name} — ${biz.type} in ${cityName()}`,
     description: metaDesc,
     canonical:   canonUrl,
     ogImage:     biz.img || '',
@@ -1572,7 +1577,7 @@ async function initListingPage() {
         "@type": "LocalBusiness",
         "name": biz.name,
         "description": biz.description || '',
-        "address": { "@type": "PostalAddress", "addressLocality": biz.suburb || 'Geelong', "addressRegion": "VIC", "addressCountry": "AU" },
+        "address": { "@type": "PostalAddress", "addressLocality": biz.suburb || cityName(), "addressRegion": "VIC", "addressCountry": "AU" },
         "url": biz.website ? 'https://' + biz.website.replace(/^https?:\/\//, '') : canonUrl,
         "image": biz.img || '',
       })}<\/script>`,
@@ -1601,7 +1606,7 @@ async function initListingPage() {
     : '';
 
   const bizTags = getBizTags(biz);
-  const mapsQuery = encodeURIComponent(biz.name + ' ' + (biz.location || biz.suburb || 'Geelong'));
+  const mapsQuery = encodeURIComponent(biz.name + ' ' + (biz.location || biz.suburb || cityName()));
   const mapsUrl = biz.lat && biz.lng
     ? `https://www.google.com/maps/dir/?api=1&destination=${biz.lat},${biz.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
@@ -1655,7 +1660,7 @@ async function initListingPage() {
             <h1 class="lident__name">${biz.name}</h1>
             <p class="lident__loc">
               <span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle;color:var(--teal)">location_on</span>
-              ${biz.suburb || biz.location || 'Geelong'}${biz.rating ? ` <span class="lident__rating">★ ${biz.rating}</span>` : ''}<span class="lident__dist" id="js-listing-dist"></span>
+              ${biz.suburb || biz.location || cityName()}${biz.rating ? ` <span class="lident__rating">★ ${biz.rating}</span>` : ''}<span class="lident__dist" id="js-listing-dist"></span>
             </p>
             <p class="lident__views" id="js-biz-view-count" style="display:none"></p>
             ${bizTags.length ? `<div class="listing-tags">${bizTags.map(t => `<span class="listing-tag${t.teal ? ' listing-tag--teal' : ''}">${t.icon} ${t.label}</span>`).join('')}</div>` : ''}
@@ -1886,7 +1891,7 @@ async function initListingPage() {
             <div class="listing-related">
               <h2 class="listing-related__title">
                 <span class="material-symbols-rounded">storefront</span>
-                More ${biz.type} in Geelong
+                More ${biz.type} in ${cityName()}
               </h2>
               <div class="listing-related__grid">
                 ${picks.map(r => {
@@ -1899,7 +1904,7 @@ async function initListingPage() {
                       </div>
                       <div class="listing-related__body">
                         <div class="listing-related__name">${r.name}</div>
-                        <div class="listing-related__sub">${r.suburb || 'Geelong'}${rating}</div>
+                        <div class="listing-related__sub">${r.suburb || cityName()}${rating}</div>
                       </div>
                     </a>`;
                 }).join('')}
@@ -2113,7 +2118,7 @@ function initNav() {
   const header = document.createElement('div');
   header.className = 'nav__mobile-header';
   header.innerHTML = `
-    <img src="assets/logo.jpg" alt="What To Do Geelong" class="nav__mobile-logo" />
+    <img src="assets/logo.jpg" alt="${siteName()}" class="nav__mobile-logo" />
     <button class="nav__mobile-close" aria-label="Close menu">
       <span class="material-symbols-rounded">close</span>
     </button>`;
@@ -2242,10 +2247,10 @@ async function initEventPage() {
   const bizSlug = biz ? (biz.slug || slugify(biz.name + '-' + (biz.suburb || ''))) : null;
   const canonUrl = bizSlug ? `https://whattodogeelong.com.au/${bizSlug}/${evSlug}` : `https://whattodogeelong.com.au/events/${evSlug}`;
 
-  document.title = `${ev.title} — What To Do Geelong`;
+  document.title = `${ev.title} — ${siteName()}`;
   injectSEOMeta({
     title:       `${ev.title} | ${ev.date} — ${ev.location}`,
-    description: `${ev.title} on ${ev.date} at ${ev.location}. ${ev.price === 'Free' ? 'Free entry.' : ev.price + ' entry.'} Geelong events guide.`,
+    description: `${ev.title} on ${ev.date} at ${ev.location}. ${ev.price === 'Free' ? 'Free entry.' : ev.price + ' entry.'} ${cityName()} events guide.`,
     canonical:   canonUrl,
     ogImage:     biz?.img || '',
     type:        'event',
@@ -2255,7 +2260,7 @@ async function initEventPage() {
         "@type": "Event",
         "name": ev.title,
         "startDate": ev.date,
-        "location": { "@type": "Place", "name": ev.location, "address": { "@type": "PostalAddress", "addressLocality": "Geelong", "addressRegion": "VIC", "addressCountry": "AU" } },
+        "location": { "@type": "Place", "name": ev.location, "address": { "@type": "PostalAddress", "addressLocality": "${cityName()}", "addressRegion": "VIC", "addressCountry": "AU" } },
         "offers": { "@type": "Offer", "price": ev.price === 'Free' ? '0' : ev.price?.replace(/[^0-9.]/g, '') || '0', "priceCurrency": "AUD", "availability": "https://schema.org/InStock" },
         "organizer": biz ? { "@type": "Organization", "name": biz.name, "url": biz.website ? 'https://' + biz.website.replace(/^https?:\/\//, '') : '' } : undefined,
       })}<\/script>`,
@@ -2541,36 +2546,36 @@ function normaliseFilter(raw) {
 // ── SEO META PER FILTER ───────────────────────────────────
 const FILTER_SEO = {
   'eat': {
-    all:        { title: 'Where to Eat in Geelong | What To Do Geelong', desc: 'The best restaurants, cafes, bakeries and bars in Geelong. Browse our curated guide to eating out in Geelong.' },
-    'café':     { title: 'Best Cafes in Geelong | What To Do Geelong', desc: 'Find the best cafes in Geelong for great coffee, brunch and all-day dining. Local favourites and hidden gems.' },
-    brunch:     { title: 'Best Brunch in Geelong | What To Do Geelong', desc: 'The top spots for brunch in Geelong — from big breakfast to eggs benny and weekend specials.' },
-    restaurant: { title: 'Best Restaurants in Geelong | What To Do Geelong', desc: 'Geelong\'s best restaurants for dinner and lunch. Fine dining to casual, all locally reviewed.' },
-    bar:        { title: 'Best Bars in Geelong | What To Do Geelong', desc: 'Top bars in Geelong for a great drink. Cocktail bars, wine bars, and great pub vibes.' },
-    bakery:     { title: 'Best Bakeries in Geelong | What To Do Geelong', desc: 'Fresh bread, pastries and coffee — the best bakeries in Geelong.' },
-    pizza:      { title: 'Best Pizza in Geelong | What To Do Geelong', desc: 'Wood-fired, sourdough, and classic — the best pizza restaurants in Geelong.' },
-    asian:      { title: 'Best Asian Restaurants Geelong | What To Do Geelong', desc: 'Japanese, Thai, Chinese, Korean and more — the best Asian restaurants in Geelong.' },
+    all:        { title: 'Where to Eat in ${cityName()} | ${siteName()}', desc: 'The best restaurants, cafes, bakeries and bars in ${cityName()}. Browse our curated guide to eating out in ${cityName()}.' },
+    'café':     { title: 'Best Cafes in ${cityName()} | ${siteName()}', desc: 'Find the best cafes in Geelong for great coffee, brunch and all-day dining. Local favourites and hidden gems.' },
+    brunch:     { title: 'Best Brunch in ${cityName()} | ${siteName()}', desc: 'The top spots for brunch in ${cityName()} — from big breakfast to eggs benny and weekend specials.' },
+    restaurant: { title: 'Best Restaurants in ${cityName()} | ${siteName()}', desc: 'Geelong\'s best restaurants for dinner and lunch. Fine dining to casual, all locally reviewed.' },
+    bar:        { title: 'Best Bars in ${cityName()} | ${siteName()}', desc: 'Top bars in Geelong for a great drink. Cocktail bars, wine bars, and great pub vibes.' },
+    bakery:     { title: 'Best Bakeries in ${cityName()} | ${siteName()}', desc: 'Fresh bread, pastries and coffee — the best bakeries in ${cityName()}.' },
+    pizza:      { title: 'Best Pizza in ${cityName()} | ${siteName()}', desc: 'Wood-fired, sourdough, and classic — the best pizza restaurants in ${cityName()}.' },
+    asian:      { title: 'Best Asian Restaurants Geelong | What To Do ${cityName()}', desc: 'Japanese, Thai, Chinese, Korean and more — the best Asian restaurants in ${cityName()}.' },
   },
   'drink': {
-    all:      { title: 'Bars, Pubs & Breweries in Geelong | What To Do Geelong', desc: 'Your guide to drinking in Geelong — bars, pubs, breweries, wineries and more.' },
-    brewery:  { title: 'Geelong Breweries | What To Do Geelong', desc: 'The best craft breweries in Geelong and the Bellarine Peninsula. Local beers, tasting paddles and brewery tours.' },
-    winery:   { title: 'Bellarine Peninsula Wineries | What To Do Geelong', desc: 'Discover the best wineries on the Bellarine Peninsula near Geelong. Cellar doors, tastings and vineyard dining.' },
-    bar:      { title: 'Best Bars in Geelong | What To Do Geelong', desc: 'Cocktail bars, wine bars and great evenings out in Geelong.' },
-    pub:      { title: 'Best Pubs in Geelong | What To Do Geelong', desc: 'The best pubs in Geelong for a cold beer, parma and Sunday session.' },
-    cocktail: { title: 'Best Cocktail Bars Geelong | What To Do Geelong', desc: 'Geelong\'s best cocktail bars — from low-key to late night.' },
+    all:      { title: 'Bars, Pubs & Breweries in ${cityName()} | ${siteName()}', desc: 'Your guide to drinking in ${cityName()} — bars, pubs, breweries, wineries and more.' },
+    brewery:  { title: 'Geelong Breweries | What To Do ${cityName()}', desc: 'The best craft breweries in Geelong and the Bellarine Peninsula. Local beers, tasting paddles and brewery tours.' },
+    winery:   { title: 'Bellarine Peninsula Wineries | What To Do ${cityName()}', desc: 'Discover the best wineries on the Bellarine Peninsula near Geelong. Cellar doors, tastings and vineyard dining.' },
+    bar:      { title: 'Best Bars in ${cityName()} | ${siteName()}', desc: 'Cocktail bars, wine bars and great evenings out in ${cityName()}.' },
+    pub:      { title: 'Best Pubs in ${cityName()} | ${siteName()}', desc: 'The best pubs in Geelong for a cold beer, parma and Sunday session.' },
+    cocktail: { title: 'Best Cocktail Bars Geelong | What To Do ${cityName()}', desc: 'Geelong\'s best cocktail bars — from low-key to late night.' },
   },
   'do': {
-    all:        { title: 'Things to Do in Geelong | What To Do Geelong', desc: 'The best things to do in Geelong and the Surf Coast. Activities, attractions, arts and outdoor adventures.' },
-    activity:   { title: 'Activities in Geelong | What To Do Geelong', desc: 'Fun activities in Geelong for all ages — indoors and outdoors.' },
-    attraction: { title: 'Geelong Attractions | What To Do Geelong', desc: 'Top tourist attractions in Geelong. Waterfront, galleries, museums and day-trip destinations.' },
-    adventure:  { title: 'Adventure Activities Geelong | What To Do Geelong', desc: 'Adventure and outdoor activities in and around Geelong — surfing, kayaking, climbing and more.' },
-    art:        { title: 'Arts & Culture Geelong | What To Do Geelong', desc: 'Geelong\'s arts and culture scene — galleries, theatres, live music venues and cultural landmarks.' },
-    sport:      { title: 'Sport & Leisure in Geelong | What To Do Geelong', desc: 'Sporting activities and spectator sport in Geelong. Gyms, pools, golf and the Cats.' },
-    nature:     { title: 'Outdoor Activities Geelong | What To Do Geelong', desc: 'Nature and outdoor activities near Geelong — walks, parks, beaches and the You Yangs.' },
-    wellness:   { title: 'Day Spas & Wellness in Geelong | What To Do Geelong', desc: 'Day spas, wellness retreats and relaxation in Geelong. Massages, yoga and health studios.' },
-    family:     { title: 'Family Activities in Geelong | What To Do Geelong', desc: 'The best family-friendly activities in Geelong for kids and adults. Fun for all ages.' },
+    all:        { title: 'Things to Do in ${cityName()} | ${siteName()}', desc: 'The best things to do in Geelong and the Surf Coast. Activities, attractions, arts and outdoor adventures.' },
+    activity:   { title: 'Activities in ${cityName()} | ${siteName()}', desc: 'Fun activities in Geelong for all ages — indoors and outdoors.' },
+    attraction: { title: 'Geelong Attractions | What To Do ${cityName()}', desc: 'Top tourist attractions in ${cityName()}. Waterfront, galleries, museums and day-trip destinations.' },
+    adventure:  { title: 'Adventure Activities Geelong | What To Do ${cityName()}', desc: 'Adventure and outdoor activities in and around Geelong — surfing, kayaking, climbing and more.' },
+    art:        { title: 'Arts & Culture Geelong | What To Do ${cityName()}', desc: 'Geelong\'s arts and culture scene — galleries, theatres, live music venues and cultural landmarks.' },
+    sport:      { title: 'Sport & Leisure in ${cityName()} | ${siteName()}', desc: 'Sporting activities and spectator sport in ${cityName()}. Gyms, pools, golf and the Cats.' },
+    nature:     { title: 'Outdoor Activities Geelong | What To Do ${cityName()}', desc: 'Nature and outdoor activities near Geelong — walks, parks, beaches and the You Yangs.' },
+    wellness:   { title: 'Day Spas & Wellness in ${cityName()} | ${siteName()}', desc: 'Day spas, wellness retreats and relaxation in ${cityName()}. Massages, yoga and health studios.' },
+    family:     { title: 'Family Activities in ${cityName()} | ${siteName()}', desc: 'The best family-friendly activities in Geelong for kids and adults. Fun for all ages.' },
   },
   'stay': {
-    all: { title: 'Where to Stay in Geelong | What To Do Geelong', desc: 'Find the best accommodation in Geelong — hotels, holiday rentals, boutique stays and B&Bs.' },
+    all: { title: 'Where to Stay in ${cityName()} | ${siteName()}', desc: 'Find the best accommodation in ${cityName()} — hotels, holiday rentals, boutique stays and B&Bs.' },
   },
 };
 
@@ -3197,7 +3202,7 @@ function initArticlePage() {
 
   const artSlug  = article.slug || article.id;
   const canonUrl = `https://whattodogeelong.com.au/news/${artSlug}`;
-  document.title = `${article.title} — What To Do Geelong`;
+  document.title = `${article.title} — ${siteName()}`;
   injectSEOMeta({
     title:       article.title,
     description: article.excerpt || article.title,

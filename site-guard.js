@@ -7,12 +7,13 @@
 (async function siteGuard() {
   const path = window.location.pathname;
 
-  // Don't guard admin, maintenance or coming-soon pages
+  // Don't guard admin, maintenance, coming-soon pages, or admin preview bypass
   if (
     path.includes('wtdgadmin') ||
     path.includes('maintenance') ||
     path.includes('comingsoon') ||
-    path.includes('coming-soon')
+    path.includes('coming-soon') ||
+    document.cookie.includes('wtdg_admin_bypass=1')
   ) return;
 
   try {

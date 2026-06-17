@@ -14,6 +14,16 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "whattodovictoria.com.au" }],
+      "destination": "/victoria.html"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.whattodovictoria.com.au" }],
+      "destination": "/victoria.html"
+    },
     { "source": "/victoria",               "destination": "/victoria.html" },
     { "source": "/parks",                  "destination": "/parks.html" },
     { "source": "/date-night",             "destination": "/date-night.html" },

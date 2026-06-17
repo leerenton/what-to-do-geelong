@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let profiles = [];
   let digestEnabled = false;
+  let citySubscriptions = {}; // slug → boolean
+  let allSites = [];
   if (session) {
     try {
       const { data } = await db.from('businesses').select('*').eq('owner_id', session.user.id);
@@ -23,6 +25,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const { data } = await db.from('email_preferences').select('weekly_digest').eq('user_id', session.user.id).maybeSingle();
       digestEnabled = data?.weekly_digest === true;
+    } catch (_) {}
+    try {
+      const [subsRes, sitesRes] = await Promise.all([
+        db.from('user_city_subscriptions').select('city, subscribed').eq('user_id', session.user.id),
+        db.from('sites').select('slug, name, domain, site_mode').order('name'),
+      ]);
+      (subsRes.data || []).forEach(r => { citySubscriptions[r.city] = r.subscribed; });
+      allSites = (sitesRes.data || []).filter(s => s.site_mode === 'active' || citySubscriptions[s.slug] !== undefined);
     } catch (_) {}
   }
   const saved     = JSON.parse(localStorage.getItem('wtdg_saved') || '[]');
@@ -106,18 +116,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       ` : ''}
 
-      <!-- EMAIL DIGEST -->
+      <!-- EMAIL SUBSCRIPTIONS -->
       ${session ? `
         <div class="acct-section" id="js-digest-section">
-          <div class="acct-section-title"><span class="material-symbols-rounded">mail</span> Weekly Digest</div>
-          <p style="font-size:.88rem;color:var(--mid);margin:0 0 1rem;line-height:1.55">Get a personalised roundup of what's on in Geelong every Sunday morning — tailored to what you've been exploring.</p>
-          <label class="digest-toggle-row" id="js-digest-label">
-            <span class="digest-toggle-wrap">
-              <input type="checkbox" id="js-digest-check" ${digestEnabled ? 'checked' : ''} />
-              <span class="digest-toggle-track"><span class="digest-toggle-thumb"></span></span>
-            </span>
-            <span class="digest-toggle-text">${digestEnabled ? 'Weekly digest enabled ✅' : 'Subscribe to weekly digest'}</span>
-          </label>
+          <div class="acct-section-title"><span class="material-symbols-rounded">mail</span> Email Subscriptions</div>
+          <p style="font-size:.88rem;color:var(--mid);margin:0 0 1rem;line-height:1.55">Choose which cities you'd like to receive weekly emails for.</p>
+          <div id="js-city-subs">
+            ${allSites.length ? allSites.map(site => {
+              const subbed = citySubscriptions[site.slug] === true;
+              const isCurrent = site.slug === (window.SITE?.slug || 'geelong');
+              return `
+              <div class="digest-toggle-row" style="margin-bottom:.65rem;justify-content:space-between">
+                <span style="font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.4rem">
+                  ${site.name}
+                  ${isCurrent ? '<span style="font-size:.68rem;background:#e0f2fe;color:#0369a1;padding:.1rem .4rem;border-radius:4px;font-weight:700">This city</span>' : ''}
+                </span>
+                <label class="digest-toggle-wrap" style="cursor:pointer" title="Toggle ${site.name} emails">
+                  <input type="checkbox" class="js-city-sub-check" data-city="${site.slug}" ${subbed ? 'checked' : ''} style="position:absolute;opacity:0;width:0;height:0" />
+                  <span class="digest-toggle-track"><span class="digest-toggle-thumb"></span></span>
+                </label>
+              </div>`;
+            }).join('') : '<p style="font-size:.85rem;color:var(--mid)">No cities available yet.</p>'}
+          </div>
           <p id="js-digest-status" style="font-size:.8rem;color:var(--teal);margin:.5rem 0 0;min-height:1.2em"></p>
         </div>
       ` : ''}
@@ -145,44 +165,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('js-logout-btn')?.addEventListener('click', logout);
 
-  // ── Email digest toggle ───────────────────────────────────
-  const digestCheck = document.getElementById('js-digest-check');
+  // ── City email subscription toggles ─────────────────────
   const digestStatus = document.getElementById('js-digest-status');
-  const digestLabel = document.getElementById('js-digest-label');
 
-  if (digestCheck && session) {
-    digestCheck.addEventListener('change', async () => {
-      const enabled = digestCheck.checked;
-      digestLabel.style.pointerEvents = 'none';
-      digestStatus.textContent = 'Saving…';
+  if (session) {
+    document.querySelectorAll('.js-city-sub-check').forEach(checkbox => {
+      checkbox.addEventListener('change', async () => {
+        const city    = checkbox.dataset.city;
+        const enabled = checkbox.checked;
+        checkbox.disabled = true;
+        if (digestStatus) digestStatus.textContent = 'Saving…';
 
-      try {
-        const res = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: session.user.id,
-            email: session.user.email,
-            weekly_digest: enabled,
-          }),
-        });
-        if (res.ok) {
-          digestStatus.textContent = enabled ? 'You\'re subscribed! Look out for Sundays. ✅' : 'Unsubscribed. You won\'t receive the digest.';
-          digestCheck.closest('label').querySelector('.digest-toggle-text').textContent =
-            enabled ? 'Weekly digest enabled ✅' : 'Subscribe to weekly digest';
+        const { error } = await db.from('user_city_subscriptions').upsert(
+          { user_id: session.user.id, city, subscribed: enabled },
+          { onConflict: 'user_id,city' }
+        );
+
+        checkbox.disabled = false;
+        if (error) {
+          checkbox.checked = !enabled; // revert
+          if (digestStatus) digestStatus.textContent = 'Something went wrong. Please try again.';
         } else {
-          const err = await res.json().catch(() => ({}));
-          digestStatus.textContent = 'Something went wrong. Please try again.';
-          digestCheck.checked = !enabled; // revert
-          console.error('Digest toggle error:', err);
+          if (digestStatus) digestStatus.textContent = enabled
+            ? `Subscribed to ${allSites.find(s => s.slug === city)?.name || city} emails ✅`
+            : `Unsubscribed from ${allSites.find(s => s.slug === city)?.name || city} emails`;
+          setTimeout(() => { if (digestStatus) digestStatus.textContent = ''; }, 3000);
         }
-      } catch (e) {
-        digestStatus.textContent = 'Network error. Please try again.';
-        digestCheck.checked = !enabled;
-      }
-
-      digestLabel.style.pointerEvents = '';
-      setTimeout(() => { if (digestStatus) digestStatus.textContent = ''; }, 4000);
+      });
     });
   }
 });

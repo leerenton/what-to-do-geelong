@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ── EMAIL DIGEST TOOLS ────────────────────────────────────────
-function setupDigestTools() {
+async function setupDigestTools() {
   async function callDigest(url, label, status) {
     status.textContent = `${label}…`;
     try {

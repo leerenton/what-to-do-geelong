@@ -25,10 +25,10 @@ export default async function middleware(request) {
   if (hostname === ADMIN_HOSTNAME) {
     // / or /dash → /wtdgadmin/dash
     // /sites      → /wtdgadmin/sites
-    // /login      → /login (pass through for login page)
+    // Fetch from the main deployment origin to avoid middleware re-entry
     const clean = pathname === '/' ? '/dash' : pathname;
-    if (clean === '/login') return; // pass through to login.html via vercel.json
-    return fetch(new URL(`/wtdgadmin${clean}`, request.url));
+    const origin = 'https://whattodogeelong.com.au';
+    return fetch(`${origin}/wtdgadmin${clean}${url.search}`);
   }
 
   if (pathname !== '/') return; // only intercept root for other domains

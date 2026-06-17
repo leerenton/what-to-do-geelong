@@ -10,14 +10,34 @@
   <link rel="stylesheet" href="/wtdgadmin.css?v=1" />
   <meta name="robots" content="noindex, nofollow" />
   <style>
-    .mode-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .site-tabs {
+      display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.75rem;
+    }
+    .site-tab {
+      padding: .45rem 1rem; border-radius: 99px;
+      border: 1.5px solid var(--adm-border);
+      background: var(--adm-card2); color: var(--adm-mid);
+      font-size: .82rem; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: all .15s;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .site-tab:hover { border-color: var(--adm-teal); color: var(--adm-text); }
+    .site-tab.active { border-color: var(--adm-teal); background: var(--adm-teal); color: #fff; }
+    .site-tab__dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .site-tab__dot--active      { background: #4ade80; }
+    .site-tab__dot--coming-soon { background: #fbbf24; }
+    .site-tab__dot--maintenance { background: #f87171; }
+
+    .mode-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
     .mode-card {
       background: var(--adm-card); border: 2px solid var(--adm-border);
       border-radius: var(--adm-radius); padding: 1.5rem; cursor: pointer;
       transition: border-color .2s, background .2s; position: relative;
     }
     .mode-card:hover { border-color: var(--adm-teal); }
-    .mode-card.active { border-color: var(--adm-teal); background: var(--adm-teal-dim); }
+    .mode-card.selected { border-color: var(--adm-teal); background: var(--adm-teal-dim); }
     .mode-card__icon { font-size: 2rem; margin-bottom: .75rem; display: block; }
     .mode-card__title { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
     .mode-card__desc { font-size: .82rem; color: var(--adm-mid); line-height: 1.5; }
@@ -27,8 +47,9 @@
       background: var(--adm-teal); display: none;
       align-items: center; justify-content: center;
     }
-    .mode-card.active .mode-card__check { display: flex; }
+    .mode-card.selected .mode-card__check { display: flex; }
     .mode-card__check svg { width: 13px; height: 13px; stroke: #fff; }
+
     .adm-save-btn {
       background: var(--adm-teal); color: #fff; border: none; border-radius: .5rem;
       padding: .7rem 1.75rem; font-size: .9rem; font-weight: 700;
@@ -43,10 +64,19 @@
       background: var(--adm-card2); border: 1px solid var(--adm-border);
       border-radius: var(--adm-radius); padding: 1.1rem 1.25rem;
       font-size: .83rem; color: var(--adm-mid); line-height: 1.6;
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
     }
     .adm-info-box strong { color: var(--adm-text); }
     .adm-section-sep { border: none; border-top: 1px solid var(--adm-border); margin: 2rem 0; }
+
+    .preview-links { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .preview-link {
+      font-size: .82rem; font-weight: 700; padding: .45rem 1rem;
+      border-radius: .4rem; border: 1.5px solid var(--adm-border);
+      color: var(--adm-text); text-decoration: none; background: var(--adm-card2);
+      transition: border-color .15s;
+    }
+    .preview-link:hover { border-color: var(--adm-teal); }
   </style>
 </head>
 <body class="adm-body">
@@ -63,16 +93,23 @@
 
       <!-- Site Mode -->
       <div class="adm-section">
-        <div class="adm-section__header" style="margin-bottom:.5rem">
+        <div class="adm-section__header" style="margin-bottom:1.25rem">
           <span class="adm-section__title">Site Mode</span>
         </div>
+
         <div class="adm-info-box">
-          <strong>Admin bypass:</strong> Your account always sees the live site regardless of mode — visitors will see the selected mode below.
-          The mode is cached for 2 minutes on each visitor's browser.
+          <strong>Admin bypass:</strong> Your account always sees the live site regardless of mode.
+          Changes take effect immediately for all visitors — no deploy needed.
         </div>
 
-        <div class="mode-cards" id="js-mode-cards">
-          <div class="mode-card" data-mode="live">
+        <!-- Site selector tabs -->
+        <div class="site-tabs" id="js-site-tabs">
+          <div style="color:var(--adm-mid);font-size:.85rem">Loading sites…</div>
+        </div>
+
+        <!-- Mode cards -->
+        <div class="mode-cards">
+          <div class="mode-card" data-mode="active">
             <span class="mode-card__check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="mode-card__icon">🌐</span>
             <div class="mode-card__title">Live</div>
@@ -82,17 +119,17 @@
             <span class="mode-card__check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="mode-card__icon">⚙️</span>
             <div class="mode-card__title">Maintenance</div>
-            <div class="mode-card__desc">Shows a "back soon, essential updates in progress" holding page to all visitors.</div>
+            <div class="mode-card__desc">Shows a "back soon" holding page to all visitors.</div>
           </div>
           <div class="mode-card" data-mode="coming_soon">
             <span class="mode-card__check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="mode-card__icon">🚀</span>
             <div class="mode-card__title">Coming Soon</div>
-            <div class="mode-card__desc">Shows a branded "launching soon" page with email capture. Great before going live.</div>
+            <div class="mode-card__desc">Shows a branded "launching soon" page with email capture.</div>
           </div>
         </div>
 
-        <button class="adm-save-btn" id="js-save-mode">Save Mode</button>
+        <button class="adm-save-btn" id="js-save-mode" disabled>Save Mode</button>
         <div class="adm-status" id="js-mode-status"></div>
       </div>
 
@@ -101,11 +138,11 @@
       <!-- Preview links -->
       <div class="adm-section">
         <div class="adm-section__header"><span class="adm-section__title">Preview Pages</span></div>
-        <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:1rem">Open these in a private/incognito window to see what visitors see.</p>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-          <a href="maintenance.html" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">Preview Maintenance</a>
-          <a href="comingsoon.html" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">Preview Coming Soon</a>
-          <a href="index.html" target="_blank" class="adm-btn adm-btn--outline adm-btn--sm" style="width:auto">View Live Site</a>
+        <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:1rem">Open in a private/incognito window to see what visitors see.</p>
+        <div class="preview-links">
+          <a href="/maintenance" target="_blank" class="preview-link">🔧 Preview Maintenance</a>
+          <a href="/comingsoon.html" target="_blank" class="preview-link">🚀 Preview Coming Soon</a>
+          <a href="/" target="_blank" class="preview-link">🌐 View Live Site</a>
         </div>
       </div>
 
@@ -114,7 +151,6 @@
       <!-- Admin emails -->
       <div class="adm-section">
         <div class="adm-section__header"><span class="adm-section__title">Super Admin Accounts</span></div>
-        <p style="font-size:.83rem;color:var(--adm-mid);margin-bottom:1rem">Defined in <code style="background:var(--adm-card2);padding:.1rem .4rem;border-radius:.3rem">wtdgadmin.js</code> and <code style="background:var(--adm-card2);padding:.1rem .4rem;border-radius:.3rem">sitemode.js</code>. To add an admin, update the <code>ADMIN_EMAILS</code> array in both files.</p>
         <div class="adm-table-wrap">
           <table class="adm-table">
             <thead><tr><th>Email</th><th>Status</th></tr></thead>
@@ -132,72 +168,121 @@
 <script src="/wtdgadmin.js?v=1"></script>
 <script src="/wtdgadmin-shell.js?v=1"></script>
 <script>
-let selectedMode = 'live';
+'use strict';
 
+let _sites       = [];
+let _selectedId  = null;
+let _selectedMode = null;
+
+function dotClass(mode) {
+  return mode === 'active' ? 'active' : mode === 'maintenance' ? 'maintenance' : 'coming-soon';
+}
+
+// ── RENDER SITE TABS ────────────────────────────────────────
+function renderTabs() {
+  const wrap = document.getElementById('js-site-tabs');
+  wrap.innerHTML = _sites.map(s => {
+    const mode = s.site_mode || (s.active ? 'active' : 'coming_soon');
+    return `<button class="site-tab${s.id === _selectedId ? ' active' : ''}" data-id="${s.id}" data-mode="${mode}">
+      <span class="site-tab__dot site-tab__dot--${dotClass(mode)}"></span>
+      ${s.name}
+    </button>`;
+  }).join('');
+
+  wrap.querySelectorAll('.site-tab').forEach(btn => {
+    btn.addEventListener('click', () => selectSite(btn.dataset.id));
+  });
+}
+
+// ── SELECT A SITE ───────────────────────────────────────────
+function selectSite(id) {
+  _selectedId = id;
+  const site  = _sites.find(s => s.id === id);
+  _selectedMode = site?.site_mode || (site?.active ? 'active' : 'coming_soon');
+
+  renderTabs();
+  highlightMode(_selectedMode);
+
+  document.getElementById('js-save-mode').disabled = false;
+  document.getElementById('js-mode-status').textContent = '';
+  document.getElementById('js-mode-status').className = 'adm-status';
+}
+
+// ── HIGHLIGHT MODE CARD ─────────────────────────────────────
+function highlightMode(mode) {
+  document.querySelectorAll('.mode-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.mode === mode);
+  });
+}
+
+// ── SAVE MODE ───────────────────────────────────────────────
+async function saveMode() {
+  if (!_selectedId) return;
+  const btn    = document.getElementById('js-save-mode');
+  const status = document.getElementById('js-mode-status');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const { error } = await db.from('sites').update({
+    site_mode: _selectedMode,
+    active:    _selectedMode === 'active',
+    updated_at: new Date().toISOString(),
+  }).eq('id', _selectedId);
+
+  btn.disabled = false; btn.textContent = 'Save Mode';
+
+  if (error) {
+    status.textContent = '✗ ' + error.message;
+    status.className = 'adm-status adm-status--err';
+    return;
+  }
+
+  // Update local state
+  const site = _sites.find(s => s.id === _selectedId);
+  if (site) { site.site_mode = _selectedMode; site.active = _selectedMode === 'active'; }
+  renderTabs();
+
+  const label = { active: 'Live', maintenance: 'Maintenance', coming_soon: 'Coming Soon' }[_selectedMode] || _selectedMode;
+  status.textContent = `✓ ${_sites.find(s=>s.id===_selectedId)?.name} set to "${label}" — active immediately.`;
+  status.className = 'adm-status adm-status--ok';
+}
+
+// ── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   const admin = await requireAdminAuth();
   if (!admin) return;
   initAdminShell('Site Settings');
 
-  // Load current mode
-  await loadCurrentMode();
+  // Load sites
+  const { data } = await db.from('sites').select('id,name,slug,domain,site_mode,active').order('created_at');
+  _sites = data || [];
+  renderTabs();
 
-  // Card selection
+  // Auto-select current domain's site if possible
+  const host = window.location.hostname.replace(/^www\./, '');
+  const match = _sites.find(s => s.domain === host || s.domain_www === window.location.hostname);
+  if (match) selectSite(match.id);
+  else if (_sites.length) selectSite(_sites[0].id);
+
+  // Mode card clicks
   document.querySelectorAll('.mode-card').forEach(card => {
     card.addEventListener('click', () => {
-      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-      selectedMode = card.dataset.mode;
+      if (!_selectedId) return;
+      _selectedMode = card.dataset.mode;
+      highlightMode(_selectedMode);
     });
   });
 
-  // Save
+  // Save button
   document.getElementById('js-save-mode').addEventListener('click', saveMode);
 
   // Admin list
   const list = document.getElementById('js-admin-list');
-  list.innerHTML = ADMIN_EMAILS.map(e =>
-    `<tr><td style="font-weight:600">${e}</td><td><span class="adm-badge adm-badge--teal">Super Admin</span></td></tr>`
-  ).join('');
+  if (typeof ADMIN_EMAILS !== 'undefined') {
+    list.innerHTML = ADMIN_EMAILS.map(e =>
+      `<tr><td style="font-weight:600">${e}</td><td><span class="adm-badge adm-badge--teal">Super Admin</span></td></tr>`
+    ).join('');
+  }
 });
-
-async function loadCurrentMode() {
-  try {
-    const { data } = await db.from('site_settings').select('value').eq('key', 'site_mode').single();
-    const mode = data?.value || 'live';
-    selectedMode = mode;
-    document.querySelectorAll('.mode-card').forEach(c => {
-      c.classList.toggle('active', c.dataset.mode === mode);
-    });
-  } catch (_) {
-    // site_settings table may not exist yet — show setup hint
-    document.getElementById('js-mode-status').textContent = '⚠ Could not load — run the setup SQL first (see below).';
-    document.getElementById('js-mode-status').className = 'adm-status adm-status--err';
-  }
-}
-
-async function saveMode() {
-  const btn = document.getElementById('js-save-mode');
-  const status = document.getElementById('js-mode-status');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  status.textContent = '';
-  status.className = 'adm-status';
-
-  try {
-    const { error } = await db.from('site_settings')
-      .upsert({ key: 'site_mode', value: selectedMode, updated_at: new Date().toISOString() });
-    if (error) throw error;
-    status.textContent = `✓ Site mode set to "${selectedMode}" — active within 2 minutes for visitors.`;
-    status.className = 'adm-status adm-status--ok';
-  } catch (err) {
-    status.textContent = '✗ Save failed: ' + (err.message || 'Unknown error');
-    status.className = 'adm-status adm-status--err';
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Save Mode';
-}
 </script>
 </body>
 </html>

@@ -35,8 +35,8 @@ async function loadAllData() {
       db.from('businesses').select('*').or('status.eq.approved,status.is.null').eq('city', city).order('admin_priority', { ascending: false }).order('name'),
       db.from('events').select('*').or('status.eq.approved,status.is.null').eq('city', city).order('admin_priority', { ascending: false }).order('id'),
       db.from('stays').select('*').eq('city', city).order('id'),
-      db.from('promos').select('*').or('status.eq.approved,status.is.null').order('id'),
-      db.from('articles').select('*').order('published_at', { ascending: false }).limit(20),
+      db.from('promos').select('*').or('status.eq.approved,status.is.null').eq('city', city).order('id'),
+      db.from('articles').select('*').eq('city', city).order('published_at', { ascending: false }).limit(20),
     ]);
 
     if (bizRes.error) throw bizRes.error;

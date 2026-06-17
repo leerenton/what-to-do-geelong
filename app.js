@@ -964,6 +964,7 @@ async function renderGiveawaysAndOffers() {
     const { data } = await db.from('giveaways')
       .select('*')
       .eq('published', true)
+      .eq('city', window.SITE?.slug || 'geelong')
       .order('created_at', { ascending: false });
     giveaways = data || [];
   } catch (_) {}

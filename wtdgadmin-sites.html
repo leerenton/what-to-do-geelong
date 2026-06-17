@@ -26,21 +26,24 @@
       gap: .75rem;
     }
     .site-card--inactive { opacity: .55; }
-    .site-card__header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+    .site-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
     .site-card__name { font-size: 1.05rem; font-weight: 800; color: var(--adm-text); }
     .site-card__badge {
       font-size: .65rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-      padding: .2rem .55rem; border-radius: 99px;
+      padding: .2rem .55rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0;
     }
-    .site-card__badge--active { background: #d1fae5; color: #065f46; }
-    .site-card__badge--inactive { background: var(--adm-card2); color: var(--adm-mid); }
+    .site-card__badge--active      { background: #d1fae5; color: #065f46; }
+    .site-card__badge--coming-soon { background: #fef3c7; color: #92400e; }
+    .site-card__badge--maintenance { background: #fee2e2; color: #991b1b; }
     .site-card__slug {
       font-size: .75rem; font-family: monospace; color: var(--adm-mid);
       background: var(--adm-card2); padding: .2rem .5rem; border-radius: .3rem; display: inline-block;
     }
     .site-card__domain { font-size: .85rem; color: var(--adm-teal); font-weight: 600; }
     .site-card__meta { font-size: .8rem; color: var(--adm-mid); display: flex; flex-wrap: wrap; gap: .4rem .75rem; }
-    .site-card__actions { display: flex; gap: .5rem; margin-top: .25rem; }
+    .site-card__actions { display: flex; gap: .5rem; margin-top: .25rem; flex-wrap: wrap; }
+    .site-card__logo { height: 36px; max-width: 140px; object-fit: contain; display: block; }
+
     .adm-btn--xs {
       font-size: .75rem; padding: .3rem .7rem; border-radius: .4rem;
       border: 1.5px solid var(--adm-border); background: transparent;
@@ -48,9 +51,12 @@
       transition: background .15s, border-color .15s;
     }
     .adm-btn--xs:hover { background: var(--adm-card2); border-color: var(--adm-teal); }
-    .adm-btn--xs--danger:hover { border-color: var(--adm-red); color: var(--adm-red); }
+    .adm-btn--xs--danger { border-color: var(--adm-red); color: var(--adm-red); }
+    .adm-btn--xs--danger:hover { background: #fee2e2; }
     .adm-btn--xs--teal { background: var(--adm-teal); color: #fff; border-color: var(--adm-teal); }
     .adm-btn--xs--teal:hover { opacity: .85; }
+    .adm-btn--xs--warn { border-color: #d97706; color: #d97706; }
+    .adm-btn--xs--warn:hover { background: #fef3c7; }
 
     /* Modal */
     .adm-modal-backdrop {
@@ -72,7 +78,7 @@
     .adm-field input, .adm-field select, .adm-field textarea {
       width: 100%; padding: .55rem .75rem; border: 1.5px solid var(--adm-border);
       border-radius: .45rem; background: var(--adm-card2); color: var(--adm-text);
-      font-size: .9rem; font-family: inherit;
+      font-size: .9rem; font-family: inherit; box-sizing: border-box;
     }
     .adm-field input:focus, .adm-field select:focus { outline: none; border-color: var(--adm-teal); }
     .adm-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
@@ -80,6 +86,16 @@
     .adm-modal-status { font-size: .85rem; font-weight: 600; min-height: 1.2em; margin-top: .5rem; }
     .adm-modal-status--ok  { color: var(--adm-green); }
     .adm-modal-status--err { color: var(--adm-red); }
+
+    /* Upload zone */
+    .adm-upload-zone {
+      border: 2px dashed var(--adm-border); border-radius: .5rem;
+      padding: 1rem; text-align: center; cursor: pointer;
+      font-size: .82rem; color: var(--adm-mid); transition: border-color .15s;
+      background: var(--adm-card2);
+    }
+    .adm-upload-zone:hover, .adm-upload-zone--over { border-color: var(--adm-teal); color: var(--adm-teal); }
+    .adm-upload-preview { max-height: 60px; max-width: 200px; object-fit: contain; margin-top: .5rem; display: none; }
 
     .adm-add-btn {
       display: inline-flex; align-items: center; gap: .4rem;
@@ -99,6 +115,21 @@
     .adm-vercel-tip strong { color: var(--adm-text); }
     .adm-vercel-tip ol { margin: .5rem 0 0 1rem; padding: 0; }
     .adm-vercel-tip li { margin-bottom: .25rem; }
+
+    .site-mode-select {
+      display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .35rem;
+    }
+    .site-mode-opt {
+      flex: 1; min-width: 120px; padding: .55rem .6rem; border-radius: .4rem;
+      border: 1.5px solid var(--adm-border); background: var(--adm-card2);
+      cursor: pointer; text-align: center; font-size: .8rem; font-weight: 700;
+      color: var(--adm-mid); transition: all .15s; font-family: inherit;
+    }
+    .site-mode-opt:hover { border-color: var(--adm-teal); }
+    .site-mode-opt--active.selected   { border-color: #059669; background: #d1fae5; color: #065f46; }
+    .site-mode-opt--coming-soon.selected { border-color: #d97706; background: #fef3c7; color: #92400e; }
+    .site-mode-opt--maintenance.selected { border-color: #dc2626; background: #fee2e2; color: #991b1b; }
+    input[name="f-site-mode"] { display: none; }
   </style>
 </head>
 <body class="adm-body">
@@ -116,9 +147,9 @@
       <div class="adm-vercel-tip">
         <strong>Adding a new city</strong> — create the site row here, then:
         <ol>
-          <li>Go to your <strong>Vercel dashboard</strong> → project → Settings → Domains</li>
-          <li>Add the new domain as an alias (e.g. <code>whattodoballarat.com.au</code>)</li>
-          <li>Point DNS to Vercel — the site will auto-configure from this table</li>
+          <li>Go to your <strong>Vercel dashboard</strong> → project → Settings → Domains → add the domain</li>
+          <li>Point DNS to Vercel (grey cloud in Cloudflare — no proxy)</li>
+          <li>Add the city to <code>middleware.js</code> so its domain serves the right homepage</li>
         </ol>
       </div>
 
@@ -144,7 +175,7 @@
       <div class="adm-field">
         <label>City slug *</label>
         <input type="text" id="f-slug" placeholder="geelong" />
-        <div class="adm-field-hint">Lowercase, no spaces. Used as city filter key.</div>
+        <div class="adm-field-hint">Lowercase, no spaces.</div>
       </div>
       <div class="adm-field">
         <label>Short name *</label>
@@ -168,10 +199,28 @@
       </div>
     </div>
 
+    <!-- Logo upload -->
     <div class="adm-field">
-      <label>Logo URL</label>
-      <input type="text" id="f-logo-url" placeholder="https://..." />
-      <div class="adm-field-hint">Upload to Supabase storage and paste the public URL.</div>
+      <label>Site Logo</label>
+      <div class="adm-upload-zone" id="logo-upload-zone">
+        🖼️ Drop logo here or click to upload
+        <input type="file" id="logo-file-input" accept="image/*" style="display:none" />
+      </div>
+      <img class="adm-upload-preview" id="logo-preview" alt="Logo preview" />
+      <input type="hidden" id="f-logo-url" />
+      <div class="adm-field-hint" id="logo-hint"></div>
+    </div>
+
+    <!-- Site mode -->
+    <div class="adm-field">
+      <label>Site Mode</label>
+      <div class="site-mode-select">
+        <button type="button" class="site-mode-opt site-mode-opt--active" data-mode="active">✅ Active</button>
+        <button type="button" class="site-mode-opt site-mode-opt--coming-soon" data-mode="coming_soon">🚧 Coming Soon</button>
+        <button type="button" class="site-mode-opt site-mode-opt--maintenance" data-mode="maintenance">🔧 Maintenance</button>
+      </div>
+      <input type="hidden" id="f-site-mode" value="active" />
+      <div class="adm-field-hint">Coming Soon and Maintenance redirect all visitors to the relevant page.</div>
     </div>
 
     <div class="adm-field-row">
@@ -180,11 +229,8 @@
         <input type="color" id="f-color" value="#0d9488" />
       </div>
       <div class="adm-field">
-        <label>Active</label>
-        <select id="f-active">
-          <option value="true">Yes — live</option>
-          <option value="false">No — hidden</option>
-        </select>
+        <label>Map zoom (1–18)</label>
+        <input type="number" id="f-zoom" placeholder="13" min="1" max="18" />
       </div>
     </div>
 
@@ -204,11 +250,6 @@
       </div>
     </div>
 
-    <div class="adm-field">
-      <label>Map zoom (1–18)</label>
-      <input type="number" id="f-zoom" placeholder="13" min="1" max="18" />
-    </div>
-
     <div id="js-modal-status" class="adm-modal-status"></div>
 
     <div class="adm-modal__footer">
@@ -222,34 +263,45 @@
 <script src="/supabase.js"></script>
 <script src="/wtdgadmin.js"></script>
 <script src="/wtdgadmin-shell.js"></script>
+<script src="/wtdgadmin-upload.js"></script>
 <script>
 'use strict';
 
-let _sites = [];
+let _sites    = [];
 let _editingId = null;
 
-// ── RENDER GRID ───────────────────────────────────────────
+// ── SITE MODE BADGE ────────────────────────────────────────
+function modeBadge(mode) {
+  const map = {
+    active:      ['active',      'Live'],
+    coming_soon: ['coming-soon', 'Coming Soon'],
+    maintenance: ['maintenance', 'Maintenance'],
+  };
+  const [cls, label] = map[mode] || ['coming-soon', mode];
+  return `<span class="site-card__badge site-card__badge--${cls}">${label}</span>`;
+}
+
+// ── RENDER GRID ────────────────────────────────────────────
 function renderGrid() {
   const grid = document.getElementById('js-sites-grid');
   if (!_sites.length) {
     grid.innerHTML = '<div style="color:var(--adm-mid);font-size:.9rem">No sites found.</div>';
     return;
   }
-  grid.innerHTML = _sites.map(s => `
-    <div class="site-card ${s.active ? '' : 'site-card--inactive'}">
+  grid.innerHTML = _sites.map(s => {
+    const mode = s.site_mode || (s.active ? 'active' : 'coming_soon');
+    return `
+    <div class="site-card ${mode === 'active' ? '' : 'site-card--inactive'}">
       <div class="site-card__header">
         <div>
-          <div class="site-card__name">${s.full_name}</div>
+          ${s.logo_url ? `<img src="${s.logo_url}" class="site-card__logo" alt="${s.full_name} logo" />` : `<div class="site-card__name">${s.full_name}</div>`}
           <span class="site-card__slug">${s.slug}</span>
         </div>
-        <span class="site-card__badge site-card__badge--${s.active ? 'active' : 'inactive'}">
-          ${s.active ? 'Live' : 'Inactive'}
-        </span>
+        ${modeBadge(mode)}
       </div>
       <div class="site-card__domain">
-        🌐 ${s.domain}${s.domain_www ? ` · ${s.domain_www}` : ''}
+        🌐 <a href="https://${s.domain}" target="_blank" style="color:inherit">${s.domain}</a>${s.domain_www ? ` · ${s.domain_www}` : ''}
       </div>
-      ${s.logo_url ? `<div style="font-size:.8rem;color:var(--adm-mid)">Logo: <a href="${s.logo_url}" target="_blank" style="color:var(--adm-teal)">${s.logo_url.split('/').pop()}</a></div>` : ''}
       <div class="site-card__meta">
         ${s.primary_color ? `<span>🎨 ${s.primary_color}</span>` : ''}
         ${s.map_lat ? `<span>📍 ${s.map_lat}, ${s.map_lng} z${s.map_zoom}</span>` : ''}
@@ -257,16 +309,15 @@ function renderGrid() {
       ${s.hero_tagline ? `<div style="font-size:.82rem;color:var(--adm-mid);font-style:italic">"${s.hero_tagline}"</div>` : ''}
       <div class="site-card__actions">
         <button class="adm-btn--xs" onclick="openEdit('${s.id}')">Edit</button>
-        <button class="adm-btn--xs ${s.active ? 'adm-btn--xs--danger' : 'adm-btn--xs--teal'}"
-          onclick="toggleActive('${s.id}', ${!s.active})">
-          ${s.active ? 'Deactivate' : 'Activate'}
-        </button>
+        ${mode !== 'active'      ? `<button class="adm-btn--xs adm-btn--xs--teal"  onclick="setMode('${s.id}','active')">✅ Go Live</button>` : ''}
+        ${mode !== 'coming_soon' ? `<button class="adm-btn--xs adm-btn--xs--warn"  onclick="setMode('${s.id}','coming_soon')">🚧 Coming Soon</button>` : ''}
+        ${mode !== 'maintenance' ? `<button class="adm-btn--xs adm-btn--xs--danger" onclick="setMode('${s.id}','maintenance')">🔧 Maintenance</button>` : ''}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
-// ── LOAD SITES ────────────────────────────────────────────
+// ── LOAD SITES ─────────────────────────────────────────────
 async function loadSites() {
   const { data, error } = await db.from('sites').select('*').order('created_at');
   if (error) { console.error(error); return; }
@@ -274,31 +325,85 @@ async function loadSites() {
   renderGrid();
 }
 
-// ── TOGGLE ACTIVE ─────────────────────────────────────────
-async function toggleActive(id, newVal) {
-  const { error } = await db.from('sites').update({ active: newVal }).eq('id', id);
+// ── SET MODE QUICK ACTION ──────────────────────────────────
+async function setMode(id, mode) {
+  const { error } = await db.from('sites').update({ site_mode: mode, active: mode === 'active' }).eq('id', id);
   if (error) { alert('Error: ' + error.message); return; }
   await loadSites();
 }
-window.toggleActive = toggleActive;
+window.setMode = setMode;
 
-// ── MODAL ─────────────────────────────────────────────────
+// ── SITE MODE BUTTONS ──────────────────────────────────────
+function selectMode(mode) {
+  document.getElementById('f-site-mode').value = mode;
+  document.querySelectorAll('.site-mode-opt').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.mode === mode);
+  });
+}
+
+document.querySelectorAll('.site-mode-opt').forEach(btn => {
+  btn.addEventListener('click', () => selectMode(btn.dataset.mode));
+});
+
+// ── LOGO UPLOAD ────────────────────────────────────────────
+const logoZone    = document.getElementById('logo-upload-zone');
+const logoInput   = document.getElementById('logo-file-input');
+const logoPreview = document.getElementById('logo-preview');
+const logoHint    = document.getElementById('logo-hint');
+
+logoZone.addEventListener('click', () => logoInput.click());
+logoZone.addEventListener('dragover', e => { e.preventDefault(); logoZone.classList.add('adm-upload-zone--over'); });
+logoZone.addEventListener('dragleave', () => logoZone.classList.remove('adm-upload-zone--over'));
+logoZone.addEventListener('drop', e => {
+  e.preventDefault();
+  logoZone.classList.remove('adm-upload-zone--over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleLogoFile(file);
+});
+logoInput.addEventListener('change', () => {
+  if (logoInput.files[0]) handleLogoFile(logoInput.files[0]);
+});
+
+async function handleLogoFile(file) {
+  logoHint.textContent = 'Uploading…';
+  try {
+    const url = await uploadMediaFile(file, 'logos');
+    document.getElementById('f-logo-url').value = url;
+    logoPreview.src = url;
+    logoPreview.style.display = 'block';
+    logoHint.textContent = 'Logo uploaded ✓';
+  } catch (err) {
+    logoHint.textContent = 'Upload failed: ' + (err.message || err);
+  }
+}
+
+// ── MODAL ──────────────────────────────────────────────────
 function openModal(site) {
   _editingId = site?.id || null;
   document.getElementById('js-modal-title').textContent = site ? `Edit — ${site.full_name}` : 'Add city';
-  document.getElementById('f-slug').value        = site?.slug         || '';
-  document.getElementById('f-name').value        = site?.name         || '';
-  document.getElementById('f-full-name').value   = site?.full_name    || '';
-  document.getElementById('f-domain').value      = site?.domain       || '';
-  document.getElementById('f-domain-www').value  = site?.domain_www   || '';
-  document.getElementById('f-logo-url').value    = site?.logo_url     || '';
-  document.getElementById('f-color').value       = site?.primary_color || '#0d9488';
-  document.getElementById('f-active').value      = String(site?.active !== false);
-  document.getElementById('f-tagline').value     = site?.hero_tagline || '';
-  document.getElementById('f-lat').value         = site?.map_lat      || '';
-  document.getElementById('f-lng').value         = site?.map_lng      || '';
-  document.getElementById('f-zoom').value        = site?.map_zoom     || 13;
-  document.getElementById('f-slug').disabled     = !!site; // slug is immutable after creation
+  document.getElementById('f-slug').value       = site?.slug         || '';
+  document.getElementById('f-name').value       = site?.name         || '';
+  document.getElementById('f-full-name').value  = site?.full_name    || '';
+  document.getElementById('f-domain').value     = site?.domain       || '';
+  document.getElementById('f-domain-www').value = site?.domain_www   || '';
+  document.getElementById('f-logo-url').value   = site?.logo_url     || '';
+  document.getElementById('f-color').value      = site?.primary_color || '#0d9488';
+  document.getElementById('f-tagline').value    = site?.hero_tagline || '';
+  document.getElementById('f-lat').value        = site?.map_lat      || '';
+  document.getElementById('f-lng').value        = site?.map_lng      || '';
+  document.getElementById('f-zoom').value       = site?.map_zoom     || 13;
+  document.getElementById('f-slug').disabled    = !!site;
+
+  // Logo preview
+  const existingLogo = site?.logo_url || '';
+  logoPreview.src = existingLogo;
+  logoPreview.style.display = existingLogo ? 'block' : 'none';
+  logoHint.textContent = '';
+
+  // Site mode
+  const mode = site?.site_mode || (site?.active !== false ? 'active' : 'coming_soon');
+  selectMode(mode);
+
   document.getElementById('js-modal-status').textContent = '';
   document.getElementById('js-modal-backdrop').classList.add('adm-modal-backdrop--open');
 }
@@ -314,6 +419,7 @@ function openEdit(id) {
 }
 window.openEdit = openEdit;
 
+// ── SAVE ───────────────────────────────────────────────────
 async function saveSite() {
   const statusEl = document.getElementById('js-modal-status');
   const saveBtn  = document.getElementById('js-modal-save');
@@ -325,7 +431,7 @@ async function saveSite() {
   const domainWww = document.getElementById('f-domain-www').value.trim().toLowerCase().replace(/^https?:\/\//, '') || null;
   const logoUrl   = document.getElementById('f-logo-url').value.trim() || null;
   const color     = document.getElementById('f-color').value;
-  const active    = document.getElementById('f-active').value === 'true';
+  const siteMode  = document.getElementById('f-site-mode').value || 'active';
   const tagline   = document.getElementById('f-tagline').value.trim() || null;
   const lat       = parseFloat(document.getElementById('f-lat').value) || null;
   const lng       = parseFloat(document.getElementById('f-lng').value) || null;
@@ -348,7 +454,8 @@ async function saveSite() {
 
   const payload = {
     name, full_name: fullName, domain, domain_www: domainWww,
-    logo_url: logoUrl, primary_color: color, active,
+    logo_url: logoUrl, primary_color: color,
+    site_mode: siteMode, active: siteMode === 'active',
     hero_tagline: tagline, map_lat: lat, map_lng: lng, map_zoom: zoom,
     updated_at: new Date().toISOString(),
   };
@@ -374,7 +481,7 @@ async function saveSite() {
   setTimeout(closeModal, 800);
 }
 
-// ── EVENTS ────────────────────────────────────────────────
+// ── EVENTS ─────────────────────────────────────────────────
 document.getElementById('js-add-site').addEventListener('click', () => openModal(null));
 document.getElementById('js-modal-cancel').addEventListener('click', closeModal);
 document.getElementById('js-modal-save').addEventListener('click', saveSite);
@@ -382,7 +489,7 @@ document.getElementById('js-modal-backdrop').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-// ── INIT ──────────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   const admin = await requireAdminAuth();
   if (!admin) return;

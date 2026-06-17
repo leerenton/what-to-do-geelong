@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us — What To Do Victoria</title>
+  <meta name="description" content="Get in touch with the What To Do Victoria team — advertising enquiries, partnerships, or general questions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, ::before, ::after { box-sizing: border-box; }
+    :root {
+      --navy: #1a2744; --blue: #1e3a8a; --teal: #0d9488;
+      --gold: #f59e0b; --mid: #6b7280; --border: #e5e7eb;
+      --light: #f8f9fc; --radius: .85rem; --g: 1.25rem;
+    }
+    body { margin: 0; font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
+    .container { max-width: 720px; margin: 0 auto; padding: 0 var(--g); }
+    a { color: inherit; text-decoration: none; }
+
+    .hdr {
+      background: var(--navy); padding: .9rem var(--g);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hdr__logo { display: flex; align-items: center; gap: .65rem; }
+    .hdr__logo img { height: 38px; }
+    .hdr__back { color: rgba(255,255,255,.65); font-size: .85rem; font-weight: 600; transition: color .15s; }
+    .hdr__back:hover { color: #fff; }
+
+    .page-hero {
+      background: var(--navy); color: #fff;
+      padding: 3rem var(--g) 2.5rem; text-align: center;
+    }
+    .page-hero__eyebrow {
+      font-size: .72rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .6rem;
+    }
+    .page-hero__title {
+      font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 900;
+      margin: 0 0 .6rem;
+    }
+    .page-hero__sub { color: rgba(255,255,255,.65); font-size: .95rem; margin: 0; }
+
+    .contact-body { padding: 3rem var(--g); }
+
+    /* CONTACT CARDS */
+    .contact-cards {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem; margin-bottom: 3rem;
+    }
+    .contact-card {
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem; text-align: center;
+    }
+    .contact-card__icon { font-size: 2rem; margin-bottom: .6rem; }
+    .contact-card__label {
+      font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 800;
+      margin-bottom: .35rem;
+    }
+    .contact-card__val { font-size: .83rem; color: var(--mid); line-height: 1.55; }
+    .contact-card__val a { color: var(--teal); font-weight: 600; }
+
+    /* FORM */
+    .contact-form { background: var(--light); border-radius: var(--radius); padding: 2rem; }
+    .contact-form h2 {
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.25rem;
+      margin: 0 0 1.5rem;
+    }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .f-field { display: flex; flex-direction: column; margin-bottom: 1rem; }
+    .f-field label { font-size: .8rem; font-weight: 700; color: #374151; margin-bottom: .35rem; }
+    .f-field input, .f-field select, .f-field textarea {
+      padding: .65rem .8rem; border: 1.5px solid var(--border); border-radius: .5rem;
+      font-family: inherit; font-size: .9rem; background: #fff; color: #111;
+      transition: border-color .15s;
+    }
+    .f-field input:focus, .f-field select:focus, .f-field textarea:focus {
+      outline: none; border-color: var(--blue);
+    }
+    .f-field textarea { resize: vertical; min-height: 130px; }
+    .btn {
+      display: inline-block; padding: .75rem 2rem;
+      border-radius: 99px; font-weight: 800; font-size: .92rem;
+      border: none; cursor: pointer; transition: opacity .15s;
+      font-family: inherit;
+    }
+    .btn:hover { opacity: .88; }
+    .btn--navy { background: var(--navy); color: #fff; }
+    .btn--gold { background: var(--gold); color: var(--navy); }
+    #js-form-status { font-size: .85rem; margin-top: .75rem; min-height: 1.2em; }
+
+    .vic-footer {
+      background: #0d1120; color: rgba(255,255,255,.4);
+      padding: 1.5rem var(--g); text-align: center; font-size: .78rem; margin-top: 3rem;
+    }
+    .vic-footer a { color: rgba(255,255,255,.4); margin: 0 .5rem; }
+    .vic-footer a:hover { color: rgba(255,255,255,.7); }
+
+    @media (max-width: 540px) { .f-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="https://whattodovictoria.com.au" class="hdr__logo">
+    <img src="/assets/wtd_victoria_logo.png" alt="What To Do Victoria"
+         onerror="this.style.display='none'" />
+  </a>
+  <a href="https://whattodovictoria.com.au" class="hdr__back">← Back to Victoria</a>
+</header>
+
+<div class="page-hero">
+  <div class="page-hero__eyebrow">What To Do Victoria</div>
+  <h1 class="page-hero__title">Get in touch</h1>
+  <p class="page-hero__sub">Advertising, partnerships, listing questions — we'd love to hear from you.</p>
+</div>
+
+<div class="contact-body">
+  <div class="container">
+
+    <!-- CONTACT METHODS -->
+    <div class="contact-cards">
+      <div class="contact-card">
+        <div class="contact-card__icon">📧</div>
+        <div class="contact-card__label">General enquiries</div>
+        <div class="contact-card__val"><a href="mailto:hello@whattodovictoria.com.au">hello@whattodovictoria.com.au</a></div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-card__icon">📢</div>
+        <div class="contact-card__label">Advertising</div>
+        <div class="contact-card__val"><a href="mailto:advertise@whattodovictoria.com.au">advertise@whattodovictoria.com.au</a></div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-card__icon">🆘</div>
+        <div class="contact-card__label">Support</div>
+        <div class="contact-card__val"><a href="/support.html">Visit our support page</a> for listing &amp; account help.</div>
+      </div>
+    </div>
+
+    <!-- CONTACT FORM -->
+    <div class="contact-form">
+      <h2>Send us a message</h2>
+
+      <div class="f-row">
+        <div class="f-field">
+          <label for="cf-name">Your name *</label>
+          <input type="text" id="cf-name" placeholder="Lee Renton" required />
+        </div>
+        <div class="f-field">
+          <label for="cf-email">Email address *</label>
+          <input type="email" id="cf-email" placeholder="lee@example.com" required />
+        </div>
+      </div>
+
+      <div class="f-field">
+        <label for="cf-subject">What's it about?</label>
+        <select id="cf-subject">
+          <option value="">— Select a topic —</option>
+          <option value="advertising">Advertising / Boost packages</option>
+          <option value="gold">Gold membership</option>
+          <option value="network">Network-wide campaign</option>
+          <option value="listing">My business listing</option>
+          <option value="partnership">Partnership / collaboration</option>
+          <option value="other">Something else</option>
+        </select>
+      </div>
+
+      <div class="f-field">
+        <label for="cf-message">Message *</label>
+        <textarea id="cf-message" placeholder="Tell us a bit about what you're after…" required></textarea>
+      </div>
+
+      <button class="btn btn--navy" id="js-contact-send">Send message</button>
+      <div id="js-form-status"></div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="vic-footer">
+  <a href="https://whattodovictoria.com.au">What To Do Victoria</a>
+  ·
+  <a href="/support.html">Support</a>
+  ·
+  <a href="mailto:hello@whattodovictoria.com.au">hello@whattodovictoria.com.au</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase.js"></script>
+<script>
+'use strict';
+document.getElementById('js-contact-send').addEventListener('click', async () => {
+  const name    = document.getElementById('cf-name').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const subject = document.getElementById('cf-subject').value;
+  const message = document.getElementById('cf-message').value.trim();
+  const status  = document.getElementById('js-form-status');
+
+  if (!name || !email || !message) {
+    status.style.color = '#ef4444';
+    status.textContent = 'Please fill in your name, email and message.';
+    return;
+  }
+
+  const btn = document.getElementById('js-contact-send');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  status.textContent = '';
+
+  try {
+    const { error } = await db.from('inquiries').insert({
+      name, email,
+      subject: subject || 'General enquiry',
+      message,
+      source: 'contact-page',
+      city: 'victoria',
+    });
+    if (error) throw error;
+    status.style.color = '#059669';
+    status.textContent = '✅ Message sent! We\'ll be in touch shortly.';
+    btn.textContent = 'Sent!';
+    document.getElementById('cf-name').value = '';
+    document.getElementById('cf-email').value = '';
+    document.getElementById('cf-subject').value = '';
+    document.getElementById('cf-message').value = '';
+  } catch (e) {
+    // Fallback: open mailto if DB insert fails
+    const mailto = `mailto:hello@whattodovictoria.com.au?subject=${encodeURIComponent(subject || 'Enquiry')}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)}`;
+    window.location.href = mailto;
+    btn.disabled = false;
+    btn.textContent = 'Send message';
+  }
+});
+</script>
+</body>
+</html>

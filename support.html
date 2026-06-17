@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support — What To Do Victoria</title>
+  <meta name="description" content="Get help with your What To Do listing, account, or advertising. Browse FAQs or contact the support team." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, ::before, ::after { box-sizing: border-box; }
+    :root {
+      --navy: #1a2744; --blue: #1e3a8a; --teal: #0d9488;
+      --gold: #f59e0b; --mid: #6b7280; --border: #e5e7eb;
+      --light: #f8f9fc; --radius: .85rem; --g: 1.25rem;
+    }
+    body { margin: 0; font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 var(--g); }
+    a { color: inherit; text-decoration: none; }
+
+    .hdr {
+      background: var(--navy); padding: .9rem var(--g);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hdr__logo { display: flex; align-items: center; gap: .65rem; }
+    .hdr__logo img { height: 38px; }
+    .hdr__back { color: rgba(255,255,255,.65); font-size: .85rem; font-weight: 600; transition: color .15s; }
+    .hdr__back:hover { color: #fff; }
+
+    .page-hero {
+      background: var(--navy); color: #fff;
+      padding: 3rem var(--g) 2.5rem; text-align: center;
+    }
+    .page-hero__eyebrow {
+      font-size: .72rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .6rem;
+    }
+    .page-hero__title {
+      font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 900; margin: 0 0 .6rem;
+    }
+    .page-hero__sub { color: rgba(255,255,255,.65); font-size: .95rem; margin: 0; }
+
+    .support-body { padding: 3rem var(--g) 4rem; }
+
+    /* FAQ CATEGORIES */
+    .faq-cats {
+      display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 2rem;
+    }
+    .faq-cat {
+      padding: .4rem 1rem; border-radius: 99px;
+      font-size: .82rem; font-weight: 700; cursor: pointer;
+      border: 1.5px solid var(--border); background: #fff;
+      transition: all .15s;
+    }
+    .faq-cat.active, .faq-cat:hover {
+      background: var(--navy); color: #fff; border-color: var(--navy);
+    }
+
+    /* FAQS */
+    .faq-list { margin-bottom: 3rem; }
+    .faq-item {
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      margin-bottom: .65rem; overflow: hidden;
+    }
+    .faq-q {
+      padding: 1rem 1.25rem; font-weight: 700; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: .5rem; background: #fff; transition: background .15s;
+    }
+    .faq-q:hover { background: var(--light); }
+    .faq-q__arrow { font-size: 1rem; flex-shrink: 0; transition: transform .2s; }
+    .faq-item.open .faq-q__arrow { transform: rotate(180deg); }
+    .faq-a {
+      padding: 0 1.25rem; max-height: 0; overflow: hidden;
+      font-size: .88rem; color: var(--mid); line-height: 1.65;
+      transition: max-height .25s ease, padding .25s;
+    }
+    .faq-item.open .faq-a { max-height: 400px; padding: 0 1.25rem 1.1rem; }
+    .faq-a a { color: var(--teal); font-weight: 600; }
+
+    /* SUPPORT FORM */
+    .support-form { background: var(--light); border-radius: var(--radius); padding: 2rem; }
+    .support-form h2 {
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.25rem; margin: 0 0 1.5rem;
+    }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .f-field { display: flex; flex-direction: column; margin-bottom: 1rem; }
+    .f-field label { font-size: .8rem; font-weight: 700; color: #374151; margin-bottom: .35rem; }
+    .f-field input, .f-field select, .f-field textarea {
+      padding: .65rem .8rem; border: 1.5px solid var(--border); border-radius: .5rem;
+      font-family: inherit; font-size: .9rem; background: #fff; color: #111; transition: border-color .15s;
+    }
+    .f-field input:focus, .f-field select:focus, .f-field textarea:focus {
+      outline: none; border-color: var(--blue);
+    }
+    .f-field textarea { resize: vertical; min-height: 120px; }
+    .btn {
+      display: inline-block; padding: .75rem 2rem;
+      border-radius: 99px; font-weight: 800; font-size: .92rem;
+      border: none; cursor: pointer; transition: opacity .15s; font-family: inherit;
+    }
+    .btn:hover { opacity: .88; }
+    .btn--navy { background: var(--navy); color: #fff; }
+    #js-support-status { font-size: .85rem; margin-top: .75rem; min-height: 1.2em; }
+
+    .vic-footer {
+      background: #0d1120; color: rgba(255,255,255,.4);
+      padding: 1.5rem var(--g); text-align: center; font-size: .78rem;
+    }
+    .vic-footer a { color: rgba(255,255,255,.4); margin: 0 .5rem; }
+    .vic-footer a:hover { color: rgba(255,255,255,.7); }
+
+    @media (max-width: 540px) { .f-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="https://whattodovictoria.com.au" class="hdr__logo">
+    <img src="/assets/wtd_victoria_logo.png" alt="What To Do Victoria"
+         onerror="this.style.display='none'" />
+  </a>
+  <a href="https://whattodovictoria.com.au" class="hdr__back">← Back to Victoria</a>
+</header>
+
+<div class="page-hero">
+  <div class="page-hero__eyebrow">Help centre</div>
+  <h1 class="page-hero__title">Support</h1>
+  <p class="page-hero__sub">Browse common questions or send us a support request.</p>
+</div>
+
+<div class="support-body">
+  <div class="container">
+
+    <!-- FAQ CATEGORIES -->
+    <div class="faq-cats">
+      <div class="faq-cat active" data-cat="all">All</div>
+      <div class="faq-cat" data-cat="listing">My listing</div>
+      <div class="faq-cat" data-cat="account">Account</div>
+      <div class="faq-cat" data-cat="gold">Gold membership</div>
+      <div class="faq-cat" data-cat="advertising">Advertising</div>
+      <div class="faq-cat" data-cat="events">Events</div>
+    </div>
+
+    <!-- FAQS -->
+    <div class="faq-list" id="js-faqs">
+
+      <div class="faq-item" data-cat="listing">
+        <div class="faq-q">How do I add my business to the site? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Visit your city's guide and click "List your business" — it's free and takes under 5 minutes. You'll create an account, add your details and your listing goes live once approved. <a href="/business-signup.html">Start here →</a></div>
+      </div>
+
+      <div class="faq-item" data-cat="listing">
+        <div class="faq-q">How do I edit or update my business listing? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Log in to your account on the city site, then go to My Businesses. Click your business name to open the business dashboard where you can edit all your details, update photos, and manage your offers.</div>
+      </div>
+
+      <div class="faq-item" data-cat="listing">
+        <div class="faq-q">My business is on the wrong city — how do I fix it? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Use the support form below and let us know the business name, the city it's currently on, and the city it should be on. We'll update it within 1 business day.</div>
+      </div>
+
+      <div class="faq-item" data-cat="account">
+        <div class="faq-q">I forgot my password — how do I reset it? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">On the login page, click "Forgot password" and enter your email. You'll receive a reset link. Alternatively, if you're logged in, you can change your password in Account → Change password.</div>
+      </div>
+
+      <div class="faq-item" data-cat="account">
+        <div class="faq-q">Can I use one account across multiple cities? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Yes — your account works across all What To Do Victoria sites. You can manage listings in multiple cities from one login, and choose which city email newsletters to subscribe to from your account settings.</div>
+      </div>
+
+      <div class="faq-item" data-cat="gold">
+        <div class="faq-q">What does Gold membership include? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Gold members get featured placement (top of listings), a photo gallery (up to 8 images), special offers & promotions, a direct customer inquiry form, priority in search results, and a Gold badge. It's $25/month per city.</div>
+      </div>
+
+      <div class="faq-item" data-cat="gold">
+        <div class="faq-q">How do I upgrade to Gold? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Email us at <a href="mailto:hello@whattodovictoria.com.au">hello@whattodovictoria.com.au</a> and we'll set you up. Monthly billing — cancel anytime.</div>
+      </div>
+
+      <div class="faq-item" data-cat="advertising">
+        <div class="faq-q">What advertising options are available? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">We offer three advertising products: <strong>Boost Banner</strong> (in-feed ad, from $49/week), <strong>Spotlight</strong> (sticky nav strip, from $79/week), and <strong>Premier</strong> (slide-up mobile impact ad, from $199/30 days). Network-wide campaigns are also available — <a href="/contact.html">contact us to discuss</a>.</div>
+      </div>
+
+      <div class="faq-item" data-cat="advertising">
+        <div class="faq-q">How do I set up a Boost ad? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Boost ads are self-serve — once set up, you upload your banner image and headline in your business dashboard. Contact us at <a href="mailto:advertise@whattodovictoria.com.au">advertise@whattodovictoria.com.au</a> to get started.</div>
+      </div>
+
+      <div class="faq-item" data-cat="events">
+        <div class="faq-q">How do I submit an event? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Go to your city guide and click "Submit an event" in the footer or events page. Events are reviewed and published by our team. For Gold members, events can also be managed directly from the business dashboard.</div>
+      </div>
+
+      <div class="faq-item" data-cat="events">
+        <div class="faq-q">How long until my event is published? <span class="faq-q__arrow">▾</span></div>
+        <div class="faq-a">Most events are reviewed and published within 1–2 business days. If your event is time-sensitive, use the support form below and let us know.</div>
+      </div>
+
+    </div>
+
+    <!-- SUPPORT FORM -->
+    <div class="support-form">
+      <h2>Still need help? Send us a request</h2>
+
+      <div class="f-row">
+        <div class="f-field">
+          <label for="sf-name">Your name *</label>
+          <input type="text" id="sf-name" placeholder="Lee Renton" />
+        </div>
+        <div class="f-field">
+          <label for="sf-email">Email address *</label>
+          <input type="email" id="sf-email" placeholder="lee@example.com" />
+        </div>
+      </div>
+
+      <div class="f-field">
+        <label for="sf-site">Which city site is this about?</label>
+        <select id="sf-site">
+          <option value="">— Select a city —</option>
+          <!-- populated by JS -->
+        </select>
+      </div>
+
+      <div class="f-field">
+        <label for="sf-topic">Topic</label>
+        <select id="sf-topic">
+          <option value="">— Select a topic —</option>
+          <option value="listing">My business listing</option>
+          <option value="account">Account / login</option>
+          <option value="gold">Gold membership</option>
+          <option value="advertising">Advertising / boost</option>
+          <option value="event">Event submission</option>
+          <option value="technical">Technical issue</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="f-field">
+        <label for="sf-message">Describe your issue *</label>
+        <textarea id="sf-message" placeholder="Tell us what's happening — the more detail the better…"></textarea>
+      </div>
+
+      <button class="btn btn--navy" id="js-support-send">Send support request</button>
+      <div id="js-support-status"></div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="vic-footer">
+  <a href="https://whattodovictoria.com.au">What To Do Victoria</a>
+  ·
+  <a href="/contact.html">Contact</a>
+  ·
+  <a href="mailto:hello@whattodovictoria.com.au">hello@whattodovictoria.com.au</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase.js"></script>
+<script>
+'use strict';
+
+// ── FAQ accordion + category filter ─────────────────────────────────────────
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    q.closest('.faq-item').classList.toggle('open');
+  });
+});
+
+document.querySelectorAll('.faq-cat').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.faq-cat').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cat = btn.dataset.cat;
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.style.display = (cat === 'all' || item.dataset.cat === cat) ? '' : 'none';
+    });
+  });
+});
+
+// ── City dropdown ─────────────────────────────────────────────────────────────
+async function loadCities() {
+  const sel = document.getElementById('sf-site');
+  try {
+    const { data } = await db.from('sites').select('slug, name').neq('slug', 'victoria').order('name');
+    (data || []).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.slug; opt.textContent = s.name;
+      sel.appendChild(opt);
+    });
+    // If visiting from a city site, pre-select it
+    const host = window.location.hostname.replace(/^www\./, '');
+    const match = (data || []).find(s => host.includes(s.slug));
+    if (match) sel.value = match.slug;
+  } catch (_) {}
+}
+loadCities();
+
+// ── Support form ──────────────────────────────────────────────────────────────
+document.getElementById('js-support-send').addEventListener('click', async () => {
+  const name    = document.getElementById('sf-name').value.trim();
+  const email   = document.getElementById('sf-email').value.trim();
+  const site    = document.getElementById('sf-site').value;
+  const topic   = document.getElementById('sf-topic').value;
+  const message = document.getElementById('sf-message').value.trim();
+  const status  = document.getElementById('js-support-status');
+
+  if (!name || !email || !message) {
+    status.style.color = '#ef4444';
+    status.textContent = 'Please fill in your name, email and message.';
+    return;
+  }
+
+  const btn = document.getElementById('js-support-send');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  status.textContent = '';
+
+  try {
+    const { error } = await db.from('inquiries').insert({
+      name, email,
+      subject: `Support: ${topic || 'General'} — ${site || 'unspecified city'}`,
+      message,
+      source: 'support-page',
+      city: site || 'victoria',
+    });
+    if (error) throw error;
+    status.style.color = '#059669';
+    status.textContent = '✅ Request received! We\'ll get back to you within 1–2 business days.';
+    btn.textContent = 'Sent!';
+    document.getElementById('sf-name').value = '';
+    document.getElementById('sf-email').value = '';
+    document.getElementById('sf-site').value = '';
+    document.getElementById('sf-topic').value = '';
+    document.getElementById('sf-message').value = '';
+  } catch (e) {
+    // Fallback to mailto
+    const subj = `Support: ${topic || 'General'} [${site || 'unspecified'}]`;
+    const body  = `Name: ${name}\nEmail: ${email}\nCity: ${site}\nTopic: ${topic}\n\n${message}`;
+    window.location.href = `mailto:hello@whattodovictoria.com.au?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+    btn.disabled = false;
+    btn.textContent = 'Send support request';
+  }
+});
+</script>
+</body>
+</html>

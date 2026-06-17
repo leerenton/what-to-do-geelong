@@ -274,8 +274,8 @@
         <a href="/editorial.html">Best of ${cityName}</a>
         <a href="/do.html">${cityName} attractions</a>
         <a href="/eat.html">Where to eat in ${cityName}</a>
-        <a href="#">About us</a>
-        <a href="#">Contact us</a>
+        <a href="/contact.html">Contact us</a>
+        <a href="/support.html">Support</a>
       </div>
     </div>
     ${NETWORK_BAR}

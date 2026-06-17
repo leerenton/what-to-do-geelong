@@ -59,10 +59,17 @@ document.getElementById('js-signup-form')?.addEventListener('submit', async e =>
     setAccount({ id: data.user.id, name, email });
 
     // Auto-subscribe to the city this user signed up on
+    if (window._siteConfigPromise) await window._siteConfigPromise;
     const citySlug = window.SITE?.slug || 'geelong';
     await db.from('user_city_subscriptions').upsert(
       { user_id: data.user.id, city: citySlug, subscribed: true },
       { onConflict: 'user_id,city' }
+    );
+
+    // Save signup city to profile
+    await db.from('profiles').upsert(
+      { id: data.user.id, email, name, city: citySlug },
+      { onConflict: 'id' }
     );
   }
 

@@ -31,6 +31,9 @@
           </span>
           <input type="search" id="js-user-search" placeholder="Search by name or email…" />
         </div>
+        <select class="adm-select" id="js-user-city">
+          <option value="">All cities</option>
+        </select>
         <select class="adm-select" id="js-user-sort">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
@@ -71,9 +74,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!admin) return;
   initAdminShell('Users');
   await loadUsers();
+  await loadCityFilter();
 
   document.getElementById('js-user-search').addEventListener('input', renderTable);
   document.getElementById('js-user-sort').addEventListener('change', renderTable);
+  document.getElementById('js-user-city').addEventListener('change', renderTable);
   document.getElementById('js-modal-close').addEventListener('click', closeModal);
   document.getElementById('js-modal-close2').addEventListener('click', closeModal);
   document.getElementById('js-modal-impersonate').addEventListener('click', impersonateActive);
@@ -90,12 +95,25 @@ async function loadUsers() {
   renderTable();
 }
 
+async function loadCityFilter() {
+  const { data } = await db.from('sites').select('slug, name').neq('slug', 'victoria').order('name');
+  const sel = document.getElementById('js-user-city');
+  (data || []).forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.slug;
+    o.textContent = s.name;
+    sel.appendChild(o);
+  });
+}
+
 function renderTable() {
   const q      = document.getElementById('js-user-search').value.toLowerCase();
   const sort   = document.getElementById('js-user-sort').value;
-  let filtered = allUsers.filter(u =>
-    (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
-  );
+  const city   = document.getElementById('js-user-city').value;
+  let filtered = allUsers.filter(u => {
+    if (city && u.city !== city) return false;
+    return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+  });
   if (sort === 'oldest') filtered.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
   else if (sort === 'name') filtered.sort((a,b) => (a.name||'').localeCompare(b.name||''));
 

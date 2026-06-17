@@ -207,21 +207,34 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
   // Track hero event so featured pair can exclude it
   window._heroEventId = mainEv?.id ?? null;
 
-  // Need at least the main event with an image
-  if (!mainEv) { section.style.display = 'none'; return; }
+  // Business fallback pool (with images), shuffled for variety
+  const bizWithImg = BUSINESSES.filter(b => b.img).sort(() => Math.random() - 0.5);
 
-  // Populate main (left)
+  // Need at least one event OR one business to show the hero
+  if (!mainEv && !bizWithImg.length) { section.style.display = 'none'; return; }
+
+  // Populate main (left) — event preferred, business fallback
   const mainEl  = document.getElementById('js-mh-main');
   const mainImg = document.getElementById('js-mh-main-img');
-  mainEl.href = evLink(mainEv);
-  mainImg.src = mainEv.img;
-  mainImg.alt = mainEv.title;
-  document.getElementById('js-mh-main-badge').textContent = mainEv.category || 'Event';
-  document.getElementById('js-mh-main-title').textContent = mainEv.title;
-  document.getElementById('js-mh-main-sub').textContent =
-    [mainEv.date, mainEv.location].filter(Boolean).join(' · ');
+  if (mainEv) {
+    mainEl.href = evLink(mainEv);
+    mainImg.src = mainEv.img;
+    mainImg.alt = mainEv.title;
+    document.getElementById('js-mh-main-badge').textContent = mainEv.category || 'Event';
+    document.getElementById('js-mh-main-title').textContent = mainEv.title;
+    document.getElementById('js-mh-main-sub').textContent =
+      [mainEv.date, mainEv.location].filter(Boolean).join(' · ');
+  } else {
+    const fallbackBiz = bizWithImg[0];
+    mainEl.href = bizLink(fallbackBiz);
+    mainImg.src = fallbackBiz.img;
+    mainImg.alt = fallbackBiz.name;
+    document.getElementById('js-mh-main-badge').textContent = fallbackBiz.type || 'Place';
+    document.getElementById('js-mh-main-title').textContent = fallbackBiz.name;
+    document.getElementById('js-mh-main-sub').textContent = fallbackBiz.suburb || '';
+  }
 
-  // Populate top-right (article or fallback event)
+  // Populate top-right — article > event > business fallback
   const topEl  = document.getElementById('js-mh-top');
   const topImg = document.getElementById('js-mh-top-img');
   if (article) {
@@ -237,6 +250,13 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
     topImg.alt = btmEv.title;
     document.getElementById('js-mh-top-badge').textContent = btmEv.category || 'Event';
     document.getElementById('js-mh-top-title').textContent = btmEv.title;
+  } else if (bizWithImg[1]) {
+    const fb = bizWithImg[1];
+    topEl.href = bizLink(fb);
+    topImg.src = fb.img;
+    topImg.alt = fb.name;
+    document.getElementById('js-mh-top-badge').textContent = fb.type || 'Place';
+    document.getElementById('js-mh-top-title').textContent = fb.name;
   }
 
   // Populate bottom-right — random business, sticky for 1 hour
@@ -274,8 +294,10 @@ function renderMasonryHero(events, articles, settings, trendingScores) {
 
   // Cache hero image for instant display on next visit
   try {
-    const heroCache = { img: mainEv.img, title: mainEv.title, ts: Date.now() };
-    localStorage.setItem('wtdg_hero_cache', JSON.stringify(heroCache));
+    if (mainEv) {
+      const heroCache = { img: mainEv.img, title: mainEv.title, ts: Date.now() };
+      localStorage.setItem('wtdg_hero_cache', JSON.stringify(heroCache));
+    }
   } catch(e) {}
 
   // Hide skeleton, reveal real hero

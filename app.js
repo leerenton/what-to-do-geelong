@@ -1545,6 +1545,24 @@ async function initListingPage() {
     return;
   }
 
+  // Cross-city redirect — if this listing belongs to a different city,
+  // send the visitor to the correct domain
+  const bizCity = biz.city || biz.citySlug;
+  const currentCity = window.SITE?.slug || 'geelong';
+  if (bizCity && bizCity !== currentCity) {
+    try {
+      const { data: targetSite } = await db.from('sites')
+        .select('domain')
+        .eq('slug', bizCity)
+        .eq('site_mode', 'active')
+        .single();
+      if (targetSite?.domain) {
+        window.location.replace(`https://${targetSite.domain}/${biz.slug || slugify(biz.name)}`);
+        return;
+      }
+    } catch (_) {}
+  }
+
   // Show pending notice to the owner
   if (biz.status === 'pending') {
     const session = await db.auth.getSession();

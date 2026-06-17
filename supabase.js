@@ -83,7 +83,6 @@ async function loadSiteConfig() {
       .from('sites')
       .select('*')
       .or(`domain.eq.${hostname},domain_www.eq.${window.location.hostname}`)
-      .eq('active', true)
       .single();
     if (error || !data) return SITE_FALLBACK;
     const site = camelize(data);

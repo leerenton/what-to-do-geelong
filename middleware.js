@@ -5,8 +5,8 @@ import { NextResponse } from 'next/server';
 const CITY_ROOTS = {
   'whattodovictoria.com.au':     '/victoria.html',
   'www.whattodovictoria.com.au': '/victoria.html',
-  'whattodoballarat.com.au':     '/comingsoon.html',
-  'www.whattodoballarat.com.au': '/comingsoon.html',
+  'whattodoballarat.com.au':     '/index.html',
+  'www.whattodoballarat.com.au': '/index.html',
   // 'whattodobendigo.com.au':      '/bendigo.html',
   // 'whattodomelbourne.com.au':    '/melbourne.html',
 };

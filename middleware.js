@@ -34,16 +34,28 @@ const PASSTHROUGH_RE = /^\/(api|_next|_vercel|wtdgadmin|assets)\//;
 
 // ── Page type detection ───────────────────────────────────────────────────────
 function getPageType(pathname) {
-  const p = pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+  // .html extension = a known page file, never a business slug
+  if (pathname.endsWith('.html')) return 'other';
+
+  const p = pathname.replace(/\/$/, '') || '/';
   if (p === '/' || p === '/index') return 'home';
-  if (p.startsWith('/eat'))    return 'eat';
-  if (p.startsWith('/drink'))  return 'drink';
-  if (p.startsWith('/do'))     return 'do';
-  if (p.startsWith('/events')) return 'events';
-  if (p.startsWith('/news'))   return 'other';
-  if (p.startsWith('/guide'))  return 'other';
+  if (p.startsWith('/eat'))      return 'eat';
+  if (p.startsWith('/drink'))    return 'drink';
+  if (p.startsWith('/do'))       return 'do';
+  if (p.startsWith('/events'))   return 'events';
+  if (p.startsWith('/news'))     return 'other';
+  if (p.startsWith('/guide'))    return 'other';
   if (p.startsWith('/giveaway')) return 'other';
-  // Single-segment clean path = business listing
+  if (p.startsWith('/promote'))  return 'other';
+  if (p.startsWith('/account'))  return 'other';
+  if (p.startsWith('/login'))    return 'other';
+  if (p.startsWith('/signup'))   return 'other';
+  if (p.startsWith('/support'))  return 'other';
+  if (p.startsWith('/contact'))  return 'other';
+  if (p.startsWith('/victoria')) return 'other';
+  if (p.startsWith('/advertise'))return 'other';
+  if (p.startsWith('/upgrade'))  return 'other';
+  // Single-segment clean path with no known prefix = business listing slug
   const seg = p.replace(/^\//, '');
   if (seg && !seg.includes('/')) return 'listing';
   return 'other';

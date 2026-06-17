@@ -95,6 +95,7 @@
       const { data: ads } = await db
         .from('promotions')
         .select('package, ad_image_url, ad_link_url, ad_headline, ad_body')
+        .eq('city', window.SITE?.slug || 'geelong')
         .eq('package', 'premier')
         .eq('ad_live', true)
         .gt('ends_at', new Date().toISOString())

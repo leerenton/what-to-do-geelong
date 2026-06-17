@@ -29,11 +29,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="auth-card">
 
       <div class="auth-logo">
-        <a href="index.html"><img src="/assets/logo.jpg" alt="What To Do Geelong" /></a>
+        <a href="index.html"><img src="/assets/logo.jpg" alt="What To Do" id="js-auth-logo" /></a>
       </div>
 
       <h1 class="auth-title">Welcome back</h1>
-      <p class="auth-sub">Log in to your WTDG account</p>
+      <p class="auth-sub" id="js-auth-sub">Log in to your account</p>
 
       <!-- Social logins (placeholders) -->
       <div class="auth-socials">
@@ -83,5 +83,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script src="/auth.js"></script>
   <script src="/guides.js"></script>
   <script src="/login.js"></script>
+  <script>
+    (async () => {
+      if (window._siteConfigPromise) await window._siteConfigPromise;
+      const city = window.SITE?.name || 'Geelong';
+      const logo = window.SITE?.logoUrl;
+      document.title = `Login — What To Do ${city}`;
+      const imgEl = document.getElementById('js-auth-logo');
+      if (imgEl) {
+        imgEl.alt = `What To Do ${city}`;
+        if (logo) imgEl.src = logo;
+      }
+      const sub = document.getElementById('js-auth-sub');
+      if (sub) sub.textContent = `Log in to your What To Do ${city} account`;
+    })();
+  </script>
 </body>
 </html>

@@ -29,11 +29,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="auth-card">
 
       <div class="auth-logo">
-        <a href="index.html"><img src="/assets/logo.jpg" alt="What To Do Geelong" /></a>
+        <a href="index.html"><img src="/assets/logo.jpg" alt="What To Do" id="js-auth-logo" /></a>
       </div>
 
       <h1 class="auth-title">Create your account</h1>
-      <p class="auth-sub">Save your Geelong itinerary, enter giveaways, and list your business</p>
+      <p class="auth-sub" id="js-auth-sub">Save your itinerary, enter giveaways, and list your business</p>
 
       <div class="auth-socials">
         <button class="auth-social-btn" id="js-google-btn">
@@ -85,5 +85,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script src="/analytics.js?v=1"></script>
   <script src="/auth.js"></script>
   <script src="/signup.js"></script>
+  <script>
+    (async () => {
+      if (window._siteConfigPromise) await window._siteConfigPromise;
+      const city = window.SITE?.name || 'Geelong';
+      const logo = window.SITE?.logoUrl;
+      document.title = `Create Account — What To Do ${city}`;
+      const imgEl = document.getElementById('js-auth-logo');
+      if (imgEl) {
+        imgEl.alt = `What To Do ${city}`;
+        if (logo) imgEl.src = logo;
+      }
+      const sub = document.getElementById('js-auth-sub');
+      if (sub) sub.textContent = `Save your ${city} itinerary, enter giveaways, and list your business`;
+    })();
+  </script>
 </body>
 </html>

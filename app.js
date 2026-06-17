@@ -776,6 +776,7 @@ async function loadActiveAds() {
     const { data, error } = await window.db
       .from('promotions')
       .select('id, business_id, package, ad_image_url, ad_link_url, ad_headline, ad_body, ends_at')
+      .eq('city', window.SITE?.slug || 'geelong')
       .eq('ad_live', true)
       .gt('ends_at', now)
       .in('package', ['boost', 'spotlight', 'premier']);

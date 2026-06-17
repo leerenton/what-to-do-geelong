@@ -190,8 +190,16 @@ async function handleCheckoutComplete(session) {
 
     const amountTotal = session.amount_total || 0; // cents
 
+    // Look up business city so the promotion is scoped to the right city
+    let bizCity = 'geelong';
+    try {
+      const bizRows = await sbGet('businesses', `id=eq.${encodeURIComponent(bizId)}&select=city`);
+      if (bizRows?.[0]?.city) bizCity = bizRows[0].city;
+    } catch (_) {}
+
     await sbPost('promotions', {
       business_id:       bizId,
+      city:              bizCity,
       item_type:         itemType || 'event',
       item_id:           String(itemId || ''),
       package:           baseType,

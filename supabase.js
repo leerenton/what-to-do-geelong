@@ -127,8 +127,8 @@ function injectAnalytics(site) {
     head.appendChild(s);
   }
 
-  // Google Analytics (GA4) — only if no GTM (GTM usually includes GA)
-  if (site.gaId && !site.gtmId) {
+  // Google Analytics (GA4)
+  if (site.gaId) {
     const s1 = document.createElement('script');
     s1.async = true;
     s1.src = `https://www.googletagmanager.com/gtag/js?id=${site.gaId}`;

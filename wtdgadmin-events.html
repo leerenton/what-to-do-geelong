@@ -137,6 +137,9 @@
           <option>Community</option><option>Workshops</option><option>Sports</option>
           <option>Theatre</option><option>Comedy</option><option>Festival</option>
         </select>
+        <select class="adm-select" id="js-ev-city">
+          <option value="">All cities</option>
+        </select>
         <select class="adm-select" id="js-ev-sort">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
@@ -170,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('js-ev-save').addEventListener('click', saveEvent);
   document.getElementById('js-ev-delete').addEventListener('click', deleteEvent);
 
-  ['js-ev-search','js-ev-cat','js-ev-sort'].forEach(id => {
+  ['js-ev-search','js-ev-cat','js-ev-city','js-ev-sort'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', renderTable);
     document.getElementById(id)?.addEventListener('change', renderTable);
   });
@@ -192,8 +195,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     folder: 'events',
   });
 
-  await Promise.all([loadEvents(), loadBizList()]);
+  await Promise.all([loadEvents(), loadBizList(), loadCityFilter('js-ev-city')]);
 });
+
+async function loadCityFilter(selectId) {
+  const { data } = await db.from('sites').select('slug, name').order('name');
+  const sel = document.getElementById(selectId);
+  if (!sel || !data) return;
+  data.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.slug; opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+}
 
 async function loadBizList() {
   const { data } = await db.from('businesses').select('id,name').order('name');
@@ -230,10 +244,12 @@ function sc(label, value, v='') {
 function renderTable() {
   const q    = document.getElementById('js-ev-search').value.toLowerCase();
   const cat  = document.getElementById('js-ev-cat').value;
+  const city = document.getElementById('js-ev-city').value;
   const sort = document.getElementById('js-ev-sort').value;
   let list   = allEvents.filter(e =>
-    (!q   || (e.title||'').toLowerCase().includes(q) || (e.location||'').toLowerCase().includes(q)) &&
-    (!cat || (e.category||'') === cat)
+    (!q    || (e.title||'').toLowerCase().includes(q) || (e.location||'').toLowerCase().includes(q)) &&
+    (!cat  || (e.category||'') === cat) &&
+    (!city || (e.city||'geelong') === city)
   );
   if (sort === 'oldest') list.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
   else if (sort === 'alpha') list.sort((a,b) => (a.title||'').localeCompare(b.title||''));

@@ -33,6 +33,9 @@
           </span>
           <input type="search" id="js-offer-search" placeholder="Search offers…" />
         </div>
+        <select class="adm-select" id="js-offer-city">
+          <option value="">All cities</option>
+        </select>
         <select class="adm-select" id="js-offer-sort">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
@@ -58,12 +61,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   const admin = await requireAdminAuth();
   if (!admin) return;
   initAdminShell('Offers & Promos');
-  await loadOffers();
-  ['js-offer-search','js-offer-sort'].forEach(id => {
+  await Promise.all([loadOffers(), loadCityFilter('js-offer-city')]);
+  ['js-offer-search','js-offer-city','js-offer-sort'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', renderOffers);
     document.getElementById(id)?.addEventListener('change', renderOffers);
   });
 });
+
+async function loadCityFilter(selectId) {
+  const { data } = await db.from('sites').select('slug, name').order('name');
+  const sel = document.getElementById(selectId);
+  if (!sel || !data) return;
+  data.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.slug; opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+}
 
 async function loadOffers() {
   const { data, error } = await db.from('promos').select('*').order('created_at', { ascending: false });
@@ -89,10 +103,14 @@ function sc(l,v,variant=''){return`<div class="adm-stat${variant?' adm-stat--'+v
 
 function renderOffers() {
   const q    = document.getElementById('js-offer-search').value.toLowerCase();
+  const city = document.getElementById('js-offer-city').value;
   const sort = document.getElementById('js-offer-sort').value;
   const now  = new Date();
 
-  let list = allOffers.filter(o => (o.title||o.name||'').toLowerCase().includes(q));
+  let list = allOffers.filter(o =>
+    (o.title||o.name||'').toLowerCase().includes(q) &&
+    (!city || (o.city||'geelong') === city)
+  );
   if (sort === 'oldest') list.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
   else if (sort === 'expiry') list.sort((a,b) => new Date(a.expires_at||'9999')-new Date(b.expires_at||'9999'));
 

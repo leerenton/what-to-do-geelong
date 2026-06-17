@@ -234,6 +234,9 @@
           <option value="claimed">Claimed</option>
           <option value="unclaimed">Unclaimed</option>
         </select>
+        <select class="adm-select" id="js-biz-city">
+          <option value="">All cities</option>
+        </select>
         <select class="adm-select" id="js-biz-sort">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
@@ -267,7 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('js-biz-save').addEventListener('click', saveBusiness);
   document.getElementById('js-biz-delete').addEventListener('click', deleteBusiness);
 
-  ['js-biz-search','js-biz-tier','js-biz-claimed','js-biz-sort'].forEach(id => {
+  ['js-biz-search','js-biz-tier','js-biz-claimed','js-biz-city','js-biz-sort'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', renderTable);
     document.getElementById(id)?.addEventListener('change', renderTable);
   });
@@ -287,8 +290,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     folder: 'businesses',
   });
 
-  await loadBiz();
+  await Promise.all([loadCityFilter('js-biz-city'), loadBiz()]);
 });
+
+async function loadCityFilter(selectId) {
+  const { data } = await db.from('sites').select('slug, name').order('name');
+  const sel = document.getElementById(selectId);
+  if (!sel || !data) return;
+  (data || []).forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.slug; opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+}
 
 async function loadBiz() {
   const { data, error } = await db.from('businesses').select('*').order('created_at', { ascending: false });
@@ -317,13 +331,15 @@ function renderTable() {
   const q       = document.getElementById('js-biz-search').value.toLowerCase();
   const tier    = document.getElementById('js-biz-tier').value;
   const claimed = document.getElementById('js-biz-claimed').value;
+  const city    = document.getElementById('js-biz-city').value;
   const sort    = document.getElementById('js-biz-sort').value;
 
   let list = allBiz.filter(b => {
     const mQ = (b.name||'').toLowerCase().includes(q) || (b.suburb||'').toLowerCase().includes(q);
     const mT = !tier    || (b.plan||'free') === tier;
     const mC = !claimed || (claimed==='claimed' && b.is_claimed) || (claimed==='unclaimed' && !b.is_claimed);
-    return mQ && mT && mC;
+    const mCity = !city || (b.city||'geelong') === city;
+    return mQ && mT && mC && mCity;
   });
 
   if (sort === 'oldest') list.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));

@@ -2963,6 +2963,13 @@ function initEatPage() {
   const root = document.getElementById('js-eat-root');
   if (!root) return;
 
+  // Dynamic city name in hero
+  const cn = cityName();
+  const eyebrow = document.getElementById('js-eat-eyebrow');
+  const sub     = document.getElementById('js-eat-sub');
+  if (eyebrow) eyebrow.textContent = `🍽️ ${cn}'s food scene`;
+  if (sub)     sub.textContent     = `From local favourites to hidden gems — discover ${cn}'s best bites.`;
+
   const eatBiz = BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('eat') : b.section === 'eat'));
 
   function renderEat(items) {
@@ -3002,6 +3009,12 @@ function initDrinkPage() {
   const root = document.getElementById('js-drink-root');
   if (!root) return;
 
+  const cn = cityName();
+  const eyebrow = document.getElementById('js-drink-eyebrow');
+  const sub     = document.getElementById('js-drink-sub');
+  if (eyebrow) eyebrow.textContent = `🍺 ${cn}'s bar scene`;
+  if (sub)     sub.textContent     = `Craft beer, cocktail bars, wineries and local pubs — ${cn}'s best spots to raise a glass.`;
+
   const drinkBiz = BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('drink') : b.section === 'drink'));
 
   function renderDrink(items) {
@@ -3040,6 +3053,12 @@ function initDrinkPage() {
 function initDoPage() {
   const root = document.getElementById('js-do-root');
   if (!root) return;
+
+  const cn = cityName();
+  const eyebrow = document.getElementById('js-do-eyebrow');
+  const sub     = document.getElementById('js-do-sub');
+  if (eyebrow) eyebrow.textContent = `🎯 Things to do in ${cn}`;
+  if (sub)     sub.textContent     = `Adventures, attractions and experiences — the best of ${cn}.`;
 
   const doBiz = BUSINESSES.filter(b => (b.sections?.length ? b.sections.includes('do') : b.section === 'do'));
 

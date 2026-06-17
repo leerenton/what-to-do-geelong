@@ -28,7 +28,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="bsign-wrap">
 
     <div class="bsign-topbar">
-      <a href="index.html" class="bsign-logo"><img src="/assets/logo.jpg" alt="What To Do Geelong" /></a>
+      <a href="index.html" class="bsign-logo"><img id="js-bsign-logo" src="/assets/logo.jpg" alt="What To Do" /></a>
       <button class="bsign-back" id="js-bsign-back" style="display:none">← Back</button>
     </div>
 
@@ -37,18 +37,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- SCREEN 1: Claim or Create -->
     <div class="bsign-screen active" id="bs-s1">
       <div class="bsign-step-label">Step 1 of 5</div>
-      <h1 class="bsign-title">Is your business already on WTDG?</h1>
+      <h1 class="bsign-title">Is your business already on <span class="js-site-abbr">WTDG</span>?</h1>
       <p class="bsign-sub">You can claim an existing listing or create a brand new one.</p>
       <div class="bsign-choice-grid">
         <button class="bsign-choice" id="js-choice-claim" data-value="claim">
           <span class="bsign-choice__icon">🔍</span>
           <span class="bsign-choice__label">Claim listing</span>
-          <span class="bsign-choice__sub">Already listed on WTDG</span>
+          <span class="bsign-choice__sub">Already listed on <span class="js-site-abbr">WTDG</span></span>
         </button>
         <button class="bsign-choice" id="js-choice-create" data-value="create">
           <span class="bsign-choice__icon">✨</span>
           <span class="bsign-choice__label">Create new</span>
-          <span class="bsign-choice__sub">Not on WTDG yet</span>
+          <span class="bsign-choice__sub">Not on <span class="js-site-abbr">WTDG</span> yet</span>
         </button>
       </div>
       <button class="bsign-next" id="js-s1-next" disabled>Continue →</button>
@@ -72,7 +72,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="bsign-screen" id="bs-s2">
       <div class="bsign-step-label">Step 2 of 5</div>
       <h1 class="bsign-title">Tell us about your business</h1>
-      <p class="bsign-sub">This information will appear on your WTDG listing.</p>
+      <p class="bsign-sub">This information will appear on your <span class="js-site-abbr">WTDG</span> listing.</p>
 
       <div class="bsign-step-label" style="margin-bottom:.65rem">Business type</div>
       <div class="bsign-type-grid" id="js-btype-grid">
@@ -134,7 +134,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="bsign-plan__radio"></div>
           </div>
           <div class="bsign-plan__features">
-            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Listed on WTDG</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Listed on <span class="js-site-abbr">WTDG</span></div>
             <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 events</div>
             <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 offers</div>
             <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Enquiry form</div>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <h1 class="bsign-done__title">You're listed!</h1>
         <p class="bsign-done__sub" id="js-bsign-done-sub">Your business is now live on What To Do Geelong. Head to your dashboard to add events, offers, and photos.</p>
         <a href="business-dashboard.html" class="btn btn--teal btn--lg" style="margin-top:.5rem">Go to my dashboard →</a>
-        <a href="index.html" class="btn btn--outline" style="margin-top:.5rem">Back to WTDG</a>
+        <a href="index.html" class="btn btn--outline" style="margin-top:.5rem">Back to <span class="js-site-abbr">WTDG</span></a>
       </div>
     </div>
 
@@ -249,6 +249,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <script src="/analytics.js?v=1"></script>
   <script src="/auth.js"></script>
   <script src="/app.js"></script>
+  <script>
+    (async () => {
+      if (window._siteConfigPromise) await window._siteConfigPromise;
+      const site = window.SITE || {};
+      // Logo
+      const logo = document.getElementById('js-bsign-logo');
+      if (logo) {
+        if (site.logoUrl) logo.src = site.logoUrl;
+        if (site.fullName) logo.alt = site.fullName;
+      }
+      // Abbreviation (WTDG, WTDB etc.)
+      const abbr = site.abbreviation || (site.fullName ? site.fullName.split(' ').map(w=>w[0]).join('') : 'WTDG');
+      document.querySelectorAll('.js-site-abbr').forEach(el => el.textContent = abbr);
+    })();
+  </script>
   <script src="/business-signup.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHUrQ0uu0j0VDjigRhxoS44h-9Y4p1PZY&libraries=places&callback=initPlacesAutocomplete" async defer></script>
   <script src="/premier-ad.js?v=1"></script>

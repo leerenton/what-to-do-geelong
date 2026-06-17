@@ -32,6 +32,7 @@ export async function middleware(request) {
             apikey:        SUPABASE_KEY,
             Authorization: `Bearer ${SUPABASE_KEY}`,
           },
+          cache: 'no-store',
         }
       );
       if (res.ok) {

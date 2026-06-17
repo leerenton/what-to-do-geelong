@@ -21,14 +21,25 @@ export default async function middleware(request) {
   const hostname = url.hostname;
   const pathname = url.pathname;
 
-  // ── Admin subdomain: rewrite all paths to /wtdgadmin/* ────────────────────
+  // ── Admin subdomain: map paths to wtdgadmin HTML files ───────────────────
   if (hostname === ADMIN_HOSTNAME) {
-    // / or /dash → /wtdgadmin/dash
-    // /sites      → /wtdgadmin/sites
-    // Fetch from the main deployment origin to avoid middleware re-entry
-    const clean = pathname === '/' ? '/dash' : pathname;
-    const origin = 'https://whattodogeelong.com.au';
-    return fetch(`${origin}/wtdgadmin${clean}${url.search}`);
+    const ADMIN_PAGES = {
+      '/':            '/wtdgadmin-dash.html',
+      '/dash':        '/wtdgadmin-dash.html',
+      '/sites':       '/wtdgadmin-sites.html',
+      '/businesses':  '/wtdgadmin-businesses.html',
+      '/events':      '/wtdgadmin-events.html',
+      '/offers':      '/wtdgadmin-offers.html',
+      '/promotions':  '/wtdgadmin-promotions.html',
+      '/revenue':     '/wtdgadmin-revenue.html',
+      '/users':       '/wtdgadmin-users.html',
+      '/content':     '/wtdgadmin-content.html',
+      '/homepage':    '/wtdgadmin-homepage.html',
+      '/inquiries':   '/wtdgadmin-inquiries.html',
+    };
+    const target = ADMIN_PAGES[pathname];
+    if (target) return fetch(new URL(target, request.url));
+    return; // pass through (assets, login.html, etc.)
   }
 
   if (pathname !== '/') return; // only intercept root for other domains

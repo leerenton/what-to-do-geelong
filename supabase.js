@@ -103,8 +103,58 @@ window._siteConfigPromise = loadSiteConfig().then(site => {
     if (titleEl) titleEl.textContent = titleEl.textContent.replace(/Geelong/g, site.name);
     if (descEl)  descEl.setAttribute('content', descEl.getAttribute('content').replace(/Geelong/g, site.name));
   }
+
+  // Inject site-specific analytics tags
+  injectAnalytics(site);
+
   return site;
 });
+
+function injectAnalytics(site) {
+  const head = document.head;
+
+  // Google Tag Manager
+  if (site.gtmId) {
+    // GTM noscript iframe — append to body when ready
+    const noscript = document.createElement('noscript');
+    noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${site.gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+    if (document.body) document.body.prepend(noscript);
+    else document.addEventListener('DOMContentLoaded', () => document.body.prepend(noscript));
+
+    // GTM script tag
+    const s = document.createElement('script');
+    s.innerHTML = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${site.gtmId}');`;
+    head.appendChild(s);
+  }
+
+  // Google Analytics (GA4) — only if no GTM (GTM usually includes GA)
+  if (site.gaId && !site.gtmId) {
+    const s1 = document.createElement('script');
+    s1.async = true;
+    s1.src = `https://www.googletagmanager.com/gtag/js?id=${site.gaId}`;
+    head.appendChild(s1);
+
+    const s2 = document.createElement('script');
+    s2.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${site.gaId}');`;
+    head.appendChild(s2);
+  }
+
+  // Google AdSense
+  if (site.adsenseId) {
+    const s = document.createElement('script');
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.adsenseId}`;
+    head.appendChild(s);
+  }
+
+  // Meta (Facebook) Pixel
+  if (site.metaPixelId) {
+    const s = document.createElement('script');
+    s.innerHTML = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${site.metaPixelId}');fbq('track','PageView');`;
+    head.appendChild(s);
+  }
+}
 
 // ── SLUG UTILITY ─────────────────────────────────────────
 function slugify(str) {

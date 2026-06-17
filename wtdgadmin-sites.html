@@ -257,6 +257,26 @@
       </div>
     </div>
 
+    <!-- ANALYTICS -->
+    <div style="font-size:.75rem;font-weight:700;color:var(--adm-mid);text-transform:uppercase;letter-spacing:.05em;margin:1.25rem 0 .75rem">Analytics &amp; Tracking</div>
+
+    <div class="adm-field">
+      <label>Google Analytics ID <span style="font-weight:400;color:var(--adm-mid)">(G-XXXXXXXXXX or UA-XXXXXXXX-X)</span></label>
+      <input type="text" id="f-ga-id" placeholder="G-XXXXXXXXXX" />
+    </div>
+    <div class="adm-field">
+      <label>Google Tag Manager ID <span style="font-weight:400;color:var(--adm-mid)">(GTM-XXXXXXX)</span></label>
+      <input type="text" id="f-gtm-id" placeholder="GTM-XXXXXXX" />
+    </div>
+    <div class="adm-field">
+      <label>Google AdSense Publisher ID <span style="font-weight:400;color:var(--adm-mid)">(ca-pub-XXXXXXXXXXXXXXXX)</span></label>
+      <input type="text" id="f-adsense-id" placeholder="ca-pub-XXXXXXXXXXXXXXXX" />
+    </div>
+    <div class="adm-field">
+      <label>Meta Pixel ID <span style="font-weight:400;color:var(--adm-mid)">(Facebook / Instagram)</span></label>
+      <input type="text" id="f-meta-pixel-id" placeholder="1234567890" />
+    </div>
+
     <div id="js-modal-status" class="adm-modal-status"></div>
 
     <div class="adm-modal__footer">
@@ -400,7 +420,11 @@ function openModal(site) {
   document.getElementById('f-tagline').value    = site?.hero_tagline || '';
   document.getElementById('f-lat').value        = site?.map_lat      || '';
   document.getElementById('f-lng').value        = site?.map_lng      || '';
-  document.getElementById('f-zoom').value       = site?.map_zoom     || 13;
+  document.getElementById('f-zoom').value          = site?.map_zoom       || 13;
+  document.getElementById('f-ga-id').value         = site?.ga_id          || '';
+  document.getElementById('f-gtm-id').value        = site?.gtm_id         || '';
+  document.getElementById('f-adsense-id').value    = site?.adsense_id     || '';
+  document.getElementById('f-meta-pixel-id').value = site?.meta_pixel_id  || '';
   document.getElementById('f-slug').disabled    = !!site;
 
   // Logo preview
@@ -462,11 +486,17 @@ async function saveSite() {
   statusEl.textContent = 'Saving…';
   statusEl.className = 'adm-modal-status';
 
+  const gaId       = document.getElementById('f-ga-id').value.trim()         || null;
+  const gtmId      = document.getElementById('f-gtm-id').value.trim()        || null;
+  const adsenseId  = document.getElementById('f-adsense-id').value.trim()    || null;
+  const metaPixelId= document.getElementById('f-meta-pixel-id').value.trim() || null;
+
   const payload = {
     name, full_name: fullName, abbreviation, domain, domain_www: domainWww,
     logo_url: logoUrl, primary_color: color,
     site_mode: siteMode, active: siteMode === 'active',
     hero_tagline: tagline, map_lat: lat, map_lng: lng, map_zoom: zoom,
+    ga_id: gaId, gtm_id: gtmId, adsense_id: adsenseId, meta_pixel_id: metaPixelId,
     updated_at: new Date().toISOString(),
   };
 

@@ -55,20 +55,24 @@ document.getElementById('js-claim-search').addEventListener('input', function ()
 
   clearTimeout(claimSearchTimer);
   claimSearchTimer = setTimeout(async () => {
-    // Search Supabase first (unclaimed businesses only)
+    const citySlug = window.SITE?.slug || 'geelong';
+
+    // Search Supabase first (unclaimed businesses in current city only)
     let supabaseMatches = [];
     try {
       const { data } = await db.from('businesses')
         .select('id, name, type, suburb, emoji, color, location, website, description, owner_id, is_claimed')
         .or(`name.ilike.%${q}%,suburb.ilike.%${q}%`)
+        .eq('city', citySlug)
         .is('owner_id', null)
         .limit(10);
       supabaseMatches = data || [];
     } catch (_) {}
 
-    // Also search local BUSINESSES array (unclaimed = no owner_id)
+    // Also search local BUSINESSES array (unclaimed, current city only)
     const localMatches = (typeof BUSINESSES !== 'undefined' ? BUSINESSES : []).filter(b =>
-      (b.name.toLowerCase().includes(q) || b.suburb?.toLowerCase().includes(q))
+      (b.name.toLowerCase().includes(q) || b.suburb?.toLowerCase().includes(q)) &&
+      (b.city || 'geelong') === citySlug
     );
 
     // Merge — Supabase takes priority, add local ones not already in results

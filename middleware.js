@@ -96,7 +96,7 @@ async function storeCachedPage(key, html, city) {
 }
 
 // ── HTML enhancement ──────────────────────────────────────────────────────────
-function enhanceHtml(html, { cityName, citySlug, pageType, biz, businesses }) {
+function enhanceHtml(html, { cityName, citySlug, pageType, biz, businesses, eventsData }) {
   let out = html;
 
   // 1. Replace Geelong → actual city name in title + meta
@@ -118,10 +118,13 @@ function enhanceHtml(html, { cityName, citySlug, pageType, biz, businesses }) {
     const bizTitle = `${biz.name} — ${biz.suburb || cityName} | What To Do ${cityName}`;
     const bizDesc  = (biz.description || `${biz.name} in ${biz.suburb || cityName}. Discover more on What To Do ${cityName}.`).slice(0, 155);
 
+    const bizUrl = `https://whattodo${citySlug}.com.au/${biz.slug}`;
     out = out.replace(/<title>[^<]*<\/title>/, `<title>${bizTitle}</title>`);
     out = out.replace(/(meta[^>]+name="description"[^>]+content=")[^"]*"/, `$1${bizDesc}"`);
     out = out.replace(/(meta[^>]+property="og:title"[^>]+content=")[^"]*"/, `$1${bizTitle}"`);
     out = out.replace(/(meta[^>]+property="og:description"[^>]+content=")[^"]*"/, `$1${bizDesc}"`);
+    out = out.replace(/(meta[^>]+property="og:url"[^>]+content=")[^"]*"/, `$1${bizUrl}"`);
+    out = out.replace(/(link[^>]+rel="canonical"[^>]+href=")[^"]*"/, `$1${bizUrl}"`);
     if (biz.img) {
       out = out.replace(/(meta[^>]+property="og:image"[^>]+content=")[^"]*"/, `$1${biz.img}"`);
     }
@@ -156,6 +159,36 @@ function enhanceHtml(html, { cityName, citySlug, pageType, biz, businesses }) {
 </div>`;
 
   // 3. Category pages — ItemList schema + crawlable business links
+  // 4. Events page — ItemList of Events schema + crawlable SSR list
+  } else if (pageType === 'events' && eventsData?.length) {
+    jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: `Upcoming Events in ${cityName}`,
+      description: `Discover upcoming events in ${cityName}, Victoria. Festivals, markets, live music, arts and more.`,
+      itemListElement: eventsData.slice(0, 30).map((e, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@context': 'https://schema.org',
+          '@type': 'Event',
+          name: e.title,
+          startDate: e.date,
+          eventStatus: 'https://schema.org/EventScheduled',
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          url: `https://whattodo${citySlug}.com.au/events/${e.slug || ''}`,
+          location: { '@type': 'Place', name: e.location || cityName, address: { '@type': 'PostalAddress', addressLocality: cityName, addressRegion: 'VIC', addressCountry: 'AU' } },
+          ...(e.img ? { image: e.img } : {}),
+          ...(e.description ? { description: e.description.slice(0, 150) } : {}),
+        },
+      })),
+    };
+
+    const evLinks = eventsData.slice(0, 50).map(e =>
+      `<li><a href="/events/${escAttr(e.slug || '')}">${escHtml(e.title)}${e.date ? ` — ${escHtml(e.date)}` : ''}${e.location ? ` at ${escHtml(e.location)}` : ''}</a></li>`
+    ).join('');
+    ssrBlock = `<ul id="js-ssr-events" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden" aria-hidden="true">${evLinks}</ul>`;
+
   } else if ((pageType === 'eat' || pageType === 'drink' || pageType === 'do') && businesses?.length) {
     const pageLabel = pageType === 'eat' ? 'Restaurants & Cafes'
                     : pageType === 'drink' ? 'Bars, Pubs & Breweries'
@@ -304,6 +337,7 @@ export default async function middleware(request) {
   // 4. Fetch page-specific SEO data from Supabase
   let biz = null;
   let businesses = [];
+  let eventsData = [];
 
   if (pageType === 'listing') {
     const slug = pathname.replace(/^\//, '').replace(/\.html$/, '');
@@ -321,6 +355,13 @@ export default async function middleware(request) {
       );
       businesses = rows || [];
     } catch (_) {}
+  } else if (pageType === 'events') {
+    try {
+      const rows = await sbGet(
+        `events?city=eq.${city.slug}&or=(status.eq.approved,status.is.null)&select=title,slug,date,location,description,img&order=admin_priority.desc.nullslast,date.asc&limit=50`
+      );
+      eventsData = rows || [];
+    } catch (_) {}
   }
 
   // 5. Enhance HTML
@@ -330,6 +371,7 @@ export default async function middleware(request) {
     pageType,
     biz,
     businesses,
+    eventsData,
   });
 
   // 6. Store in cache (awaited — ensures cache is warm for next visitor)

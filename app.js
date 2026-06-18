@@ -438,6 +438,50 @@ function parseEventDate(str) {
   return d;
 }
 
+// ── EVENT ISO DATE HELPERS (for schema.org JSON-LD) ──────────
+// Converts human date strings to ISO 8601 for Google Events rich results.
+// Handles ranges like "2 – 6 Jul 2026" by extracting start/end separately.
+function _parseRangeDates(str) {
+  if (!str) return { start: null, end: null };
+  // Range: "2 – 6 Jul 2026" or "2-6 Jul 2026" or "Fri 2 – Sun 6 Jul 2026"
+  const rangeParts = str.split(/\s*[–—-]\s*/);
+  if (rangeParts.length >= 2) {
+    const endDate = parseEventDate(rangeParts[rangeParts.length - 1]);
+    // Start part may be missing month/year — append from end part
+    const endMonYear = (rangeParts[rangeParts.length - 1].match(/[A-Za-z]+(?:\s+\d{4})?$/) || [''])[0];
+    const startStr = rangeParts[0].trim().includes(' ') ? rangeParts[0] : `${rangeParts[0]} ${endMonYear}`;
+    const startDate = parseEventDate(startStr);
+    return { start: startDate, end: endDate };
+  }
+  const d = parseEventDate(str);
+  return { start: d, end: null };
+}
+
+function evIsoDate(dateStr, timeStr) {
+  const { start } = _parseRangeDates(dateStr);
+  if (!start) return dateStr || '';
+  const timeMatch = (timeStr || '').match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+  if (timeMatch) {
+    let h = parseInt(timeMatch[1]);
+    const m = timeMatch[2];
+    if (timeMatch[3]?.toLowerCase() === 'pm' && h < 12) h += 12;
+    if (timeMatch[3]?.toLowerCase() === 'am' && h === 12) h = 0;
+    start.setHours(h, parseInt(m), 0, 0);
+    return start.toISOString().replace(/\.\d{3}Z$/, '+10:00').replace('T', 'T').slice(0, 19) + '+10:00';
+  }
+  // No parseable time — use date only (still valid for Google)
+  return start.toISOString().slice(0, 10);
+}
+
+function evIsoEndDate(dateStr, timeStr) {
+  const { start, end } = _parseRangeDates(dateStr);
+  const d = end || start;
+  if (!d) return undefined;
+  // If same as start and no time, omit endDate (avoid identical start/end)
+  if (!end && !timeStr?.match(/\d{1,2}:\d{2}/)) return undefined;
+  return d.toISOString().slice(0, 10);
+}
+
 // ── EVENT URGENCY ─────────────────────────────────────────
 function getEventUrgency(ev) {
   const d = parseEventDate(ev.date);
@@ -2300,10 +2344,16 @@ async function initEventPage() {
         "@context": "https://schema.org",
         "@type": "Event",
         "name": ev.title,
-        "startDate": ev.date,
-        "location": { "@type": "Place", "name": ev.location, "address": { "@type": "PostalAddress", "addressLocality": "${cityName()}", "addressRegion": "VIC", "addressCountry": "AU" } },
-        "offers": { "@type": "Offer", "price": ev.price === 'Free' ? '0' : ev.price?.replace(/[^0-9.]/g, '') || '0', "priceCurrency": "AUD", "availability": "https://schema.org/InStock" },
-        "organizer": biz ? { "@type": "Organization", "name": biz.name, "url": biz.website ? 'https://' + biz.website.replace(/^https?:\/\//, '') : '' } : undefined,
+        "startDate": evIsoDate(ev.date, ev.time),
+        "endDate":   evIsoEndDate(ev.date, ev.time),
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "url": canonUrl,
+        "description": ev.description || `${ev.title} at ${ev.location}. ${ev.price === 'Free' ? 'Free entry.' : (ev.price || '') + ' entry.'} ${cityName()} events guide.`,
+        ...(ev.img || biz?.img ? { "image": [ev.img || biz.img] } : {}),
+        "location": { "@type": "Place", "name": ev.location, "address": { "@type": "PostalAddress", "addressLocality": cityName(), "addressRegion": "VIC", "addressCountry": "AU" } },
+        "offers": { "@type": "Offer", "price": ev.price === 'Free' ? '0' : ev.price?.replace(/[^0-9.]/g, '') || '0', "priceCurrency": "AUD", "availability": "https://schema.org/InStock", "url": canonUrl },
+        ...(biz ? { "organizer": { "@type": "Organization", "name": biz.name, ...(biz.website ? { "url": 'https://' + biz.website.replace(/^https?:\/\//, '') } : {}) } } : {}),
       })}<\/script>`,
   });
 

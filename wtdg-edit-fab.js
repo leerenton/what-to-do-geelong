@@ -1,28 +1,36 @@
 'use strict';
 /* ── Super-admin floating edit button ───────────────────────────────────────
    Single click → navigates directly to the admin edit form for this record.
-   Shown only when the logged-in Supabase user is in ADMIN_EMAILS.
+   Shown when:
+     a) logged-in Supabase user is in ADMIN_EMAILS, OR
+     b) wtdg_admin_bypass=1 cookie is set (preview mode)
    ──────────────────────────────────────────────────────────────────────────── */
 
 const FAB_ADMIN_EMAILS = ['lee.renton81@gmail.com', 'adele@whattodogeelong.com.au'];
+const ADMIN_ROOT = 'https://wtdadmin.whattodovictoria.com.au';
 
 async function initEditFab() {
   if (typeof db === 'undefined') return;
 
-  let session;
-  try {
-    const { data } = await db.auth.getSession();
-    session = data?.session;
-  } catch (_) { return; }
+  const isPreview = document.cookie.includes('wtdg_admin_bypass=1');
 
-  if (!session) return;
-  const email = session.user?.email;
-  if (!FAB_ADMIN_EMAILS.includes(email)) return;
+  if (!isPreview) {
+    // Only check session when not in preview mode
+    let session;
+    try {
+      const { data } = await db.auth.getSession();
+      session = data?.session;
+    } catch (_) { return; }
+
+    if (!session) return;
+    const email = session.user?.email;
+    if (!FAB_ADMIN_EMAILS.includes(email)) return;
+  }
 
   // ── Determine page type + slug from URL ──────────────────────────────────
   const path = window.location.pathname; // e.g. /venue-name  or  /events/slug
 
-  let adminUrl = '/wtdgadmin-dash.html';
+  let adminUrl = `${ADMIN_ROOT}/`;
   let fabTitle = 'Admin';
 
   const eventMatch = path.match(/^\/events\/(.+)$/) || path.match(/^\/([^/]+)\/([^/]+)$/);
@@ -36,32 +44,31 @@ async function initEditFab() {
       try {
         const { data } = await db.from('articles').select('id').or(`slug.eq.${slug},id.eq.${slug}`).limit(1);
         if (data?.[0]) {
-          adminUrl = `/wtdgadmin-content.html?edit=${data[0].id}`;
+          adminUrl = `${ADMIN_ROOT}/content?edit=${data[0].id}`;
           fabTitle = 'Edit Article';
         } else {
-          adminUrl = '/wtdgadmin-content.html';
+          adminUrl = `${ADMIN_ROOT}/content`;
           fabTitle = 'Content Admin';
         }
       } catch (_) {
-        adminUrl = '/wtdgadmin-content.html';
+        adminUrl = `${ADMIN_ROOT}/content`;
         fabTitle = 'Content Admin';
       }
     }
   } else if (isEventPage) {
-    // Get event slug — last segment of path
     const slug = path.split('/').filter(Boolean).pop();
     if (slug) {
       try {
-        const { data } = await db.from('events').select('id, name').or(`slug.eq.${slug},id.eq.${slug}`).limit(1);
+        const { data } = await db.from('events').select('id').or(`slug.eq.${slug},id.eq.${slug}`).limit(1);
         if (data?.[0]) {
-          adminUrl = `/wtdgadmin-events.html?edit=${data[0].id}`;
+          adminUrl = `${ADMIN_ROOT}/events?edit=${data[0].id}`;
           fabTitle = 'Edit Event';
         } else {
-          adminUrl = '/wtdgadmin-events.html';
+          adminUrl = `${ADMIN_ROOT}/events`;
           fabTitle = 'Events Admin';
         }
       } catch (_) {
-        adminUrl = '/wtdgadmin-events.html';
+        adminUrl = `${ADMIN_ROOT}/events`;
         fabTitle = 'Events Admin';
       }
     }
@@ -69,16 +76,16 @@ async function initEditFab() {
     const slug = path.split('/').filter(Boolean)[0];
     if (slug) {
       try {
-        const { data } = await db.from('businesses').select('id, name').or(`slug.eq.${slug},id.eq.${slug}`).limit(1);
+        const { data } = await db.from('businesses').select('id').or(`slug.eq.${slug},id.eq.${slug}`).limit(1);
         if (data?.[0]) {
-          adminUrl = `/wtdgadmin-businesses.html?edit=${data[0].id}`;
+          adminUrl = `${ADMIN_ROOT}/businesses?edit=${data[0].id}`;
           fabTitle = 'Edit Listing';
         } else {
-          adminUrl = '/wtdgadmin-businesses.html';
+          adminUrl = `${ADMIN_ROOT}/businesses`;
           fabTitle = 'Businesses Admin';
         }
       } catch (_) {
-        adminUrl = '/wtdgadmin-businesses.html';
+        adminUrl = `${ADMIN_ROOT}/businesses`;
         fabTitle = 'Businesses Admin';
       }
     }

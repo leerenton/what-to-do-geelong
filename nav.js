@@ -6,6 +6,13 @@
 // and a <script src="/nav.js"></script> before other scripts.
 // ──────────────────────────────────────────────────────────
 
+// Auto-inject preview bar on any page when bypass cookie is set
+if (document.cookie.includes('wtdg_admin_bypass=1') && !document.getElementById('wtdg-preview-bar')) {
+  const s = document.createElement('script');
+  s.src = '/admin-preview-bar.js?v=1';
+  document.head.appendChild(s);
+}
+
 (async function () {
   const GUIDE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="18.5" y1="5.5" x2="21" y2="3" stroke="#48c7d4"/><line x1="20" y1="9" x2="23" y2="8" stroke="#48c7d4"/><line x1="16" y1="4" x2="16.5" y2="1.5" stroke="#48c7d4"/></svg>`;
 

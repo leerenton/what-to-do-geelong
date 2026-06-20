@@ -410,10 +410,11 @@ async function handleB6Submit(e) {
     try {
       const sess = await db.auth.getSession();
       const uid  = sess?.data?.session?.user?.id;
+      const jwt  = sess?.data?.session?.access_token;
       const stripeType = B_BILLING[ob.bizBilling]?.stripeType || 'gold_annual';
       const res  = await fetch('/api/create-checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
         body: JSON.stringify({
           type: stripeType, bizId, userId: uid,
           successUrl: `${location.origin}/business-dashboard.html?biz=${bizId}&gold=1`,
@@ -610,13 +611,14 @@ async function handleP3Submit(e) {
     try {
       const sess = await db.auth.getSession();
       const uid  = sess?.data?.session?.user?.id;
+      const jwt  = sess?.data?.session?.access_token;
       // If both boost + gold, prioritise gold (covers boosts via credits)
       const type = ob.promoterGold
         ? P_BILLING[ob.promoterBilling].stripeType
         : ob.boostPackage;
       const res  = await fetch('/api/create-checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
         body: JSON.stringify({
           type, eventId, userId: uid,
           successUrl: `${location.origin}/account.html?tab=events&new=${eventId}`,

@@ -100,18 +100,25 @@ async function getSupabaseUserId(authHeader) {
   });
 }
 
-// Confirm bizId is owned by userId
-async function verifyBizOwnership(bizId, userId) {
+// Confirm bizId is owned by the caller — uses caller's JWT so RLS enforces ownership.
+// Falls back to service key if available; anon key otherwise (both work via RLS).
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
+
+async function verifyBizOwnership(bizId, callerJwt) {
+  const apiKey = SUPABASE_KEY || SUPABASE_ANON_KEY;
   return new Promise((resolve) => {
     const url = new URL(`${SUPABASE_URL}/rest/v1/businesses`);
     url.searchParams.set('id', `eq.${bizId}`);
-    url.searchParams.set('owner_id', `eq.${userId}`);
     url.searchParams.set('select', 'id');
     url.searchParams.set('limit', '1');
     const req = https.request({
       hostname: url.hostname, port: 443,
       path: `${url.pathname}${url.search}`, method: 'GET',
-      headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Accept': 'application/json' },
+      headers: {
+        'Authorization': `Bearer ${callerJwt}`,
+        'apikey': apiKey,
+        'Accept': 'application/json',
+      },
     }, res => {
       let d = '';
       res.on('data', c => d += c);
@@ -145,9 +152,10 @@ module.exports = async function handler(req, res) {
 
   const { type, bizId, eventId, userId, itemType, itemId } = data;
 
-  // Verify caller owns the business they're creating a checkout for
+  // Verify caller owns the business — RLS on the businesses table enforces this
   if (bizId) {
-    const owns = await verifyBizOwnership(bizId, callerId);
+    const callerJwt = req.headers['authorization']?.slice(7);
+    const owns = await verifyBizOwnership(bizId, callerJwt);
     if (!owns) return res.status(403).json({ error: 'Forbidden' });
   }
 

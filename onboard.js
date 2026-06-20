@@ -1085,7 +1085,8 @@ async function handleC4Submit(e) {
       owner_id: userId,
       is_approved: false,
       tags: [...ob.communityTags.suit, ...ob.communityTags.interest],
-      images: imageUrls,
+      img: imageUrls[0] || null,
+      gallery: imageUrls.slice(1),
     };
     if (ob.communitySport) payload.sport = ob.communitySport;
 

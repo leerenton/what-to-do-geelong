@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="btn btn--outline btn--sm js-ev-edit-btn" data-id="${ev.id}" style="font-size:.75rem;padding:.25rem .65rem">
                       <span class="material-symbols-rounded" style="font-size:.9rem">edit</span> Edit
                     </button>
-                    <a href="promote-event.html?ev=${ev.id}" class="btn btn--teal btn--sm" style="font-size:.75rem;padding:.25rem .65rem">
+                    <a href="promote.html?ev=${ev.id}" class="btn btn--teal btn--sm" style="font-size:.75rem;padding:.25rem .65rem">
                       <span class="material-symbols-rounded" style="font-size:.9rem">rocket_launch</span> Boost
                     </a>
                   </div>

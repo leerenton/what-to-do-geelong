@@ -228,6 +228,16 @@ if (document.cookie.includes('wtdg_admin_bypass=1') && !document.getElementById(
     </div>
   </header>`;
 
+  // Promotion bar — above network bar, only on city sites
+  const PROMO_BAR = site.slug !== 'victoria' ? `
+    <div class="wtdg-promo-bar">
+      <div class="wtdg-promo-bar__inner">
+        <span>🏪 Business owner? <a href="/onboard.html?path=business">Get listed free →</a></span>
+        <span class="wtdg-promo-bar__sep">|</span>
+        <span>🎪 Running an event? <a href="/onboard.html?path=promoter">Promote it here →</a></span>
+      </div>
+    </div>` : '';
+
   // Network bar — sits at the very bottom of the footer, only on city sites
   const NETWORK_BAR = site.slug !== 'victoria' ? `
     <div class="wtdv-network-bar">
@@ -285,6 +295,7 @@ if (document.cookie.includes('wtdg_admin_bypass=1') && !document.getElementById(
         <a href="/support.html">Support</a>
       </div>
     </div>
+    ${PROMO_BAR}
     ${NETWORK_BAR}
   </footer>`;
 

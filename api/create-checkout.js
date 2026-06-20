@@ -19,6 +19,8 @@
 //   SUPABASE_SERVICE_KEY
 //   STRIPE_PRICE_GOLD_ANNUAL
 //   STRIPE_PRICE_GOLD_MONTHLY
+//   STRIPE_PRICE_PROMOTER_ANNUAL
+//   STRIPE_PRICE_PROMOTER_MONTHLY
 //   STRIPE_PRICE_BOOST
 //   STRIPE_PRICE_SPOTLIGHT
 //   STRIPE_PRICE_PREMIER
@@ -32,19 +34,21 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const SITE_URL     = process.env.SITE_URL || 'https://whattodogeelong.com.au';
 
 const PRICE_IDS = {
-  gold_annual:     process.env.STRIPE_PRICE_GOLD_ANNUAL,
-  gold_monthly:    process.env.STRIPE_PRICE_GOLD_MONTHLY,
-  boost:           process.env.STRIPE_PRICE_BOOST,
-  spotlight:       process.env.STRIPE_PRICE_SPOTLIGHT,
-  premier:         process.env.STRIPE_PRICE_PREMIER,
+  gold_annual:       process.env.STRIPE_PRICE_GOLD_ANNUAL,
+  gold_monthly:      process.env.STRIPE_PRICE_GOLD_MONTHLY,
+  promoter_annual:   process.env.STRIPE_PRICE_PROMOTER_ANNUAL,
+  promoter_monthly:  process.env.STRIPE_PRICE_PROMOTER_MONTHLY,
+  boost:             process.env.STRIPE_PRICE_BOOST,
+  spotlight:         process.env.STRIPE_PRICE_SPOTLIGHT,
+  premier:           process.env.STRIPE_PRICE_PREMIER,
   // Legacy aliases
-  event_boost:     process.env.STRIPE_PRICE_BOOST,
-  event_spotlight: process.env.STRIPE_PRICE_SPOTLIGHT,
-  event_premier:   process.env.STRIPE_PRICE_PREMIER,
+  event_boost:       process.env.STRIPE_PRICE_BOOST,
+  event_spotlight:   process.env.STRIPE_PRICE_SPOTLIGHT,
+  event_premier:     process.env.STRIPE_PRICE_PREMIER,
 };
 
 const PROMOTION_TYPES    = new Set(['boost','spotlight','premier','event_boost','event_spotlight','event_premier']);
-const SUBSCRIPTION_TYPES = new Set(['gold_annual', 'gold_monthly']);
+const SUBSCRIPTION_TYPES = new Set(['gold_annual', 'gold_monthly', 'promoter_annual', 'promoter_monthly']);
 
 function stripePost(path, params) {
   const body = new URLSearchParams(params).toString();

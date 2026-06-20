@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M8CX39H7');</script>
+<!-- End Google Tag Manager -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Started — What To Do</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,500,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/business-signup.css" />
+  <link rel="stylesheet" href="/onboard.css" />
+</head>
+<body class="bsign-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8CX39H7"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager -->
+
+  <div class="bsign-wrap" id="js-ob-wrap">
+
+    <div class="bsign-topbar">
+      <a href="index.html" class="bsign-logo"><img id="js-ob-logo" src="/assets/logo.jpg" alt="What To Do" /></a>
+      <button class="bsign-back" id="js-ob-back" style="display:none">← Back</button>
+    </div>
+
+    <div class="bsign-progress"><div class="bsign-progress__fill" id="js-ob-progress" style="width:10%"></div></div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- SCREEN 0: Role selection                              -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="bsign-screen active" id="ob-s0">
+      <div class="ob-welcome-emoji">👋</div>
+      <h1 class="bsign-title">Welcome! What brings you here?</h1>
+      <p class="bsign-sub">Tell us how you'd like to use <span class="js-site-name">What To Do</span> and we'll get you set up in minutes.</p>
+      <div class="ob-role-grid">
+        <button class="ob-role-card" data-role="business">
+          <span class="ob-role-card__icon">🏪</span>
+          <span class="ob-role-card__label">Business owner</span>
+          <span class="ob-role-card__sub">Get listed, post events &amp; offers, and reach more customers.</span>
+        </button>
+        <button class="ob-role-card" data-role="promoter">
+          <span class="ob-role-card__icon">🎪</span>
+          <span class="ob-role-card__label">Promoter / Event organiser</span>
+          <span class="ob-role-card__sub">Add one or multiple events, boost visibility, and sell tickets.</span>
+        </button>
+        <button class="ob-role-card" data-role="user">
+          <span class="ob-role-card__icon">🌟</span>
+          <span class="ob-role-card__label">Just exploring</span>
+          <span class="ob-role-card__sub">Set your preferences to get a personalised guide to what's on.</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- BUSINESS PATH                                         -->
+    <!-- ══════════════════════════════════════════════════════ -->
+
+    <!-- B1: Claim or Create -->
+    <div class="bsign-screen" id="ob-b1">
+      <div class="bsign-step-label">Business · Step 1 of 6</div>
+      <h1 class="bsign-title">Is your business already on <span class="js-site-abbr">WTDG</span>?</h1>
+      <p class="bsign-sub">You can claim an existing listing or create a brand new one.</p>
+      <div class="bsign-choice-grid">
+        <button class="bsign-choice" data-value="claim">
+          <span class="bsign-choice__icon">🔍</span>
+          <span class="bsign-choice__label">Claim listing</span>
+          <span class="bsign-choice__sub">Already on <span class="js-site-abbr">WTDG</span></span>
+        </button>
+        <button class="bsign-choice" data-value="create">
+          <span class="bsign-choice__icon">✨</span>
+          <span class="bsign-choice__label">Create new</span>
+          <span class="bsign-choice__sub">Not on <span class="js-site-abbr">WTDG</span> yet</span>
+        </button>
+      </div>
+      <button class="bsign-next" id="js-b1-next" disabled>Continue →</button>
+    </div>
+
+    <!-- B1b: Claim search -->
+    <div class="bsign-screen" id="ob-b1b">
+      <div class="bsign-step-label">Business · Step 1 of 6</div>
+      <h1 class="bsign-title">Search for your business</h1>
+      <p class="bsign-sub">Find your listing and claim it as the owner.</p>
+      <div class="bsign-search-wrap">
+        <span class="material-symbols-rounded bsign-search-icon">search</span>
+        <input class="bsign-search-input" type="text" id="js-b-claim-search" placeholder="Type your business name…" />
+      </div>
+      <div class="bsign-results" id="js-b-claim-results"></div>
+      <button class="bsign-next" id="js-b1b-next" disabled>Claim this listing →</button>
+    </div>
+
+    <!-- B2: Business details + map -->
+    <div class="bsign-screen" id="ob-b2">
+      <div class="bsign-step-label">Business · Step 2 of 6</div>
+      <h1 class="bsign-title">Tell us about your business</h1>
+      <p class="bsign-sub">This info appears on your listing.</p>
+
+      <div class="bsign-step-label" style="margin-bottom:.65rem">Business type</div>
+      <div class="bsign-type-grid" id="js-b-type-grid">
+        <button class="bsign-type-chip" data-value="Restaurant / Café">🍽️ Restaurant / Café</button>
+        <button class="bsign-type-chip" data-value="Bar / Venue">🍺 Bar / Venue</button>
+        <button class="bsign-type-chip" data-value="Accommodation">🛏️ Accommodation</button>
+        <button class="bsign-type-chip" data-value="Arts & Culture">🎭 Arts &amp; Culture</button>
+        <button class="bsign-type-chip" data-value="Retail / Shop">🛍️ Retail / Shop</button>
+        <button class="bsign-type-chip" data-value="Event Organiser">🎪 Event Organiser</button>
+        <button class="bsign-type-chip" data-value="Health & Fitness">🏋️ Health &amp; Fitness</button>
+        <button class="bsign-type-chip" data-value="Other">📌 Other</button>
+      </div>
+
+      <div class="bsign-form">
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-name">Business name *</label>
+          <input class="bsign-input" type="text" id="bd-name" placeholder="e.g. The Wharf Shed Café" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-phone">Phone</label>
+          <input class="bsign-input" type="tel" id="bd-phone" placeholder="03 XXXX XXXX" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-address">Street address</label>
+          <input class="bsign-input" type="text" id="bd-address" placeholder="Start typing your address…" autocomplete="off" />
+          <input type="hidden" id="bd-suburb" />
+          <input type="hidden" id="bd-lat" />
+          <input type="hidden" id="bd-lng" />
+        </div>
+        <!-- Map container — shown once address is set -->
+        <div id="js-b-map-wrap" class="ob-map-wrap" style="display:none">
+          <div id="js-b-map" class="ob-map"></div>
+          <p class="ob-map-hint">Drag the pin to fine-tune the exact location.</p>
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-website">Website</label>
+          <input class="bsign-input" type="url" id="bd-website" placeholder="yourbusiness.com.au" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="bd-desc">Short description *</label>
+          <textarea class="bsign-input bsign-textarea" id="bd-desc" placeholder="Tell visitors what makes your place special (2–3 sentences)…"></textarea>
+        </div>
+      </div>
+      <button class="bsign-next" id="js-b2-next">Continue →</button>
+    </div>
+
+    <!-- B3: Preferences (full field set) -->
+    <div class="bsign-screen" id="ob-b3">
+      <div class="bsign-step-label">Business · Step 3 of 6</div>
+      <h1 class="bsign-title">Refine your listing</h1>
+      <p class="bsign-sub">Help people find you with the right categories and tags. Pick all that apply.</p>
+
+      <div class="ob-pref-section">
+        <div class="ob-pref-label">Categories</div>
+        <div class="ob-tag-grid" id="js-b-cats">
+          <button class="ob-tag" data-group="cats" data-value="Café">☕ Café</button>
+          <button class="ob-tag" data-group="cats" data-value="Restaurant">🍽️ Restaurant</button>
+          <button class="ob-tag" data-group="cats" data-value="Bar">🍸 Bar</button>
+          <button class="ob-tag" data-group="cats" data-value="Pub">🍺 Pub</button>
+          <button class="ob-tag" data-group="cats" data-value="Bakery">🥐 Bakery</button>
+          <button class="ob-tag" data-group="cats" data-value="Brunch">🍳 Brunch</button>
+          <button class="ob-tag" data-group="cats" data-value="Pizza">🍕 Pizza</button>
+          <button class="ob-tag" data-group="cats" data-value="Asian">🍜 Asian</button>
+          <button class="ob-tag" data-group="cats" data-value="Seafood">🦞 Seafood</button>
+          <button class="ob-tag" data-group="cats" data-value="Winery">🍷 Winery</button>
+          <button class="ob-tag" data-group="cats" data-value="Brewery">🍻 Brewery</button>
+          <button class="ob-tag" data-group="cats" data-value="Market">🛍️ Market</button>
+          <button class="ob-tag" data-group="cats" data-value="Gallery">🖼️ Gallery</button>
+          <button class="ob-tag" data-group="cats" data-value="Museum">🏛️ Museum</button>
+          <button class="ob-tag" data-group="cats" data-value="Theatre">🎭 Theatre</button>
+          <button class="ob-tag" data-group="cats" data-value="Cinema">🎬 Cinema</button>
+          <button class="ob-tag" data-group="cats" data-value="Activity">🎯 Activity</button>
+          <button class="ob-tag" data-group="cats" data-value="Adventure">🧗 Adventure</button>
+          <button class="ob-tag" data-group="cats" data-value="Sport">🏅 Sport</button>
+          <button class="ob-tag" data-group="cats" data-value="Wellness">🧘 Wellness</button>
+          <button class="ob-tag" data-group="cats" data-value="Hotel">🏨 Hotel</button>
+          <button class="ob-tag" data-group="cats" data-value="Tour">🗺️ Tour</button>
+          <button class="ob-tag" data-group="cats" data-value="Retail / Shop">🛒 Retail / Shop</button>
+          <button class="ob-tag" data-group="cats" data-value="Other">📌 Other</button>
+        </div>
+      </div>
+
+      <div class="ob-pref-section">
+        <div class="ob-pref-label">Appears on</div>
+        <div class="ob-tag-grid" id="js-b-sections">
+          <button class="ob-tag" data-group="sections" data-value="eat">🍴 Eat</button>
+          <button class="ob-tag" data-group="sections" data-value="drink">🍹 Drink</button>
+          <button class="ob-tag" data-group="sections" data-value="do">🎡 Do</button>
+          <button class="ob-tag" data-group="sections" data-value="stay">🛌 Stay</button>
+        </div>
+      </div>
+
+      <div class="ob-pref-section">
+        <div class="ob-pref-label">Interests &amp; vibes</div>
+        <div class="ob-tag-grid" id="js-b-interest-tags">
+          <button class="ob-tag" data-group="interest" data-value="music">🎵 Music</button>
+          <button class="ob-tag" data-group="interest" data-value="food">🍷 Food &amp; Drink</button>
+          <button class="ob-tag" data-group="interest" data-value="arts">🎨 Arts</button>
+          <button class="ob-tag" data-group="interest" data-value="outdoors">🌿 Outdoors</button>
+          <button class="ob-tag" data-group="interest" data-value="fitness">🏃 Fitness</button>
+          <button class="ob-tag" data-group="interest" data-value="wellness">🧘 Wellness</button>
+          <button class="ob-tag" data-group="interest" data-value="sport">🏅 Sport</button>
+          <button class="ob-tag" data-group="interest" data-value="nightlife">🌙 Nightlife</button>
+          <button class="ob-tag" data-group="interest" data-value="markets">🛍️ Markets</button>
+          <button class="ob-tag" data-group="interest" data-value="theatre">🎭 Theatre</button>
+          <button class="ob-tag" data-group="interest" data-value="nature">🌳 Nature</button>
+          <button class="ob-tag" data-group="interest" data-value="shopping">🛒 Shopping</button>
+        </div>
+      </div>
+
+      <div class="ob-pref-section">
+        <div class="ob-pref-label">Suitability</div>
+        <div class="ob-tag-grid" id="js-b-suit-tags">
+          <button class="ob-tag" data-group="suit" data-value="family-friendly">👨‍👩‍👧 Family</button>
+          <button class="ob-tag" data-group="suit" data-value="kids">🧒 Kids</button>
+          <button class="ob-tag" data-group="suit" data-value="teens">🎧 Teens</button>
+          <button class="ob-tag" data-group="suit" data-value="adults-only">🔞 Adults only</button>
+          <button class="ob-tag" data-group="suit" data-value="dog-friendly">🐶 Dog-friendly</button>
+          <button class="ob-tag" data-group="suit" data-value="accessible">♿ Accessible</button>
+          <button class="ob-tag" data-group="suit" data-value="free">🎁 Free</button>
+          <button class="ob-tag" data-group="suit" data-value="all-ages">👥 All ages</button>
+        </div>
+      </div>
+
+      <div class="ob-pref-section">
+        <div class="ob-pref-label">Vibe</div>
+        <div class="ob-tag-grid" id="js-b-vibe-tags">
+          <button class="ob-tag" data-group="vibe" data-value="indoor">🏠 Indoor</button>
+          <button class="ob-tag" data-group="vibe" data-value="outdoor">🌤️ Outdoor</button>
+          <button class="ob-tag" data-group="vibe" data-value="date-night">💑 Date night</button>
+          <button class="ob-tag" data-group="vibe" data-value="group">👥 Group</button>
+          <button class="ob-tag" data-group="vibe" data-value="solo">🧍 Solo</button>
+          <button class="ob-tag" data-group="vibe" data-value="romantic">🌹 Romantic</button>
+          <button class="ob-tag" data-group="vibe" data-value="live music">🎶 Live music</button>
+          <button class="ob-tag" data-group="vibe" data-value="pet-friendly">🐾 Pet-friendly</button>
+        </div>
+      </div>
+
+      <button class="bsign-next" id="js-b3-next">Continue →</button>
+      <button class="bsign-skip" id="js-b3-skip">Skip for now</button>
+    </div>
+
+    <!-- B4: Images -->
+    <div class="bsign-screen" id="ob-b4">
+      <div class="bsign-step-label">Business · Step 4 of 6</div>
+      <h1 class="bsign-title">Add some photos</h1>
+      <p class="bsign-sub">Great photos help customers discover you. You can always refine images further before your listing goes live.</p>
+
+      <div class="ob-upload-area" id="js-b-upload-area">
+        <input type="file" id="js-b-img-input" accept="image/*" multiple style="display:none" />
+        <span class="ob-upload-icon">📷</span>
+        <p class="ob-upload-label">Tap to add photos</p>
+        <p class="ob-upload-hint">JPG, PNG or WebP · max 8MB each</p>
+      </div>
+      <div class="ob-img-preview-grid" id="js-b-img-previews"></div>
+      <p class="ob-img-note">✏️ You can add, remove, and reorder images from your dashboard once the listing is submitted.</p>
+
+      <button class="bsign-next" id="js-b4-next">Continue →</button>
+      <button class="bsign-skip" id="js-b4-skip">Skip photos for now</button>
+    </div>
+
+    <!-- B5: Plan selection -->
+    <div class="bsign-screen" id="ob-b5">
+      <div class="bsign-step-label">Business · Step 5 of 6</div>
+      <h1 class="bsign-title">Choose your plan</h1>
+      <p class="bsign-sub">Start free and upgrade anytime. No lock-in contracts.</p>
+
+      <div class="bsign-billing-toggle" id="js-b-billing-toggle">
+        <button class="bsign-billing-btn active" data-billing="annual">Annual <span class="bsign-billing-save">Save 17%</span></button>
+        <button class="bsign-billing-btn" data-billing="monthly">Monthly</button>
+      </div>
+
+      <div class="bsign-plan-grid">
+        <div class="bsign-plan" id="js-bplan-free" data-plan="free">
+          <div class="bsign-plan__header">
+            <span class="bsign-plan__name">Free</span>
+            <span class="bsign-plan__price">$0 <span>/ mo</span></span>
+            <div class="bsign-plan__radio"></div>
+          </div>
+          <div class="bsign-plan__features">
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Listed on <span class="js-site-abbr">WTDG</span></div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 events</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Up to 3 offers</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Enquiry form</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Homepage rotation</div>
+            <div class="bsign-plan__feat bsign-plan__feat--muted"><span class="material-symbols-rounded">close</span> Promoted events</div>
+          </div>
+        </div>
+
+        <div class="bsign-plan bsign-plan--featured selected" id="js-bplan-gold" data-plan="gold">
+          <div class="bsign-plan__badge">⭐ Recommended</div>
+          <div class="bsign-plan__header">
+            <span class="bsign-plan__name">Gold</span>
+            <span class="bsign-plan__price" id="js-b-gold-price">$20.75 <span>/ mo</span></span>
+            <div class="bsign-plan__radio bsign-plan__radio--checked"></div>
+          </div>
+          <div class="bsign-plan__price-note" id="js-b-gold-note">Billed $249/yr · cancel anytime</div>
+          <div class="bsign-plan__features">
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Everything in Free</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Live enquiry form</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Homepage rotation</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> 3 promoted events / year</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> Featured in weekly email</div>
+            <div class="bsign-plan__feat"><span class="material-symbols-rounded">check</span> ⭐ Gold badge on listing</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="bsign-next" id="js-b5-next">Continue →</button>
+    </div>
+
+    <!-- B6: Auth -->
+    <div class="bsign-screen" id="ob-b6">
+      <div class="bsign-step-label">Business · Step 6 of 6</div>
+
+      <div id="ob-b6-loggedin" style="display:none">
+        <h1 class="bsign-title">You're all set 👋</h1>
+        <p class="bsign-sub">We'll submit the listing under your account.</p>
+        <div class="bsign-logged-in-card" id="js-b6-account-card"></div>
+        <button class="bsign-next ob-auth-submit" id="js-b6-next-li">Submit listing →</button>
+        <p style="font-size:.8rem;color:var(--mid);margin-top:.75rem;text-align:center">
+          Not you? <a href="#" id="js-b6-signout" style="color:var(--teal)">Sign out</a>
+        </p>
+      </div>
+
+      <div id="ob-b6-loggedout" style="display:none">
+        <h1 class="bsign-title">Create your account</h1>
+        <p class="bsign-sub">You'll use this to manage your listing, events, and offers.</p>
+        <div class="bsign-auth-toggle" id="js-b6-auth-toggle">
+          <button class="bsign-auth-tab active" data-mode="signup">New account</button>
+          <button class="bsign-auth-tab" data-mode="login">I have an account</button>
+        </div>
+        <div class="bsign-form" id="ob-b6-signup-form">
+          <div class="bsign-field">
+            <label class="bsign-label" for="b6-name">Your name *</label>
+            <input class="bsign-input" type="text" id="b6-name" placeholder="First and last name" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="b6-email">Email address *</label>
+            <input class="bsign-input" type="email" id="b6-email" placeholder="you@yourbusiness.com.au" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="b6-password">Password *</label>
+            <input class="bsign-input" type="password" id="b6-password" placeholder="Min 8 characters" />
+          </div>
+        </div>
+        <div class="bsign-form" id="ob-b6-login-form" style="display:none">
+          <div class="bsign-field">
+            <label class="bsign-label" for="b6-login-email">Email address *</label>
+            <input class="bsign-input" type="email" id="b6-login-email" placeholder="you@yourbusiness.com.au" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="b6-login-password">Password *</label>
+            <input class="bsign-input" type="password" id="b6-login-password" placeholder="Your password" />
+          </div>
+          <p style="font-size:.8rem;margin-top:.25rem"><a href="login.html?forgot=1" style="color:var(--teal)">Forgot password?</a></p>
+        </div>
+        <button class="bsign-next ob-auth-submit" id="js-b6-next">Submit listing →</button>
+      </div>
+      <div id="js-b6-error" class="bsign-error" style="display:none"></div>
+    </div>
+
+    <!-- B7: Success -->
+    <div class="bsign-screen" id="ob-b7">
+      <div class="bsign-done">
+        <div class="bsign-done__icon">🎉</div>
+        <h1 class="bsign-done__title">You're listed!</h1>
+        <p class="bsign-done__sub" id="js-b7-sub">Your business has been submitted for review. Head to your dashboard to add events, offers, and photos.</p>
+        <a href="business-dashboard.html" class="btn btn--teal btn--lg" id="js-b7-dash-link" style="margin-top:.5rem">Go to my dashboard →</a>
+        <a href="index.html" class="btn btn--outline" style="margin-top:.5rem">Back to <span class="js-site-abbr">WTDG</span></a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PROMOTER PATH                                         -->
+    <!-- ══════════════════════════════════════════════════════ -->
+
+    <!-- P1: Event details -->
+    <div class="bsign-screen" id="ob-p1">
+      <div class="bsign-step-label">Promoter · Step 1 of 4</div>
+      <h1 class="bsign-title">Tell us about your event</h1>
+      <p class="bsign-sub">Add the key details and we'll get your event in front of the right audience.</p>
+
+      <div class="bsign-form">
+        <div class="bsign-field">
+          <label class="bsign-label" for="pe-title">Event name *</label>
+          <input class="bsign-input" type="text" id="pe-title" placeholder="e.g. Jazz in the Park" />
+        </div>
+        <div class="bsign-row">
+          <div class="bsign-field">
+            <label class="bsign-label" for="pe-date">Date *</label>
+            <input class="bsign-input" type="text" id="pe-date" placeholder="Sat 14 Jun 2026" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="pe-time">Time</label>
+            <input class="bsign-input" type="text" id="pe-time" placeholder="7:00 pm" />
+          </div>
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="pe-location">Venue / location *</label>
+          <input class="bsign-input" type="text" id="pe-location" placeholder="Venue name, address" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="pe-cat">Category</label>
+          <select class="bsign-input" id="pe-cat">
+            <option value="Music">🎵 Music</option>
+            <option value="Food & Drink">🍷 Food &amp; Drink</option>
+            <option value="Arts">🎨 Arts</option>
+            <option value="Outdoors">🌿 Outdoors</option>
+            <option value="Fitness">🏃 Fitness</option>
+            <option value="Kids & Family">👶 Kids &amp; Family</option>
+            <option value="Theatre">🎭 Theatre</option>
+            <option value="Markets">🛍️ Markets</option>
+            <option value="Sport">🏅 Sport</option>
+            <option value="Other">📌 Other</option>
+          </select>
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="pe-url">Tickets / event URL</label>
+          <input class="bsign-input" type="url" id="pe-url" placeholder="yourevent.com.au" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="pe-desc">Description *</label>
+          <textarea class="bsign-input bsign-textarea" id="pe-desc" placeholder="Tell people what to expect…"></textarea>
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label">Event image</label>
+          <div class="ob-upload-area ob-upload-area--sm" id="js-p-upload-area">
+            <input type="file" id="js-p-img-input" accept="image/*" style="display:none" />
+            <span class="ob-upload-icon">🖼️</span>
+            <p class="ob-upload-label">Add a cover image</p>
+          </div>
+          <div id="js-p-img-preview"></div>
+        </div>
+      </div>
+      <button class="bsign-next" id="js-p1-next">Continue →</button>
+    </div>
+
+    <!-- P2: Boost selection -->
+    <div class="bsign-screen" id="ob-p2">
+      <div class="bsign-step-label">Promoter · Step 2 of 4</div>
+      <h1 class="bsign-title">Boost your event</h1>
+      <p class="bsign-sub">Give your event extra reach with a promotion package, or list it for free.</p>
+
+      <div class="ob-boost-grid">
+        <div class="ob-boost-card" data-package="none">
+          <div class="ob-boost-card__header">
+            <span class="ob-boost-card__name">Free listing</span>
+            <span class="ob-boost-card__price">$0</span>
+          </div>
+          <p class="ob-boost-card__desc">Standard listing in the events calendar.</p>
+        </div>
+        <div class="ob-boost-card" data-package="boost">
+          <div class="ob-boost-card__header">
+            <span class="ob-boost-card__name">Boost</span>
+            <span class="ob-boost-card__price">$49</span>
+          </div>
+          <ul class="ob-boost-card__feats">
+            <li>Featured in category page</li>
+            <li>Promoted badge · 7 days</li>
+            <li>Social mention</li>
+          </ul>
+        </div>
+        <div class="ob-boost-card ob-boost-card--popular" data-package="spotlight">
+          <div class="ob-boost-card__badge">Most popular</div>
+          <div class="ob-boost-card__header">
+            <span class="ob-boost-card__name">Spotlight</span>
+            <span class="ob-boost-card__price">$99</span>
+          </div>
+          <ul class="ob-boost-card__feats">
+            <li>Everything in Boost</li>
+            <li>Homepage placement · 14 days</li>
+            <li>Weekly email feature</li>
+          </ul>
+        </div>
+        <div class="ob-boost-card" data-package="premier">
+          <div class="ob-boost-card__header">
+            <span class="ob-boost-card__name">Premier</span>
+            <span class="ob-boost-card__price">$199</span>
+          </div>
+          <ul class="ob-boost-card__feats">
+            <li>Everything in Spotlight</li>
+            <li>Banner takeover · 30 days</li>
+            <li>Dedicated email blast</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ob-promoter-gold-cta" id="js-promoter-gold-cta">
+        <span class="ob-promoter-gold-cta__icon">⭐</span>
+        <div>
+          <strong>Run multiple events?</strong> Gold Member Promoter gives you promotional credits usable across all your events — $500/yr or $50/mo.
+        </div>
+        <button class="ob-promoter-gold-btn" id="js-p-gold-toggle">Add Gold</button>
+      </div>
+
+      <div class="ob-promoter-gold-detail" id="js-p-gold-detail" style="display:none">
+        <div class="bsign-billing-toggle" id="js-p-billing-toggle">
+          <button class="bsign-billing-btn active" data-billing="annual">Annual <span class="bsign-billing-save">Save 17%</span></button>
+          <button class="bsign-billing-btn" data-billing="monthly">Monthly</button>
+        </div>
+        <p class="ob-promoter-gold-note" id="js-p-gold-note">$500/yr — includes promotional credits · cancel anytime</p>
+        <button class="bsign-skip" id="js-p-gold-remove">Remove Gold membership</button>
+      </div>
+
+      <div id="js-p2-error" style="display:none;color:#dc2626;font-size:.85rem;margin:.5rem 0;text-align:center"></div>
+      <button class="bsign-next" id="js-p2-next">Continue →</button>
+    </div>
+
+    <!-- P3: Auth -->
+    <div class="bsign-screen" id="ob-p3">
+      <div class="bsign-step-label">Promoter · Step 3 of 4</div>
+
+      <div id="ob-p3-loggedin" style="display:none">
+        <h1 class="bsign-title">Looking good 👋</h1>
+        <p class="bsign-sub">Your event will be submitted under your account.</p>
+        <div class="bsign-logged-in-card" id="js-p3-account-card"></div>
+        <button class="bsign-next ob-auth-submit" id="js-p3-next-li">Submit event →</button>
+        <p style="font-size:.8rem;color:var(--mid);margin-top:.75rem;text-align:center">
+          Not you? <a href="#" id="js-p3-signout" style="color:var(--teal)">Sign out</a>
+        </p>
+      </div>
+
+      <div id="ob-p3-loggedout" style="display:none">
+        <h1 class="bsign-title">Create your promoter account</h1>
+        <p class="bsign-sub">Free account — manage all your events in one place.</p>
+        <div class="bsign-auth-toggle" id="js-p3-auth-toggle">
+          <button class="bsign-auth-tab active" data-mode="signup">New account</button>
+          <button class="bsign-auth-tab" data-mode="login">I have an account</button>
+        </div>
+        <div class="bsign-form" id="ob-p3-signup-form">
+          <div class="bsign-field">
+            <label class="bsign-label" for="p3-name">Your name *</label>
+            <input class="bsign-input" type="text" id="p3-name" placeholder="First and last name" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="p3-email">Email address *</label>
+            <input class="bsign-input" type="email" id="p3-email" placeholder="you@example.com" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="p3-password">Password *</label>
+            <input class="bsign-input" type="password" id="p3-password" placeholder="Min 8 characters" />
+          </div>
+        </div>
+        <div class="bsign-form" id="ob-p3-login-form" style="display:none">
+          <div class="bsign-field">
+            <label class="bsign-label" for="p3-login-email">Email address *</label>
+            <input class="bsign-input" type="email" id="p3-login-email" placeholder="you@example.com" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="p3-login-password">Password *</label>
+            <input class="bsign-input" type="password" id="p3-login-password" placeholder="Your password" />
+          </div>
+          <p style="font-size:.8rem;margin-top:.25rem"><a href="login.html?forgot=1" style="color:var(--teal)">Forgot password?</a></p>
+        </div>
+        <button class="bsign-next ob-auth-submit" id="js-p3-next">Submit event →</button>
+      </div>
+      <div id="js-p3-error" class="bsign-error" style="display:none"></div>
+    </div>
+
+    <!-- P4: Success -->
+    <div class="bsign-screen" id="ob-p4">
+      <div class="bsign-done">
+        <div class="bsign-done__icon">🎉</div>
+        <h1 class="bsign-done__title">Your event is submitted!</h1>
+        <p class="bsign-done__sub" id="js-p4-sub">Your event is under review and will be live shortly.</p>
+        <a href="account.html?tab=events" class="btn btn--teal btn--lg" style="margin-top:.5rem">View my events →</a>
+        <a href="index.html" class="btn btn--outline" style="margin-top:.5rem">Back to <span class="js-site-abbr">WTDG</span></a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- USER PATH                                             -->
+    <!-- ══════════════════════════════════════════════════════ -->
+
+    <!-- U1: Group type -->
+    <div class="bsign-screen" id="ob-u1">
+      <div class="bsign-step-label">Step 1 of 3</div>
+      <div class="ob-welcome-emoji">👋</div>
+      <h1 class="bsign-title">Who's exploring <span class="js-site-name">your city</span>?</h1>
+      <p class="bsign-sub">Tell us a bit about yourself so we can show you what's actually relevant.</p>
+      <div class="ob-role-grid">
+        <button class="ob-role-card ob-role-card--sm" data-group="solo">
+          <span class="ob-role-card__icon">🧍</span>
+          <span class="ob-role-card__label">Solo</span>
+          <span class="ob-role-card__sub">Just me</span>
+        </button>
+        <button class="ob-role-card ob-role-card--sm" data-group="couple">
+          <span class="ob-role-card__icon">👫</span>
+          <span class="ob-role-card__label">Couple</span>
+          <span class="ob-role-card__sub">Two of us</span>
+        </button>
+        <button class="ob-role-card ob-role-card--sm" data-group="family">
+          <span class="ob-role-card__icon">👨‍👩‍👧‍👦</span>
+          <span class="ob-role-card__label">Family</span>
+          <span class="ob-role-card__sub">Kids in tow</span>
+        </button>
+        <button class="ob-role-card ob-role-card--sm" data-group="friends">
+          <span class="ob-role-card__icon">🎉</span>
+          <span class="ob-role-card__label">Group</span>
+          <span class="ob-role-card__sub">Friends / crew</span>
+        </button>
+      </div>
+      <button class="bsign-next" id="js-u1-next" disabled>Next →</button>
+      <button class="bsign-skip" id="js-u1-skip">Skip personalisation</button>
+    </div>
+
+    <!-- U2: Kids ages (shown only for family) -->
+    <div class="bsign-screen" id="ob-u2">
+      <div class="bsign-step-label">Step 1 of 3</div>
+      <div class="ob-welcome-emoji">👧👦</div>
+      <h1 class="bsign-title">How old are the kids?</h1>
+      <p class="bsign-sub">We'll highlight family-friendly events. Pick all that apply.</p>
+      <div class="ob-tag-grid" id="js-u-kids-chips">
+        <button class="ob-tag" data-value="toddler">🐣 0–2 Toddler</button>
+        <button class="ob-tag" data-value="preschool">🌱 3–5 Preschool</button>
+        <button class="ob-tag" data-value="primary">🎒 6–9 Primary</button>
+        <button class="ob-tag" data-value="tweens">🎮 10–12 Tweens</button>
+        <button class="ob-tag" data-value="teens">🎧 13+ Teens</button>
+      </div>
+      <button class="bsign-next" id="js-u2-next">Next →</button>
+      <button class="bsign-skip" id="js-u2-skip">Skip this step</button>
+    </div>
+
+    <!-- U3: Interests -->
+    <div class="bsign-screen" id="ob-u3">
+      <div class="bsign-step-label">Step 2 of 3</div>
+      <div class="ob-welcome-emoji">✨</div>
+      <h1 class="bsign-title">What are you into?</h1>
+      <p class="bsign-sub">Pick as many as you like — we'll use these to personalise your feed.</p>
+      <div class="ob-tag-grid" id="js-u-interest-tags">
+        <button class="ob-tag" data-value="music">🎵 Music</button>
+        <button class="ob-tag" data-value="food">🍷 Food &amp; Drink</button>
+        <button class="ob-tag" data-value="arts">🎨 Arts</button>
+        <button class="ob-tag" data-value="outdoors">🌿 Outdoors</button>
+        <button class="ob-tag" data-value="fitness">🏃 Fitness</button>
+        <button class="ob-tag" data-value="family">👶 Kids &amp; Family</button>
+        <button class="ob-tag" data-value="theatre">🎭 Theatre</button>
+        <button class="ob-tag" data-value="markets">🛍️ Markets</button>
+        <button class="ob-tag" data-value="pets">🐾 Pet-friendly</button>
+        <button class="ob-tag" data-value="free">🍦 Free events</button>
+        <button class="ob-tag" data-value="nightlife">🌙 Nightlife</button>
+        <button class="ob-tag" data-value="sport">🏅 Sport</button>
+      </div>
+      <button class="bsign-next" id="js-u3-next">Next →</button>
+    </div>
+
+    <!-- U4: Auth (optional) -->
+    <div class="bsign-screen" id="ob-u4">
+      <div class="bsign-step-label">Step 3 of 3</div>
+
+      <div id="ob-u4-loggedin" style="display:none">
+        <div class="ob-welcome-emoji">✅</div>
+        <h1 class="bsign-title">Preferences saved!</h1>
+        <p class="bsign-sub">Your personalised <span class="js-site-name">city</span> guide is ready.</p>
+        <div class="ob-perks">
+          <div class="ob-perk">✦ Homepage sorted to your tastes</div>
+          <div class="ob-perk">⭐ Events matching your vibe come first</div>
+          <div class="ob-perk">🔔 Alerts when new events match your interests</div>
+        </div>
+        <button class="bsign-next" id="js-u4-go">Show me what's on →</button>
+      </div>
+
+      <div id="ob-u4-loggedout">
+        <div class="ob-welcome-emoji">💌</div>
+        <h1 class="bsign-title">Save your guide</h1>
+        <p class="bsign-sub">Create a free account to save your preferences, build an itinerary, and get alerts when new events match your vibe.</p>
+        <div class="ob-perks">
+          <div class="ob-perk">⭐ Save events &amp; places to your itinerary</div>
+          <div class="ob-perk">🎁 One-click entry to competitions &amp; giveaways</div>
+          <div class="ob-perk">🔔 Alerts when something new matches your interests</div>
+        </div>
+
+        <div class="bsign-auth-toggle" id="js-u4-auth-toggle" style="margin-top:1.25rem">
+          <button class="bsign-auth-tab active" data-mode="signup">New account</button>
+          <button class="bsign-auth-tab" data-mode="login">Log in</button>
+        </div>
+        <div class="bsign-form" id="ob-u4-signup-form">
+          <div class="bsign-field">
+            <label class="bsign-label" for="u4-name">Your name *</label>
+            <input class="bsign-input" type="text" id="u4-name" placeholder="First name" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="u4-email">Email address *</label>
+            <input class="bsign-input" type="email" id="u4-email" placeholder="you@example.com" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="u4-password">Password *</label>
+            <input class="bsign-input" type="password" id="u4-password" placeholder="Min 8 characters" />
+          </div>
+        </div>
+        <div class="bsign-form" id="ob-u4-login-form" style="display:none">
+          <div class="bsign-field">
+            <label class="bsign-label" for="u4-login-email">Email address *</label>
+            <input class="bsign-input" type="email" id="u4-login-email" placeholder="you@example.com" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="u4-login-password">Password *</label>
+            <input class="bsign-input" type="password" id="u4-login-password" placeholder="Your password" />
+          </div>
+          <p style="font-size:.8rem;margin-top:.25rem"><a href="login.html?forgot=1" style="color:var(--teal)">Forgot password?</a></p>
+        </div>
+        <div id="js-u4-error" class="bsign-error" style="display:none"></div>
+        <button class="bsign-next ob-auth-submit" id="js-u4-next">Save my guide →</button>
+        <button class="bsign-skip" id="js-u4-skip">Skip — just show me what's on</button>
+      </div>
+    </div>
+
+    <!-- U5: Success -->
+    <div class="bsign-screen" id="ob-u5">
+      <div class="bsign-done">
+        <div class="bsign-done__icon">🎯</div>
+        <h1 class="bsign-done__title">You're all set!</h1>
+        <p class="bsign-done__sub">Your personalised <span class="js-site-name">city</span> guide is ready. Head back to see tailored events, eats, and stays.</p>
+        <a href="index.html" class="btn btn--teal btn--lg" style="margin-top:.5rem">Show me what's on →</a>
+        <a href="guides.html" class="btn btn--outline" style="margin-top:.5rem">View my itinerary ⭐</a>
+      </div>
+    </div>
+
+  </div><!-- /bsign-wrap -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase.js?v=4"></script>
+  <script src="/analytics.js?v=1"></script>
+  <script src="/auth.js"></script>
+  <script>
+    (async () => {
+      if (window._siteConfigPromise) await window._siteConfigPromise;
+      const site = window.SITE || {};
+      const logo = document.getElementById('js-ob-logo');
+      if (logo) {
+        if (site.logoUrl) logo.src = site.logoUrl;
+        if (site.fullName) logo.alt = site.fullName;
+      }
+      const abbr = site.abbreviation || (site.fullName ? site.fullName.split(' ').map(w=>w[0]).join('') : 'WTDG');
+      document.querySelectorAll('.js-site-abbr').forEach(el => el.textContent = abbr);
+      document.querySelectorAll('.js-site-name').forEach(el => el.textContent = site.fullName || 'What To Do');
+    })();
+  </script>
+  <script src="/onboard.js?v=1"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHUrQ0uu0j0VDjigRhxoS44h-9Y4p1PZY&libraries=places&callback=initOnboardMap" async defer></script>
+</body>
+</html>

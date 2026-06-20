@@ -50,6 +50,7 @@ function getPageType(pathname) {
   if (p.startsWith('/account'))  return 'other';
   if (p.startsWith('/login'))    return 'other';
   if (p.startsWith('/signup'))   return 'other';
+  if (p.startsWith('/onboard'))  return 'other';
   if (p.startsWith('/support'))  return 'other';
   if (p.startsWith('/contact'))  return 'other';
   if (p.startsWith('/victoria')) return 'other';
@@ -271,6 +272,18 @@ export default async function middleware(request) {
   // ── Skip assets and passthrough paths ─────────────────────────────────────
   if (ASSET_RE.test(pathname) || PASSTHROUGH_RE.test(pathname)) {
     return; // Vercel handles it directly
+  }
+
+  // ── Old signup/onboarding paths — 301 to unified flow ──────────────────────
+  if (pathname === '/signup.html' || pathname === '/signup') {
+    const dest = new URL('/onboard.html', request.url);
+    dest.searchParams.set('path', 'user');
+    return new Response(null, { status: 301, headers: { 'Location': dest.toString() } });
+  }
+  if (pathname === '/onboarding.html' || pathname === '/onboarding') {
+    const dest = new URL('/onboard.html', request.url);
+    dest.searchParams.set('path', 'user');
+    return new Response(null, { status: 301, headers: { 'Location': dest.toString() } });
   }
 
   // ── Admin preview entry point — set bypass cookie and redirect to homepage ──

@@ -481,18 +481,34 @@ pImgInput.addEventListener('change', () => {
 });
 
 document.getElementById('js-p1-next').addEventListener('click', () => {
-  const title = document.getElementById('pe-title').value.trim();
-  const date  = document.getElementById('pe-date').value.trim();
-  const loc   = document.getElementById('pe-location').value.trim();
-  const desc  = document.getElementById('pe-desc').value.trim();
-  if (!title || !date || !loc || !desc) { alert('Please fill in event name, date, location, and description.'); return; }
+  const title     = document.getElementById('pe-title').value.trim();
+  const startRaw  = document.getElementById('pe-start').value;
+  const endRaw    = document.getElementById('pe-end').value;
+  const loc       = document.getElementById('pe-location').value.trim();
+  const desc      = document.getElementById('pe-desc').value.trim();
+  if (!title || !startRaw || !loc || !desc) { alert('Please fill in event name, start date/time, location, and description.'); return; }
+
+  const startDt = new Date(startRaw);
+  const endDt   = endRaw ? new Date(endRaw) : null;
+
+  // Human-readable display strings
+  const fmtDate = dt => dt.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const fmtTime = dt => dt.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+  const dateDisplay = endDt && fmtDate(endDt) !== fmtDate(startDt)
+    ? `${fmtDate(startDt)} – ${fmtDate(endDt)}`
+    : fmtDate(startDt);
+
   ob.event = {
-    title, date,
-    time:        document.getElementById('pe-time').value.trim() || null,
-    location:    loc,
-    category:    document.getElementById('pe-cat').value,
-    url:         document.getElementById('pe-url').value.trim() || null,
-    description: desc,
+    title,
+    start_date:   startDt.toISOString(),
+    end_date:     endDt ? endDt.toISOString() : null,
+    date:         dateDisplay,
+    time:         fmtTime(startDt),
+    location:     loc,
+    category:     document.getElementById('pe-cat').value,
+    url:          document.getElementById('pe-url').value.trim() || null,
+    description:  desc,
   };
   goto('ob-p2');
 });
@@ -596,6 +612,8 @@ async function handleP3Submit(e) {
   const { error: evErr } = await db.from('events').insert({
     id:          eventId,
     title:       ob.event.title,
+    start_date:  ob.event.start_date,
+    end_date:    ob.event.end_date,
     date:        ob.event.date,
     time:        ob.event.time,
     location:    ob.event.location,

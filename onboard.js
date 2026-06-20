@@ -607,10 +607,8 @@ async function handleP3Submit(e) {
   if (window._siteConfigPromise) await window._siteConfigPromise;
   const city = window.SITE?.slug || 'geelong';
 
-  // Insert event
-  const eventId = 'ev-' + Date.now().toString(36);
-  const { error: evErr } = await db.from('events').insert({
-    id:          eventId,
+  // Insert event — let Postgres generate the integer id
+  const { data: evRow, error: evErr } = await db.from('events').insert({
     title:       ob.event.title,
     start_date:  ob.event.start_date,
     end_date:    ob.event.end_date,
@@ -623,11 +621,13 @@ async function handleP3Submit(e) {
     city,
     status:      'pending',
     promoter_id: userId,
-  });
+  }).select('id').single();
   if (evErr) { showError(errEl, 'Could not save event: ' + evErr.message, btn, 'Submit event →'); return; }
 
+  const eventId = evRow?.id;
+
   // Upload event image
-  if (pImgFile) {
+  if (pImgFile && eventId) {
     try {
       const ext  = pImgFile.name.split('.').pop().toLowerCase();
       await db.storage.from('event-images').upload(`${eventId}.${ext}`, pImgFile, { upsert: true });

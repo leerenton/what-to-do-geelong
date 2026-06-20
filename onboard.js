@@ -1077,7 +1077,7 @@ async function handleC4Submit(e) {
       name,
       description,
       slug,
-      address: location || null,
+      location: location || null,
       website: website || null,
       email: contact || null,
       listing_type: ob.communityListingType,

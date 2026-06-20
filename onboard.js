@@ -2,7 +2,7 @@
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 const ob = {
-  path: null,          // 'business' | 'promoter' | 'user'
+  path: null,          // 'business' | 'promoter' | 'community' | 'user'
   // Business
   bizMode: null,       // 'claim' | 'create'
   claimedBiz: null,
@@ -19,6 +19,14 @@ const ob = {
   promoterGold: false,
   promoterBilling: 'annual',
   eventId: null,
+  // Community
+  communitySubType: null,  // 'sports_team' | 'community_group' | 'hobby_club' | 'school_group' | 'volunteer' | 'other'
+  communityListingType: 'community', // 'community' | 'sports_team'
+  communitySport: null,
+  communityDetails: {},
+  communityTags: { suit: [], interest: [] },
+  communityImages: [],
+  communityId: null,
   // User
   userGroup: null,
   userKids: [],
@@ -30,6 +38,7 @@ const SCREENS = [
   'ob-b1','ob-b1b','ob-b2','ob-b3','ob-b4','ob-b5','ob-b6','ob-b7',
   'ob-p1','ob-p2','ob-p3','ob-p4',
   'ob-u1','ob-u2','ob-u3','ob-u4','ob-u5',
+  'ob-c1','ob-c2','ob-c3','ob-c4','ob-c5',
 ];
 
 // Progress percentages per screen
@@ -38,6 +47,7 @@ const PROGRESS = {
   'ob-b1': 15, 'ob-b1b': 20, 'ob-b2': 33, 'ob-b3': 50, 'ob-b4': 65, 'ob-b5': 80, 'ob-b6': 92, 'ob-b7': 100,
   'ob-p1': 25, 'ob-p2': 55, 'ob-p3': 80, 'ob-p4': 100,
   'ob-u1': 20, 'ob-u2': 35, 'ob-u3': 55, 'ob-u4': 80, 'ob-u5': 100,
+  'ob-c1': 25, 'ob-c2': 50, 'ob-c3': 75, 'ob-c4': 92, 'ob-c5': 100,
 };
 
 // Back navigation map
@@ -46,6 +56,7 @@ const BACK = {
   'ob-b4': 'ob-b3', 'ob-b5': 'ob-b4', 'ob-b6': 'ob-b5',
   'ob-p1': 'ob-s0', 'ob-p2': 'ob-p1', 'ob-p3': 'ob-p2',
   'ob-u1': 'ob-s0', 'ob-u2': 'ob-u1', 'ob-u3': null /* dynamic */, 'ob-u4': 'ob-u3',
+  'ob-c1': 'ob-s0', 'ob-c2': 'ob-c1', 'ob-c3': 'ob-c2', 'ob-c4': 'ob-c3',
 };
 
 let currentScreen = 'ob-s0';
@@ -88,6 +99,8 @@ document.querySelectorAll('.ob-role-card[data-role]').forEach(card => {
       }
     } else if (ob.path === 'promoter') {
       goto('ob-p1');
+    } else if (ob.path === 'community') {
+      goto('ob-c1');
     } else {
       goto('ob-u1');
     }
@@ -108,6 +121,7 @@ document.querySelectorAll('.ob-role-card[data-role]').forEach(card => {
   }
   if (path === 'business') { ob.path = 'business'; goto('ob-b1'); }
   else if (path === 'promoter') { ob.path = 'promoter'; goto('ob-p1'); }
+  else if (path === 'community') { ob.path = 'community'; goto('ob-c1'); }
   else if (path === 'user') { ob.path = 'user'; goto('ob-u1'); }
 })();
 
@@ -891,3 +905,251 @@ function initOnboardMap() {
 }
 
 window.initOnboardMap = initOnboardMap;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COMMUNITY / CLUB PATH
+// ══════════════════════════════════════════════════════════════════════════════
+
+// C1: Group type chips
+document.querySelectorAll('#js-c-type-grid .bsign-type-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#js-c-type-grid .bsign-type-chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    ob.communitySubType    = chip.dataset.value;
+    ob.communityListingType = chip.dataset.listing;
+    const isSport = ob.communitySubType === 'sports_team';
+    document.getElementById('js-c-sport-wrap').style.display = isSport ? 'block' : 'none';
+    if (!isSport) ob.communitySport = null;
+  });
+});
+
+document.querySelectorAll('#js-c-sport-chips .ob-tag').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#js-c-sport-chips .ob-tag').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    ob.communitySport = chip.dataset.value;
+  });
+});
+
+document.getElementById('js-c1-next').addEventListener('click', () => {
+  const name = document.getElementById('cd-name').value.trim();
+  const desc = document.getElementById('cd-desc').value.trim();
+  if (!ob.communitySubType) { alert('Please choose a group type.'); return; }
+  if (!name) { alert('Please enter your group name.'); return; }
+  if (!desc) { alert('Please add a short description.'); return; }
+  ob.communityDetails = {
+    name,
+    description: desc,
+    location:    document.getElementById('cd-location').value.trim(),
+    website:     document.getElementById('cd-website').value.trim(),
+    contact:     document.getElementById('cd-contact').value.trim(),
+  };
+  goto('ob-c2');
+});
+
+// C2: Tags
+document.querySelectorAll('#js-c-suit-tags .ob-tag').forEach(t => {
+  t.addEventListener('click', () => {
+    t.classList.toggle('active');
+    const v = t.dataset.value;
+    const idx = ob.communityTags.suit.indexOf(v);
+    idx === -1 ? ob.communityTags.suit.push(v) : ob.communityTags.suit.splice(idx, 1);
+  });
+});
+
+document.querySelectorAll('#js-c-interest-tags .ob-tag').forEach(t => {
+  t.addEventListener('click', () => {
+    t.classList.toggle('active');
+    const v = t.dataset.value;
+    const idx = ob.communityTags.interest.indexOf(v);
+    idx === -1 ? ob.communityTags.interest.push(v) : ob.communityTags.interest.splice(idx, 1);
+  });
+});
+
+document.getElementById('js-c2-next').addEventListener('click', () => goto('ob-c3'));
+document.getElementById('js-c2-skip').addEventListener('click', () => goto('ob-c3'));
+
+// C3: Image upload
+const cImgInput = document.getElementById('js-c-img-input');
+const cUploadArea = document.getElementById('js-c-upload-area');
+const cImgPreviews = document.getElementById('js-c-img-previews');
+
+cUploadArea.addEventListener('click', () => cImgInput.click());
+cUploadArea.addEventListener('dragover', e => { e.preventDefault(); cUploadArea.classList.add('dragover'); });
+cUploadArea.addEventListener('dragleave', () => cUploadArea.classList.remove('dragover'));
+cUploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  cUploadArea.classList.remove('dragover');
+  handleCommunityFiles(Array.from(e.dataTransfer.files));
+});
+
+cImgInput.addEventListener('change', () => {
+  handleCommunityFiles(Array.from(cImgInput.files));
+  cImgInput.value = '';
+});
+
+function handleCommunityFiles(files) {
+  files.filter(f => f.type.startsWith('image/')).forEach(file => {
+    ob.communityImages.push(file);
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const thumb = document.createElement('div');
+      thumb.className = 'ob-img-thumb';
+      thumb.innerHTML = `<img src="${ev.target.result}" alt="" /><button class="ob-img-remove" title="Remove">✕</button>`;
+      thumb.querySelector('.ob-img-remove').addEventListener('click', () => {
+        const idx = ob.communityImages.indexOf(file);
+        if (idx !== -1) ob.communityImages.splice(idx, 1);
+        thumb.remove();
+      });
+      cImgPreviews.appendChild(thumb);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('js-c3-next').addEventListener('click', () => gotoC4());
+document.getElementById('js-c3-skip').addEventListener('click', () => gotoC4());
+
+async function gotoC4() {
+  await window._siteConfigPromise;
+  const { data: { session } } = await db.auth.getSession();
+  const loggedIn = document.getElementById('ob-c4-loggedin');
+  const loggedOut = document.getElementById('ob-c4-loggedout');
+  if (session?.user) {
+    loggedIn.style.display = 'block';
+    loggedOut.style.display = 'none';
+    document.getElementById('js-c4-account-card').textContent =
+      `Signed in as ${session.user.email}`;
+  } else {
+    loggedIn.style.display = 'none';
+    loggedOut.style.display = 'block';
+  }
+  goto('ob-c4');
+}
+
+// C4: Auth toggle
+document.getElementById('js-c4-auth-toggle').addEventListener('click', e => {
+  const tab = e.target.closest('.bsign-auth-tab');
+  if (!tab) return;
+  document.querySelectorAll('#js-c4-auth-toggle .bsign-auth-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const mode = tab.dataset.mode;
+  document.getElementById('ob-c4-signup-form').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('ob-c4-login-form').style.display  = mode === 'login'  ? 'block' : 'none';
+  document.querySelectorAll('#ob-c4 .ob-auth-submit').forEach(b => {
+    b.textContent = mode === 'login' ? 'Sign in & create page →' : 'Create group page →';
+  });
+});
+
+document.getElementById('js-c4-signout').addEventListener('click', async e => {
+  e.preventDefault();
+  await db.auth.signOut();
+  document.getElementById('ob-c4-loggedin').style.display = 'none';
+  document.getElementById('ob-c4-loggedout').style.display = 'block';
+});
+
+// C4: Submit (both logged-in and logged-out buttons share .ob-auth-submit within #ob-c4)
+document.querySelectorAll('#ob-c4 .ob-auth-submit').forEach(btn => {
+  btn.addEventListener('click', e => handleC4Submit(e));
+});
+
+async function handleC4Submit(e) {
+  const btn = e.currentTarget;
+  const errEl = document.getElementById('js-c4-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const userId = await resolveUserId(btn, errEl, 'ob-c4-signup-form', 'ob-c4-login-form',
+      'c4-name', 'c4-email', 'c4-password', 'c4-login-email', 'c4-login-password',
+      'community');
+
+    if (!userId) { btn.disabled = false; btn.textContent = 'Create group page →'; return; }
+
+    // Upload images if any
+    const imageUrls = ob.communityImages.length ? await uploadImages(ob.communityImages, 'business-images') : [];
+
+    const { name, description, location, website, contact } = ob.communityDetails;
+    const slug = bsSlugify(name);
+
+    const payload = {
+      name,
+      description,
+      slug,
+      address: location || null,
+      website: website || null,
+      email: contact || null,
+      listing_type: ob.communityListingType,
+      plan: 'free',
+      owner_id: userId,
+      is_approved: false,
+      tags: [...ob.communityTags.suit, ...ob.communityTags.interest],
+      images: imageUrls,
+    };
+    if (ob.communitySport) payload.sport = ob.communitySport;
+
+    const { data: biz, error: bizErr } = await db
+      .from('businesses')
+      .insert(payload)
+      .select('id,slug')
+      .single();
+
+    if (bizErr) throw new Error(bizErr.message);
+    ob.communityId = biz.id;
+
+    document.getElementById('js-c5-title').textContent =
+      ob.communityListingType === 'sports_team'
+        ? 'Your team page is live! 🏆'
+        : 'Your group page is live! 🎉';
+    document.getElementById('js-c5-sub').textContent =
+      `Your page is under review and will be visible shortly. Head to your dashboard to post ${ob.communityListingType === 'sports_team' ? 'fixtures and ' : ''}events and keep your community in the loop.`;
+    document.getElementById('js-c5-dash-link').href = `business-dashboard.html?id=${biz.id}`;
+
+    goto('ob-c5');
+  } catch (err) {
+    showError(errEl, err.message || 'Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Create group page →';
+  }
+}
+
+async function uploadImages(files, bucket) {
+  const urls = [];
+  for (const file of files) {
+    const ext  = file.name.split('.').pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await db.storage.from(bucket).upload(path, file, { upsert: false });
+    if (!error) {
+      const { data } = db.storage.from(bucket).getPublicUrl(path);
+      if (data?.publicUrl) urls.push(data.publicUrl);
+    }
+  }
+  return urls;
+}
+
+// Shared resolveUserId helper for community path
+// (delegates to the same doAuth used by business/promoter paths if user isn't logged in)
+async function resolveUserId(btn, errEl, signupFormId, loginFormId,
+  nameId, emailId, pwId, loginEmailId, loginPwId, userType) {
+  const { data: { session } } = await db.auth.getSession();
+  if (session?.user) return session.user.id;
+
+  const activeTab = document.querySelector(`#js-c4-auth-toggle .bsign-auth-tab.active`)?.dataset?.mode || 'signup';
+  const isLogin = activeTab === 'login';
+
+  const name     = isLogin ? '' : document.getElementById(nameId)?.value?.trim();
+  const email    = isLogin
+    ? document.getElementById(loginEmailId)?.value?.trim()
+    : document.getElementById(emailId)?.value?.trim();
+  const password = isLogin
+    ? document.getElementById(loginPwId)?.value
+    : document.getElementById(pwId)?.value;
+
+  if (!email || !password) { showError(errEl, 'Please enter your email and password.'); return null; }
+  if (!isLogin && !name)   { showError(errEl, 'Please enter your name.'); return null; }
+
+  const result = await doAuth(isLogin, { name, email, password }, userType);
+  if (result.error) { showError(errEl, result.error); return null; }
+  return result.userId;
+}

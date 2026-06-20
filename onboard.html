@@ -51,6 +51,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="ob-role-card__label">Promoter / Event organiser</span>
           <span class="ob-role-card__sub">Add one or multiple events, boost visibility, and sell tickets.</span>
         </button>
+        <button class="ob-role-card" data-role="community">
+          <span class="ob-role-card__icon">🤝</span>
+          <span class="ob-role-card__label">Community group / Club</span>
+          <span class="ob-role-card__sub">Sports team, hobby club, community org — get a free group page and post fixtures or events.</span>
+        </button>
         <button class="ob-role-card" data-role="user">
           <span class="ob-role-card__icon">🌟</span>
           <span class="ob-role-card__label">Just exploring</span>
@@ -717,6 +722,186 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="bsign-done__sub">Your personalised <span class="js-site-name">city</span> guide is ready. Head back to see tailored events, eats, and stays.</p>
         <a href="index.html" class="btn btn--teal btn--lg" style="margin-top:.5rem">Show me what's on →</a>
         <a href="guides.html" class="btn btn--outline" style="margin-top:.5rem">View my itinerary ⭐</a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- COMMUNITY / CLUB PATH                                 -->
+    <!-- ══════════════════════════════════════════════════════ -->
+
+    <!-- C1: Group details -->
+    <div class="bsign-screen" id="ob-c1">
+      <div class="bsign-step-label">Community · Step 1 of 4</div>
+      <h1 class="bsign-title">Tell us about your group</h1>
+      <p class="bsign-sub">We'll create a free page where your community can find you and stay up to date.</p>
+
+      <div class="bsign-step-label" style="margin-bottom:.65rem">What kind of group?</div>
+      <div class="bsign-type-grid" id="js-c-type-grid">
+        <button class="bsign-type-chip" data-value="sports_team" data-listing="sports_team">⚽ Sports team</button>
+        <button class="bsign-type-chip" data-value="community_group" data-listing="community">🤝 Community group</button>
+        <button class="bsign-type-chip" data-value="hobby_club" data-listing="community">🎨 Hobby / interest club</button>
+        <button class="bsign-type-chip" data-value="school_group" data-listing="community">🎒 School / uni group</button>
+        <button class="bsign-type-chip" data-value="volunteer" data-listing="community">💚 Volunteer / charity</button>
+        <button class="bsign-type-chip" data-value="other" data-listing="community">📌 Other</button>
+      </div>
+
+      <!-- Sport selector — shown only when sports_team is selected -->
+      <div id="js-c-sport-wrap" style="display:none;margin-bottom:1rem">
+        <div class="bsign-step-label" style="margin-bottom:.5rem">Sport</div>
+        <div class="ob-tag-grid" id="js-c-sport-chips">
+          <button class="ob-tag" data-value="AFL">🏈 AFL</button>
+          <button class="ob-tag" data-value="Basketball">🏀 Basketball</button>
+          <button class="ob-tag" data-value="Soccer">⚽ Soccer</button>
+          <button class="ob-tag" data-value="Cricket">🏏 Cricket</button>
+          <button class="ob-tag" data-value="Netball">🏐 Netball</button>
+          <button class="ob-tag" data-value="Rugby">🏉 Rugby</button>
+          <button class="ob-tag" data-value="Tennis">🎾 Tennis</button>
+          <button class="ob-tag" data-value="Swimming">🏊 Swimming</button>
+          <button class="ob-tag" data-value="Athletics">🏃 Athletics</button>
+          <button class="ob-tag" data-value="Other">📌 Other sport</button>
+        </div>
+      </div>
+
+      <div class="bsign-form">
+        <div class="bsign-field">
+          <label class="bsign-label" for="cd-name">Group / team name *</label>
+          <input class="bsign-input" type="text" id="cd-name" placeholder="e.g. Geelong Cats Basketball" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="cd-desc">About your group *</label>
+          <textarea class="bsign-input bsign-textarea" id="cd-desc" placeholder="Tell people what your group is about, who can join, and what you get up to…"></textarea>
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="cd-location">Suburb / home ground</label>
+          <input class="bsign-input" type="text" id="cd-location" placeholder="e.g. Kardinia Park, Geelong" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="cd-website">Website or social link</label>
+          <input class="bsign-input" type="url" id="cd-website" placeholder="yourclub.com.au or facebook.com/yourclub" />
+        </div>
+        <div class="bsign-field">
+          <label class="bsign-label" for="cd-contact">Contact email</label>
+          <input class="bsign-input" type="email" id="cd-contact" placeholder="contact@yourclub.com.au" />
+        </div>
+      </div>
+      <button class="bsign-next" id="js-c1-next">Continue →</button>
+    </div>
+
+    <!-- C2: Tags -->
+    <div class="bsign-screen" id="ob-c2">
+      <div class="bsign-step-label">Community · Step 2 of 4</div>
+      <h1 class="bsign-title">Help people find you</h1>
+      <p class="bsign-sub">Pick tags that describe your group — we'll use these to surface you in relevant searches.</p>
+
+      <div class="ob-pref-section">
+        <div class="ob-pref-label">Who's welcome?</div>
+        <div class="ob-tag-grid" id="js-c-suit-tags">
+          <button class="ob-tag" data-value="all-ages">👥 All ages</button>
+          <button class="ob-tag" data-value="kids">🧒 Kids</button>
+          <button class="ob-tag" data-value="teens">🎧 Teens</button>
+          <button class="ob-tag" data-value="adults-only">🔞 Adults</button>
+          <button class="ob-tag" data-value="family-friendly">👨‍👩‍👧 Family-friendly</button>
+          <button class="ob-tag" data-value="beginners">🌱 Beginners welcome</button>
+          <button class="ob-tag" data-value="accessible">♿ Accessible</button>
+          <button class="ob-tag" data-value="free">🎁 Free to join</button>
+        </div>
+      </div>
+
+      <div class="ob-pref-section">
+        <div class="ob-pref-label">Interests &amp; vibes</div>
+        <div class="ob-tag-grid" id="js-c-interest-tags">
+          <button class="ob-tag" data-value="sport">🏅 Sport</button>
+          <button class="ob-tag" data-value="fitness">🏃 Fitness</button>
+          <button class="ob-tag" data-value="outdoors">🌿 Outdoors</button>
+          <button class="ob-tag" data-value="arts">🎨 Arts &amp; crafts</button>
+          <button class="ob-tag" data-value="music">🎵 Music</button>
+          <button class="ob-tag" data-value="community">🤝 Community</button>
+          <button class="ob-tag" data-value="volunteering">💚 Volunteering</button>
+          <button class="ob-tag" data-value="social">🎉 Social</button>
+        </div>
+      </div>
+
+      <button class="bsign-next" id="js-c2-next">Continue →</button>
+      <button class="bsign-skip" id="js-c2-skip">Skip for now</button>
+    </div>
+
+    <!-- C3: Images -->
+    <div class="bsign-screen" id="ob-c3">
+      <div class="bsign-step-label">Community · Step 3 of 4</div>
+      <h1 class="bsign-title">Add some photos</h1>
+      <p class="bsign-sub">A group photo or action shot goes a long way. You can update these anytime from your dashboard.</p>
+
+      <div class="ob-upload-area" id="js-c-upload-area">
+        <input type="file" id="js-c-img-input" accept="image/*" multiple style="display:none" />
+        <span class="ob-upload-icon">📷</span>
+        <p class="ob-upload-label">Tap to add photos</p>
+        <p class="ob-upload-hint">JPG, PNG or WebP · max 8MB each</p>
+      </div>
+      <div class="ob-img-preview-grid" id="js-c-img-previews"></div>
+
+      <button class="bsign-next" id="js-c3-next">Continue →</button>
+      <button class="bsign-skip" id="js-c3-skip">Skip photos for now</button>
+    </div>
+
+    <!-- C4: Auth -->
+    <div class="bsign-screen" id="ob-c4">
+      <div class="bsign-step-label">Community · Step 4 of 4</div>
+
+      <div id="ob-c4-loggedin" style="display:none">
+        <h1 class="bsign-title">You're all set 👋</h1>
+        <p class="bsign-sub">We'll create the group page under your account.</p>
+        <div class="bsign-logged-in-card" id="js-c4-account-card"></div>
+        <button class="bsign-next ob-auth-submit" id="js-c4-next-li">Create group page →</button>
+        <p style="font-size:.8rem;color:var(--mid);margin-top:.75rem;text-align:center">
+          Not you? <a href="#" id="js-c4-signout" style="color:var(--teal)">Sign out</a>
+        </p>
+      </div>
+
+      <div id="ob-c4-loggedout" style="display:none">
+        <h1 class="bsign-title">Create your account</h1>
+        <p class="bsign-sub">Free account — manage your group page, post events, and keep members informed.</p>
+        <div class="bsign-auth-toggle" id="js-c4-auth-toggle">
+          <button class="bsign-auth-tab active" data-mode="signup">New account</button>
+          <button class="bsign-auth-tab" data-mode="login">I have an account</button>
+        </div>
+        <div class="bsign-form" id="ob-c4-signup-form">
+          <div class="bsign-field">
+            <label class="bsign-label" for="c4-name">Your name *</label>
+            <input class="bsign-input" type="text" id="c4-name" placeholder="First and last name" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="c4-email">Email address *</label>
+            <input class="bsign-input" type="email" id="c4-email" placeholder="you@example.com" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="c4-password">Password *</label>
+            <input class="bsign-input" type="password" id="c4-password" placeholder="Min 8 characters" />
+          </div>
+        </div>
+        <div class="bsign-form" id="ob-c4-login-form" style="display:none">
+          <div class="bsign-field">
+            <label class="bsign-label" for="c4-login-email">Email address *</label>
+            <input class="bsign-input" type="email" id="c4-login-email" placeholder="you@example.com" />
+          </div>
+          <div class="bsign-field">
+            <label class="bsign-label" for="c4-login-password">Password *</label>
+            <input class="bsign-input" type="password" id="c4-login-password" placeholder="Your password" />
+          </div>
+          <p style="font-size:.8rem;margin-top:.25rem"><a href="login.html?forgot=1" style="color:var(--teal)">Forgot password?</a></p>
+        </div>
+        <button class="bsign-next ob-auth-submit" id="js-c4-next">Create group page →</button>
+      </div>
+      <div id="js-c4-error" class="bsign-error" style="display:none"></div>
+    </div>
+
+    <!-- C5: Success -->
+    <div class="bsign-screen" id="ob-c5">
+      <div class="bsign-done">
+        <div class="bsign-done__icon">🎉</div>
+        <h1 class="bsign-done__title" id="js-c5-title">Your group page is live!</h1>
+        <p class="bsign-done__sub" id="js-c5-sub">Your page is under review and will be live shortly. Head to your dashboard to post events and keep your community up to date.</p>
+        <a href="business-dashboard.html" class="btn btn--teal btn--lg" id="js-c5-dash-link" style="margin-top:.5rem">Go to my dashboard →</a>
+        <a href="index.html" class="btn btn--outline" style="margin-top:.5rem">Back to <span class="js-site-abbr">WTDG</span></a>
       </div>
     </div>
 

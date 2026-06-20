@@ -4642,3 +4642,51 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   border-radius: var(--radius-pill);
   white-space: nowrap;
 }
+
+/* ── Fixture cards (sports team listing) ──────────────────── */
+.fixture-list { display: flex; flex-direction: column; gap: .75rem; }
+.fixture-card {
+  background: var(--card-bg, rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+.fixture-card__date { font-size: .78rem; color: var(--mid); font-weight: 600; letter-spacing: .03em; }
+.fixture-card__time { font-weight: 400; opacity: .75; }
+.fixture-card__matchup {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: 1rem;
+  font-weight: 800;
+  flex-wrap: wrap;
+}
+.fixture-card__vs { font-size: .78rem; font-weight: 600; color: var(--mid); }
+.fixture-card__team--opp { font-weight: 700; color: var(--mid); }
+.fixture-card__meta { display: flex; align-items: center; gap: .6rem; font-size: .8rem; flex-wrap: wrap; }
+.fixture-badge {
+  display: inline-flex;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+.fixture-badge--home { background: var(--teal-lt, #e8f9f9); color: var(--teal-d, #0f766e); }
+.fixture-badge--away { background: rgba(255,255,255,.08); color: var(--mid); }
+.fixture-card__venue { color: var(--mid); }
+.fixture-card__tickets { align-self: flex-start; margin-top: .25rem; }
+
+/* ── Community event cards ────────────────────────────────── */
+.community-event-list { display: flex; flex-direction: column; gap: .75rem; }
+.ev-card--community {
+  background: var(--card-bg, rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+}
+.ev-card--community .ev-card__title { font-size: 1rem; font-weight: 800; margin-bottom: .35rem; }
+.ev-card--community .ev-card__meta  { font-size: .8rem; color: var(--mid); margin-bottom: .25rem; }

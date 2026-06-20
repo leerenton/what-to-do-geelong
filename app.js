@@ -1576,6 +1576,179 @@ function getTodayHours(openingHours) {
   return hours ? `Today: ${hours}` : 'See hours';
 }
 
+// ── Community / Sports Team listing template ──────────────────────────────────
+async function renderCommunityListing(biz, listingType) {
+  const isSports = listingType === 'sports_team';
+  const SUPABASE_KEY = 'sb_publishable_hQC1qopXEWqlHPACU30OQA_LoeW5sw2';
+  const SUPABASE_URL = 'https://duhxszqyyzrbzrhwneey.supabase.co';
+
+  // Fetch events for this listing — include fixture fields
+  let events = [];
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/events?select=*&business_id=eq.${biz.id}&start_date=gte.${new Date().toISOString().slice(0,10)}&order=start_date.asc&limit=30`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const rows = await res.json();
+    if (Array.isArray(rows)) events = rows.map(camelize);
+  } catch (_) {}
+
+  const galleryImgs = [biz.img, ...(biz.gallery || [])].filter(Boolean).slice(0, 5);
+  const heroSlides = galleryImgs.length
+    ? galleryImgs.map((src, i) => `<div class="lhero__slide${i === 0 ? ' active' : ''}" style="background-image:url('${src}')"></div>`).join('')
+    : `<div class="lhero__slide active" style="background:${biz.color||'#1a2a3a'}22;display:flex;align-items:center;justify-content:center;font-size:6rem">${biz.emoji || '🤝'}</div>`;
+
+  const mapsQuery = encodeURIComponent((biz.address || biz.location || biz.name) + ' ' + cityName());
+  const mapsUrl   = biz.lat && biz.lng
+    ? `https://www.google.com/maps/dir/?api=1&destination=${biz.lat},${biz.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+
+  // Sport badge if available
+  const sportBadge = biz.sport ? `<span class="lhero__type-badge">${biz.sport}</span>` : '';
+  const typeBadge  = `<span class="lhero__type-badge">${isSports ? 'Sports Team' : 'Community Group'}</span>`;
+
+  // Fixture card or standard event card
+  function fixtureCard(ev) {
+    const opponent   = ev.opponent || 'TBA';
+    const isHome     = ev.isHomeGame !== false;
+    const dateStr    = ev.startDate ? new Date(ev.startDate).toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' }) : '';
+    const timeStr    = ev.startDate ? new Date(ev.startDate).toLocaleTimeString('en-AU', { hour:'numeric', minute:'2-digit', hour12:true }) : '';
+    const venue      = ev.location || (isHome ? (biz.address || 'Home ground') : 'Away');
+    const homeBadge  = `<span class="fixture-badge fixture-badge--${isHome ? 'home' : 'away'}">${isHome ? 'HOME' : 'AWAY'}</span>`;
+    return `
+      <div class="fixture-card">
+        <div class="fixture-card__date">${dateStr} <span class="fixture-card__time">${timeStr}</span></div>
+        <div class="fixture-card__matchup">
+          <span class="fixture-card__team">${biz.name}</span>
+          <span class="fixture-card__vs">vs</span>
+          <span class="fixture-card__team fixture-card__team--opp">${opponent}</span>
+        </div>
+        <div class="fixture-card__meta">${homeBadge} <span class="fixture-card__venue">📍 ${venue}</span></div>
+        ${ev.ticketUrl ? `<a href="${ev.ticketUrl}" class="btn btn--teal btn--sm fixture-card__tickets" target="_blank">Tickets</a>` : ''}
+      </div>`;
+  }
+
+  function communityEventCard(ev) {
+    const dateStr = ev.startDate ? new Date(ev.startDate).toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' }) : '';
+    const timeStr = ev.startDate ? new Date(ev.startDate).toLocaleTimeString('en-AU', { hour:'numeric', minute:'2-digit', hour12:true }) : '';
+    return `
+      <div class="ev-card ev-card--community">
+        <div class="ev-card__body">
+          <h3 class="ev-card__title">${ev.title}</h3>
+          <div class="ev-card__meta">📅 ${dateStr} &nbsp;🕐 ${timeStr}</div>
+          ${ev.location ? `<div class="ev-card__meta">📍 ${ev.location}</div>` : ''}
+          ${ev.price === 'Free' || !ev.price ? '<span class="ev-card__price ev-card__price--free">Free</span>' : `<span class="ev-card__price">${ev.price}</span>`}
+        </div>
+      </div>`;
+  }
+
+  const eventsHtml = events.length
+    ? events.map(ev => isSports ? fixtureCard(ev) : communityEventCard(ev)).join('')
+    : `<p class="listing-empty">No upcoming ${isSports ? 'fixtures' : 'events'} right now. Check back soon.</p>`;
+
+  const tabLabel = isSports ? `Fixtures <span class="tab-count">${events.length}</span>` : `What's on <span class="tab-count">${events.length}</span>`;
+
+  document.getElementById('js-listing-root').innerHTML = `
+    <div class="lhero lhero--full">
+      <div class="lhero__track">${heroSlides}</div>
+      <div class="lhero__badge-wrap">${sportBadge || typeBadge}</div>
+    </div>
+
+    <div class="container">
+      <div class="lheader">
+        <div class="lheader__left">
+          <div class="lident__avatar" style="background:${biz.color||'var(--teal)'}22">${biz.emoji || (isSports ? '🏆' : '🤝')}</div>
+          <div class="lheader__info">
+            <h1 class="lident__name">${biz.name}</h1>
+            <p class="lident__loc">
+              <span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle;color:var(--teal)">location_on</span>
+              ${biz.suburb || biz.address || biz.location || cityName()}
+            </p>
+            <p class="lident__type" style="font-size:.82rem;color:var(--mid);margin-top:.2rem">
+              ${isSports ? (biz.sport ? `${biz.sport} · Sports Team` : 'Sports Team') : 'Community Group'}
+            </p>
+          </div>
+        </div>
+        <div class="lheader__actions">
+          ${biz.website ? `<a href="${biz.website.startsWith('http') ? biz.website : 'https://'+biz.website}" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><span class="material-symbols-rounded">language</span> Website</a>` : ''}
+          ${biz.email   ? `<a href="mailto:${biz.email}" class="btn btn--outline btn--sm"><span class="material-symbols-rounded">mail</span> Contact</a>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="container listing-layout">
+      <div class="listing-main">
+        ${biz.description ? `<p class="lident__desc">${biz.description}</p>` : ''}
+
+        <div class="listing-tabs" role="tablist">
+          <button class="listing-tab listing-tab--active" role="tab" data-tab="events">${tabLabel}</button>
+          <button class="listing-tab" role="tab" data-tab="about">About</button>
+        </div>
+
+        <div id="js-tab-events" class="tab-panel">
+          <div class="${isSports ? 'fixture-list' : 'community-event-list'}">
+            ${eventsHtml}
+          </div>
+        </div>
+
+        <div id="js-tab-about" class="tab-panel tab-panel--hidden">
+          ${biz.description ? `<p style="margin-bottom:1rem">${biz.description}</p>` : ''}
+          ${biz.address ? `<p><strong>Location:</strong> ${biz.address}</p>` : ''}
+          ${biz.email   ? `<p><strong>Contact:</strong> <a href="mailto:${biz.email}" style="color:var(--teal)">${biz.email}</a></p>` : ''}
+          ${biz.website ? `<p><strong>Website:</strong> <a href="${biz.website.startsWith('http') ? biz.website : 'https://'+biz.website}" target="_blank" rel="noopener" style="color:var(--teal)">${biz.website}</a></p>` : ''}
+        </div>
+      </div>
+
+      <aside class="listing-sidebar">
+        ${biz.address || biz.lat ? `
+        <div class="linfo-card linfo-card--map">
+          <iframe
+            src="https://maps.google.com/maps?q=${biz.lat && biz.lng ? `${biz.lat},${biz.lng}` : mapsQuery}&z=15&output=embed"
+            width="100%" height="200" style="border:0;border-radius:8px;display:block"
+            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+          ${biz.address ? `<p class="linfo-address">${biz.address}</p>` : ''}
+          <a href="${mapsUrl}" target="_blank" rel="noopener" class="linfo-directions-btn">
+            <span class="material-symbols-rounded">directions</span> Get Directions
+          </a>
+        </div>` : ''}
+
+        <div class="linfo-card" style="background:var(--teal-lt,#e8f9f9);border:1.5px solid var(--teal)">
+          <p style="font-size:.88rem;color:var(--dark);line-height:1.5">
+            ${isSports ? 'Want to stay across every fixture?' : 'Want to stay up to date with this group?'}
+            <a href="onboard.html?path=user" style="color:var(--teal);font-weight:700">
+              Create a free account →
+            </a>
+          </p>
+        </div>
+      </aside>
+    </div>
+  `;
+
+  // Tab switching
+  document.querySelectorAll('#js-listing-root .listing-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#js-listing-root .listing-tab').forEach(t => t.classList.remove('listing-tab--active'));
+      tab.classList.add('listing-tab--active');
+      const panelId = `js-tab-${tab.dataset.tab}`;
+      document.querySelectorAll('#js-listing-root .tab-panel').forEach(p => {
+        p.classList.toggle('tab-panel--hidden', p.id !== panelId);
+      });
+    });
+  });
+
+  // Hero gallery sliding
+  const slides = document.querySelectorAll('.lhero__slide');
+  if (slides.length > 1) {
+    let cur = 0;
+    setInterval(() => {
+      slides[cur].classList.remove('active');
+      cur = (cur + 1) % slides.length;
+      slides[cur].classList.add('active');
+    }, 4000);
+  }
+}
+
 async function initListingPage() {
   const params    = new URLSearchParams(window.location.search);
   // On Vercel, URL stays clean (/biz-slug) so read path; locally use ?s= or ?id=
@@ -1667,6 +1840,14 @@ async function initListingPage() {
         "image": biz.img || '',
       })}<\/script>`,
   });
+
+  const listingType = biz.listingType || biz.listing_type || 'business';
+
+  // Community / sports-team pages get a purpose-built template
+  if (listingType === 'community' || listingType === 'sports_team') {
+    renderCommunityListing(biz, listingType);
+    return;
+  }
 
   const events = getEventsForBusiness(biz.id);
   const promos = getPromosForBusiness(biz.id);

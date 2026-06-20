@@ -374,7 +374,7 @@
           <li class="no">Special offers</li>
           <li class="no">Direct inquiry form</li>
         </ul>
-        <a href="/business-signup.html" class="btn btn--navy" style="font-size:.88rem;padding:.65rem 1.4rem">List for free →</a>
+        <button onclick="openCityPicker('free')" class="btn btn--navy" style="font-size:.88rem;padding:.65rem 1.4rem">List for free →</button>
       </div>
       <div class="plan plan--gold">
         <div class="plan__badge">Most popular</div>
@@ -390,7 +390,17 @@
           <li>Gold badge on your listing</li>
           <li>Business dashboard &amp; analytics</li>
         </ul>
-        <a href="mailto:hello@whattodovictoria.com.au?subject=Gold Membership" class="btn btn--gold" style="font-size:.88rem;padding:.65rem 1.4rem">Get Gold →</a>
+        <button onclick="openCityPicker('gold')" class="btn btn--gold" style="font-size:.88rem;padding:.65rem 1.4rem">Get Gold →</button>
+      </div>
+    </div>
+
+    <!-- CITY PICKER MODAL -->
+    <div id="js-city-picker" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:1rem">
+      <div style="background:#fff;border-radius:1rem;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative">
+        <button onclick="closeCityPicker()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#666">✕</button>
+        <h3 style="font-family:Nunito,sans-serif;font-size:1.25rem;font-weight:800;color:#0f172a;margin:0 0 .4rem">Choose your city</h3>
+        <p style="font-size:.88rem;color:#64748b;margin:0 0 1.25rem">Select the city where your business is located.</p>
+        <div id="js-city-picker-list" style="display:flex;flex-direction:column;gap:.6rem"></div>
       </div>
     </div>
 
@@ -557,6 +567,7 @@ async function loadCities() {
 
     // Count live sites
     const live = all.filter(s => s.site_mode === 'active');
+    window._liveSites = live; // used by city picker
     document.getElementById('js-stat-cities').textContent = live.length;
 
     // Footer city links
@@ -601,6 +612,60 @@ async function loadCities() {
 
 loadCities();
 loadStats();
+
+// ── City picker modal ─────────────────────────────────────────
+let _pickerIntent = 'free';
+
+function openCityPicker(intent) {
+  _pickerIntent = intent || 'free';
+  const modal = document.getElementById('js-city-picker');
+  const list  = document.getElementById('js-city-picker-list');
+  const sites = window._liveSites || [];
+
+  if (!sites.length) {
+    // Sites not loaded yet — fall back to fetching
+    db.from('sites').select('name,slug,domain,logo_url').eq('site_mode', 'active').neq('slug', 'victoria').order('name')
+      .then(({ data }) => { window._liveSites = data || []; openCityPicker(intent); });
+    return;
+  }
+
+  list.innerHTML = sites.map(s => `
+    <button onclick="pickCity('${s.domain}','${s.slug}')" style="
+      display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;
+      border:2px solid #e2e8f0;border-radius:.6rem;background:#fff;
+      cursor:pointer;text-align:left;transition:border-color .15s,background .15s;
+      font-family:inherit;width:100%
+    " onmouseover="this.style.borderColor='#2ab4a0';this.style.background='#f0fdfa'"
+       onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#fff'">
+      ${s.logo_url ? `<img src="${s.logo_url}" style="height:28px;width:auto;object-fit:contain;flex-shrink:0" alt="${s.name}" />` : `<span style="font-weight:800;font-size:.95rem;color:#0f172a;flex-shrink:0">${s.name}</span>`}
+      <span style="font-size:.88rem;color:#64748b">${s.domain}</span>
+      <span style="margin-left:auto;color:#2ab4a0;font-size:1rem;flex-shrink:0">→</span>
+    </button>
+  `).join('');
+
+  modal.style.display = 'flex';
+  document.addEventListener('keydown', _pickerEsc);
+}
+
+function pickCity(domain, slug) {
+  const dest = _pickerIntent === 'gold'
+    ? `https://${domain}/business-signup.html?plan=gold`
+    : `https://${domain}/business-signup.html`;
+  closeCityPicker();
+  window.open(dest, '_blank', 'noopener');
+}
+
+function closeCityPicker() {
+  document.getElementById('js-city-picker').style.display = 'none';
+  document.removeEventListener('keydown', _pickerEsc);
+}
+
+function _pickerEsc(e) { if (e.key === 'Escape') closeCityPicker(); }
+
+// Close on backdrop click
+document.getElementById('js-city-picker').addEventListener('click', function(e) {
+  if (e.target === this) closeCityPicker();
+});
 </script>
 </body>
 </html>

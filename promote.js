@@ -55,83 +55,108 @@
     const sections = document.getElementById('js-promo-sections');
     const empty    = document.getElementById('js-promo-empty');
 
+    const params   = new URLSearchParams(window.location.search);
+    const urlBiz   = params.get('biz');
+    const urlEv    = params.get('ev');   // pre-select a specific event
+    const lsBiz    = localStorage.getItem('wtdg_dash_biz');
+
     try {
-      // Find business owned by user
+      // Find businesses owned by user
       const { data: bizRows } = await db
         .from('businesses')
         .select('id, name, img, status, credit_balance')
         .eq('owner_id', user.id)
         .limit(10);
 
-      if (!bizRows || bizRows.length === 0) {
-        loading.style.display  = 'none';
-        empty.style.display    = '';
-        return;
-      }
-
       // Store credits per biz
-      bizRows.forEach(b => { _bizCredits[b.id] = b.credit_balance || 0; });
+      (bizRows || []).forEach(b => { _bizCredits[b.id] = b.credit_balance || 0; });
 
-      // Default to URL param biz, localStorage biz, or first row
-      const urlBiz    = new URLSearchParams(window.location.search).get('biz');
-      const lsBiz     = localStorage.getItem('wtdg_dash_biz');
-      const preferred  = bizRows.find(b => b.id === urlBiz) ||
-                         bizRows.find(b => b.id === lsBiz)  ||
-                         bizRows[0];
+      const preferred = bizRows?.find(b => b.id === urlBiz) ||
+                        bizRows?.find(b => b.id === lsBiz)  ||
+                        bizRows?.[0] || null;
 
-      _bizId   = preferred.id;
-      _credits = preferred.credit_balance || 0;
+      _bizId   = preferred?.id || null;
+      _credits = preferred?.credit_balance || 0;
 
+      const bizIds = (bizRows || []).map(b => b.id);
 
-      // Load events + offers for all businesses owned by user
-      const bizIds = bizRows.map(b => b.id);
+      // Load events: business-linked AND promoter-submitted
+      const evQueries = [];
+      if (bizIds.length) {
+        evQueries.push(
+          db.from('events').select('id, title, img, date, start_date, business_id, promoter_id')
+            .in('business_id', bizIds).order('start_date', { ascending: false })
+        );
+      }
+      evQueries.push(
+        db.from('events').select('id, title, img, date, start_date, business_id, promoter_id')
+          .eq('promoter_id', user.id).order('start_date', { ascending: false })
+      );
+      const evResults = await Promise.all(evQueries);
+      const seenEvIds = new Set();
+      const allEvRows = evResults.flatMap(r => r.data || []).filter(e => {
+        if (seenEvIds.has(e.id)) return false;
+        seenEvIds.add(e.id); return true;
+      });
 
-      // Events
-      const { data: evRows } = await db
-        .from('events')
-        .select('id, name, img, date, business_id')
-        .in('business_id', bizIds)
-        .order('id', { ascending: false });
-
-      // Offers / promos
-      const { data: promoRows } = await db
-        .from('promos')
-        .select('id, title, img, discount, business_id')
-        .in('business_id', bizIds)
-        .order('id', { ascending: false });
+      // Offers
+      const { data: promoRows } = bizIds.length
+        ? await db.from('promos').select('id, title, img, discount, business_id').in('business_id', bizIds).order('id', { ascending: false })
+        : { data: [] };
 
       loading.style.display  = 'none';
-      sections.style.display = '';
 
-      // Render business listing
+      // Render business listings
       const bizItems = document.getElementById('js-promo-biz-items');
-      bizRows.filter(b => b.id === _bizId).forEach(b => {
+      (bizRows || []).forEach(b => {
         bizItems.appendChild(makeItemCard({
           id: b.id, type: 'business', name: b.name,
           img: b.img, meta: 'Business listing', bizId: b.id,
         }));
       });
 
-      // Events — only for the active biz
-      const bizEvRows = evRows?.filter(e => e.business_id === _bizId) || [];
-      if (bizEvRows.length) {
+      // Events — business events grouped under biz name, then standalone promoter events
+      if (allEvRows.length) {
         document.getElementById('js-promo-events-section').style.display = '';
         const cont = document.getElementById('js-promo-event-items');
-        bizEvRows.forEach(e => {
-          cont.appendChild(makeItemCard({
-            id: e.id, type: 'event', name: e.name,
-            img: e.img, meta: e.date ? `Event · ${e.date}` : 'Event',
-            bizId: e.business_id,
-          }));
+
+        // Group: per-biz events first
+        bizIds.forEach(bid => {
+          const biz = bizRows.find(b => b.id === bid);
+          const bizEv = allEvRows.filter(e => e.business_id === bid);
+          if (bizEv.length && biz) {
+            const lbl = document.createElement('div');
+            lbl.style.cssText = 'font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mid);margin:.75rem 0 .35rem';
+            lbl.textContent = biz.name;
+            cont.appendChild(lbl);
+            bizEv.forEach(e => cont.appendChild(makeItemCard({
+              id: e.id, type: 'event', name: e.title || 'Untitled event',
+              img: e.img, meta: e.date || (e.start_date ? new Date(e.start_date).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : 'Event'),
+              bizId: bid,
+            })));
+          }
         });
+
+        // Standalone promoter events (no business_id)
+        const standaloneEv = allEvRows.filter(e => !e.business_id && e.promoter_id === user.id);
+        if (standaloneEv.length) {
+          const lbl = document.createElement('div');
+          lbl.style.cssText = 'font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mid);margin:.75rem 0 .35rem';
+          lbl.textContent = 'Your events';
+          cont.appendChild(lbl);
+          standaloneEv.forEach(e => cont.appendChild(makeItemCard({
+            id: e.id, type: 'event', name: e.title || 'Untitled event',
+            img: e.img, meta: e.date || (e.start_date ? new Date(e.start_date).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : 'Event'),
+            bizId: null,
+          })));
+        }
       }
 
-      // Offers — only for the active biz
-      const bizPromoRows = promoRows?.filter(p => p.business_id === _bizId) || [];
-      if (bizPromoRows.length) {
+      // Offers
+      if (promoRows?.length) {
         document.getElementById('js-promo-offers-section').style.display = '';
         const cont = document.getElementById('js-promo-offer-items');
-        bizPromoRows.forEach(p => {
+        promoRows.forEach(p => {
           cont.appendChild(makeItemCard({
             id: p.id, type: 'offer', name: p.title || 'Untitled offer',
             img: p.img, meta: p.discount || 'Offer',
@@ -140,22 +165,34 @@
         });
       }
 
-      const hasContent = bizItems.children.length || bizEvRows.length || bizPromoRows.length;
+      const hasContent = bizItems.children.length || allEvRows.length || promoRows?.length;
       if (!hasContent) {
         sections.style.display = 'none';
         empty.style.display    = '';
         return;
       }
 
-      // Auto-select the biz listing and skip straight to step 2
-      const firstCard = document.querySelector('.promo-item');
-      if (firstCard) firstCard.click();
-      // Jump directly to package selection — no need to show step 1
-      _step = 2;
-      setProgress(50);
-      document.getElementById('js-s2-item-label').textContent = _selectedItem?.name || '';
-      showScreen('ps-s2');
+      sections.style.display = '';
 
+      // Pre-select via URL params and skip to step 2
+      if (urlEv || urlBiz) {
+        let targetCard = null;
+        if (urlEv) {
+          targetCard = document.querySelector(`.promo-item[data-id="${urlEv}"][data-type="event"]`);
+        }
+        if (!targetCard && urlBiz) {
+          targetCard = document.querySelector(`.promo-item[data-id="${urlBiz}"][data-type="business"]`);
+        }
+        if (!targetCard) targetCard = document.querySelector('.promo-item');
+        if (targetCard) {
+          targetCard.click();
+          _step = 2;
+          setProgress(50);
+          document.getElementById('js-s2-item-label').textContent = _selectedItem?.name || '';
+          showScreen('ps-s2');
+        }
+      }
+      // No pre-selection — show step 1 so user can choose
     } catch (err) {
       loading.textContent = 'Failed to load content: ' + err.message;
     }

@@ -273,6 +273,17 @@ export default async function middleware(request) {
     return; // Vercel handles it directly
   }
 
+  // ── Admin preview entry point — set bypass cookie and redirect to homepage ──
+  if (pathname === '/admin-preview') {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': '/',
+        'Set-Cookie': 'wtdg_admin_bypass=1; Path=/; Max-Age=86400; SameSite=Lax',
+      },
+    });
+  }
+
   const city     = CITY_MAP[hostname];
   const pageType = getPageType(pathname);
 

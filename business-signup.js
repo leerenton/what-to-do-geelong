@@ -267,8 +267,8 @@ document.getElementById('js-auth-toggle')?.addEventListener('click', e => {
 });
 
 // ── SCREEN 4: Submit ──────────────────────────────────────
-document.getElementById('js-s4-next').addEventListener('click', async () => {
-  const btn   = document.getElementById('js-s4-next');
+async function handleS4Submit(e) {
+  const btn   = e.currentTarget;
   const errEl = document.getElementById('js-s4-error');
   btn.disabled = true; btn.textContent = 'Saving…';
   if (errEl) errEl.style.display = 'none';
@@ -432,7 +432,9 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
     `${bsState.details.name} has been submitted for review. Head to your dashboard to start setting up events, offers, and photos.`;
 
   bsignGoto('bs-s5');
-});
+}
+
+document.querySelectorAll('.js-s4-submit').forEach(btn => btn.addEventListener('click', e => handleS4Submit(e)));
 
 // ── BACK BUTTON ───────────────────────────────────────────
 document.getElementById('js-bsign-back').addEventListener('click', () => {

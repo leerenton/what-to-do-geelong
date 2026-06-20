@@ -1561,6 +1561,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   document.querySelectorAll('.dash-tab').forEach(tab => {
-    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    tab.addEventListener('click', () => {
+      if (tab.dataset.tab === 'promote') {
+        window.location.href = `promote.html?biz=${encodeURIComponent(currentBiz.id)}`;
+      } else {
+        switchTab(tab.dataset.tab);
+      }
+    });
   });
 });

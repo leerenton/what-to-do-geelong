@@ -21,6 +21,18 @@
   color: var(--teal, #0d9488);
 }
 
+/* When dash-header is present, the sub-topbar just holds the back button */
+.promo-topbar--sub {
+  padding: .5rem 0 .75rem;
+  min-height: 2rem;
+}
+
+/* Dash header sits outside promo-wrap so it spans full width */
+#js-dash-header .dash-topbar,
+#js-dash-header .dash-tabs {
+  max-width: 100%;
+}
+
 /* Progress bar */
 .promo-progress {
   height: 4px; background: #e2e8f0;

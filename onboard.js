@@ -1079,7 +1079,7 @@ async function handleC4Submit(e) {
       slug,
       location: location || null,
       website: website || null,
-      email: contact || null,
+      phone: contact || null,
       listing_type: ob.communityListingType,
       plan: 'free',
       owner_id: userId,

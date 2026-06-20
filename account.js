@@ -91,28 +91,80 @@ document.addEventListener('DOMContentLoaded', async () => {
       ${promoterEvents.length ? `
         <div class="acct-section">
           <div class="acct-section-title"><span class="material-symbols-rounded">confirmation_number</span> My Events</div>
-          <div class="acct-biz-list">
+          <div class="acct-biz-list" id="js-promoter-event-list">
             ${promoterEvents.map(ev => {
               const statusBadge = ev.status === 'approved'
                 ? `<span class="acct-biz-card__plan acct-biz-card__plan--gold">✓ Live</span>`
-                : `<span class="acct-biz-card__plan acct-biz-card__plan--free">Pending</span>`;
+                : `<span class="acct-biz-card__plan acct-biz-card__plan--free">Pending review</span>`;
               const dateStr = ev.start_date
                 ? new Date(ev.start_date).toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' })
                 : (ev.date || '');
               return `
-                <div class="acct-biz-card" style="cursor:default">
+                <div class="acct-biz-card" style="flex-wrap:wrap;gap:.5rem">
                   <div class="acct-biz-card__icon" style="background:var(--teal-lt)">🎪</div>
-                  <div>
+                  <div style="flex:1;min-width:0">
                     <div class="acct-biz-card__name">${ev.title}</div>
                     <div class="acct-biz-card__meta">${ev.category || ''} · ${dateStr}</div>
                   </div>
                   ${statusBadge}
+                  <div style="display:flex;gap:.4rem;width:100%;margin-top:.1rem">
+                    <button class="btn btn--outline btn--sm js-ev-edit-btn" data-id="${ev.id}" style="font-size:.75rem;padding:.25rem .65rem">
+                      <span class="material-symbols-rounded" style="font-size:.9rem">edit</span> Edit
+                    </button>
+                    <a href="promote-event.html?ev=${ev.id}" class="btn btn--teal btn--sm" style="font-size:.75rem;padding:.25rem .65rem">
+                      <span class="material-symbols-rounded" style="font-size:.9rem">rocket_launch</span> Boost
+                    </a>
+                  </div>
                 </div>`;
             }).join('')}
           </div>
           <a href="onboard.html?path=promoter" class="btn btn--outline btn--full" style="margin-top:.85rem">
             <span class="material-symbols-rounded" style="font-size:1rem">add</span> Submit another event
           </a>
+        </div>
+
+        <!-- Event edit drawer -->
+        <div id="js-ev-edit-drawer" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center">
+          <div style="background:#fff;width:100%;max-width:540px;border-radius:16px 16px 0 0;padding:1.5rem 1.25rem 2rem;max-height:90vh;overflow-y:auto">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+              <h2 style="font-family:var(--font-head);font-size:1.1rem;font-weight:900;margin:0">Edit event</h2>
+              <button id="js-ev-edit-close" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--mid)">✕</button>
+            </div>
+            <input type="hidden" id="js-eef-id" />
+            <div style="display:flex;flex-direction:column;gap:.85rem">
+              <div>
+                <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.3rem">Event name *</label>
+                <input id="js-eef-title" type="text" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .85rem;font-size:.95rem;font-family:var(--font-body)" />
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+                <div>
+                  <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.3rem">Start date &amp; time *</label>
+                  <input id="js-eef-start" type="datetime-local" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .85rem;font-size:.9rem;font-family:var(--font-body)" />
+                </div>
+                <div>
+                  <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.3rem">End (optional)</label>
+                  <input id="js-eef-end" type="datetime-local" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .85rem;font-size:.9rem;font-family:var(--font-body)" />
+                </div>
+              </div>
+              <div>
+                <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.3rem">Venue / location *</label>
+                <input id="js-eef-location" type="text" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .85rem;font-size:.95rem;font-family:var(--font-body)" />
+              </div>
+              <div>
+                <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.3rem">Tickets / event URL</label>
+                <input id="js-eef-url" type="url" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .85rem;font-size:.95rem;font-family:var(--font-body)" placeholder="https://…" />
+              </div>
+              <div>
+                <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:.3rem">Description</label>
+                <textarea id="js-eef-desc" rows="3" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .85rem;font-size:.9rem;font-family:var(--font-body);resize:vertical"></textarea>
+              </div>
+            </div>
+            <div id="js-eef-error" style="color:#e76f51;font-size:.82rem;margin-top:.75rem;display:none"></div>
+            <div style="display:flex;gap:.65rem;margin-top:1.25rem">
+              <button id="js-eef-save" class="btn btn--teal" style="flex:1">Save changes</button>
+              <button id="js-eef-delete" class="btn btn--outline" style="color:#e76f51;border-color:#e76f51">Delete</button>
+            </div>
+          </div>
         </div>
       ` : ''}
 
@@ -213,6 +265,89 @@ document.addEventListener('DOMContentLoaded', async () => {
   `;
 
   document.getElementById('js-logout-btn')?.addEventListener('click', logout);
+
+  // ── Promoter event edit drawer ────────────────────────────
+  const editDrawer = document.getElementById('js-ev-edit-drawer');
+  if (editDrawer) {
+    // Open drawer when Edit button clicked
+    document.querySelectorAll('.js-ev-edit-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const evId = btn.dataset.id;
+        const { data: ev } = await db.from('events').select('*').eq('id', evId).single();
+        if (!ev) return;
+        document.getElementById('js-eef-id').value       = ev.id;
+        document.getElementById('js-eef-title').value    = ev.title || '';
+        document.getElementById('js-eef-location').value = ev.location || '';
+        document.getElementById('js-eef-url').value      = ev.url || '';
+        document.getElementById('js-eef-desc').value     = ev.description || '';
+        // Format ISO dates back to datetime-local value (YYYY-MM-DDTHH:MM)
+        const toLocal = iso => iso ? iso.slice(0, 16) : '';
+        document.getElementById('js-eef-start').value = toLocal(ev.start_date);
+        document.getElementById('js-eef-end').value   = toLocal(ev.end_date);
+        document.getElementById('js-eef-error').style.display = 'none';
+        editDrawer.style.display = 'flex';
+      });
+    });
+
+    // Close
+    document.getElementById('js-ev-edit-close').addEventListener('click', () => {
+      editDrawer.style.display = 'none';
+    });
+    editDrawer.addEventListener('click', e => {
+      if (e.target === editDrawer) editDrawer.style.display = 'none';
+    });
+
+    // Save
+    document.getElementById('js-eef-save').addEventListener('click', async () => {
+      const evId    = document.getElementById('js-eef-id').value;
+      const title   = document.getElementById('js-eef-title').value.trim();
+      const startRaw = document.getElementById('js-eef-start').value;
+      const endRaw   = document.getElementById('js-eef-end').value;
+      const errEl   = document.getElementById('js-eef-error');
+      if (!title || !startRaw) { errEl.textContent = 'Title and start date are required.'; errEl.style.display = 'block'; return; }
+
+      const startDt = new Date(startRaw);
+      const endDt   = endRaw ? new Date(endRaw) : null;
+      const fmtDate = dt => dt.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+      const fmtTime = dt => dt.toLocaleTimeString('en-AU', { hour:'numeric', minute:'2-digit', hour12:true });
+      const dateDisplay = endDt && fmtDate(endDt) !== fmtDate(startDt)
+        ? `${fmtDate(startDt)} – ${fmtDate(endDt)}`
+        : fmtDate(startDt);
+
+      const saveBtn = document.getElementById('js-eef-save');
+      saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+
+      const { error } = await db.from('events').update({
+        title,
+        start_date:  startDt.toISOString(),
+        end_date:    endDt ? endDt.toISOString() : null,
+        date:        dateDisplay,
+        time:        fmtTime(startDt),
+        location:    document.getElementById('js-eef-location').value.trim() || null,
+        url:         document.getElementById('js-eef-url').value.trim() || null,
+        description: document.getElementById('js-eef-desc').value.trim() || null,
+      }).eq('id', evId);
+
+      saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
+
+      if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+      editDrawer.style.display = 'none';
+      // Refresh the page so the list reflects any title/date change
+      window.location.reload();
+    });
+
+    // Delete
+    document.getElementById('js-eef-delete').addEventListener('click', async () => {
+      if (!confirm('Delete this event? This cannot be undone.')) return;
+      const evId = document.getElementById('js-eef-id').value;
+      const deleteBtn = document.getElementById('js-eef-delete');
+      deleteBtn.disabled = true; deleteBtn.textContent = 'Deleting…';
+      const { error } = await db.from('events').delete().eq('id', evId);
+      if (error) { deleteBtn.disabled = false; deleteBtn.textContent = 'Delete'; alert(error.message); return; }
+      editDrawer.style.display = 'none';
+      window.location.reload();
+    });
+  }
 
   // ── City email subscription toggles ─────────────────────
   const digestStatus = document.getElementById('js-digest-status');

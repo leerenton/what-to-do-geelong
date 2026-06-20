@@ -17,3 +17,10 @@ CREATE POLICY "Promoters can delete their own events"
   FOR DELETE
   TO authenticated
   USING (auth.uid() = promoter_id);
+
+-- Allow promoters to read their own events on the account dashboard
+CREATE POLICY "Promoters can read their own events"
+  ON public.events
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = promoter_id);

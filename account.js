@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!session && !acct) { window.location.href = 'login.html?next=account.html'; return; }
 
   let profiles = [];
+  let promoterEvents = [];
   let digestEnabled = false;
   let citySubscriptions = {}; // slug → boolean
   let allSites = [];
@@ -21,8 +22,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       if (window._siteConfigPromise) await window._siteConfigPromise;
       const citySlug = window.SITE?.slug || 'geelong';
-      const { data } = await db.from('businesses').select('*').eq('owner_id', session.user.id).eq('city', citySlug);
-      profiles = data || [];
+      const [bizRes, evRes] = await Promise.all([
+        db.from('businesses').select('*').eq('owner_id', session.user.id).eq('city', citySlug),
+        db.from('events').select('id,title,date,time,start_date,status,category').eq('promoter_id', session.user.id).order('start_date', { ascending: true }),
+      ]);
+      profiles       = bizRes.data || [];
+      promoterEvents = evRes.data  || [];
     } catch (_) {}
     try {
       const { data } = await db.from('email_preferences').select('weekly_digest').eq('user_id', session.user.id).maybeSingle();
@@ -82,6 +87,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>
 
+      <!-- MY EVENTS (promoters) -->
+      ${promoterEvents.length ? `
+        <div class="acct-section">
+          <div class="acct-section-title"><span class="material-symbols-rounded">confirmation_number</span> My Events</div>
+          <div class="acct-biz-list">
+            ${promoterEvents.map(ev => {
+              const statusBadge = ev.status === 'approved'
+                ? `<span class="acct-biz-card__plan acct-biz-card__plan--gold">✓ Live</span>`
+                : `<span class="acct-biz-card__plan acct-biz-card__plan--free">Pending</span>`;
+              const dateStr = ev.start_date
+                ? new Date(ev.start_date).toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' })
+                : (ev.date || '');
+              return `
+                <div class="acct-biz-card" style="cursor:default">
+                  <div class="acct-biz-card__icon" style="background:var(--teal-lt)">🎪</div>
+                  <div>
+                    <div class="acct-biz-card__name">${ev.title}</div>
+                    <div class="acct-biz-card__meta">${ev.category || ''} · ${dateStr}</div>
+                  </div>
+                  ${statusBadge}
+                </div>`;
+            }).join('')}
+          </div>
+          <a href="onboard.html?path=promoter" class="btn btn--outline btn--full" style="margin-top:.85rem">
+            <span class="material-symbols-rounded" style="font-size:1rem">add</span> Submit another event
+          </a>
+        </div>
+      ` : ''}
+
       <!-- MY BUSINESSES -->
       <div class="acct-section">
         <div class="acct-section-title"><span class="material-symbols-rounded">store</span> My Businesses</div>
@@ -98,12 +132,21 @@ document.addEventListener('DOMContentLoaded', async () => {
               </a>
             `).join('')}
           </div>
-          <a href="business-signup.html" class="btn btn--outline btn--full" style="margin-top:.85rem">
-            <span class="material-symbols-rounded" style="font-size:1rem">add</span> Add another business
-          </a>
+          <div style="display:flex;gap:.65rem;margin-top:.85rem;flex-wrap:wrap">
+            <a href="onboard.html?path=business" class="btn btn--outline btn--sm">
+              <span class="material-symbols-rounded" style="font-size:1rem">add</span> Add another listing
+            </a>
+            <a href="onboard.html?path=promoter" class="btn btn--outline btn--sm">
+              <span class="material-symbols-rounded" style="font-size:1rem">confirmation_number</span> Promote an event
+            </a>
+          </div>
         ` : `
-          <p style="color:var(--mid);font-size:.9rem;margin-bottom:.85rem">No businesses yet. List your venue, café, or event on WTDG.</p>
-          <a href="business-signup.html" class="btn btn--teal btn--full">List a business →</a>
+          <p style="color:var(--mid);font-size:.9rem;margin-bottom:.85rem">No businesses yet. List your venue, café, or community group on WTDG.</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <a href="onboard.html?path=business" class="btn btn--teal btn--full">List a business →</a>
+            <a href="onboard.html?path=promoter" class="btn btn--outline btn--full">Promote an event →</a>
+            <a href="onboard.html?path=community" class="btn btn--outline btn--full">List a community group →</a>
+          </div>
         `}
       </div>
 

@@ -31,10 +31,9 @@ async function loadAllData() {
     const site = await window._siteConfigPromise;
     const city = site.slug;
 
-    const [bizRes, evRes, stayRes, promoRes, artRes] = await Promise.all([
+    const [bizRes, evRes, promoRes, artRes] = await Promise.all([
       db.from('businesses').select('*').or('status.eq.approved,status.is.null').eq('city', city).order('admin_priority', { ascending: false }).order('name'),
       db.from('events').select('*').or('status.eq.approved,status.is.null').eq('city', city).order('admin_priority', { ascending: false }).order('id'),
-      db.from('stays').select('*').eq('city', city).order('id').then(r => r.error ? { data: [] } : r).catch(() => ({ data: [] })),
       db.from('promos').select('*').or('status.eq.approved,status.is.null').eq('city', city).order('id'),
       db.from('articles').select('*').eq('city', city).order('published_at', { ascending: false }).limit(20),
     ]);
@@ -44,7 +43,7 @@ async function loadAllData() {
     return {
       businesses: camelize(bizRes.data  || []),
       events:     camelize(evRes.data   || []),
-      stays:      camelize(stayRes.data || []),
+      stays:      [],
       promos:     camelize(promoRes.data|| []),
       articles:   camelize(artRes.data  || []),
     };

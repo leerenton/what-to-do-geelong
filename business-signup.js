@@ -308,7 +308,9 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
         showS4Error('Password must be at least 8 characters.');
         return;
       }
-      const { data, error } = await db.auth.signUp({ email, password, options: { data: { full_name: name } } });
+      if (window._siteConfigPromise) await window._siteConfigPromise;
+      const signupCity = window.SITE?.slug || 'geelong';
+      const { data, error } = await db.auth.signUp({ email, password, options: { data: { name, city: signupCity } } });
       if (error) { showS4Error(error.message); return; }
       userId = data.user?.id;
     }
@@ -325,12 +327,15 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
     btn.disabled = false; btn.textContent = 'Submit listing →';
   }
 
+  if (window._siteConfigPromise) await window._siteConfigPromise;
+  const bizCity = window.SITE?.slug || 'geelong';
+
   let bizId, error;
 
   if (bsState.mode === 'claim' && bsState.claimedBiz) {
     // Claim an existing business — update owner_id
     bizId = bsState.claimedBiz.id;
-    const claimSlug = bsSlugify(`${bsState.details.name}-${bsState.details.suburb || 'geelong'}`);
+    const claimSlug = bsSlugify(`${bsState.details.name}-${bsState.details.suburb || bizCity}`);
     const { error: upErr } = await db.from('businesses').update({
       owner_id:    userId,
       is_claimed:  true,
@@ -351,10 +356,11 @@ document.getElementById('js-s4-next').addEventListener('click', async () => {
   } else {
     // Create a new business
     bizId = 'biz-' + Date.now().toString(36);
-    const newSlug = bsSlugify(`${bsState.details.name}-${bsState.details.suburb || 'geelong'}`);
+    const newSlug = bsSlugify(`${bsState.details.name}-${bsState.details.suburb || bizCity}`);
     const { error: insErr } = await db.from('businesses').insert({
       id:          bizId,
       owner_id:    userId,
+      city:        bizCity,
       is_claimed:  true,
       status:      'pending',
       slug:        newSlug,
